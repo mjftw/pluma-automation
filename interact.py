@@ -27,7 +27,6 @@ class pexfuncs():
         quiet_count = 3
 
         while 1:
-
             self.log("Waiting for quiet. Timeout[{}] Quiet[{}] Bytes[{}]....".format(
                 timeout, quiet_count - exit_count,
                 self.bytes
@@ -51,7 +50,6 @@ class pexfuncs():
             timeout -= 1
 
     def waitre(self, recvs, maxtimeout=100):
-
         timeout = 0
 
         if not isinstance(recvs, list):
@@ -74,7 +72,6 @@ class pexfuncs():
                     timeout, maxtimeout, self.bytes, [r.pattern for r in recvs]))
 
     def waitr(self, recvs, maxtimeout=100):
-
         if isinstance(recvs, str):
             recvs = [recvs]
 
@@ -85,7 +82,6 @@ class pexfuncs():
 
     # Send, dont care about receive
     def snr(self, send):
-
         if isinstance(send, str):
             send = send.encode('ascii')
 
@@ -96,7 +92,6 @@ class pexfuncs():
         return self.psr('stty -echo', prompt=prompt)
 
     def validate_prompt(self, prompt=default_prompt):
-
         # Flush everything out first
         self.flush()
 
@@ -200,7 +195,7 @@ class serialSpawn(pfd.fdspawn, pexfuncs):
                 s = serial.Serial(filename, 115200, timeout=timeout)
                 return s
             except Exception as e:
-                self.log("Failed to init serial ({}), Error - [{}].  trying again.".format(filename, e))
+                self.log("Failed to init serial ({}), Error -[{}].  trying again.".format(filename, e))
                 time.sleep(1)
 
         raise IOError('Cannot start board and connect to serial')

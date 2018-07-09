@@ -40,7 +40,8 @@ def newemail(subject="", body="", files=[], me=False):
         fp = open(filename, "rb")
         img = MIMEImage( fp.read())
         fp.close()
-        img.add_header('Content-Disposition', "attachment; filename={}".format(bn))
+        img.add_header(
+            'Content-Disposition', "attachment; filename={}".format(bn))
         #img.add_header( 'Content-ID', '<{}>'.format( bn ) )
         msg.attach(img)
 
@@ -50,7 +51,6 @@ def newemail(subject="", body="", files=[], me=False):
     text = msg.as_string()
     server.sendmail(fromaddr, recipients, text)
     server.quit()
-
 
 
 def doemail(subject="", body="", files=[]):
@@ -75,7 +75,8 @@ def doemail(subject="", body="", files=[]):
         part = MIMEBase('application', 'octet-stream')
         part.set_payload(attachment.read())
         encoders.encode_base64(part)
-        part.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+        part.add_header('Content-Disposition', "attachment; filename= %s"
+                        % filename)
         msg.attach(part)
 
     server = smtplib.SMTP('smtp.office365.com', 587)

@@ -27,7 +27,10 @@ df = df.groupby(['major', 'minor', 'revision']).agg(['mean', 'max', 'min'])
 #df['test'] = df['index']['major']
 
 df = df.reset_index()
-df['test'] = (df['major'].astype(str) + '.' + df['minor'].astype(str) + '.' + df['revision'].astype(str).str.zfill(4))
+df['test'] = (
+    df['major'].astype(str)
+    + '.' + df['minor'].astype(str)
+    + '.' + df['revision'].astype(str).str.zfill(4))
 
 df = df[['test', 'idle']]
 

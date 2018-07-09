@@ -168,7 +168,8 @@ class farm():
             self.log("Configuring interact module...")
             for _ in range(10):
                 try:
-                    self._p = interact.serialSpawn(self.serial, board=self, logfile=self.blogfile)
+                    self._p = interact.serialSpawn(
+                        self.serial, board=self, logfile=self.blogfile)
                 except RuntimeError as e:
                     self.log("Failed to init serial [{}], rebooting board.", e)
                     self.off()

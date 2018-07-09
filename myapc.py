@@ -18,7 +18,8 @@ class APC():
         if not self.spawn:
             cl = "telnet {}".format(self.host)
             for _ in range(5):
-                self.spawn = interact.genSpawn(cl, logfile=open('/tmp/apclog', 'ab'), timeout=5)
+                self.spawn = interact.genSpawn(
+                    cl, logfile=open('/tmp/apclog', 'ab'), timeout=5)
                 self.spawn.linesep = '\r\n'.encode('ascii')
 
                 try:
@@ -76,9 +77,3 @@ class APC():
             self.send(4)
             self.spawn.close(force=True)
             self.spawn = None
-
-
-
-
-
-
