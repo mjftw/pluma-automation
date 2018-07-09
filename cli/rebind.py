@@ -3,6 +3,5 @@
 import boards
 import sys
 
-b = boards.get( sys.argv[1] )
+b = boards.get(sys.argv[1])
 b.init()
-

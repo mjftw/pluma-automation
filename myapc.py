@@ -1,22 +1,24 @@
 #!/usr/bin/env python3
 
 import interact
-import sys, time
+import sys
+import time
 import pexpect.exceptions as pex
 
-class APC( ):
-    def __init__( self, host, user, pw, quiet = False ):
+
+class APC():
+    def __init__(self, host, user, pw, quiet=False):
         self.host = host
         self.user = user
         self.pw = pw
         self.quiet = quiet
         self.spawn = None
 
-    def init_spawn( self ):
+    def init_spawn(self):
         if not self.spawn:
-            cl = "telnet {}".format( self.host )
+            cl = "telnet {}".format(self.host)
             for _ in range(5):
-                self.spawn = interact.genSpawn( cl, logfile = open('/tmp/apclog','ab'), timeout = 5 )
+                self.spawn = interact.genSpawn(cl, logfile=open('/tmp/apclog', 'ab'), timeout=5)
                 self.spawn.linesep = '\r\n'.encode('ascii')
 
                 try:
@@ -32,48 +34,47 @@ class APC( ):
 
             raise IOError("Couldn't connect to APC.")
 
-
-    def login( self ):
-        self.spawn.waitr( 'User Name' )
-        self.spawn.snr( self.user  )
+    def login(self):
+        self.spawn.waitr('User Name')
+        self.spawn.snr(self.user)
         self.spawn.send_newline()
-        self.spawn.waitr ('Password')
-        self.spawn.snr( self.pw )
-        self.spawn.send_newline()
-
-    def send( self, s ):
-        self.spawn.waitr( '^> ' )
-        self.spawn.snr( str(s) )
+        self.spawn.waitr('Password')
+        self.spawn.snr(self.pw)
         self.spawn.send_newline()
 
-    def menu( self, l ):
+    def send(self, s):
+        self.spawn.waitr('^> ')
+        self.spawn.snr(str(s))
+        self.spawn.send_newline()
+
+    def menu(self, l):
         for e in l:
-            self.send( e )
+            self.send(e)
 
-    def on( self, index, dummy = None ):
+    def on(self, index, dummy=None):
         self.init_spawn()
-        self.menu( [ 1,2,1,index,1, 1 ] )
-        self.spawn.snr( 'YES' )
+        self.menu([1, 2, 1, index, 1, 1])
+        self.spawn.snr('YES')
         self.spawn.send_newline()
         self.spawn.send_newline()
-        self.spawn.waitr( '^> ' )
+        self.spawn.waitr('^> ')
         self.disconnect()
 
-    def off( self, index, dummy = None ):
+    def off(self, index, dummy=None):
         self.init_spawn()
-        self.menu( [ 1,2,1,index,1, 2 ] )
-        self.spawn.snr( 'YES' )
+        self.menu([1, 2, 1, index, 1, 2])
+        self.spawn.snr('YES')
         self.spawn.send_newline()
         self.spawn.send_newline()
-        self.spawn.waitr( '^> ' )
+        self.spawn.waitr('^> ')
         self.disconnect()
 
-    def disconnect( self ):
+    def disconnect(self):
         if self.spawn:
             self.spawn.sendcontrol('c')
-            self.spawn.waitr( '^> ' )
-            self.send( 4 )
-            self.spawn.close( force = True )
+            self.spawn.waitr('^> ')
+            self.send(4)
+            self.spawn.close(force=True)
             self.spawn = None
 
 

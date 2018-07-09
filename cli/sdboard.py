@@ -3,4 +3,4 @@
 import sdmux
 
 usb_device = "1-1.1.4"
-sdmux.sd_mux( usb_device, 'board')
+sdmux.sd_mux(usb_device, 'board')
