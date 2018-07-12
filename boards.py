@@ -43,9 +43,8 @@ sdm3 = SDMux(ur=ur2, index=2, apc=3)
 
 sdms = [sdm1, sdm2, sdm3]
 
-#TODO: Remove fb4 specifc section
 boards = [
-        Board(name='fb41', apc=7, hub='1-1.1.1', sdmux=sdm1),
+        Board(name='bbb', apc=7, hub='1-1.1.1', sdmux=sdm1),
         Board(name='fb42', apc=4, hub='1-1.1.2', sdmux=sdm2),
         Board(name='fb43', apc=6, hub='1-1.1.3', sdmux=sdm3),
 ]
