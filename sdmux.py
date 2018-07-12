@@ -30,7 +30,7 @@ class SDMux:
         """ Switch the SD card to the host """
         print("Switching SDMux on USB {}, index {} to host...".format(
             self.usbrelay.usb, self.index))
-        usb.rebind(self.usbrelay.usb)
+        usb.USB().rebind(self.usbrelay.usb)
         s = serial.Serial(self.serialdev, self.baud)
         s.write(sdmux_map[self.index]['host'])
         s.close()
@@ -39,7 +39,7 @@ class SDMux:
         """ Switch the SD card to the board """
         print("Switching SDMux on USB {}, index {} to board...".format(
             self.usbrelay.usb, self.index))
-        usb.rebind(self.usbrelay.usb)
+        usb.USB().rebind(self.usbrelay.usb)
         s = serial.Serial(self.serialdev, self.baud)
         s.write(sdmux_map[self.index]['board'])
         s.close()
