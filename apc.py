@@ -21,14 +21,18 @@ class APC():
         self.pw = pw
         self.spawn = None
         if 1 <= port <= 8:
-            self.index = port - 1
+            self.port = port
         else:
             raise InvalidPort("Invalid port[{}]").format(port)
 
     def __repr__(self):
         return "\n[APC: host={}, user={}, pw={}, port={}, spawn={}]".format(
-            self.host, self.user, self.pw, self.index+1, self.spawn
+            self.host, self.user, self.pw, self.port, self.spawn
         )
+
+    @property
+    def index(self):
+        return self.port - 1
 
     def _init_spawn(self):
         if not self.spawn:
@@ -78,7 +82,7 @@ class APC():
 
     def on(self, dummy=None):
         self._init_spawn()
-        self.menu([1, 2, 1, self.port, 1, 1])
+        self.menu([1, 2, 1, self.index, 1, 1])
         self.spawn.snr('YES')
         self.spawn.send_newline()
         self.spawn.send_newline()
@@ -97,7 +101,7 @@ class APC():
 
 def get_apc(apcs, host, port):
     for apc in apcs:
-        if apc.index+1 == port and apc.host == host:
+        if apc.port == port and apc.host == host:
             return apc
 
     raise NoAPC("Can't find APC with host[{}], port[{}]".format(
