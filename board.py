@@ -22,13 +22,6 @@ class Board:
             self.name, self.apc, self.hub, self.sdmux
             )
 
-    def power_on(self):
-        self.apc.on(self.apc_port)
-
-    def power_off(self):
-        self.apc.off(self.apc_port)
-
-
 def get_board(boards, name):
     for b in boards:
         if b.name == name:
@@ -44,12 +37,12 @@ def get_board(boards, name):
 #     raise NoBoard("Can't find board called [{}]".format(name))
 
 
-# def get_name(hub):
-#     for b in boards:
-#         if b.hub == hub:
-#             return b.name
+def get_name(boards, hub):
+    for b in boards:
+        if b.hub.usb == hub:
+            return b.name
 
-#     return None
+    return None
 
 
 # def get(name, *a, **kw):

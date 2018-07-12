@@ -1,5 +1,5 @@
 from board import Board
-from usb import USBRelay
+from usbrelay import USBRelay
 from sdmux import SDMux
 from apc import APC
 from apc import get_apc
