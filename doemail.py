@@ -10,78 +10,69 @@ from email.mime.application import MIMEApplication
 from email import encoders
 
 
-def newemail(subject="", body="", files=[], me=False):
-    fromaddr = "wsheppard@witekio.com"
-
-    if me:
-        recipients = [
-            'wsheppard@witekio.com',
-            'sheppard.will@gmail.com',
-        ]
-    else:
-        recipients = [
-            'wsheppard@witekio.com',
-            'amurray@witekio.com',
-            'elangley@witekio.com',
-            'jeremyr@ovation.co.uk',
-        ]
-
-    msg = MIMEMultipart('mixed')
-
-    msg['From'] = fromaddr
-    msg['To'] = '; '.join(recipients)
-    msg['Subject'] = subject
-    msg.preamble = 'This is a multi-part message in MIME format.'
-
-    msg.attach(MIMEText(body, 'html'))
-
-    for filename in files:
-        bn = path.basename(filename)
-        fp = open(filename, "rb")
-        img = MIMEImage( fp.read())
-        fp.close()
-        img.add_header(
-            'Content-Disposition', "attachment; filename={}".format(bn))
-        #img.add_header( 'Content-ID', '<{}>'.format( bn ) )
-        msg.attach(img)
-
-    server = smtplib.SMTP('smtp.office365.com', 587)
-    server.starttls()
-    server.login(fromaddr, "4T2jsU")
-    text = msg.as_string()
-    server.sendmail(fromaddr, recipients, text)
-    server.quit()
+class InvalidEmailSettings(Exception):
+    pass
 
 
-def doemail(subject="", body="", files=[]):
-    fromaddr = "wsheppard@witekio.com"
-    recipients = [
-        'wsheppard@witekio.com',
-        'amurray@witekio.com',
-        'elangley@witekio.com'
-    ]
+class email():
+    def __init__(
+        self,
+        addr_to=[],
+        addr_from="",
+        subject="",
+        body="",
+        attach_files=[],
+        smtp_server="",
+        smtp_user="",
+        smtp_pass="",
+        smtp_timeout=587,
+    ):
+        self.addr_to = addr_to
+        self.addr_from = addr_from,
+        self.subject = subject
+        self.body = body
+        self.attach_files = attach_files
 
-    msg = MIMEMultipart()
+        self.smtp_server = smtp_server
+        self.smtp_user = smtp_user
+        if(smtp_user != ""):
+            self.smtp_user = smtp_user
+        else:
+            self.smtp_user = addr_from
+        self.smtp_pass = smtp_pass
+        self.smtp_timeout = smtp_timeout
 
-    msg['From'] = fromaddr
-    #msg['To'] = toaddr
-    msg['To'] = '; '.join(recipients)
-    msg['Subject'] = subject
+    def send():
+        if(
+            self.addr_to == "" or
+            self.addr_from == [] or
+            self.smtp_server == "" or
+            self.smtp_user == "" or
+            self.smtp_pass == ""
+        ):
+            raise Exception(InvalidEmailSettings)
 
-    msg.attach(MIMEText(body, 'html'))
+        msg = MIMEMultipart()
 
-    for filename in files:
-        attachment = open(filename, "rb")
-        part = MIMEBase('application', 'octet-stream')
-        part.set_payload(attachment.read())
-        encoders.encode_base64(part)
-        part.add_header('Content-Disposition', "attachment; filename= %s"
-                        % filename)
-        msg.attach(part)
+        msg['From'] = self.addr_from
+        msg['To'] = '; '.join(self.addr_to)
+        msg['Subject'] = self.subject
+        msg.preamble = 'This is a multi-part message in MIME format.'
 
-    server = smtplib.SMTP('smtp.office365.com', 587)
-    server.starttls()
-    server.login(fromaddr, "4T2jsU")
-    text = msg.as_string()
-    server.sendmail(fromaddr, recipients, text)
-    server.quit()
+        msg.attach(MIMEText(body, 'html'))
+
+        for filename in self.attach_files:
+            attachment = open(filename, "rb")
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(attachment.read())
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', "attachment; filename= %s"
+                            % filename)
+            msg.attach(part)
+
+        server = smtplib.SMTP(self.smtp_user, self.smtp_timeout)
+        server.starttls()
+        server.login(self.addr_from, self.smtp_pass)
+        text = msg.as_string()
+        server.sendmail(self.addr_from, self.to_addrs, text)
+        server.quit()
