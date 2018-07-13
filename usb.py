@@ -62,7 +62,6 @@ class USB():
         time.sleep(1)
 
     def bind(self):
-        #print("binding {}".format( self.device )
         d = os.path.basename(self._dev['DEVPATH'])
         bind_fd = open(bind_path, 'w')
         bind_fd.write(d)
@@ -74,6 +73,7 @@ class USB():
         self.bind(self.device)
 
     def get_devnode(self, subsys, devtype=None, vendor_id=None, timeout=10):
+        """ Find the device node for the first device matches """
         for _ in range(timeout):
             if devtype is not None:
                 devices = self.puctx.list_devices(
@@ -94,6 +94,7 @@ class USB():
         return None
 
     def get_block(self):
+        """ Wrapper for get_devnode for block devices"""
         devnode = self.get_devnode(
             subsys='block', devtype='disk', timeout=10)
         if devnode is None:
@@ -103,6 +104,7 @@ class USB():
 
     # Get first partition name for block device
     def get_part(self):
+        """ Wrapper for get_devnode for disk partitions"""
         devnode = self.get_devnode(
             subsys='block', devtype='partition', timeout=5)
         if devnode is None:
@@ -111,8 +113,9 @@ class USB():
             return devnode
 
     def get_tty(self):
+        """ Wrapper for get_devnode for tty devices"""
         devnode = self.get_devnode(
-            subsys='tty', , timeout=5)
+            subsys='tty', timeout=5)
         if devnode is None:
             raise NoDevice('No tty devices on {}'.format(self.device))
         else:
