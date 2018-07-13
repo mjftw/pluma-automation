@@ -74,10 +74,14 @@ class USB():
         self.bind(self.device)
 
     def get_devnode(self, subsys, devtype=None, dev_id=None):
-        #print("Searching for sdmux devicces on [{}]".format( self.device ))
         for _ in range(20):
-            for m in self.puctx.list_devices(
-                    subsystem=subsys, DEVTYPE=devtype, parent=self._dev):
+            if devtype is not None:
+                devices = self.puctx.list_devices(
+                    subsystem=subsys, DEVTYPE=devtype, parent=self._dev)
+            else:
+                devices = self.puctx.list_devices(
+                    subsystem=subsys, parent=self._dev)
+            for m in devices:
                 if dev_id is not None:
                     if m.get('ID_VENDOR') is None:
                         continue
@@ -85,7 +89,7 @@ class USB():
                         return m.device_node
                 else:
                     return m.device_node
-            time.sleep(2)
+            time.sleep(1)
         raise IOError('No {} {} devices with id {}'.format(
             subsys, devtype, dev_id))
 
