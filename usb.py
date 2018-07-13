@@ -30,7 +30,7 @@ class USB():
         self.device = device
 
     def __repr__(self):
-        return "\n[USB: device={}".format(self.device)
+        return "\n[USB: device={}]".format(self.device)
 
     def unbind(self):
         try:
@@ -179,8 +179,8 @@ class USB():
             f.write(d.sys_name)
 
     def show_info(self):
-        d = ud.get_device()
-        for m in ud.puc.list_devices(
+        d = self.get_device()
+        for m in self.puctx.list_devices(
                 subsystem='block', DEVTYPE='disk', parent=d):
             if int(m.attributes.get('size')) == 0:
                 continue
