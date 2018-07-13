@@ -1,4 +1,5 @@
 from board import Board
+from usb import USB
 from usbrelay import USBRelay
 from sdmux import SDMux
 from apc import APC
@@ -10,14 +11,14 @@ from hub import Hub
 # The SDMUCes are also powered by the APC unit.
 
 usbrelays = [
-    USBRelay(usb='1-1.1.4.1'),
-    USBRelay(usb='1-1.1.4.3'),
+    USBRelay(usb=USB('1-1.1.4.1')),
+    USBRelay(usb=USB('1-1.1.4.3')),
 ]
 
 hubs = [
-    Hub(usb='1-1.1.1'),
-    Hub(usb='1-1.1.2'),
-    Hub(usb='1-1.1.3'),
+    Hub(usb=USB('1-1.1.1')),
+    Hub(usb=USB('1-1.1.2')),
+    Hub(usb=USB('1-1.1.3')),
 ]
 
 apcs = [
@@ -36,19 +37,16 @@ sdmuxs = [
         usbrelay=usbrelays[1],
         index=0,
         apc=get_apc(apcs, 'apc1', 2),
-        serialdev='/dev/ttyUSB1'
     ),
     SDMux(
         usbrelay=usbrelays[1],
         index=3,
         apc=get_apc(apcs, 'apc1', 1),
-        serialdev='/dev/ttyUSB1'
     ),
     SDMux(
         usbrelay=usbrelays[1],
         index=2,
         apc=get_apc(apcs, 'apc1', 3),
-        serialdev='/dev/ttyUSB1'
     ),
 ]
 

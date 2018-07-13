@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import os
+import serial
 
 import usb
 
@@ -15,16 +15,17 @@ sdmux_map = [
 
 
 class SDMux:
-    def __init__(self, usbrelay, index, apc, serialdev, baud=9600):
+    """ SD Mux driver """
+    def __init__(self, usbrelay, index, apc, baud=9600):
         self.usbrelay = usbrelay
         self.index = index
         self.apc = apc
-        self.serialdev = serialdev
         self.baud = baud
 
     def __repr__(self):
-        return "\n[SDMux: {}, index={}, {}, serialdev={}]".format(
-            self.usbrelay, self.index, self.apc, self.serialdev)
+        return "\n[SDMux: {}, index={}, {} {}]".format(
+            self.usbrelay, self.index, self.apc, self.usbrelay
+        )
 
     def sdhost(self):
         """ Switch the SD card to the host """

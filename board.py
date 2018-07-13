@@ -22,6 +22,7 @@ class Board:
             self.name, self.apc, self.hub, self.sdmux
             )
 
+
 def get_board(boards, name):
     for b in boards:
         if b.name == name:
