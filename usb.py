@@ -34,7 +34,7 @@ class USB():
 
     @property
     def is_bound(self):
-        return os.path.isdir(os.path.join(self.get_driver_path(), self.device))
+        return os.path.isdir(os.path.join(driver_path, self.device))
 
     def _get_dev(self):
         try:
