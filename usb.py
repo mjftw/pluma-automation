@@ -73,8 +73,8 @@ class USB():
         self.unbind(self.device)
         self.bind(self.device)
 
-    def get_devnode(self, subsys, devtype=None, dev_id=None):
-        for _ in range(20):
+    def get_devnode(self, subsys, devtype=None, vendor_id=None, timeout=10):
+        for _ in range(timeout):
             if devtype is not None:
                 devices = self.puctx.list_devices(
                     subsystem=subsys, DEVTYPE=devtype, parent=self._dev)
@@ -82,51 +82,41 @@ class USB():
                 devices = self.puctx.list_devices(
                     subsystem=subsys, parent=self._dev)
             for m in devices:
-                if dev_id is not None:
-                    if m.get('ID_VENDOR') is None:
-                        continue
-                    if m['ID_VENDOR'] == dev_id:
-                        return m.device_node
-                else:
-                    return m.device_node
-            time.sleep(1)
-        raise IOError('No {} {} devices with id {}'.format(
-            subsys, devtype, dev_id))
-
-    # Return the device node and the sysname for the usb parent for use with the bind/unbind
-    def get_block(self):
-        #print("Searching for block devicces on [{}]".format( self.device ))
-        for _ in range(20):
-            blks = self.puctx.list_devices(
-                subsystem='block',  DEVTYPE='disk', parent=self._dev)
-            for m in blks:
-                if int(m.attributes.get('size')) == 0:
+                if(vendor_id is not None and
+                        (m.get('ID_VENDOR') is None or
+                            m['ID_VENDOR'] != vendor_id)):
                     continue
-                #print("Block device {} has size {:4.2f}MB".format(
-                #    m.device_node,
-                #    int(m.attributes.get('size')) / 1024 / 1024 ))
-                usbp = m.find_parent('usb', device_type='self.device')
-                #print(" Parent is: {} , {}".format( usbp.sys_name, usbp.device_type ))
-                return(m.device_node, usbp.sys_name)
-            time.sleep(2)
-        raise NoDisks('No block devices on {}'.format(self.device))
+                if(subsys == 'block' and
+                        int(m.attributes.get('size')) == 0):
+                    continue
+                return m.device_node
+            time.sleep(1)
+        return None
+
+    def get_block(self):
+        devnode = self.get_devnode(
+            subsys='block', devtype='disk', timeout=10)
+        if devnode is None:
+            raise NoDisks('No block devices on {}'.format(self.device))
+        else:
+            return devnode
 
     # Get first partition name for block device
     def get_part(self):
-        #print("Searching for block devicces on [{}]".format( self.device ))
-        for _ in range(5):
-            blks = self.puctx.list_devices(
-                subsystem='block',  DEVTYPE='partition', parent=self._dev)
-            for m in blks:
-                if int(m.attributes.get('size')) == 0: continue
-                #print("Block device {} has size {:4.2f}MB".format(
-                #    m.device_node,
-                #    int(m.attributes.get('size')) / 1024 / 1024 ))
-                #usbp = m.find_parent('usb', device_type='self.device')
-                #print(" Parent is: {} , {}".format( usbp.sys_name, usbp.device_type ))
-                return m.device_node
-            time.sleep(2)
-        raise NoPartitions('No partitions on {}'.format(self.device))
+        devnode = self.get_devnode(
+            subsys='block', devtype='partition', timeout=5)
+        if devnode is None:
+            raise NoPartitions('No partitions on {}'.format(self.device))
+        else:
+            return devnode
+
+    def get_tty(self):
+        devnode = self.get_devnode(
+            subsys='tty', , timeout=5)
+        if devnode is None:
+            raise NoDevice('No tty devices on {}'.format(self.device))
+        else:
+            return devnode
 
     def show_ancestry(self):
         d = self._dev
