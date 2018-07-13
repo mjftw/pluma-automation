@@ -46,26 +46,13 @@ class USB():
         return d
 
     def unbind(self):
-        try:
-            #print("unbinding {}".format( self.device ) )
-            dev = self._get_dev()
-            if dev is None:
-                return
-            d = os.path.basename(device['DEVPATH'])
-            unbind_fd = open(unbind_path, 'w')
-            unbind_fd.write(d)
-            unbind_fd.close()
-        except:
-            #print("No device to unbind, lets carry on")
-            pass
+        with open(unbind_path, 'w') as fd:
+            fd.write(self.device)
         time.sleep(1)
 
     def bind(self):
-        dev = self._get_dev()
-        d = os.path.basename(dev['DEVPATH'])
-        bind_fd = open(bind_path, 'w')
-        bind_fd.write(d)
-        bind_fd.close()
+        with open(bind_path, 'w') as fd:
+            fd.write(self.device)
         time.sleep(1)
 
     def rebind(self):
