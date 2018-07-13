@@ -8,14 +8,12 @@ class Farm():
     def __repr__(self):
         return "Farm: {}".format(self.boards)
 
-    def board_info():
+    def board_info(self):
         for b in self.boards:
             ud = b.hub.usb
             print("\n =============== Device [{} - {}] =============".format(
                 ud.device, b.name))
             ud.show_info()
-
-
 
 
 # import usb
