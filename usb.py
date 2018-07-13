@@ -9,7 +9,7 @@ import subprocess as sp
 import pyudev
 import board
 
-driver_path = '/sys/bus/usb/driver/usb/'
+driver_path = '/sys/bus/usb/drivers/usb/'
 
 
 class NoPartitions(Exception):
