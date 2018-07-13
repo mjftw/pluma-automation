@@ -191,7 +191,7 @@ class USB():
             if usbp is not None:
                 print("Parent is: {}, {}".format(
                     usbp.sys_name, usbp.device_type))
-        for m in self.puc.list_devices(subsystem='tty', parent=d):
+        for m in self.puctx.list_devices(subsystem='tty', parent=d):
             print(m.device_node, m['ID_VENDOR'])
 
 #find_block( device )
