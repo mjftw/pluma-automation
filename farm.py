@@ -1,9 +1,5 @@
 #TODO: import Logger
 
-
-import board
-
-
 class Farm():
     def __init__(self, boards):
         self.boards = boards
@@ -11,6 +7,27 @@ class Farm():
     def __repr__(self):
         return "Farm: {}".format(self.boards)
 
+
+def board_info(boards):
+    for b in boards:
+        ud = b.hub.usb
+        print("\n =============== Device [{} - {}] =============".format(
+            ud.device, b.name))
+        d = ud.get_device()
+        if d is None:
+            continue
+        for m in ud.puc.list_devices(
+                subsystem='block', DEVTYPE='disk', parent=d):
+            if int(m.attributes.get('size')) == 0:
+                continue
+            print("Block device {} has size {:4.2f}MB".format(
+                m.device_node,
+                int(m.attributes.get('size')) / (1024 * 1024)))
+            usbp = m.find_parent('usb', device_type='device')
+            print(" Parent is: {} , {}".format(
+                usbp.sys_name, usbp.device_type))
+        for m in _usb.puc.list_devices(subsystem='tty', parent=d):
+            print(m.device_node, m['ID_VENDOR'])
 
 
 # import usb

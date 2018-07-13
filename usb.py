@@ -30,7 +30,7 @@ class USB():
         self.device = device
 
     def __repr__(self):
-        return "\n[USB: device={}]".format(self.device)
+        return "\n[USB: device={}".format(self.device)
 
     def unbind(self):
         try:
@@ -61,7 +61,7 @@ class USB():
         self.bind(self.device)
 
     def get_device(self):
-        #print("Looking for device {}".format( self.device ))
+        #print("Looking for device {}".format(self.device))
         try:
             for _ in range(20):
                 d = pu.Devices.from_path(
@@ -177,32 +177,6 @@ class USB():
         time.sleep(2)
         with open("{}/bind".format(driver_path), 'w') as f:
             f.write(d.sys_name)
-
-
-def show_info(boards):
-    _usb = USB(device=[])
-
-    for b in boards:
-        _usb.device.append(b.hub.usb)
-
-    for ud in _usb.device:
-        print("\n =============== Device [{} - {}] =============".format(
-            ud.device, board.get_name(boards, ud)))
-        d = _usb.get_device()
-        if d is None:
-            continue
-        for m in _usb.puc.list_devices(
-                subsystem='block', DEVTYPE='disk', parent=d):
-            if int(m.attributes.get('size')) == 0:
-                continue
-            print("Block device {} has size {:4.2f}MB".format(
-                m.device_node,
-                int(m.attributes.get('size')) / (1024 * 1024)))
-            usbp = m.find_parent('usb', device_type='device')
-            print(" Parent is: {} , {}".format(
-                usbp.sys_name, usbp.device_type))
-        for m in _usb.puc.list_devices(subsystem='tty', parent=d):
-            print(m.device_node, m['ID_VENDOR'])
 
 #find_block( device )
 #find_serial( device )
