@@ -188,9 +188,10 @@ class USB():
                 m.device_node,
                 int(m.attributes.get('size')) / (1024 * 1024)))
             usbp = m.find_parent('usb', device_type='device')
-            print(" Parent is: {} , {}".format(
-                usbp.sys_name, usbp.device_type))
-        for m in _usb.puc.list_devices(subsystem='tty', parent=d):
+            if usbp is not None:
+                print("Parent is: {}, {}".format(
+                    usbp.sys_name, usbp.device_type))
+        for m in self.puc.list_devices(subsystem='tty', parent=d):
             print(m.device_node, m['ID_VENDOR'])
 
 #find_block( device )
