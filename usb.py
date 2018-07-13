@@ -48,8 +48,8 @@ class USB():
     def unbind(self):
         try:
             #print("unbinding {}".format( self.device ) )
-            device = self.get_device()
-            if device is None:
+            dev = self._get_dev()
+            if dev is None:
                 return
             d = os.path.basename(device['DEVPATH'])
             unbind_fd = open(unbind_path, 'w')
@@ -134,7 +134,7 @@ class USB():
             dev = p
 
     def rebind_host(self):
-        dev = self.self._get_dev
+        dev = self._get_dev
 
         # Keep going until we find no more parents
         while dev.parent:
@@ -156,7 +156,7 @@ class USB():
             f.write(d.sys_name)
 
     def show_info(self):
-        dev = self.self._get_dev()
+        dev = self._get_dev()
         for m in self.puctx.list_devices(
                 subsystem='block', DEVTYPE='disk', parent=dev):
             if int(m.attributes.get('size')) == 0:
