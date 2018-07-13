@@ -72,9 +72,9 @@ class USB():
         self.unbind(self.device)
         self.bind(self.device)
 
-    def get_devnode(self, subsys, devtype=None, vendor_id=None, timeout=10):
+    def get_devnode(self, subsys, devtype=None, vendor_id=None, attempts=1):
         """ Find the device node for the first device matches """
-        for _ in range(timeout):
+        for _ in range(attempts):
             if devtype is not None:
                 devices = self.puctx.list_devices(
                     subsystem=subsys, DEVTYPE=devtype, parent=self._dev)
@@ -90,13 +90,14 @@ class USB():
                         int(m.attributes.get('size')) == 0):
                     continue
                 return m.device_node
-            time.sleep(1)
+            if attempts != 1:
+                time.sleep(1)
         return None
 
     def get_block(self):
         """ Wrapper for get_devnode for block devices"""
         devnode = self.get_devnode(
-            subsys='block', devtype='disk', timeout=10)
+            subsys='block', devtype='disk', attempts=10)
         if devnode is None:
             raise NoDisks('No block devices on {}'.format(self.device))
         else:
@@ -106,7 +107,7 @@ class USB():
     def get_part(self):
         """ Wrapper for get_devnode for disk partitions"""
         devnode = self.get_devnode(
-            subsys='block', devtype='partition', timeout=5)
+            subsys='block', devtype='partition', attempts=5)
         if devnode is None:
             raise NoPartitions('No partitions on {}'.format(self.device))
         else:
@@ -115,7 +116,7 @@ class USB():
     def get_tty(self):
         """ Wrapper for get_devnode for tty devices"""
         devnode = self.get_devnode(
-            subsys='tty', timeout=5)
+            subsys='tty', attempts=5)
         if devnode is None:
             raise NoDevice('No tty devices on {}'.format(self.device))
         else:
