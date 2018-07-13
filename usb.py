@@ -2,13 +2,12 @@
 
 import sys
 import os
+import stat
 import time
 from pprint import pprint as pp
 import subprocess as sp
 import pyudev
 import board
-
-driver_path = "/sys/bus/usb/drivers/usb/"
 
 
 class NoPartitions(Exception):
@@ -31,8 +30,22 @@ class USB():
     def __repr__(self):
         return "\n[USB: device={}]".format(self.device)
 
+    def get_driver_path(self):
+        dev = self._get_dev
+
+        # Keep going until we find no more parents
+        while dev.parent:
+            dev = dev.parent
+
+        path = os.path.join(dev.sys_path, 'driver')
+        path = os.path.realpath(path)
+        return path
+
+    @property
+    def is_bound(self):
+        return os.path.isdir(os.path.join(self.get_driver_path(), self.device))
+
     def _get_dev(self):
-        #print("Looking for device {}".format(self.device))
         try:
             for _ in range(20):
                 d = pyudev.Devices.from_path(
@@ -44,20 +57,17 @@ class USB():
             raise NoDevice("No device for [{}]".format(self.device))
         return d
 
-    def is_bound(self):
-        return os.path.isdir(os.path.join(driver_path, self.device))
-
     def unbind(self):
-        if not self.is_bound():
+        if not self.is_bound:
             return
-        with open(os.path.join(driver_path, 'unbind'), 'w') as fd:
+        with open(os.path.join(self.get_driver_path(), 'unbind'), 'w') as fd:
             fd.write(self.device)
         time.sleep(1)
 
     def bind(self):
-        if self.is_bound():
+        if self.is_bound:
             return
-        with open(os.path.join(driver_path, 'bind'), 'w') as fd:
+        with open(os.path.join(self.get_driver_path(), 'bind'), 'w') as fd:
             fd.write(self.device)
         time.sleep(1)
 
@@ -127,26 +137,21 @@ class USB():
             dev = p
 
     def rebind_host(self):
-        dev = self._get_dev
+        driver_path = self.get_driver_path()
 
-        # Keep going until we find no more parents
-        while dev.parent:
-            dev = dev.parent
+        # print("WARN: Rebinding HOST {} at {}".format(dev.sys_name, self.get_driver_path()))
+        unbind_path = os.path.join(driver_path, 'unbind')
+        bind_path = os.path.join(driver_path, 'bind')
 
-        driver_path = "{}/driver".format(d.sys_path)
-        driver_path = os.path.realpath(driver_path)
+        os.chmod(unbind_path, stat.S_IWOTH)
+        os.chmod(bind_path, stat.S_IWOTH)
 
-        print("WARN: Rebinding HOST {} at {}".format(d.sys_name, driver_path))
-
-        sp.run(['sudo', 'chmod', 'a+w', driver_path + "/unbind"])
-        sp.run(['sudo', 'chmod', 'a+w', driver_path + "/bind"])
-
-        with open("{}/unbind".format(driver_path), 'w') as f:
-            f.write(d.sys_name)
+        with open(unbind_path, 'w') as fd:
+            f.write(dev.sys_name)
 
         time.sleep(2)
-        with open("{}/bind".format(driver_path), 'w') as f:
-            f.write(d.sys_name)
+        with open(bind_path, 'w') as fd:
+            f.write(dev.sys_name)
 
     def show_info(self):
         dev = self._get_dev()
