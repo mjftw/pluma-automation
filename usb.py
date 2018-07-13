@@ -178,10 +178,8 @@ class USB():
         with open("{}/bind".format(driver_path), 'w') as f:
             f.write(d.sys_name)
 
-    def info(self):
+    def show_info(self):
         d = ud.get_device()
-        if d is None:
-            continue
         for m in ud.puc.list_devices(
                 subsystem='block', DEVTYPE='disk', parent=d):
             if int(m.attributes.get('size')) == 0:
