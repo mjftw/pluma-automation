@@ -8,8 +8,7 @@ import subprocess as sp
 import pyudev
 import board
 
-bind_path = "/sys/bus/usb/drivers/usb/bind"
-unbind_path = "/sys/bus/usb/drivers/usb/unbind"
+driver_path = "/sys/bus/usb/drivers/usb/"
 
 
 class NoPartitions(Exception):
@@ -45,13 +44,20 @@ class USB():
             raise NoDevice("No device for [{}]".format(self.device))
         return d
 
+    def is_bound(self):
+        return os.path.isdir(os.path.join(driver_path, self.device))
+
     def unbind(self):
-        with open(unbind_path, 'w') as fd:
+        if not self.is_bound():
+            return
+        with open(os.path.join(driver_path, 'unbind'), 'w') as fd:
             fd.write(self.device)
         time.sleep(1)
 
     def bind(self):
-        with open(bind_path, 'w') as fd:
+        if self.is_bound():
+            return
+        with open(os.path.join(driver_path, 'bind'), 'w') as fd:
             fd.write(self.device)
         time.sleep(1)
 
