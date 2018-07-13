@@ -27,11 +27,16 @@ class SDMux:
             self.usbrelay, self.index, self.apc, self.usbrelay
         )
 
+    @property
+    def serialdev(self):
+        """ Check we can get tty device node every time we use it """
+        return self.usbrelay.usb.get_tty()
+
     def sdhost(self):
         """ Switch the SD card to the host """
         print("Switching SDMux on USB {}, index {} to host...".format(
-            self.usbrelay.usb, self.index))
-        usb.USB().rebind(self.usbrelay.usb)
+            self.usbrelay.usb.device, self.index))
+        self.usbrelay.usb.rebind()
         s = serial.Serial(self.serialdev, self.baud)
         s.write(sdmux_map[self.index]['host'])
         s.close()
@@ -40,7 +45,7 @@ class SDMux:
         """ Switch the SD card to the board """
         print("Switching SDMux on USB {}, index {} to board...".format(
             self.usbrelay.usb, self.index))
-        usb.USB().rebind(self.usbrelay.usb)
+        self.usbrelay.usb.rebind()
         s = serial.Serial(self.serialdev, self.baud)
         s.write(sdmux_map[self.index]['board'])
         s.close()
