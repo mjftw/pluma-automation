@@ -28,7 +28,6 @@ class USB():
     def __init__(self, device):
         self.puctx = pyudev.Context()
         self.device = device
-        self._dev = self._get_dev()
 
     def __repr__(self):
         return "\n[USB: device={}]".format(self.device)
@@ -62,7 +61,8 @@ class USB():
         time.sleep(1)
 
     def bind(self):
-        d = os.path.basename(self._dev['DEVPATH'])
+        dev = self._get_dev()
+        d = os.path.basename(dev['DEVPATH'])
         bind_fd = open(bind_path, 'w')
         bind_fd.write(d)
         bind_fd.close()
@@ -74,13 +74,14 @@ class USB():
 
     def get_devnode(self, subsys, devtype=None, vendor_id=None, attempts=1):
         """ Find the device node for the first device matches """
+        dev = self._get_dev()
         for _ in range(attempts):
             if devtype is not None:
                 devices = self.puctx.list_devices(
-                    subsystem=subsys, DEVTYPE=devtype, parent=self._dev)
+                    subsystem=subsys, DEVTYPE=devtype, parent=dev)
             else:
                 devices = self.puctx.list_devices(
-                    subsystem=subsys, parent=self._dev)
+                    subsystem=subsys, parent=dev)
             for m in devices:
                 if(vendor_id is not None and
                         (m.get('ID_VENDOR') is None or
@@ -123,21 +124,21 @@ class USB():
             return devnode
 
     def show_ancestry(self):
-        d = self._dev
+        dev = self._get_dev()
 
         while d.parent:
-            p = d.parent
+            p = dev.parent
             print(dir(p))
             print(p.driver, p.subsystem, p.sys_name, p.device_path, p.sys_path)
             sp.run(['ls', "{}/driver".format(p.sys_path)])
-            d = p
+            dev = p
 
     def rebind_host(self):
-        d = self._dev
+        dev = self.self._get_dev
 
         # Keep going until we find no more parents
-        while d.parent:
-            d = d.parent
+        while dev.parent:
+            dev = dev.parent
 
         driver_path = "{}/driver".format(d.sys_path)
         driver_path = os.path.realpath(driver_path)
@@ -155,8 +156,9 @@ class USB():
             f.write(d.sys_name)
 
     def show_info(self):
+        dev = self.self._get_dev()
         for m in self.puctx.list_devices(
-                subsystem='block', DEVTYPE='disk', parent=self._dev):
+                subsystem='block', DEVTYPE='disk', parent=dev):
             if int(m.attributes.get('size')) == 0:
                 continue
             print("Block device {} has size {:4.2f}MB".format(
@@ -166,7 +168,7 @@ class USB():
             if usbp is not None:
                 print("Parent is: {}, {}".format(
                     usbp.sys_name, usbp.device_type))
-        for m in self.puctx.list_devices(subsystem='tty', parent=self._dev):
+        for m in self.puctx.list_devices(subsystem='tty', parent=dev):
             print(m.device_node, m['ID_VENDOR'])
 
 #find_block( device )
