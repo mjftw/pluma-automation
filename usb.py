@@ -69,8 +69,8 @@ class USB():
         time.sleep(1)
 
     def rebind(self):
-        self.unbind(self.device)
-        self.bind(self.device)
+        self.unbind()
+        self.bind()
 
     def get_devnode(self, subsys, devtype=None, vendor_id=None, attempts=1):
         """ Find the device node for the first device matches """
