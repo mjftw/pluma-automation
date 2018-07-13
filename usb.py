@@ -9,6 +9,8 @@ import subprocess as sp
 import pyudev
 import board
 
+driver_path = '/sys/bus/usb/driver/usb/'
+
 
 class NoPartitions(Exception):
     pass
@@ -30,17 +32,6 @@ class USB():
     def __repr__(self):
         return "\n[USB: device={}]".format(self.device)
 
-    def get_driver_path(self):
-        dev = self._get_dev
-
-        # Keep going until we find no more parents
-        while dev.parent:
-            dev = dev.parent
-
-        path = os.path.join(dev.sys_path, 'driver')
-        path = os.path.realpath(path)
-        return path
-
     @property
     def is_bound(self):
         return os.path.isdir(os.path.join(self.get_driver_path(), self.device))
@@ -60,14 +51,14 @@ class USB():
     def unbind(self):
         if not self.is_bound:
             return
-        with open(os.path.join(self.get_driver_path(), 'unbind'), 'w') as fd:
+        with open(os.path.join(driver_path, 'unbind'), 'w') as fd:
             fd.write(self.device)
         time.sleep(1)
 
     def bind(self):
         if self.is_bound:
             return
-        with open(os.path.join(self.get_driver_path(), 'bind'), 'w') as fd:
+        with open(os.path.join(driver_path, 'bind'), 'w') as fd:
             fd.write(self.device)
         time.sleep(1)
 
@@ -137,7 +128,14 @@ class USB():
             dev = p
 
     def rebind_host(self):
-        driver_path = self.get_driver_path()
+        dev = self._get_dev
+
+        # Keep going until we find no more parents
+        while dev.parent:
+            dev = dev.parent
+
+        path = os.path.join(dev.sys_path, 'driver')
+        path = os.path.realpath(path)
 
         # print("WARN: Rebinding HOST {} at {}".format(dev.sys_name, self.get_driver_path()))
         unbind_path = os.path.join(driver_path, 'unbind')
