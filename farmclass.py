@@ -16,8 +16,8 @@ class Farmclass():
                 attrs[m] = member
         for key in attrs:
             print("-"*indent_level*indent_size +
-                  " {}: {}".format(key, attrs[key]))
+                  "{}: {}".format(key, attrs[key]))
         for key in farmobjs:
             print("-"*indent_level*indent_size +
-                  " {}:".format(key))
+                  "{}:".format(type(farmobjs[key]).__name__))
             farmobjs[key].show_hier(indent_level + 1, indent_size)
