@@ -18,6 +18,6 @@ class Farmclass():
             print("-"*indent_level*indent_size +
                   " {}: {}".format(key, attrs[key]))
         for key in farmobjs:
-            print("-"*(indent_level*indent_size - 1) +
-                  "| {}:".format(key))
+            print("-"*indent_level*indent_size +
+                  " {}:".format(key))
             farmobjs[key].show_hier(indent_level + 1, indent_size)
