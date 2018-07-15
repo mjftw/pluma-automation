@@ -29,9 +29,6 @@ class USB():
         self.puctx = pyudev.Context()
         self.device = device
 
-    def __repr__(self):
-        return "\n[USB: device={}]".format(self.device)
-
     @property
     def is_bound(self):
         return os.path.isdir(os.path.join(driver_path, self.device))

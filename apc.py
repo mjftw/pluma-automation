@@ -27,11 +27,6 @@ class APC(Farmclass):
         else:
             raise InvalidPort("Invalid port[{}]").format(port)
 
-    def __repr__(self):
-        return "APC: host={}, user={}, pw={}, port={}, spawn={}".format(
-            self.host, self.user, self.pw, self.port, self.spawn
-        )
-
     @property
     def index(self):
         return self.port - 1

@@ -14,7 +14,7 @@ class Farmclass():
             type_indent_level = indent_level
 
         print("-"*type_indent_level*indent_size +
-              "{}: {}".format(type(self).__name__))
+              "{}:".format(type(self).__name__))
 
         for m in dir(self):
             member = getattr(self, m)

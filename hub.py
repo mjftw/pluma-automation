@@ -6,9 +6,6 @@ class Hub(Farmclass, USB):
     def __init__(self, usbdev):
         USB.__init__(self, usbdev)
 
-    def __repr__(self):
-        return "Hub: usbdev={}".format(self.usbdev)
-
     def get_devices(self):
         dev = USB._get_dev()
         for m in USB.puctx.list_devices(

@@ -23,9 +23,6 @@ class SDMux(Farmclass):
         self.apc = apc
         self.baud = baud
 
-    def __repr__(self):
-        return "SDMux: index={}".format(self.index)
-
     @property
     def serialdev(self):
         """ Check we can get tty device node every time we use it """
