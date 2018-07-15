@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """ The APC is a switched rack PDU which controlls whether a board is powered """
-import interact
+import console
 import sys
 import time
 import pexpect.exceptions as pex
+
+from farmclass import Farmclass
 
 
 class NoAPC(Exception):
@@ -14,7 +16,7 @@ class InvalidPort(Exception):
     pass
 
 
-class APC():
+class APC(Farmclass):
     def __init__(self, host, user, pw, port):
         self.host = host
         self.user = user
@@ -26,7 +28,7 @@ class APC():
             raise InvalidPort("Invalid port[{}]").format(port)
 
     def __repr__(self):
-        return "\n[APC: host={}, user={}, pw={}, port={}, spawn={}]".format(
+        return "APC: host={}, user={}, pw={}, port={}, spawn={}".format(
             self.host, self.user, self.pw, self.port, self.spawn
         )
 

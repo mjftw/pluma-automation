@@ -11,14 +11,14 @@ from hub import Hub
 # The SDMUCes are also powered by the APC unit.
 
 usbrelays = [
-    USBRelay(usb=USB('1-1.1.4.1')),
-    USBRelay(usb=USB('1-1.1.4.3')),
+    USBRelay(usbdev='1-1.1.4.1'),
+    USBRelay(usbdev='1-1.1.4.3'),
 ]
 
 hubs = [
-    Hub(usb=USB('1-1.1.1')),
-    Hub(usb=USB('1-1.1.2')),
-    Hub(usb=USB('1-1.1.3')),
+    Hub(usbdev='1-1.1.1'),
+    Hub(usbdev='1-1.1.2'),
+    Hub(usbdev='1-1.1.3'),
 ]
 
 apcs = [

@@ -2,25 +2,26 @@
 
 # import farm
 # import hwconfig
-#TODO: import Logging
+
+from farmclass import Farmclass
 
 
 class NoBoard(Exception):
     pass
 
 
-class Board:
-    def __init__(self, name, apc, hub, sdmux):
+class Board(Farmclass):
+    def __init__(self, name, apc, hub, sdmux, baud=115200):
         self.apc = apc
         self.hub = hub
         self.sdmux = sdmux
         self.name = name
-        # TODO: Add logging through Logger class
+        self.baud = baud
+        self.console = None
 
-    def __repr__(self):
-        return "\n[Board: name={}, {}, {}, {}]".format(
-            self.name, self.apc, self.hub, self.sdmux
-            )
+    def get_console(self):
+        if self.console is None:
+            self.console = Console(hub.get_tty(), self.baud)
 
 
 def get_board(boards, name):
@@ -30,17 +31,10 @@ def get_board(boards, name):
 
     raise NoBoard("Can't find board with name[{}]".format(name))
 
-# def get_board(name):
-#     for b in boards:
-#         if b.name == name:
-#             return b
-
-#     raise NoBoard("Can't find board called [{}]".format(name))
-
 
 def get_name(boards, hub):
     for b in boards:
-        if b.hub.usb == hub:
+        if b.hub.usb == hub.usb:
             return b.name
 
     return None

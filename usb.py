@@ -151,21 +151,5 @@ class USB():
         with open(bind_path, 'w') as fd:
             f.write(dev.sys_name)
 
-    def show_info(self):
-        dev = self._get_dev()
-        for m in self.puctx.list_devices(
-                subsystem='block', DEVTYPE='disk', parent=dev):
-            if int(m.attributes.get('size')) == 0:
-                continue
-            print("Block device {} has size {:4.2f}MB".format(
-                m.device_node,
-                int(m.attributes.get('size')) / (1024 * 1024)))
-            usbp = m.find_parent('usb', device_type='device')
-            if usbp is not None:
-                print("Parent is: {}, {}".format(
-                    usbp.sys_name, usbp.device_type))
-        for m in self.puctx.list_devices(subsystem='tty', parent=dev):
-            print(m.device_node, m['ID_VENDOR'])
-
 #find_block( device )
 #find_serial( device )

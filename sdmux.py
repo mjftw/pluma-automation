@@ -3,6 +3,7 @@
 import sys
 import serial
 
+from farmclass import Farmclass
 import usb
 
 # Map is board/host
@@ -14,7 +15,7 @@ sdmux_map = [
 ]
 
 
-class SDMux:
+class SDMux(Farmclass):
     """ SD Mux driver """
     def __init__(self, usbrelay, index, apc, baud=9600):
         self.usbrelay = usbrelay
@@ -23,20 +24,18 @@ class SDMux:
         self.baud = baud
 
     def __repr__(self):
-        return "\n[SDMux: {}, index={}, {} {}]".format(
-            self.usbrelay, self.index, self.apc, self.usbrelay
-        )
+        return "SDMux: index={}".format(self.index)
 
     @property
     def serialdev(self):
         """ Check we can get tty device node every time we use it """
-        return self.usbrelay.usb.get_tty()
+        return self.usbrelay.get_tty()
 
     def sdhost(self):
         """ Switch the SD card to the host """
         print("Switching SDMux on USB {}, index {} to host...".format(
-            self.usbrelay.usb.device, self.index))
-        self.usbrelay.usb.rebind()
+            self.usbrelay.usbdev, self.index))
+        self.usbrelay.rebind()
         s = serial.Serial(self.serialdev, self.baud)
         s.write(sdmux_map[self.index]['host'])
         s.close()
@@ -45,7 +44,7 @@ class SDMux:
         """ Switch the SD card to the board """
         print("Switching SDMux on USB {}, index {} to board...".format(
             self.usbrelay.usb, self.index))
-        self.usbrelay.usb.rebind()
+        self.usbrelay.rebind()
         s = serial.Serial(self.serialdev, self.baud)
         s.write(sdmux_map[self.index]['board'])
         s.close()

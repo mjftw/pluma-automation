@@ -1,7 +1,8 @@
 #!/usb/bin/env python3
 
 import time
-import sys,os
+import sys
+import os
 import serial
 import pexpect
 import pexpect.fdpexpect as pfd
@@ -11,14 +12,12 @@ from pprint import pprint as pp
 default_prompt = r'^.*# '
 
 
-def rec(s):
-    if not isinstance(s, bytes):
-        s = s.encode('ascii')
-    return re.compile(s, re.MULTILINE)
+class Console():
+    def __init__(tty_dev, baud):
+        self.tty_dev = tty_dev
+        self.baud = baud
 
-
-class pexfuncs():
-
+#TODO: Make fix all this
     def wait_for_quiet(self, maxtimeout=100):
         prompts = [pexpect.TIMEOUT]
         timeout = maxtimeout
@@ -27,7 +26,7 @@ class pexfuncs():
         quiet_count = 3
 
         while 1:
-            self.log("Waiting for quiet. Timeout[{}] Quiet[{}] Bytes[{}]....".format(
+            self.log("Waiting for quiet. Timeout[{}] Quiet[{}] Bytes[{}]...".format(
                 timeout, quiet_count - exit_count,
                 self.bytes
                 ))
@@ -106,13 +105,13 @@ class pexfuncs():
     # Prompt, send, receive
     def psr(self,
             send,
-            escape = True,
-            echo = False,
-            maxtimeout = 5,
-            prompt = default_prompt,
-            after_prompt = None,
-            send_only = False,
-            unimode = 'ignore'):
+            escape=True,
+            echo=False,
+            maxtimeout=5,
+            prompt=default_prompt,
+            after_prompt=None,
+            send_only=False,
+            unimode='ignore'):
 
         if isinstance(send, str):
             send = send.encode('ascii')
@@ -173,63 +172,69 @@ class pexfuncs():
 
         return ret.decode('utf-8', unimode).strip()
 
-
-class serialSpawn(pfd.fdspawn, pexfuncs):
-
-    def __init__(self, filename, board,  *args, **kw):
-        self.bytes = 0
-        self.board = board
-        self.log("Initialise serSpawn at {}".format(filename))
-        self.ser = self.try_init_serial(filename)
-        return super().__init__(self.ser.fileno(), *args, timeout=5, **kw)
-
-    def log(self, s):
-        self.board.log(s)
-
-    def __repr__(self):
-        return "PExpect Serial at {} for board {}".format(self.ser.port, self.board)
-
-    def try_init_serial(self, filename, timeout=1):
-        for _ in range(10):
-            try:
-                s = serial.Serial(filename, 115200, timeout=timeout)
-                return s
-            except Exception as e:
-                self.log("Failed to init serial ({}), Error -[{}].  trying again.".format(filename, e))
-                time.sleep(1)
-
-        raise IOError('Cannot start board and connect to serial')
-
-    def read(self, *a, **kw):
-        self.log("Blocking read...")
-        return super().read(*a, **kw)
-
-    def read_nonblocking(self, size=1, timeout=0):
-        # NOTE: This is the serial INTERNAL timeout, we keep this small and the pexpect
-        # modules deals nicely with the higher-level timeout
-        # self.ser.timeout = 1
-        b = self.ser.read(size)
-        self.bytes += len(b)
-        self._log(b, 'read')
-        return b
-
-    def flush(self):
-        self.buffer = bytes()
-        self.ser.reset_input_buffer()
-
-    def close(self):
-        self.ser.flush()
-        return self.ser.close()
-
-    def send(self, s):
-        if isinstance(s, str):
-            s = s.encode('ascii')
-        return self.ser.write(s)
+# def rec(s):
+#     if not isinstance(s, bytes):
+#         s = s.encode('ascii')
+#     return re.compile(s, re.MULTILINE)
 
 
-class genSpawn(pexpect.spawn, pexfuncs):
 
-    bytes = 0
+# class serialSpawn(pfd.fdspawn, pexfuncs):
 
-    def log(self, s):
-        pass
+#     def __init__(self, filename, board,  *args, **kw):
+#         self.bytes = 0
+#         self.board = board
+#         self.log("Initialise serSpawn at {}".format(filename))
+#         self.ser = self.try_init_serial(filename)
+#         return super().__init__(self.ser.fileno(), *args, timeout=5, **kw)
+
+#     def log(self, s):
+#         self.board.log(s)
+
+#     def __repr__(self):
+#         return "PExpect Serial at {} for board {}".format(self.ser.port, self.board)
+
+#     def try_init_serial(self, filename, timeout=1):
+#         for _ in range(10):
+#             try:
+#                 s = serial.Serial(filename, 115200, timeout=timeout)
+#                 return s
+#             except Exception as e:
+#                 self.log("Failed to init serial ({}), Error -[{}].  trying again.".format(filename, e))
+#                 time.sleep(1)
+
+#         raise IOError('Cannot start board and connect to serial')
+
+#     def read(self, *a, **kw):
+#         self.log("Blocking read...")
+#         return super().read(*a, **kw)
+
+#     def read_nonblocking(self, size=1, timeout=0):
+#         # NOTE: This is the serial INTERNAL timeout, we keep this small and the pexpect
+#         # modules deals nicely with the higher-level timeout
+#         # self.ser.timeout = 1
+#         b = self.ser.read(size)
+#         self.bytes += len(b)
+#         self._log(b, 'read')
+#         return b
+
+#     def flush(self):
+#         self.buffer = bytes()
+#         self.ser.reset_input_buffer()
+
+#     def close(self):
+#         self.ser.flush()
+#         return self.ser.close()
+
+#     def send(self, s):
+#         if isinstance(s, str):
+#             s = s.encode('ascii')
+#         return self.ser.write(s)
+
+
+# class genSpawn(pexpect.spawn, pexfuncs):
+
+#     bytes = 0
+
+#     def log(self, s):
+#         pass

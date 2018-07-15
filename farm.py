@@ -1,7 +1,7 @@
-#TODO: import Logger
+from farmclass import Farmclass
 
 
-class Farm():
+class Farm(Farmclass):
     def __init__(self, boards):
         self.boards = boards
 

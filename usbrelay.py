@@ -1,9 +1,9 @@
-import usb
+
+from farmclass import Farmclass
+from usb import USB
 
 
-class USBRelay:
-    def __init__(self, usb):
-        self.usb = usb
+class USBRelay(Farmclass, USB):
+    def __init__(self, usbdev):
+        USB.__init__(self, usbdev)
 
-    def __repr__(self):
-        return "\n[USBRelay: {}]".format(self.usb)
