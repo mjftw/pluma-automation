@@ -12,17 +12,17 @@ class NoBoard(Exception):
 
 
 class Board(Farmclass):
-    def __init__(self, name, apc, hub, sdmux, baud=115200):
+    def __init__(self, name, apc, hub, sdmux):
         self.apc = apc
         self.hub = hub
         self.sdmux = sdmux
         self.name = name
-        self.baud = baud
         self.console = None
 
-    def init_console(self):
+#TODO: Get hub to give the tty_device node
+    def init_console(self, tty_dev, baud=115200):
         if self.console is None:
-            self.console = Console(self.hub.get_tty(), self.baud)
+            self.console = Console(tty_dev, baud)
 
 
 def get_board(boards, name):
