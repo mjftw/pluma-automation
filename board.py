@@ -4,6 +4,7 @@
 # import hwconfig
 
 from farmclass import Farmclass
+from console import Console
 
 
 class NoBoard(Exception):
@@ -19,9 +20,9 @@ class Board(Farmclass):
         self.baud = baud
         self.console = None
 
-    def get_console(self):
+    def init_console(self):
         if self.console is None:
-            self.console = Console(hub.get_tty(), self.baud)
+            self.console = Console(self.hub.get_tty(), self.baud)
 
 
 def get_board(boards, name):

@@ -82,7 +82,7 @@ class USB():
                         int(m.attributes.get('size')) == 0):
                     continue
                 return m.device_node
-            if attempts != 1:
+            if(attempts > 1):
                 time.sleep(1)
         return None
 
