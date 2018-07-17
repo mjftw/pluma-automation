@@ -4,6 +4,7 @@ import sys
 import time
 import serial
 import pexpect
+import pexpect.fdpexpect
 
 from farmclass import Farmclass
 
@@ -61,6 +62,9 @@ class Console(Farmclass):
             except Exception as e:
                 self.log("Failed to init serial ({}), Error -[{}]. Trying again.".format(self.port, e))
                 time.sleep(1)
+
+        raise RuntimeError(
+            "Failed to open serial port {} and init pexpect".format(self.port)) 
 
     def send_newline(self):
         self.send("")
