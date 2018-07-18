@@ -2,14 +2,13 @@
 
 import sys
 import time
-import serial
 import pexpect
 import pexpect.fdpexpect
 
 from farmclass import Farmclass
 
-DEFAULT_PROMPT = r'>>FARM>>'
 
+DEFAULT_PROMPT = r'>>FARM>>'
 
 class TimeoutNoRecieve(Exception):
     pass
@@ -19,128 +18,163 @@ class TimeoutNoRecieveStop(Exception):
     pass
 
 
-class Console(Farmclass):
-    linesep = '\r\n'
+class SubclassException(Exception):
+    pass
 
-    def __init__(self, port, baud, timeout=100, prompt=DEFAULT_PROMPT):
-        self.port = port
-        self.timeout = timeout
-        self.baud = baud
-        self.bytes = 0
-        self.prompt = prompt
-        self._ser = serial.Serial()
-        self._ser_pex = None
+
+class Console(Farmclass):
+    """ Impliments the console functionality not specific to a given transport layer """
+    def __init__(self, linesep, encoding='ascii'):
+        if type(self) is Console:
+            raise SubclassException(
+                "Class is a base class and must be inherited")
+        self._check_attr('_pex')
+
+        self.encoding = encoding
+        self.linesep = linesep
+
+    def _check_attr(self, attr):
+        if not hasattr(self, attr):
+            raise SubclassException(
+                "Variable '{}' must be created by inheriting class".format(
+                    attr))
+
+    def _err_must_override(self):
+        raise SubclassException(
+            "This function must be overridden by an inheriting class")
 
     @property
     def is_open(self):
-        return self._ser.isOpen()
+        """ Check if the transport layer is ready to send and recieve"""
+        self._err_must_override()
 
     @property
-    def last_cmd_result(self):
-        if self._ser_pex:
-            return self._ser_pex.before
-        else:
-            return None
-
-    def __repr__(self):
-        return "Serial console device: {}".format(self._ser.port)
-
-    def open(self):
-        self.log("Trying to open serial port {}".format(self.port))
-        for _ in range(10):
-            try:
-                self._ser = serial.Serial(
-                    port=self.port,
-                    baudrate=self.baud,
-                    timeout=self.timeout
-                )
-                self._ser_pex = pexpect.fdpexpect.fdspawn(
-                    fd=self._ser.fileno(), timeout=self.timeout)
-
-                self.log("Init serial {} success".format(self.port))
-                return
-            except Exception as e:
-                self.log("Failed to init serial ({}), Error -[{}]. Trying again.".format(self.port, e))
-                time.sleep(1)
-
-        raise RuntimeError(
-            "Failed to open serial port {} and init pexpect".format(self.port)) 
-
-    def send_newline(self):
-        self.send("")
-
-    def close(self):
-        if self.is_open:
-            self._ser.flush()
-            self._ser.close()
-            self.log("Closed serial")
-        else:
-            self.log("Cannot close serial as it is not open")
+    def bytes_recieved(self):
+        """ Return the number of bytes in the recieve buffer """
+        self._err_must_override()
 
     def flush(self):
-        self._ser_pex.expect([pexpect.EOF, pexpect.TIMEOUT])
-        self._ser.reset_input_buffer()
+        """ Clear input buffer """
+        self._err_must_override()
 
-    def wait_for_recieve_stop(self, timeout=100):
-        last_bytes = 0
-        exit_count = 0
-        quiet_count = 3
+    def get_buffer(self):
+        """ Read all of the input buffer """
+        self._err_must_override()
 
-        while 1:
-            self.log("Waiting for quiet. Timeout[{}] Quiet[{}] Bytes[{}]....".format(
-                timeout, quiet_count - exit_count,
-                self._ser.in_waiting
-                ))
+    def open(self):
+        """ Open transport layer. E.g. Open serial port """
+        self._err_must_override()
 
-            if timeout <= 0:
-                if last_bytes == 0:
-                    raise TimeoutNoRecieve('Timeout waiting to recieve data')
-                else:
-                    raise TimeoutNoRecieveStop('Timeout waiting recieve to stop')
+    def close(self):
+        """ Close transport layer """
+        self._err_must_override()
 
-            if(self._ser.in_waiting - last_bytes == 0 and
-                    self._ser.in_waiting > 0):
-                exit_count += 1
-            else:
-                exit_count = 0
+    def decode(self, text):
+        return text.decode(self.encoding)
 
-            if exit_count == quiet_count:
-                return 0
-
-            last_bytes = self._ser.in_waiting
-            timeout -= 1
-            time.sleep(0.1)
-
-    def send(self, cmd, get_result=False, force_prompt=True):
+    def wait_for_data(self, timeout=10.0, sleep_time=0.1, start_bytes=None):
         if not self.is_open:
             self.open()
+
+        if start_bytes is None:
+            start_bytes = self.bytes_recieved
+
+        elapsed = 0.0
+
+        while(elapsed <= timeout):
+            current_bytes = self.bytes_recieved
+
+            self.log("Waiting for data... Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                elapsed, timeout, current_bytes-start_bytes
+                ))
+
+            if current_bytes > start_bytes:
+                return True
+
+            time.sleep(sleep_time)
+            elapsed += sleep_time
+
+        raise TimeoutNoRecieve('Timeout waiting to recieve data')
+        return False
+
+    def wait_for_quiet(self, timeout=10.0, quiet=0.3, sleep_time=0.1):
+        if not self.is_open:
+            self.open()
+
+        last_bytes = self.bytes_recieved
+        start_byes = last_bytes
+        time_quiet = 0.0
+        elapsed = 0.0
+
+        while(elapsed <= timeout):
+            current_bytes = self.bytes_recieved
+
+            if current_bytes == last_bytes:
+                time_quiet += sleep_time
+            else:
+                time_quiet = 0
+
+            self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                elapsed, timeout, time_quiet, quiet, current_bytes-start_byes
+                ))
+
+            if time_quiet > quiet:
+                return True
+
+            last_bytes = current_bytes
+
+            time.sleep(sleep_time)
+            elapsed += sleep_time
+
+        raise TimeoutNoRecieveStop('Timeout waiting for quiet')
+        return False
+
+    def send(self,
+             cmd,
+             recieve=False,
+             prompt=DEFAULT_PROMPT,
+             force_prompt=False
+             ):
+        if not self.is_open:
+            self.open()
+        if not self.is_open:
+            raise RuntimeError("Could not open device")
 
         result = None
 
         if force_prompt:
-            self._ser_pex.sendline("export PS1='{}'".format(self.prompt))
-            self.wait_for_recieve_stop()
-
-        if get_result:
+            self._pex.sendline("export PS1='{}'".format(prompt))
+            self.wait_for_quiet()
             self.flush()
 
-            self._ser_pex.sendline(cmd)
-            expects = [self.prompt, pexpect.EOF, pexpect.TIMEOUT]
+        if recieve:
+            self.wait_for_quiet()
+            self.flush()
+            self._pex.sendline(cmd)
+            self.wait_for_quiet()
 
-            self.wait_for_recieve_stop()
-
-            if(self._ser_pex.expect(expects) != 0):
-                raise RuntimeError('Did not find prompt {}'.format(
-                    self.prompt))
-
-            result = self.last_cmd_result
-
-            if result:
-                result = result.decode('ascii')
+            if prompt is None:
+                result = self.get_buffer()
+            else:
+                expects = [prompt, pexpect.EOF, pexpect.TIMEOUT]
+                index = self._pex.expect(expects)
+                if expects[index] is prompt:
+                    self.log("Matched prompt [{}]".format(
+                        self.decode(self._pex.after)))
+                    result = self.decode(self._pex.before)
+                else:
+                    self.log("Did not find prompt '{}'. Got {}".format(
+                        prompt, expects[index]))
+                    raise RuntimeWarning("Did not find prompt")
         else:
-            self._ser_pex.sendline(cmd)
+            self._pex.sendline(cmd)
 
         return result
+
+    def check_responds(self, timeout=10.0):
+        start_bytes = self.bytes_recieved
+        self.send("")
+        return self.wait_for_data(timeout=timeout, start_bytes=start_bytes)
 
     def set_echo(self, echo):
         if echo:
