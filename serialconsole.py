@@ -20,7 +20,7 @@ class SerialConsole(Console):
 
     @property
     def is_open(self):
-        if not self._ser:
+        if not self._ser or not self._pex:
             return False
         else:
             return self._ser.isOpen()
@@ -44,10 +44,6 @@ class SerialConsole(Console):
             while self._ser.in_waiting:
                 buffer += self.decode(self._ser.read())
         return buffer
-
-    def _spawn_fdexpect(self, fd, timeout):
-        return pexpect.fdpexpect.fdspawn(
-            fd=self._ser.fileno(), timeout=self.timeout)
 
     def open(self):
         self.log("Trying to open serial port {}".format(self.port))
