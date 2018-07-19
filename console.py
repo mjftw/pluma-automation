@@ -57,10 +57,6 @@ class Console(Farmclass):
         """ Clear input buffer """
         self._err_must_override()
 
-    def get_buffer(self):
-        """ Read all of the input buffer """
-        self._err_must_override()
-
     def open(self):
         """ Open transport layer. E.g. Open serial port """
         self._err_must_override()
@@ -72,6 +68,9 @@ class Console(Farmclass):
     @property
     def last_match(self):
         return self._pex.after
+
+    def flush(self):
+        return self._pex.read()
 
     def decode(self, text):
         return text.decode(self.encoding)
@@ -165,7 +164,7 @@ class Console(Farmclass):
                 result = self._pex.before
             else:
                 self.wait_for_quiet()
-                result = self.get_buffer()
+                result = self.flush()
 
         return result
 
