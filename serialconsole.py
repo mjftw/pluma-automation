@@ -13,7 +13,7 @@ class SerialConsole(Console):
         self.baud = baud
         self._ser = None
         self._pex = None
-        super().__init__(encoding='ascii', linesep=b'\r\n')
+        super().__init__()
 
     def __repr__(self):
         return "Serial console device: {}".format(self._ser.port)
@@ -24,26 +24,6 @@ class SerialConsole(Console):
             return False
         else:
             return self._ser.isOpen()
-
-    @property
-    def bytes_recieved(self):
-        if self.is_open:
-            return self._ser.in_waiting
-        self.log("Serial port not open")
-        return 0
-
-    def flush(self):
-        if self.is_open:
-            self._ser.reset_input_buffer()
-        else:
-            self.log("Cannot flush, serial port not open")
-
-    def get_buffer(self):
-        buffer = ''
-        if self.is_open:
-            while self._ser.in_waiting:
-                buffer += self.decode(self._ser.read())
-        return buffer
 
     def open(self):
         self.log("Trying to open serial port {}".format(self.port))
@@ -56,6 +36,7 @@ class SerialConsole(Console):
                 )
                 self._pex = pexpect.fdpexpect.fdspawn(
                     fd=self._ser.fileno(), timeout=self.timeout)
+                self._pex.r
                 self.log("Init serial {} success".format(self.port))
                 return
             except Exception as e:
