@@ -19,10 +19,9 @@ class Board(Farmclass):
         self.name = name
         self.console = None
 
-#TODO: Get hub to give the tty_device node
-    def init_console(self, tty_dev, baud=115200):
+    def init_console(self):
         if self.console is None:
-            self.console = Console(tty_dev, baud)
+            self.console = SerialConsole(self.hub.get_tty(), self.baud)
 
 
 def get_board(boards, name):
