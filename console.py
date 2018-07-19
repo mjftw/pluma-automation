@@ -60,12 +60,18 @@ class Console(Farmclass):
     def flush(self, clear_buf=False):
         if not self.is_open:
             self.open()
-        last_read = self.decode(self._pex.read())
+        try:
+            while 1:
+                last_read = self.decode(self._pex.read_nonblocking(1, 0.01))
+                self._buffer += last_read
+        except pexpect.exceptions.TIMEOUT:
+            pass
+        except pexpect.exceptions.EOF:
+            pass
+
         if clear_buf:
             self._buffer = ''
-        else:
-            self._buffer += last_read
-        return last_read
+        return self._buffer
 
     @property
     def _buffer_size(self):
@@ -90,10 +96,10 @@ class Console(Farmclass):
             if not isinstance(match, list):
                 match = [match]
             expects = [pexpect.TIMEOUT, pexpect.EOF] + match
-
-        self.flush()
-        if start_bytes is None:
-            start_bytes = self._flush_get_size()
+        else:
+            self.flush()
+            if start_bytes is None:
+                start_bytes = self._flush_get_size()
 
         elapsed = 0.0
 
@@ -120,10 +126,10 @@ class Console(Farmclass):
         if not self.is_open:
             self.open()
 
-        last_bytes = self._flush_get_size()
-        start_bytes = last_bytes
         time_quiet = 0.0
         elapsed = 0.0
+
+        last_bytes = 0
 
         while(elapsed <= timeout):
             current_bytes = self._flush_get_size()
@@ -134,7 +140,7 @@ class Console(Farmclass):
                 time_quiet = 0
 
             self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
-                elapsed, timeout, time_quiet, quiet, current_bytes-start_bytes
+                elapsed, timeout, time_quiet, quiet, current_bytes
                 ))
 
             if time_quiet > quiet:

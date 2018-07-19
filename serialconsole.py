@@ -27,24 +27,20 @@ class SerialConsole(Console):
 
     def open(self):
         self.log("Trying to open serial port {}".format(self.port))
-        for _ in range(10):
-            try:
-                self._ser = serial.Serial(
-                    port=self.port,
-                    baudrate=self.baud,
-                    timeout=self.timeout
-                )
-                self._pex = pexpect.fdpexpect.fdspawn(
-                    fd=self._ser.fileno(), timeout=self.timeout)
-                self._pex.r
-                self.log("Init serial {} success".format(self.port))
-                return
-            except Exception as e:
-                self.log("Failed to init serial ({}), Error -[{}]. Trying again.".format(self.port, e))
-                time.sleep(1)
+        self._ser = serial.Serial(
+            port=self.port,
+            baudrate=self.baud,
+            timeout=self.timeout
+        )
+        self._pex = pexpect.fdpexpect.fdspawn(
+            fd=self._ser.fileno(), timeout=self.timeout)
 
-        raise RuntimeError(
-            "Failed to open serial port {} and init pexpect".format(self.port))
+        if not self.is_open:
+            raise RuntimeError(
+                "Failed to open serial port {} and init pexpect".format(self.port))
+
+        self.log("Init serial {} success".format(self.port))
+        return
 
     def close(self):
         if self.is_open:
