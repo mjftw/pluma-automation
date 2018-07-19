@@ -69,12 +69,22 @@ class Console(Farmclass):
         """ Close transport layer """
         self._err_must_override()
 
+    @property
+    def last_match(self):
+        return self._pex.after
+
     def decode(self, text):
         return text.decode(self.encoding)
 
-    def wait_for_data(self, timeout=10.0, sleep_time=0.1, start_bytes=None):
+    def wait_for_data(self, timeout=10.0, sleep_time=0.1,
+                      match=None, start_bytes=None):
         if not self.is_open:
             self.open()
+
+        if match:
+            if not isinstance(match, list):
+                match = [match]
+            expects = [pexpect.TIMEOUT, pexpect.EOF] + match
 
         if start_bytes is None:
             start_bytes = self.bytes_recieved
@@ -84,11 +94,14 @@ class Console(Farmclass):
         while(elapsed <= timeout):
             current_bytes = self.bytes_recieved
 
-            self.log("Waiting for data... Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
-                elapsed, timeout, current_bytes-start_bytes
+            self.log("Waiting for data: {} Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                match, elapsed, timeout, current_bytes-start_bytes
                 ))
 
-            if current_bytes > start_bytes:
+            if match:
+                if self._pex.expect(expects) > 1:
+                    return True
+            elif current_bytes > start_bytes:
                 return True
 
             time.sleep(sleep_time)
@@ -132,8 +145,7 @@ class Console(Farmclass):
     def send(self,
              cmd,
              recieve=False,
-             prompt=DEFAULT_PROMPT,
-             force_prompt=False
+             match=None,
              ):
         if not self.is_open:
             self.open()
@@ -142,32 +154,18 @@ class Console(Farmclass):
 
         result = None
 
-        if force_prompt:
-            self._pex.sendline("export PS1='{}'".format(prompt))
-            self.wait_for_quiet()
-            self.flush()
-
-        if recieve:
-            self.wait_for_quiet()
-            self.flush()
+        if not recieve:
             self._pex.sendline(cmd)
-            self.wait_for_quiet()
-
-            if prompt is None:
-                result = self.get_buffer()
-            else:
-                expects = [prompt, pexpect.EOF, pexpect.TIMEOUT]
-                index = self._pex.expect(expects)
-                if expects[index] is prompt:
-                    self.log("Matched prompt [{}]".format(
-                        self.decode(self._pex.after)))
-                    result = self.decode(self._pex.before)
-                else:
-                    self.log("Did not find prompt '{}'. Got {}".format(
-                        prompt, expects[index]))
-                    raise RuntimeWarning("Did not find prompt")
         else:
+            self.wait_for_quiet()
+            self.flush()
             self._pex.sendline(cmd)
+            if match:
+                self.wait_for_data(match=match)
+                result = self._pex.before
+            else:
+                self.wait_for_quiet()
+                result = self.get_buffer()
 
         return result
 
@@ -176,7 +174,12 @@ class Console(Farmclass):
         self.send("")
         return self.wait_for_data(timeout=timeout, start_bytes=start_bytes)
 
-    def set_echo(self, echo):
+    def bash_change_prompt(self, prompt):
+        self.send("export PS1='{}'".format(prompt))
+        self.wait_for_quiet()
+        self.flush()
+
+    def bash_set_echo(self, echo):
         if echo:
             self.send('stty echo')
         else:
