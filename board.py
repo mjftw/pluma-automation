@@ -4,7 +4,8 @@
 # import hwconfig
 
 from farmclass import Farmclass
-from console import Console
+from interact import Interact
+from serialconsole import SerialConsole
 
 
 class NoBoard(Exception):
@@ -17,11 +18,12 @@ class Board(Farmclass):
         self.hub = hub
         self.sdmux = sdmux
         self.name = name
-        self.console = None
+        self.act = Interact()
 
     def init_console(self):
-        if self.console is None:
-            self.console = SerialConsole(self.hub.get_tty(), self.baud)
+        if self.act.console is None:
+            self.act.switch_console(
+                SerialConsole(self.hub.get_tty(), self.baud))
 
 
 def get_board(boards, name):
