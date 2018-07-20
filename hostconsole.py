@@ -8,8 +8,8 @@ import pexpect.fdpexpect
 from console import Console
 
 class HostConsole(Console):
-    def __init__(self, start_cmd):
-        self.start_cmd = start_cmd
+    def __init__(self, command):
+        self.command = command
         self._pex = None
         super().__init__()
 
@@ -21,7 +21,7 @@ class HostConsole(Console):
             return False
 
     def open(self):
-        self._pex = pexpect.spawn(self.start_cmd, timeout=0.01)
+        self._pex = pexpect.spawn(self.command, timeout=0.01)
         if not self.is_open:
             raise RuntimeError("Could not start host console");
 
