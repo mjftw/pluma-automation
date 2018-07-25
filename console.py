@@ -177,7 +177,7 @@ class Console(Farmclass):
             self._pex.sendline(cmd)
             if match:
                 self.wait_for_data(match=match)
-                result = self._pex.before
+                result = self.decode(self._pex.before)
             else:
                 self.wait_for_quiet()
                 result = self._buffer

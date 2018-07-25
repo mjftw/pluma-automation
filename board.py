@@ -19,6 +19,7 @@ class Board(Farmclass):
         self.sdmux = sdmux
         self.name = name
         self.act = Interact()
+        self.baud = 115200 #TODO: Remove hardcoding
 
     def init_console(self):
         if self.act.console is None:
