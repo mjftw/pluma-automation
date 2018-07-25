@@ -11,7 +11,7 @@ class TelnetConsole(HostConsole):
         self.host = host
         self.user = user
         self.pw = pw
-        super.__init__('telent {}'.format(host))
+        super.__init__('telnet {}'.format(host))
 
     def login(self):
         pass

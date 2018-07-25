@@ -1,11 +1,10 @@
 #!/usb/bin/env python3
 
-import sys
-import time
 import pexpect
 import pexpect.fdpexpect
 
 from console import Console
+
 
 class HostConsole(Console):
     def __init__(self, command):
@@ -23,7 +22,7 @@ class HostConsole(Console):
     def open(self):
         self._pex = pexpect.spawn(self.command, timeout=0.01)
         if not self.is_open:
-            raise RuntimeError("Could not start host console");
+            raise RuntimeError("Could not start host console")
 
     def close(self):
         self._pex.sendintr()
