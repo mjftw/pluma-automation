@@ -17,7 +17,6 @@ class Farmclass():
         if hasattr(self, 'timestamp') and self.timestamp:
             timestr = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
             prefix = '{} {}'.format(timestr, prefix)
-        #TODO: Reccursively create log dir
         if prefix != '':
             message = '{}: {}'.format(prefix, message)
         if hasattr(self, 'logfile') and self.logfile:
@@ -25,7 +24,7 @@ class Farmclass():
             if not os.path.exists(logdir):
                 os.makedirs(logdir)
             with open(self.logfile, 'a') as logfd:
-                logfd.write(message)
+                logfd.write(message + '\n')
         else:
             print(message)
 
