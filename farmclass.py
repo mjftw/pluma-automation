@@ -10,11 +10,11 @@ class Farmclass():
 
     def log(self, message):
         prefix = ''
-        if hasattr(self, 'appendtype') and self.appendtype:
-            prefix = '[{}]{}'.format(self.appendtype, prefix)
+        if hasattr(self, '_appendtype') and self._appendtype:
+            prefix = '[{}]{}'.format(self._appendtype, prefix)
         if hasattr(self, 'logname') and self.logname:
             prefix = '{}{}'.format(self.logname, prefix)
-        if hasattr(self, 'timestamp') and self.timestamp:
+        if hasattr(self, '_logtime') and self._logtime:
             timestr = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
             prefix = '{} {}'.format(timestr, prefix)
         if prefix != '':
@@ -41,15 +41,15 @@ class Farmclass():
         return farmobjs, attrs
 
     def set_logger(self, logname=None, logfile=None,
-                   appendtype=None, timestamp=False, reccurse=False):
+                   appendtype=None, logtime=False, reccurse=False):
         self.logfile = logfile
         self.logname = logname
-        self.timestamp = timestamp
+        self._logtime = logtime
         if appendtype:
             if isinstance(appendtype, bool):
-                self.appendtype = '{}'.format(type(self).__name__)
+                self._appendtype = '{}'.format(type(self).__name__)
             else:
-                self.appendtype = '{}.{}'.format(
+                self._appendtype = '{}.{}'.format(
                         appendtype, type(self).__name__)
 
         if reccurse:
@@ -58,8 +58,8 @@ class Farmclass():
                 farmobjs[key].set_logger(
                     logname=self.logname,
                     logfile=logfile,
-                    appendtype=self.appendtype,
-                    timestamp=self.timestamp,
+                    appendtype=self._appendtype,
+                    logtime=self._logtime,
                     reccurse=reccurse,
                 )
 

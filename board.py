@@ -35,7 +35,7 @@ class Board(Farmclass):
             logname=self.name,
             logfile=self.logfile,
             appendtype=True,
-            timestamp=True,
+            logtime=True,
             reccurse=True
         )
 

@@ -164,6 +164,8 @@ class Console(Farmclass):
         if not self.is_open:
             raise RuntimeError("Could not open device")
 
+        self.log("Sending command:\n{}".format(cmd))
+
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
 
@@ -182,12 +184,18 @@ class Console(Farmclass):
                 self.wait_for_quiet()
                 result = self._buffer
 
+        self.log("Command result:\n{}".format(result))
         return result
 
-    def check_responds(self, timeout=10.0):
+    def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()
         self.send("")
-        return self.wait_for_data(timeout=timeout, start_bytes=start_bytes)
+        alive = self.wait_for_data(timeout=timeout, start_bytes=start_bytes)
+        if alive:
+            self.log("Got response from: {}".format(self))
+        else:
+            self.log("No response from: {}".format(self))
+        return alive
 
     def bash_change_prompt(self, prompt):
         self.send("export PS1='{}'".format(prompt))

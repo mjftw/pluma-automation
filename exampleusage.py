@@ -20,7 +20,7 @@ print(b.show_hier())
 # This will likely change when detecting devices is a little more sophisticated
 b.init_console()
 # Send newline and check we get data back
-if b.act.check_responds():
+if b.act.check_alive():
     # Send command, don't care about result
     b.send('echo "Hello Farm" > ~/farmtest.txt')
     # Send comand, print result
