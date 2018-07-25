@@ -40,7 +40,8 @@ class Farmclass():
                 attrs[m] = member
         return farmobjs, attrs
 
-    def set_logger(self, logname=None, logfile=None, appendtype=None, timestamp=False, reccurse=False):
+    def set_logger(self, logname=None, logfile=None,
+                   appendtype=None, timestamp=False, reccurse=False):
         self.logfile = logfile
         self.logname = logname
         self.timestamp = timestamp
@@ -48,7 +49,8 @@ class Farmclass():
             if isinstance(appendtype, bool):
                 self.appendtype = '{}'.format(type(self).__name__)
             else:
-                self.appendtype = '{}.{}'.format(appendtype, type(self).__name__)
+                self.appendtype = '{}.{}'.format(
+                        appendtype, type(self).__name__)
 
         if reccurse:
             farmobjs, __ = self._get_hier()
@@ -82,7 +84,10 @@ class Farmclass():
                   "{}: {}\n".format(key, attrs[key]))
         for key in farmobjs:
             if reccurse:
-                hier_str += farmobjs[key].show_hier(indent_level + 1, indent_size)
+                hier_str += farmobjs[key].show_hier(
+                    indent_level=indent_level+1,
+                    indent_size=indent_size,
+                    reccurse=reccurse)
             else:
                 hier_str += ("-"*indent_level*indent_size +
                     "{}: {}\n".format(key, type(farmobjs[key]).__name__))
