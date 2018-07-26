@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-import time
+import time,threading
 import pexpect.exceptions as pex
 import os
 import getpass
@@ -16,6 +16,7 @@ class APC(FarmBase):
         self.quiet = quiet
         self.spawn = None
         self.log("Registered APC")
+        self.lock = threading.Lock()
 
     def __repr__(self):
         return "APC[{}]".format( self.host )
@@ -63,6 +64,7 @@ class APC(FarmBase):
             self.send(e)
 
     def on(self, index, dummy=None):
+        self.lock.acquire()
         self.init_spawn()
         self.menu([1, 2, 1, index, 1, 1])
         self.spawn.snr('YES')
@@ -70,8 +72,10 @@ class APC(FarmBase):
         self.spawn.send_newline()
         self.spawn.waitr('^> ')
         self.disconnect()
+        self.lock.release()
 
     def off(self, index, dummy=None):
+        self.lock.acquire()
         self.init_spawn()
         self.menu([1, 2, 1, index, 1, 2])
         self.spawn.snr('YES')
@@ -79,6 +83,7 @@ class APC(FarmBase):
         self.spawn.send_newline()
         self.spawn.waitr('^> ')
         self.disconnect()
+        self.lock.release()
 
     def disconnect(self):
         if self.spawn:
