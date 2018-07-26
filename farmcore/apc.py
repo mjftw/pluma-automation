@@ -35,7 +35,7 @@ class APC(FarmBase):
                     # one user can login at a time but it could be something else.
                     self.login()
                 except pex.EOF:
-                    print("Warning - APC Blocked. Waiting then trying again...")
+                    self.log("Warning - APC Blocked. Waiting then trying again...")
                     time.sleep(2)
                 else:
                     return
