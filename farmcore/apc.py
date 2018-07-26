@@ -1,25 +1,31 @@
 #!/usr/bin/env python3
 
-import interact
 import sys
 import time
 import pexpect.exceptions as pex
+import os
+import getpass
+from farmcore.farm_base import FarmBase
+from farmcore import interact
 
-
-class APC():
-    def __init__(self, host, user, pw, quiet=False):
+class APC(FarmBase):
+    def __init__(self, host, user, pw, port=None, quiet=False):
         self.host = host
         self.user = user
         self.pw = pw
         self.quiet = quiet
         self.spawn = None
+        self.log("Registered APC")
 
+    def __repr__(self):
+        return "APC[{}]".format( self.host )
+    
     def init_spawn(self):
         if not self.spawn:
             cl = "telnet {}".format(self.host)
             for _ in range(5):
                 self.spawn = interact.genSpawn(
-                    cl, logfile=open('/tmp/apclog', 'ab'), timeout=5)
+                    cl, logfile=open('/tmp/apclog_{}'.format( getpass.getuser() ), 'ab'), timeout=5)
                 self.spawn.linesep = '\r\n'.encode('ascii')
 
                 try:
@@ -34,6 +40,10 @@ class APC():
                     return
 
             raise IOError("Couldn't connect to APC.")
+
+
+    def __getitem__(self, index):
+        return (self,index)
 
     def login(self):
         self.spawn.waitr('User Name')
@@ -77,3 +87,5 @@ class APC():
             self.send(4)
             self.spawn.close(force=True)
             self.spawn = None
+
+

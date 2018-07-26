@@ -1,43 +1,40 @@
 
-import usb
 import sys,os
 import time
 import serial
-import interact
 import pexpect
-from myapc import APC
 import subprocess as sp
+import getpass
+from farmcore import usb, interact
+from farmcore.farm_base import FarmBase
 
 DEFAULT_LOGFILE = object()
 
-# Map is board/host
-sdmux_map = [
-        dict(board=b'1', host=b'q'),
-        dict(board=b'2', host=b'w'),
-        dict(board=b'3', host=b'e'),
-        dict(board=b'4', host=b'r'),
-]
-
-
-class farm():
-    def __init__(self, board, logfile=DEFAULT_LOGFILE, blogfile=DEFAULT_LOGFILE, mount_path=None):
+class FarmBoard(FarmBase):
+    def __init__(self, 
+            board, 
+            logfile=DEFAULT_LOGFILE, 
+            blogfile=DEFAULT_LOGFILE, 
+            mount_path = None,
+            bootline = None ):
         self.usb = usb.usb()
         self.brd = board
-        self.apc = board.apc
-        self.sdmux, self.sdmux_index = (board.sdmux.ur.usb, board.sdmux.index)
         self.hub = board.hub
         self.disk = None
         self.diskusb = None
         self._p = None
         self._s = None
+        
+        self.log("Creating FarmBoard instance for board {}".format( self.brd ))
+
         self.logfile = logfile
         self.blogfile = blogfile
 
         if logfile == DEFAULT_LOGFILE:
-            self.logfile = open("/tmp/user_{}.log".format(board.name), "ab")
+            self.logfile = open("/tmp/user_{}_{}.log".format(board.name, getpass.getuser() ), "ab")
 
         if blogfile == DEFAULT_LOGFILE:
-            self.blogfile = open("/tmp/board_{}.log".format(board.name), "ab")
+            self.blogfile = open("/tmp/board_{}_{}.log".format(board.name, getpass.getuser() ), "ab")
         elif blogfile is None:
             self.blogfile = sys.stdout.buffer
 
@@ -55,56 +52,15 @@ class farm():
         while sp.run( cmd.split() ).returncode == 0:
             self.log("WARN: Mount path had mount on it. Unmounted it.")
             pass
-
-        print("LOG[{}]\nBLOG[{}]".format(self.logfile, self.blogfile))
+        
+        self.clog("LOG[{}] BLOG[{}]".format(self.logfile, self.blogfile))
 
     def __repr__(self):
-        return "farm({})".format(self.brd.name)
+        return "FB-{}".format(self.brd)
 
-    def log(self, s):
-
-        if not isinstance(s, str):
-            s = str(s)
-
-        # If there IS a logfile, we don't need the prefix
-        if self.logfile:
-            m = s.encode('ascii')
-            self.logfile.write('\n'.encode('ascii'))
-            self.logfile.write(m)
-            self.logfile.flush()
-        else:
-            m = "[{}] {}".format(self, s)
-            print(m)
-
-    def err(self, s):
-        self.log(s)
-        raise RuntimeError(s)
-
-    def apc_off(self, index):
-        while True:
-            try:
-                apc = APC('apc1', 'apc', 'apc', quiet=True)
-            except pexpect.exceptions.EOF:
-                self.log("APC Retry")
-                continue
-            else:
-                apc.off(index, 0)
-                time.sleep(2)
-                break
-
-    def apc_on(self, index):
-        while True:
-            try:
-                apc = APC('apc1', 'apc', 'apc', quiet=True)
-            except:
-                self.log("APC Retry")
-                continue
-            else:
-                apc.on(index)
-                break
 
     def init(self):
-        self.log("Initialising board at USB location [{}]".format(self.hub))
+        self.log("Initialising board [{}]".format(self.brd))
         self._p = None
 
         # If we find a disk at start of day, we must try to ensure it
@@ -124,9 +80,9 @@ class farm():
         self.off()
 
         self.log("Power cycle the sdmux...")
-        self.apc_off(self.brd.sdmux.apc)
+        self.brd.sdm.off()
         time.sleep(8)
-        self.apc_on(self.brd.sdmux.apc)
+        self.brd.sdm.on()
 
         self.log("Rebinding whole HUB...")
         self.usb.rebind(self.hub)
@@ -144,19 +100,9 @@ class farm():
             disk = self.disk,
             diskusb = self.diskusb,
             hub = self.hub,
-            sdmux = self.sdm,
+            sdmux = self.brd.sdm,
             serial = self.serial
             ))
-
-    @property
-    def s(self):
-        if self._s is None:
-            self._s = serial.Serial(self.sdm, 9600)
-        return self._s
-
-    @property
-    def sdm(self):
-        return self.usb.get_sdmux(self.sdmux)
 
     @property
     def serial(self):
@@ -199,17 +145,11 @@ class farm():
 
     def on(self):
         self.log("Power ON")
-        return self.apc_on(self.apc)
+        return self.brd.on()
 
     def off(self):
         self.log("Power OFF")
-        return self.apc_off(self.apc)
-
-    def sdm_host(self):
-        self.s.write(sdmux_map[self.sdmux_index]['host'])
-
-    def sdm_board(self):
-        self.s.write(sdmux_map[self.sdmux_index]['board'])
+        return self.brd.off()
 
     def test_disk(self):
         # First we delay until we have permission
@@ -247,7 +187,7 @@ class farm():
         ok = False
 
         for _ in range(5):
-            self.sdm_host()
+            self.brd.sdm.host()
 
             if self.diskusb:
                 self.usb.rebind(self.diskusb)
@@ -274,21 +214,24 @@ class farm():
     def board(self):
         self.log("Switching SD to board...")
         self.usb.unbind(self.diskusb)
-        self.sdm_board()
+        self.brd.sdm.board()
         time.sleep(1)
 
     def unmount(self):
         dev = self.usb.get_part(self.diskusb)
         self.log("Umounting device {}...".format(dev))
         cmd = 'sudo umount {device}'.format(device=dev)
-        return sp.run(cmd.split())
+        sp.run(cmd.split())
 
     def mount(self):
         uid = os.getuid()
         dev = self.usb.get_part(self.diskusb)
         self.log("Mounting device {} at {}....".format(dev, self.mount_path))
         cmd = 'sudo mount -o uid={uid} {device} {path}'.format(uid=uid, device=dev, path=self.mount_path)
-        return sp.run(cmd.split())
+        sp.run(cmd.split())
 
     def root(self, path):
         return "{}/{}".format(self.mount_path, path)
+
+
+

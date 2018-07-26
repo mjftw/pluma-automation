@@ -173,7 +173,7 @@ class pexfuncs():
 
         return ret.decode('utf-8', unimode).strip()
 
-
+# Interact with a serial port
 class serialSpawn(pfd.fdspawn, pexfuncs):
 
     def __init__(self, filename, board,  *args, **kw):
@@ -227,9 +227,13 @@ class serialSpawn(pfd.fdspawn, pexfuncs):
         return self.ser.write(s)
 
 
+# Interact with any program via tty
 class genSpawn(pexpect.spawn, pexfuncs):
 
     bytes = 0
 
     def log(self, s):
         pass
+
+
+

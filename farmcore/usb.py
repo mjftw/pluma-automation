@@ -6,7 +6,6 @@ import time
 from pprint import pprint as pp
 import subprocess as sp
 import pyudev as pu
-import boards
 
 bind_path = "/sys/bus/usb/drivers/usb/bind"
 unbind_path = "/sys/bus/usb/drivers/usb/unbind"
@@ -174,30 +173,6 @@ class usb():
         with open("{}/bind".format(driver_path), 'w') as f:
             f.write(d.sys_name)
 
-    def show_info(self):
-        usb_device = []
-
-        for b in boards.boards:
-            usb_device.append(b.hub)
-
-        for ud in usb_device:
-            print("\n =============== Device [{} - {}] =============".format(
-                ud, boards.get_name(ud)))
-            d = self.get_device(ud)
-            if d is None:
-                continue
-            for m in self.puc.list_devices(
-                    subsystem='block', DEVTYPE='disk', parent=d):
-                if int(m.attributes.get('size')) == 0:
-                    continue
-                print("Block device {} has size {:4.2f}MB".format(
-                    m.device_node,
-                    int(m.attributes.get('size')) / (1024 * 1024)))
-                usbp = m.find_parent('usb', device_type='usb_device')
-                print(" Parent is: {} , {}".format(
-                    usbp.sys_name, usbp.device_type))
-            for m in self.puc.list_devices(subsystem='tty', parent=d):
-                print(m.device_node, m['ID_VENDOR'])
 
     #find_block( usb_device )
     #find_serial( usb_device )
