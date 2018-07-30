@@ -5,6 +5,7 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
 - [Witekio Lab Quick Start Guide](#witekio-lab-quick-start-guide)
     - [Farm hardware overview](#farm-hardware-overview)
     - [Farm software overview](#farm-software-overview)
+        - [Installation](#installation)
     - [Tutorials](#tutorials)
         - [Tutorial 1: Writing a farm script](#tutorial-1-writing-a-farm-script)
         - [Tutorial 2: Sending commands over serial](#tutorial-2-sending-commands-over-serial)
@@ -23,6 +24,9 @@ In this section we will look at the hardware set up of the farm.
 In this section we will show how the hardware configuration of the farm is represented in software.
 
 **[Software description and diagrams]**
+
+### Installation
+In this section we will look at how to download and install the Witekio Lab's farm scripts.
 
 ---
 ## Tutorials
