@@ -4,6 +4,14 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
 
 - [Witekio Lab Quick Start Guide](#witekio-lab-quick-start-guide)
     - [Farm hardware overview](#farm-hardware-overview)
+        - [Farm host](#farm-host)
+            - [Host PC](#host-pc)
+            - [Host Hub](#host-hub)
+            - [APC](#apc)
+        - [Farm Board](#farm-board)
+            - [Board](#board)
+            - [SD Mux](#sd-mux)
+            - [Board Hubs](#board-hubs)
     - [Farm software overview](#farm-software-overview)
         - [Installation](#installation)
     - [Tutorials](#tutorials)
@@ -14,10 +22,38 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
         - [Tutorial 5: Adding a board to the farm](#tutorial-5-adding-a-board-to-the-farm)
 ---
 ## Farm hardware overview
-In this section we will look at the hardware set up of the farm.
+In this section we will look at the hardware setup of the farm.
 
-**[Hardware description and diagrams]**
+The hardware setup can roughly be divided into the following blocks:
+- [Farm Host](#farm-host)
+    - [Host PC](#host-pc)
+    - [USB Relay](#usb-relay)
+    - [Host Hub](#host-hub)
+    - [APC](#apc)
+- [Farm Board](#farm-board)
+    - [Board](#board)
+    - [SD Mux](#sd-mux)
+    - [Board Hub](#board-hub)
 
+![Hardware block diagram](hardware_block_diagram.svg)
+*Hardware block diagram shows how each of the system components are connected.  
+Only two boards are shown, but any number could be added.*
+
+### Farm host
+
+#### Host PC
+
+#### Host Hub
+
+#### APC
+
+### Farm Board
+
+#### Board
+
+#### SD Mux
+
+#### Board Hubs
 
 ---
 ## Farm software overview
