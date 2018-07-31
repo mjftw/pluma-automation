@@ -26,6 +26,7 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
 In this section we will look at the hardware setup of the farm.
 
 The hardware setup can roughly be divided into the following blocks:
+
 - [Farm Host](#farm-host)
     - [Host PC](#host-pc)
     - [Host Hub](#host-hub)
@@ -36,7 +37,7 @@ The hardware setup can roughly be divided into the following blocks:
     - [Board Hub](#board-hub)
     - [SD Mux](#sd-mux)
 
-![Hardware block diagram](hardware_block_diagram.svg)
+![Hardware block diagram](hardware_block_diagram.svg)  
 *Hardware block diagram shows how each of the system components are connected.  
 Only two boards are shown, but any number could be added.  
 Only one PDU and USB Relay are pictured, but again, any number could be added.*
