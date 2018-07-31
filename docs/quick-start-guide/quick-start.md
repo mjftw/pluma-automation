@@ -93,6 +93,8 @@ The select line is toggled by using a [USB Relay](#usb-relay).
 
 This is a custom device created by Witekio UK, but in future it may be replaced with off the shelf, or open source hardware.
 
+Currently the power supply for each SD Mux is connected to the PDU. This is done in order to be able to reboot the device, should it experience functional issues.
+
 ---
 ## Farm software overview
 In this section we will show how the hardware configuration of the farm is represented in software.
