@@ -140,13 +140,14 @@
          style="font-size:4.23333311px;text-align:center;text-anchor:middle;stroke-width:0.26458332"
          id="tspan4677-1-8" /></text>
     <rect
+       rx="4.0651603"
        style="opacity:1;fill:#fffff8;fill-opacity:1;stroke:#007cff;stroke-width:0.59708005;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        id="rect7664"
        width="214.02412"
        height="196.11151"
        x="-6.8534708"
        y="37.767193"
-       ry="14.406328" />
+       ry="5.1467981" />
   </g>
   <g
      id="layer3"
@@ -911,7 +912,7 @@
        style="font-size:4.23333311px;text-align:center;text-anchor:middle;stroke:#000001;stroke-width:0.26458332;stroke-opacity:0.97835538"
        y="134.4552"
        x="49.925159"
-       id="tspan5166-67">APC</tspan></text>
+       id="tspan5166-67">PDU</tspan></text>
   <text
      id="text4563-6-6-8-6"
      y="129.06461"
