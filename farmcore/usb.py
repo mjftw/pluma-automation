@@ -25,24 +25,24 @@ class NoDevice(Exception):
 class USB():
     def __init__(self, device):
         self.puctx = pyudev.Context()
-        self.device = device
+        self.usb_device = device
 
     @property
     def is_bound(self):
-        return os.path.isdir(os.path.join(driver_path, self.device))
+        return os.path.isdir(os.path.join(driver_path, self.usb_device))
 
     def unbind(self):
         if not self.is_bound:
             return
         with open(os.path.join(driver_path, 'unbind'), 'w') as fd:
-            fd.write(self.device)
+            fd.write(self.usb_device)
         time.sleep(1)
 
     def bind(self):
         if self.is_bound:
             return
         with open(os.path.join(driver_path, 'bind'), 'w') as fd:
-            fd.write(self.device)
+            fd.write(self.usb_device)
         time.sleep(1)
 
     def rebind(self):
@@ -53,82 +53,107 @@ class USB():
         try:
             for _ in range(20):
                 d = pyudev.Devices.from_path(
-                    self.puctx, '/bus/usb/devices/{}'.format(self.device))
+                    self.puctx, '/bus/usb/devices/{}'.format(self.usb_device))
                 if d is not None:
                     break
                 time.sleep(1)
         except:
-            raise NoDevice("No device for [{}]".format(self.device))
+            raise NoDevice("No device for [{}]".format(self.usb_device))
         return d
 
+    @property
+    def child_info(self):
+        parent = self.get_device()
+        children = self.puctx.list_devices(parent=parent)
+        infolist = []
+
+        for child in children:
+            devinfo = {}
+            devinfo['devnode'] = child.device_node
+            if devinfo['devnode'] is None:
+                continue
+
+            devinfo['subsystem'] = child.subsystem
+            devinfo['vendor'] = child.get('ID_VENDOR')
+
+            devinfo['devtype'] = child.get('DEVTYPE')
+            if(devinfo['devtype'] == 'disk' or
+               devinfo['devtype'] == 'partition'):
+                devinfo['size'] = int(child.attributes.get('size'))
+
+            infolist.append(devinfo)
+
+        return infolist
+
+    def filter_child_info(self, filters={}, excludes={}):
+        match_vals = []
+        for c in self.child_info:
+            match = True
+            # Check match list.
+            # If the child queried DOES NOT HAVE the required
+            # field, OR the field HAS A DIFFERENT value, do not match
+            for k, v in filters.items():
+                if not match:
+                    break
+                if k not in c or c[k] != v:
+                    match = False
+
+            # Check exclude list
+            # If the child queried HAS the required filed AND
+            # the field has the SAME VALUE, do not match
+            for k, v in excludes.items():
+                if not match:
+                    break
+                if k in c and c[k] == v:
+                    match = False
+
+            if match:
+                match_vals.append(c)
+
+        return match_vals
+
     def get_serial(self):
-        d = self.get_device()
-        if d is None:
-            return None
-        #print("Searching for serial devicces on [{}]".format( usb_device ))
-        for _ in range(20):
-            for m in self.puctx.list_devices(subsystem='tty', parent=d):
-                #print("Found serial {}".format( m.device_node ))
-                return m.device_node
-            time.sleep(2)
-        raise IOError('No serial devices on '.format())
+        devinfo = self.filter_child_info({
+            'subsystem': 'tty'
+        })
+        if not devinfo:
+            raise NoDevice('No serial devices on {}'.format(self.usb_device))
+        else:
+            return devinfo[0]['devnode']
 
     def get_sdmux(self):
-        sdmux_id = 'DLP_Design'
-        d = self.get_device()
-        if d is None:
-            return None
-        #print("Searching for sdmux devicces on [{}]".format( self.device ))
-        for _ in range(20):
-            for m in self.puctx.list_devices(subsystem='tty',  parent=d):
-                if m.get('ID_VENDOR') is None:
-                    continue
-                if m['ID_VENDOR'] == sdmux_id:
-                    #print("Found sdmux as {}".format( m.device_node ))
-                    return m.device_node
-            time.sleep(2)
-        raise IOError('No sdmux devices on {}'.format(self.device))
+        devinfo = self.filter_child_info({
+            'subsystem': 'tty',
+            'vendor': 'DLP_Design'
+        })
+        if not devinfo:
+            raise IOError('No sdmux devices on {}'.format(self.usb_device))
+        else:
+            return devinfo[0]['devnode']
 
-    # Return the device node and the sysname for the usb parent for use with the bind/unbind
     def get_block(self):
-        d = self.get_device()
-        if d is None:
-            return None
-        #print("Searching for block devicces on [{}]".format( self.device ))
-        for _ in range(20):
-            blks = self.puctx.list_devices(
-                subsystem='block',  DEVTYPE='disk', parent=d)
-            for m in blks:
-                if int(m.attributes.get('size')) == 0:
-                    continue
-                #print("Block device {} has size {:4.2f}MB".format(
-                #    m.device_node,
-                #    int(m.attributes.get('size')) / 1024 / 1024 ))
-                usbp = m.find_parent('usb', device_type='usb_device')
-                #print(" Parent is: {} , {}".format( usbp.sys_name, usbp.device_type ))
-                return(m.device_node, usbp.sys_name)
-            time.sleep(2)
-        raise NoDisks('No block devices on {}'.format(self.device))
+        devinfo = self.filter_child_info({
+            'subsystem': 'block',
+            'devtype': 'disk'
+        }, {
+            'size': 0
+        })
+        if not devinfo:
+            raise NoDisks('No block devices on {}'.format(self.usb_device))
+        else:
+            return (devinfo[0]['devnode'], devinfo[0]['size'])
 
-    # Get first partition name for block device
     def get_part(self):
-        d = self.get_device()
-        if d is None:
-            raise NoDevice("No device for {}".format(self.device))
-        #print("Searching for block devicces on [{}]".format( self.device ))
-        for _ in range(5):
-            blks = self.puctx.list_devices(
-                subsystem='block',  DEVTYPE='partition', parent=d)
-            for m in blks:
-                if int(m.attributes.get('size')) == 0: continue
-                #print("Block device {} has size {:4.2f}MB".format(
-                #    m.device_node,
-                #    int(m.attributes.get('size')) / 1024 / 1024 ))
-                #usbp = m.find_parent('usb', device_type='usb_device')
-                #print(" Parent is: {} , {}".format( usbp.sys_name, usbp.device_type ))
-                return m.device_node
-            time.sleep(2)
-        raise NoPartitions('No partitions on {}'.format(self.device))
+        devinfo = self.filter_child_info({
+            'subsystem': 'block',
+            'devtype': 'partition'
+        }, {
+            'size': 0
+        })
+        if not devinfo:
+            raise NoPartitions('No partitions on {}'.format(self.usb_device))
+        else:
+            return (devinfo[0]['devnode'], devinfo[0]['size'])
 
     def show_ancestry(self):
         dev = self.get_device()
