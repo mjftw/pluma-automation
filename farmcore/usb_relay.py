@@ -12,7 +12,7 @@ from farmcore.usb import USB
 
 class USBRelay(FarmBase, USB):
     def __init__(self, usb_device):
-        USB.__init__(usb_device)
+        USB.__init__(self, usb_device)
         self.devnode = self.get_sdmux()
         self.log("Registered USBRelay at {}".format(self.devnode))
 
