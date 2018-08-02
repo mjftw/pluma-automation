@@ -85,7 +85,7 @@ class FarmBoard(FarmBase):
         self.brd.sdm.on()
 
         self.log("Rebinding whole HUB...")
-        self.usb.rebind(self.hub)
+        self.usb.rebind()
 
         self._host()
 
@@ -190,7 +190,7 @@ class FarmBoard(FarmBase):
             self.brd.sdm.host()
 
             if self.diskusb:
-                self.usb.rebind(self.diskusb)
+                self.usb.rebind()
 
             # Sometimes, the disk fails to enumerate
             self.log("Looking for disks...")
@@ -214,7 +214,7 @@ class FarmBoard(FarmBase):
 
     def board(self):
         self.log("Switching SD to board...")
-        self.usb.unbind(self.diskusb)
+        self.usb.unbind()
         self.brd.sdm.board()
         time.sleep(1)
 
