@@ -65,31 +65,6 @@ class USB():
         return d
 
     @property
-    def child_info(self):
-        parent = self.get_device()
-        children = self.puctx.list_devices(parent=parent)
-        infolist = []
-
-        for child in children:
-            devinfo = {}
-            devinfo['devnode'] = child.device_node
-            if devinfo['devnode'] is None:
-                continue
-
-            devinfo['subsystem'] = child.subsystem
-            devinfo['vendor'] = child.get('ID_VENDOR')
-            devinfo['sysname'] = child.sys_name
-
-            devinfo['devtype'] = child.get('DEVTYPE')
-            if(devinfo['devtype'] == 'disk' or
-               devinfo['devtype'] == 'partition'):
-                devinfo['size'] = int(child.attributes.get('size'))
-
-            infolist.append(devinfo)
-
-        return infolist
-
-    @property
     def devinfo(self):
         return self._pack_devinfo(self.get_device())
 
