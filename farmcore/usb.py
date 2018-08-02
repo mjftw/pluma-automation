@@ -27,6 +27,9 @@ class USB():
         self.puctx = pyudev.Context()
         self.usb_device = device
 
+    def __repr__(self):
+        return self.usb_device
+
     @property
     def is_bound(self):
         return os.path.isdir(os.path.join(driver_path, self.usb_device))
@@ -75,6 +78,7 @@ class USB():
 
             devinfo['subsystem'] = child.subsystem
             devinfo['vendor'] = child.get('ID_VENDOR')
+            devinfo['sysname'] = child.sys_name
 
             devinfo['devtype'] = child.get('DEVTYPE')
             if(devinfo['devtype'] == 'disk' or
@@ -85,35 +89,75 @@ class USB():
 
         return infolist
 
-    def filter_child_info(self, filters={}, excludes={}):
+    @property
+    def devinfo(self):
+        return self._pack_devinfo(self.get_device())
+
+    @property
+    def downstream(self):
+        infolist = []
+
+        downstream_devs = self.puctx.list_devices(
+            parent=self.get_device())
+
+        for dev in downstream_devs:
+            info = self._pack_devinfo(dev)
+            if info:
+                infolist.append(self._pack_devinfo(dev))
+
+        return infolist
+
+    def _pack_devinfo(self, device):
+        devinfo = {}
+        if device.device_node is None:
+            return devinfo
+        else:
+            devinfo['devnode'] = device.device_node
+
+        devinfo['subsystem'] = device.subsystem
+        devinfo['vendor'] = device.get('ID_VENDOR')
+        devinfo['sysname'] = device.sys_name
+
+        devinfo['devtype'] = device.get('DEVTYPE')
+        if(devinfo['devtype'] == 'disk' or
+           devinfo['devtype'] == 'partition'):
+            devinfo['size'] = int(device.attributes.get('size'))
+
+        return devinfo
+
+    def filter_downstream(self, filters={}, excludes={}):
+        return self._filter_dictarr(
+            filters=filters, excludes=excludes, dictarr=self.downstream)
+
+    def _filter_dictarr(self, filters={}, excludes={}, dictarr=[{}]):
         match_vals = []
-        for c in self.child_info:
+        for d in dictarr:
             match = True
             # Check match list.
-            # If the child queried DOES NOT HAVE the required
+            # If the dict array queried DOES NOT HAVE the required
             # field, OR the field HAS A DIFFERENT value, do not match
             for k, v in filters.items():
                 if not match:
                     break
-                if k not in c or c[k] != v:
+                if k not in d or d[k] != v:
                     match = False
 
             # Check exclude list
-            # If the child queried HAS the required filed AND
+            # If the dict array queried HAS the required filed AND
             # the field has the SAME VALUE, do not match
             for k, v in excludes.items():
                 if not match:
                     break
-                if k in c and c[k] == v:
+                if k in d and d[k] == v:
                     match = False
 
             if match:
-                match_vals.append(c)
+                match_vals.append(d)
 
         return match_vals
 
     def get_serial(self):
-        devinfo = self.filter_child_info({
+        devinfo = self.filter_downstream({
             'subsystem': 'tty'
         })
         if not devinfo:
@@ -122,7 +166,7 @@ class USB():
             return devinfo[0]['devnode']
 
     def get_sdmux(self):
-        devinfo = self.filter_child_info({
+        devinfo = self.filter_downstream({
             'subsystem': 'tty',
             'vendor': 'DLP_Design'
         })
@@ -132,7 +176,7 @@ class USB():
             return devinfo[0]['devnode']
 
     def get_block(self):
-        devinfo = self.filter_child_info({
+        devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'disk'
         }, {
@@ -144,7 +188,7 @@ class USB():
             return (devinfo[0]['devnode'], devinfo[0]['size'])
 
     def get_part(self):
-        devinfo = self.filter_child_info({
+        devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'partition'
         }, {
@@ -154,6 +198,11 @@ class USB():
             raise NoPartitions('No partitions on {}'.format(self.usb_device))
         else:
             return (devinfo[0]['devnode'], devinfo[0]['size'])
+
+    def get_parent(self):
+        dev = self.get_device()
+        pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
+        return pdev.sys_name
 
     def show_ancestry(self):
         dev = self.get_device()
