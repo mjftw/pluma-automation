@@ -28,7 +28,7 @@ class USB():
         self.usb_device = device
 
     def __repr__(self):
-        return self.usb_device
+        return '{}'.format(self.usb_device)
 
     @property
     def is_bound(self):
@@ -214,7 +214,3 @@ class USB():
         time.sleep(2)
         with open("{}/bind".format(driver_path), 'w') as f:
             f.write(d.sys_name)
-
-
-    #find_block()
-    #find_serial()
