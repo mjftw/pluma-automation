@@ -96,7 +96,7 @@ def show_info(board):
         print(("Serial device: {}, {}".format(
             info['devnode'], info['vendor'])))
 
-    up = USB(u.get_parent)
+    up = usb.USB(u.get_parent)
     pinfo = up.devinfo
     if pinfo:
         print("Parent is: {} , {}".format(
