@@ -17,9 +17,9 @@ class FarmBoard(FarmBase):
             blogfile=DEFAULT_LOGFILE, 
             mount_path = None,
             bootline = None ):
-        self.usb = usb.usb()
         self.brd = board
         self.hub = board.hub
+        self.usb = usb.USB(board.hub)
         self.disk = None
         self.diskusb = None
         self._p = None
@@ -66,7 +66,7 @@ class FarmBoard(FarmBase):
         # If we find a disk at start of day, we must try to ensure it
         # isn't mounted!
         try:
-            part = self.usb.get_part(self.hub)
+            part = self.usb.get_part()
         except usb.NoPartitions:
             # We need to run through the full init now.
             pass
@@ -92,7 +92,7 @@ class FarmBoard(FarmBase):
         self.log(str(self.p))
 
         try:
-            part = self.usb.get_part(self.diskusb)
+            part = self.diskusb.get_part()
         except usb.NoPartitions:
             self.log("WARNING: Disk at {} has no partitions. May need to format disk".format(self.disk))
 
@@ -106,7 +106,7 @@ class FarmBoard(FarmBase):
 
     @property
     def serial(self):
-        return self.usb.get_serial(self.hub)
+        return self.usb.get_serial()
 
     @property
     def p(self):
@@ -195,7 +195,8 @@ class FarmBoard(FarmBase):
             # Sometimes, the disk fails to enumerate
             self.log("Looking for disks...")
             try:
-                self.disk, self.diskusb = self.usb.get_block(self.hub)
+                self.disk, diskusb_dev = self.usb.get_block()
+                self.diskusb = usb.USB(diskusb_dev)
             except usb.NoDisks:
                 self.log("No disks found yet, retrying...")
                 continue
@@ -218,14 +219,14 @@ class FarmBoard(FarmBase):
         time.sleep(1)
 
     def unmount(self):
-        dev = self.usb.get_part(self.diskusb)
+        dev = self.diskusb.get_part()
         self.log("Umounting device {}...".format(dev))
         cmd = 'sudo umount {device}'.format(device=dev)
         sp.run(cmd.split())
 
     def mount(self):
         uid = os.getuid()
-        dev = self.usb.get_part(self.diskusb)
+        dev = self.diskusb.get_part()
         self.log("Mounting device {} at {}....".format(dev, self.mount_path))
         cmd = 'sudo mount -o uid={uid} {device} {path}'.format(uid=uid, device=dev, path=self.mount_path)
         sp.run(cmd.split())
