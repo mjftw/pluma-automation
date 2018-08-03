@@ -15,8 +15,9 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
             - [SD Mux](#sd-mux)
     - [Farm software overview](#farm-software-overview)
         - [Installation](#installation)
+        - [Software Architechture](#software-architechture)
     - [Tutorials](#tutorials)
-        - [Tutorial 1: Lab configuration files](#tutorial-1-lab-configuration-files)
+        - [Tutorial 1: Hardware configuration files](#tutorial-1-hardware-configuration-files)
         - [Tutorial 2: Adding a board to the farm](#tutorial-2-adding-a-board-to-the-farm)
         - [Tutorial 3: Writing a farm script](#tutorial-3-writing-a-farm-script)
         - [Tutorial 4: Sending commands over serial](#tutorial-4-sending-commands-over-serial)
@@ -100,26 +101,45 @@ Currently the power supply for each SD Mux is connected to the PDU. This is done
 ## Farm software overview
 In this section we will show how the hardware configuration of the farm is represented in software.
 
-**[Software description and diagrams]**
-**[UML class diagram to be automaticaally created from source and docstrings]**
-
 
 ### Installation
-In this section we will look at how to download and install the Witekio Lab's farm scripts.
+In this section we will look at how to download and install the Witekio Lab's Python scripts.
 
+We recommend that you install the scripts to a directory that you have read, write, execute access to, such as your home directory.  
+The scripts can be downloaded by cloning the 'farm-core' repository:
+```bash
+git clone https://bitbucket.org/adeneo-embedded/farm-core/ /home/my_user/farm-core
+```
+This is a private repository, so you will need read access in order to clone it.
 
+The repository has the following structure:
+- farmcore - This directory contains python scripts which impliment the core hardware control functionality of the farm.  
+_See [Software Architechture](#software-architechture) section for more information._
+- farmconfigs - Thi directory contains the configuration file used to represent the hardware state of the farm.  
+_See [Tutorial 1](#tutorial-1-hardware-configuration-files) for more information._
+
+### Software Architechture
+
+In this section we will look into the software architecture of the farm's core hardware control classes.
+
+If you are only interested in the top level functionality of the farm, you may want to skip this section and move on to the [tutorials](#tutorials).
+
+**[Software description and diagrams]**  
+**[UML class diagram to be automaticaally created from source and docstrings]**
 
 ---
 ## Tutorials
 In these tutorials we will demonstrate how to use the Witekio Lab's Python scripts.  
 We will start with simple functionality, such as restarting a board, and work our way up to more complex functionality, such as sending email reports.
 
-### Tutorial 1: Lab configuration files
+### Tutorial 1: Hardware configuration files
 In this tutorial we will look at:
 - How the hardware configuration of a farm is represented in software
 
 Below will walk through the creation of a hardware configuration file, using
-the UK lab as an example.
+the UK lab as an example.  
+We recommend that you create this file in a directory separate to the farm-core scripts installation directory.  
+We use the following location for our hardware configuration file 'farmconfigs/farm_uk.py'.
 
 The farm package includes the definitions of all farm hardware classes
 ```python
