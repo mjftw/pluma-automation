@@ -177,7 +177,7 @@ b = farm.get_board('bbb')
 We now have a handle to our board named _'bbb'_, and can use it to interact.  
 We will start looking at how to use our newly acquired board handle in [Tutorial 3](#tutorial-3-writing-a-farm-script).
 
-_See [example_1.py](examples/example_1.py) for the completed script._
+_See [tutorial_1.py](examples/tutorial_1.py) for the completed script._
 
 ### Tutorial 2: Adding a board to the farm
 This section will look at the general practices in use at the Witekio Lab UK when adding new hardware to the farm.
@@ -191,7 +191,7 @@ In this tutorial we will look at how to:
 - How to modify the lab configuration file to represent this change
 
 **[Tutorial content]**  
-_See [example_2.py](examples/example_2.py) for the completed script._
+_See [tutorial_2.py](examples/tutorial_2.py) for the completed script._
 
 ### Tutorial 3: Writing a farm script
 In this tutorial we will write a farm script to demonstrate the following:
@@ -199,8 +199,50 @@ In this tutorial we will write a farm script to demonstrate the following:
 - Get a board instance
 - Reboot the board
 
-**[Tutorial content]**  
-_See [example_3.py](examples/example_3.py) for the completed script._
+The expected way to interact with a board is to create a Python script that performs the required tasks.  
+The rest of this section will focus on creating a simple script to turn a board off and on. In this example, we will assume that the Python scrips were extracted to '/home/my_user/farm-core'.  
+
+The farm-core source is not packaged up and isn't intended to be installed as a system package.
+Therefore we must add its location to the _PYTHONPATH_ variable so that the Python interpreter can pick it up.  
+
+You can do this by setting the environment variable:
+```bash
+export PYTHONPATH=/home/my_user/farm-core
+```
+
+Alternatively, a simple way of doing this would be to add the following at the top of the script:
+```python
+import sys
+sys.path.append('/home/my_user/farm-core')
+```
+
+In order to interact with the farm, we need to import our hardware configuration file:  
+_Note: Remember to replace "farm_uk" here with your hardware description filename._
+```python
+from farmconfigs.farm_uk import farm
+```
+
+Next, we get a handle to the simple board class for the board named _'bbb'_.
+```python
+my_board = farm.get_board('bbb')
+```
+
+In order to gain exclusive use of a board, we must issue a use request.  
+This will return an instance of the _FarmBoard_ class, with which we can interact with the board.
+```python
+my_farmboard = my_board.use()
+```
+
+Now that we have a _FarmBoard_, interacting with the hardware is simple.  
+As an example, we will restart the board:
+```python
+my_farmboard.off()
+
+my_farmboard.on()
+```
+Issuing these functions calls will cause the PDU connected the the board _'bbb'_ to turn its power port off and on.
+
+_See [tutorial_3.py](examples/tutorial_3.py) for the completed script._
 
 ### Tutorial 4: Sending commands over serial
 In this tutorial we will a basic farm script to demonstrate the following:
@@ -210,7 +252,7 @@ In this tutorial we will a basic farm script to demonstrate the following:
 - Print the result
 
 **[Tutorial content]**  
-_See [example_4.py](examples/example_4.py) for the completed script._
+_See [tutorial_4.py](examples/tutorial_4.py) for the completed script._
 
 ### Tutorial 5: Using the SDMux to transfer files to a board
 In this tutorial we will a basic farm script to demonstrate the following:
@@ -220,7 +262,7 @@ In this tutorial we will a basic farm script to demonstrate the following:
 - Print the contents of the file over serial
 
 **[Tutorial content]**  
-_See [example_5.py](examples/example_5.py) for the completed script._
+_See [tutorial_5.py](examples/tutorial_5.py) for the completed script._
 
 ### Tutorial 6: Sending email reports
 In this tutorial we will write a farm script to demonstrate the following:
@@ -229,4 +271,4 @@ In this tutorial we will write a farm script to demonstrate the following:
 - Email the result
 
 **[Tutorial content]**  
-_See [example_6.py](examples/example_6.py) for the completed script._
+_See [tutorial_6.py](examples/tutorial_6.py) for the completed script._

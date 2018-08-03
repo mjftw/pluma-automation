@@ -1,5 +1,5 @@
 """
-Tutorial example 4:
+Tutorial example 5:
     - Switch a boards's SD card to the farm host
     - Mount the SD card and copy a file to it
     - Switch SD card back to the board
