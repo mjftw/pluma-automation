@@ -16,11 +16,12 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
     - [Farm software overview](#farm-software-overview)
         - [Installation](#installation)
     - [Tutorials](#tutorials)
-        - [Tutorial 1: Adding a board to the farm](#tutorial-1-adding-a-board-to-the-farm)
-        - [Tutorial 2: Writing a farm script](#tutorial-2-writing-a-farm-script)
-        - [Tutorial 3: Sending commands over serial](#tutorial-3-sending-commands-over-serial)
-        - [Tutorial 4: Using the SDMux to transfer files to a board](#tutorial-4-using-the-sdmux-to-transfer-files-to-a-board)
-        - [Tutorial 5: Sending email reports](#tutorial-5-sending-email-reports)
+        - [Tutorial 1: Lab configuration files](#tutorial-1-lab-configuration-files)
+        - [Tutorial 2: Adding a board to the farm](#tutorial-2-adding-a-board-to-the-farm)
+        - [Tutorial 3: Writing a farm script](#tutorial-3-writing-a-farm-script)
+        - [Tutorial 4: Sending commands over serial](#tutorial-4-sending-commands-over-serial)
+        - [Tutorial 5: Using the SDMux to transfer files to a board](#tutorial-5-using-the-sdmux-to-transfer-files-to-a-board)
+        - [Tutorial 6: Sending email reports](#tutorial-6-sending-email-reports)
 ---
 ## Farm Hardware Overview
 In this section we will look at the hardware setup of the farm.
@@ -100,63 +101,132 @@ Currently the power supply for each SD Mux is connected to the PDU. This is done
 In this section we will show how the hardware configuration of the farm is represented in software.
 
 **[Software description and diagrams]**
+**[UML class diagram to be automaticaally created from source and docstrings]**
+
 
 ### Installation
 In this section we will look at how to download and install the Witekio Lab's farm scripts.
+
+
 
 ---
 ## Tutorials
 In these tutorials we will demonstrate how to use the Witekio Lab's Python scripts.  
 We will start with simple functionality, such as restarting a board, and work our way up to more complex functionality, such as sending email reports.
 
-### Tutorial 1: Adding a board to the farm
-This section will look at the general practices we use when adding new hardware to the Witekio Lab, and how to represent this change in software.
+### Tutorial 1: Lab configuration files
+In this tutorial we will look at:
+- How the hardware configuration of a farm is represented in software
+
+Below will walk through the creation of a hardware configuration file, using
+the UK lab as an example.
+
+The farm package includes the definitions of all farm hardware classes
+```python
+from farmcore import farm
+```
+
+Each [PDU](#pdu) in the farm is given a _PDU_ class instance.  
+The UK farm currently only has one PDU installed, but any number could be
+added as required.   
+The PDU uses the telnet protocol, so _PDU_ class takes arguments for it's IP
+address, and the telnet user login details to be used.
+```python
+pdu1 = farm.PDU(host='10.103.3.40', user='apc', pw='apc')
+```
+
+Each [USB Relay](#usb-relay) in the farm is given a _USBRelay_ class instance.  
+The only argument required is the usb device path of the relay.
+```python
+ur1 = farm.USBRelay(usbpath='1-1.1.4.1')
+ur2 = farm.USBRelay(usbpath='1-1.1.4.3')
+```
+
+Each [SD Mux](#sd-mux) in the farm is given an _SDMux_ class instance.  
+The SD Mux is physically connected a [USB Relay](#usb-relay), and a [PDU](#pdu).  
+Each class instance is therefore given a reference to these.
+```python
+sdm1 = farm.SDMux(ur_port=ur2[0], pdu_port=pdu1[2])
+sdm2 = farm.SDMux(ur_port=ur2[3], pdu_port=pdu1[1])
+sdm3 = farm.SDMux(ur_port=ur2[2], pdu_port=pdu1[3])
+```
+
+Each [board](#board) in the farm is represented and controlled by an instance of the
+_Board_ class.  
+In order for a board to be uniquely identified, it is given a name.  
+Each board is physically connected a [PDU](#pdu), [SD Mux](#sd-mux), and its [Board Hub](#board-hub), therefore each class instance is given a reference to these.  
+In this example we have one [Beaglebone Black](https://beagleboard.org/black) _'bbb'_, and two custom boards _'fb42'_ and _'fb43'_ in the farm.
+The Beaglebone is connected to port 7 of PDU 1, SD Mux 1, and the Board Hub with usb debvice path _1-1.1.1_ .
+```python
+bbb  = farm.Board(name='bbb',  pdu_port=pdu1[7], hub='1-1.1.1', sdmux=sdm1)
+fb42 = farm.Board(name='fb42', pdu_port=pdu1[4], hub='1-1.1.2', sdmux=sdm2)
+fb43 = farm.Board(name='fb43', pdu_port=pdu1[6], hub='1-1.1.3', sdmux=sdm3)
+```
+
+This is the only configuration required the represent the hardware state of the farm.  
+A user would import this hardware configuration in order to get a farm handle.  
+This provides an entry point to start controlling the farm hardware.
+
+_Note: Remember to replace "farm_uk" here with your hardware description filename._
+```python
+from farmconfigs.farm_uk import farm
+
+b = farm.get_board('bbb')
+```
+
+We now have a handle to our board named _'bbb'_, and can use it to interact.  
+We will start looking at how to use our newly acquired board handle in [Tutorial 3](#tutorial-3-writing-a-farm-script).
+
+_See [example_1.py](examples/example_1.py) for the completed script._
+
+### Tutorial 2: Adding a board to the farm
+This section will look at the general practices in use at the Witekio Lab UK when adding new hardware to the farm.
 
 In our implementation of the Witekio Lab we have lab maintainers, who are responsible for the upkeep and installation of boards. This reduces the likelihood of a normal user disturbing tests in progress on the boards currently in the farm.
 
-If you only plan to use boards that are currently installed in the farm, then you may skip this section and move on to [Tutorial 2](#tutorial-2-writing-a-farm-script).
+If you only plan to use boards that are currently installed in the farm, then you may skip this section and move on to [Tutorial 2](#tutorial-3-writing-a-farm-script).
 
 In this tutorial we will look at how to:
-- Add a new board to the farm
-- Represent this change in software
+- The process of physically adding a new board to the farm
+- How to modify the lab configuration file to represent this change
 
-_See [example_1.py](examples/example_1.py) for the completed script._  
-**[Tutorial content]**
+**[Tutorial content]**  
+_See [example_2.py](examples/example_2.py) for the completed script._
 
-### Tutorial 2: Writing a farm script
+### Tutorial 3: Writing a farm script
 In this tutorial we will write a farm script to demonstrate the following:
 - Set up our farm script environment
 - Get a board instance
 - Reboot the board
 
-_See [example_2.py](examples/example_2.py) for the completed script._  
-**[Tutorial content]**
+**[Tutorial content]**  
+_See [example_3.py](examples/example_3.py) for the completed script._
 
-### Tutorial 3: Sending commands over serial
+### Tutorial 4: Sending commands over serial
 In this tutorial we will a basic farm script to demonstrate the following:
 - Find a boards prompt
 - Send a command over serial
 - Wait for the command to finish execution
 - Print the result
 
-_See [example_3.py](examples/example_3.py) for the completed script._  
-**[Tutorial content]**
+**[Tutorial content]**  
+_See [example_4.py](examples/example_4.py) for the completed script._
 
-### Tutorial 4: Using the SDMux to transfer files to a board
+### Tutorial 5: Using the SDMux to transfer files to a board
 In this tutorial we will a basic farm script to demonstrate the following:
 - Switch a board's SD card to the farm host
 - Mount the SD card and copy a file to it
 - Switch SD card back to the board
 - Print the contents of the file over serial
 
-_See [example_4.py](examples/example_4.py) for the completed script._  
-**[Tutorial content]**
+**[Tutorial content]**  
+_See [example_5.py](examples/example_5.py) for the completed script._
 
-### Tutorial 5: Sending email reports
+### Tutorial 6: Sending email reports
 In this tutorial we will write a farm script to demonstrate the following:
 - Copy a binary to a board
 - Run the binary and store the result
 - Email the result
 
-_See [example_5.py](examples/example_5.py) for the completed script._  
-**[Tutorial content]**
+**[Tutorial content]**  
+_See [example_6.py](examples/example_6.py) for the completed script._
