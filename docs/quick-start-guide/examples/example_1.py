@@ -1,6 +1,6 @@
 """
 Tutorial example 1:
-    - Set up our farm script environment
-    - Get a board instance
-    - Reboot the board
+    - When adding a board to the farm, this example
+      shows how to represent the change in software
 """
+

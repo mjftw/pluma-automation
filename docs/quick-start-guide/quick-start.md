@@ -16,11 +16,11 @@ For the purpose of this guide, we will use the Witekio UK farm as an example.
     - [Farm software overview](#farm-software-overview)
         - [Installation](#installation)
     - [Tutorials](#tutorials)
-        - [Tutorial 1: Writing a farm script](#tutorial-1-writing-a-farm-script)
-        - [Tutorial 2: Sending commands over serial](#tutorial-2-sending-commands-over-serial)
-        - [Tutorial 3: Using the SDMux to transfer files to a board](#tutorial-3-using-the-sdmux-to-transfer-files-to-a-board)
-        - [Tutorial 4: Sending email reports](#tutorial-4-sending-email-reports)
-        - [Tutorial 5: Adding a board to the farm](#tutorial-5-adding-a-board-to-the-farm)
+        - [Tutorial 1: Adding a board to the farm](#tutorial-1-adding-a-board-to-the-farm)
+        - [Tutorial 2: Writing a farm script](#tutorial-2-writing-a-farm-script)
+        - [Tutorial 3: Sending commands over serial](#tutorial-3-sending-commands-over-serial)
+        - [Tutorial 4: Using the SDMux to transfer files to a board](#tutorial-4-using-the-sdmux-to-transfer-files-to-a-board)
+        - [Tutorial 5: Sending email reports](#tutorial-5-sending-email-reports)
 ---
 ## Farm Hardware Overview
 In this section we will look at the hardware setup of the farm.
@@ -109,47 +109,54 @@ In this section we will look at how to download and install the Witekio Lab's fa
 In these tutorials we will demonstrate how to use the Witekio Lab's Python scripts.  
 We will start with simple functionality, such as restarting a board, and work our way up to more complex functionality, such as sending email reports.
 
-### Tutorial 1: Writing a farm script
+### Tutorial 1: Adding a board to the farm
+This section will look at the general practices we use when adding new hardware to the Witekio Lab, and how to represent this change in software.
+
+In our implementation of the Witekio Lab we have lab maintainers, who are responsible for the upkeep and installation of boards. This reduces the likelihood of a normal user disturbing tests in progress on the boards currently in the farm.
+
+If you only plan to use boards that are currently installed in the farm, then you may skip this section and move on to [Tutorial 2](#tutorial-2-writing-a-farm-script).
+
+In this tutorial we will look at how to:
+- Add a new board to the farm
+- Represent this change in software
+
+_See [example_1.py](examples/example_1.py) for the completed script._  
+**[Tutorial content]**
+
+### Tutorial 2: Writing a farm script
 In this tutorial we will write a farm script to demonstrate the following:
 - Set up our farm script environment
 - Get a board instance
 - Reboot the board
 
-_See [example_1.py](examples/example_1.py) for the completed script._  
+_See [example_2.py](examples/example_2.py) for the completed script._  
 **[Tutorial content]**
 
-### Tutorial 2: Sending commands over serial
+### Tutorial 3: Sending commands over serial
 In this tutorial we will a basic farm script to demonstrate the following:
 - Find a boards prompt
 - Send a command over serial
 - Wait for the command to finish execution
 - Print the result
 
-_See [example_2.py](examples/example_2.py) for the completed script._  
+_See [example_3.py](examples/example_3.py) for the completed script._  
 **[Tutorial content]**
 
-### Tutorial 3: Using the SDMux to transfer files to a board
+### Tutorial 4: Using the SDMux to transfer files to a board
 In this tutorial we will a basic farm script to demonstrate the following:
 - Switch a board's SD card to the farm host
 - Mount the SD card and copy a file to it
 - Switch SD card back to the board
 - Print the contents of the file over serial
 
-_See [example_3.py](examples/example_3.py) for the completed script._  
+_See [example_4.py](examples/example_4.py) for the completed script._  
 **[Tutorial content]**
 
-### Tutorial 4: Sending email reports
+### Tutorial 5: Sending email reports
 In this tutorial we will write a farm script to demonstrate the following:
 - Copy a binary to a board
 - Run the binary and store the result
 - Email the result
 
-_See [example_4.py](examples/example_4.py) for the completed script._
-**[Tutorial content]**
-
-### Tutorial 5: Adding a board to the farm
-In this tutorial we will look at how to:
-- Add a new board to the farm
-- Represent this change in software
-
+_See [example_5.py](examples/example_5.py) for the completed script._  
 **[Tutorial content]**

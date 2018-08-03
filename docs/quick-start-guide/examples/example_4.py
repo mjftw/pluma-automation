@@ -1,6 +1,7 @@
 """
-Example 4:
-    - Copy a binary to a board
-    - Run the binary and store the result
-    - Email the result
+Tutorial example 4:
+    - Switch a boards's SD card to the farm host
+    - Mount the SD card and copy a file to it
+    - Switch SD card back to the board
+    - Print the contents of the file over serial
 """
