@@ -1,4 +1,4 @@
-# Farm Core
+# Farm Core **[QSG: TO GO IN FARM SOFTWARE OVERVIEW]**
 
 This code is designed to drive the farm in 2018 where we have the components
 
@@ -9,7 +9,7 @@ This code is designed to drive the farm in 2018 where we have the components
 
 # Usage
 
-## Structure
+## Structure **[QSG: TO GO IN FARM SOFTWARE OVERVIEW]**
 
 The project for working with farm code should be split up as follows - 
 
@@ -18,9 +18,9 @@ The project for working with farm code should be split up as follows -
 3. Your source code ( which should import a config from "farmconfigs" )
 
 
-## Farm Configs
+## Farm Configs **[QSG: TO GO IN TUTORIAL 1]**
 
-Farm impementations need to be mapped out in software with a farm config file. This is then stored
+Farm impimentations need to be mapped out in software with a farm config file. This is then stored
 in this repo and used centrally by mulitple users. It should always mirror the hardware layout of the farm
 and modifications should be broadcast to other users in case there are conflicts.
 
@@ -46,7 +46,7 @@ fb43 = farm.Board('fb43', apc1[6], '1-1.1.3', sdm3)
 The above represents the hardware layout of the farm in the UK office. This file should then 
 be included in all scripts which wish to interact with the farm.
 
-## Setup references
+## Setup references **[QSG: TO GO IN TUTORIAL 2]**
 
 The farm-core source is NOT packaged up and isn't intended to be installed as a system package. 
 Therefore we must add its location to the PYTHONPATH variable so that the python interpreter can pick it up.
@@ -64,7 +64,7 @@ alternatively you can set the environment variable:
 export PYTHONPATH=/home/wsheppard/farm-core
 ```
 
-## Example Use
+## Example Use **[QSG: TO GO IN TUTORIAL 2]**
 
 The following is a very simple guide to turn on a board using the farm_uk config as shown above:
 
@@ -94,7 +94,7 @@ fb.off()
 ```
 
 
-# Installation
+# Installation **[QSG: TO GO IN INSTALLATION SECTION]**
 
 Checkout this repo into a directory you can access and reference.
 
