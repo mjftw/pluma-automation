@@ -65,8 +65,10 @@ class Email():
         msg.preamble = 'This is a multi-part message in MIME format.'
 
         msg['To'] = ', '.join(self.mail_settings['to'])
-        msg['Cc'] = ', '.join(self.mail_settings['cc'])
-        msg['Bcc'] = ', '.join(self.mail_settings['bcc'])
+        if self.mail_settings.get('cc'):
+            msg['Cc'] = ', '.join(self.mail_settings['cc'])
+        if self.mail_settings.get('bcc'):
+            msg['Bcc'] = ', '.join(self.mail_settings['bcc'])
         msg['From'] = self.mail_settings['from']
         msg['Subject'] = self.mail_settings['subject']
 
@@ -172,3 +174,32 @@ def _to_list(attr):
         return attr
     else:
         return [attr]
+
+
+def newemail(subject="", body="", files=[], me=False):
+    """ Glue function for backwards compatibility
+
+    This function should be deleted once older scripts
+    have been updated to use Email class properly.
+    """
+
+
+    if me:
+        recipients = [
+            'wsheppard@witekio.com',
+            'sheppard.will@gmail.com',
+        ]
+    else:
+        recipients = [
+            'wsheppard@witekio.com',
+            'amurray@witekio.com',
+            'elangley@witekio.com',
+            'jeremyr@ovation.co.uk',
+        ]
+
+    e = Email()
+    e.set_addr(recipients, 'wsheppard@witekio.com')
+    e.set_smtp('4T2jsU', 'smtp.office365.com', 587)
+    e.set_text(subject, body)
+    e.set_attachments(files)
+    e.send()
