@@ -51,11 +51,11 @@ class Email():
                        self.smtp_settings['password'])
             text = msg.as_string()
 
-            recipients = [self.mail_settings['to']]
+            recipients = self.mail_settings['to']
             if self.mail_settings.get('cc'):
-                recipients.append(self.mail_settings['cc'])
+                recipients.extend(self.mail_settings['cc'])
             if self.mail_settings.get('bcc'):
-                recipients.append(self.mail_settings['bcc'])
+                recipients.extend(self.mail_settings['bcc'])
 
             smtp.sendmail(self.mail_settings['from'], recipients, text)
 
@@ -64,7 +64,9 @@ class Email():
         msg = MIMEMultipart('mixed')
         msg.preamble = 'This is a multi-part message in MIME format.'
 
-        msg['To'] = self.mail_settings['to']
+        msg['To'] = ', '.join(self.mail_settings['to'])
+        msg['Cc'] = ', '.join(self.mail_settings['cc'])
+        msg['Bcc'] = ', '.join(self.mail_settings['bcc'])
         msg['From'] = self.mail_settings['from']
         msg['Subject'] = self.mail_settings['subject']
 
@@ -112,22 +114,22 @@ class Email():
     def set_addr(self, to_addr, from_addr, cc_addr=None, bcc_addr=None):
         """ Set sender and recipents email settings """
         self.mail_settings['from'] = from_addr
-        self.mail_settings['to'] = ', '.join(_to_list(to_addr))
+        self.mail_settings['to'] = _to_list(to_addr)
         if cc_addr:
-            self.mail_settings['cc'] = ', '.join(_to_list(cc_addr))
+            self.mail_settings['cc'] = _to_list(cc_addr)
         if bcc_addr:
-            self.mail_settings['bcc'] = ', '.join(_to_list(bcc_addr))
+            self.mail_settings['bcc'] = _to_list(bcc_addr)
 
     def set_text(self, subject=None, body=None):
         """ Set subject and body of email """
         self.mail_settings['body'] = body
         self.mail_settings['subject'] = subject
 
-    def set_attachments(self, files=None, images=None):
+    def set_attachments(self, files=None, images=None, inline=False):
         """ Attach files and images
 
         files -- Files are attached as plain attachments.
-        images -- Images are attached, & inline HTML inserted.
+        images -- Images are attached, & inline HTML inserted (if inline=True).
         """
 
         # Clear old attachments
@@ -157,10 +159,12 @@ class Email():
                         part = MIMEImage(fp.read(), name=ibn)
                     part.add_header('Content-ID', '<{}>'.format(cid))
                     self.attachments.append(part)
-                    self.attachments.append(MIMEText(
-                        u'<img src="cid:{}" alt="{}">'.format(cid, ibn), 'html', 'utf-8'))
+                    if inline:
+                        self.attachments.append(MIMEText(
+                            u'<img src="cid:{}" alt="{}">'.format(cid, ibn), 'html', 'utf-8'))
                 except IOError:
                     self.error("Could not image for attachment: {}".format(i))
+
 
 def _to_list(attr):
     """ Return list version of attr """
