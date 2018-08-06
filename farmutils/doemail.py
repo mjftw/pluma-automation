@@ -52,9 +52,9 @@ class Email():
             text = msg.as_string()
 
             recipients = [self.mail_settings['to']]
-            if _has_param(self.mail_settings, 'cc'):
+            if self.mail_settings.get('cc'):
                 recipients.append(self.mail_settings['cc'])
-            if _has_param(self.mail_settings, 'bcc'):
+            if self.mail_settings.get('bcc'):
                 recipients.append(self.mail_settings['bcc'])
 
             smtp.sendmail(self.mail_settings['from'], recipients, text)
@@ -80,21 +80,21 @@ class Email():
         valid = True
 
         # Check email settings
-        if not _has_param(self.mail_settings, 'to'):
+        if not self.mail_settings.get('to'):
             self.error("To address is not set")
             valid = False
-        if not _has_param(self.mail_settings, 'from'):
+        if not self.mail_settings.get('from'):
             self.error("From address is not set")
             valid = False
 
         # Check SMTP settings
-        if not _has_param(self.smtp_settings, 'password'):
+        if not self.smtp_settings.get('password'):
             self.error("smtp password not set")
             valid = False
-        if not _has_param(self.smtp_settings, 'server'):
+        if not self.smtp_settings.get('server'):
             self.error("smtp server not set")
             valid = False
-        if not _has_param(self.smtp_settings, 'timeout'):
+        if not self.smtp_settings.get('timeout'):
             self.error("smtp timeout not set")
             valid = False
 
@@ -161,15 +161,6 @@ class Email():
                         u'<img src="cid:{}" alt="{}">'.format(cid, ibn), 'html', 'utf-8'))
                 except IOError:
                     self.error("Could not image for attachment: {}".format(i))
-
-
-def _has_param(d, k):
-    """ Check whether dict has key, and value is not empty """
-    if not d or not k or k not in d or not d[k]:
-        return False
-    else:
-        return True
-
 
 def _to_list(attr):
     """ Return list version of attr """
