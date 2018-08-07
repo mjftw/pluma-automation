@@ -6,9 +6,6 @@ from email.mime.image import MIMEImage
 from email.mime.text import MIMEText
 from email import encoders
 
-DEFAULT_SMTP = 'smtp.office365.com'
-DEFAULT_TIMEOUT = 587
-
 
 class EmailInvalidSettings(Exception):
     pass
@@ -16,10 +13,198 @@ class EmailInvalidSettings(Exception):
 
 class Email():
     """ Create and send emails """
-    def __init__(self):
-        self.mail_settings = {}
-        self.smtp_settings = {}
-        self.attachments = []
+    def __init__(self,
+                 sender=None,
+                 to=[],
+                 cc=[],
+                 bcc=[],
+                 subject=None,
+                 body=None,
+                 body_type='plain',
+                 files=[],
+                 images=[],
+                 images_inline=False,
+                 smtp_server='smtp.office365.com',
+                 smtp_timeout=587,
+                 smtp_password=None,
+                 smtp_username=None
+                 ):
+
+        self.sender = sender
+        self.to = to
+        self.cc = cc
+        self.bcc = bcc
+        self.subject = subject
+        self.body = body
+        self.body_type = body_type
+        self.files = files
+        self.images = images
+        self.images_inline = images_inline
+
+        self.smtp_server = smtp_server
+        self.smtp_timeout = smtp_timeout
+        self.smtp_password = smtp_password
+        self.smtp_username = smtp_username
+
+    # Property setters for data sanitation
+    @property
+    def cc(self):
+        return self._cc
+
+    @cc.setter
+    def cc(self, cc):
+        if cc is None:
+            self._cc = None
+        else:
+            if isinstance(cc, str):
+                cc = [cc]
+            self._cc = list(map(str, cc))
+
+    @property
+    def bcc(self):
+        return self._bcc
+
+    @bcc.setter
+    def bcc(self, bcc):
+        if bcc is None:
+            self._bcc = None
+        else:
+            if isinstance(bcc, str):
+                bcc = [bcc]
+            self._bcc = list(map(str, bcc))
+
+    @property
+    def to(self):
+        return self._to
+
+    @to.setter
+    def to(self, to):
+        if to is None:
+            self._to = None
+        else:
+            if isinstance(to, str):
+                to = [to]
+            self._to = list(map(str, to))
+
+    @property
+    def sender(self):
+        return self._sender
+
+    @sender.setter
+    def sender(self, sender):
+        if sender is None:
+            self._sender = None
+        else:
+            if not isinstance(sender, str):
+                sender = str(sender)
+            self._sender = sender
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, body):
+        if body is None:
+            self._body = None
+        else:
+            if not isinstance(body, str):
+                body = str(body)
+            self._body = body
+
+    @property
+    def body_type(self):
+        return self._body_type
+
+    @body_type.setter
+    def body_type(self, body_type):
+        if body_type is None:
+            self._body_type = None
+        else:
+            if not isinstance(body_type, str):
+                body_type = str(body_type)
+            self._body_type = body_type
+
+    @property
+    def subject(self):
+        return self._subject
+
+    @subject.setter
+    def subject(self, subject):
+        if subject is None:
+            self._subject = None
+        else:
+            if not isinstance(subject, str):
+                subject = str(subject)
+            self._subject = subject
+
+    @property
+    def files(self):
+        return self._files
+
+    @files.setter
+    def files(self, files):
+        if files is None:
+            self._files = None
+        else:
+            if isinstance(files, str):
+                files = [files]
+            self._files = list(map(str, files))
+
+    @property
+    def images(self):
+        return self._images
+
+    @images.setter
+    def images(self, images):
+        if images is None:
+            self._images = None
+        else:
+            if isinstance(images, str):
+                images = [images]
+            self._images = list(map(str, images))
+
+    @property
+    def smtp_server(self):
+        return self._smtp_server
+
+    @smtp_server.setter
+    def smtp_server(self, smtp_server):
+        if smtp_server is None:
+            self._smtp_server = None
+        else:
+            if not isinstance(smtp_server, str):
+                smtp_server = str(smtp_server)
+            self._smtp_server = smtp_server
+
+    @property
+    def smtp_password(self):
+            return self._smtp_password
+
+    @smtp_password.setter
+    def smtp_password(self, smtp_password):
+        if smtp_password is None:
+            self._smtp_password = None
+        else:
+            if not isinstance(smtp_password, str):
+                smtp_password = str(smtp_password)
+            self._smtp_password = smtp_password
+
+    @property
+    def smtp_username(self):
+        if self._smtp_username:
+            return self._smtp_username
+        else:
+            return self._sender
+
+    @smtp_username.setter
+    def smtp_username(self, smtp_username):
+        if smtp_username is None:
+            self._smtp_username = None
+        else:
+            if not isinstance(smtp_username, str):
+                smtp_username = str(smtp_username)
+            self._smtp_username = smtp_username
 
     def log(self, message):
         """ Very basic logging function. Should change in future """
@@ -43,38 +228,40 @@ class Email():
 
     def _send(self, msg):
         """ Send email with current settings """
-        with smtplib.SMTP(
-                self.smtp_settings['server'],
-                self.smtp_settings['timeout']) as smtp:
+        with smtplib.SMTP(self.smtp_server, self.smtp_timeout) as smtp:
             smtp.starttls()
-            smtp.login(self.mail_settings['from'],
-                       self.smtp_settings['password'])
+            smtp.login(self.smtp_username, self.smtp_password)
             text = msg.as_string()
 
-            recipients = self.mail_settings['to']
-            if self.mail_settings.get('cc'):
-                recipients.extend(self.mail_settings['cc'])
-            if self.mail_settings.get('bcc'):
-                recipients.extend(self.mail_settings['bcc'])
+            recipients = self.to
+            if self.cc:
+                recipients.extend(self.cc)
+            if self.bcc:
+                recipients.extend(self.bcc)
 
-            smtp.sendmail(self.mail_settings['from'], recipients, text)
+            smtp.sendmail(self.sender, recipients, text)
 
     def _compose(self):
         """ Combine saved settings into a MIME multipart message """
         msg = MIMEMultipart('mixed')
         msg.preamble = 'This is a multi-part message in MIME format.'
 
-        msg['To'] = ', '.join(self.mail_settings['to'])
-        if self.mail_settings.get('cc'):
-            msg['Cc'] = ', '.join(self.mail_settings['cc'])
-        if self.mail_settings.get('bcc'):
-            msg['Bcc'] = ', '.join(self.mail_settings['bcc'])
-        msg['From'] = self.mail_settings['from']
-        msg['Subject'] = self.mail_settings['subject']
+        msg['To'] = ', '.join(self.to)
 
-        msg.attach(MIMEText(self.mail_settings['body'], 'html'))
+        if self.cc:
+            msg['Cc'] = ', '.join(self.cc)
 
-        for a in self.attachments:
+        if self.bcc:
+            msg['Bcc'] = ', '.join(self.bcc)
+
+        msg['From'] = self.sender
+        msg['Subject'] = self.subject
+
+        msg.attach(MIMEText(self.body, self.body_type))
+
+        attachments = self._make_attachments()
+
+        for a in attachments:
             msg.attach(a)
 
         return msg
@@ -84,71 +271,47 @@ class Email():
         valid = True
 
         # Check email settings
-        if not self.mail_settings.get('to'):
+        if not self.to:
             self.error("To address is not set")
             valid = False
-        if not self.mail_settings.get('from'):
+        if not self.sender:
             self.error("From address is not set")
             valid = False
 
         # Check SMTP settings
-        if not self.smtp_settings.get('password'):
+        if not self.smtp_password:
             self.error("smtp password not set")
             valid = False
-        if not self.smtp_settings.get('server'):
+        if not self.smtp_server:
             self.error("smtp server not set")
             valid = False
-        if not self.smtp_settings.get('timeout'):
+        if not self.smtp_timeout:
             self.error("smtp timeout not set")
             valid = False
+
+        # Check all attachments exist
+        for a in self.files + self.images:
+            if not os.path.isfile(a):
+                self.error("Cannot find file to attach: {}".format(a))
+                valid = False
 
         if not valid:
             raise EmailInvalidSettings
 
         return valid
 
-    def set_smtp(self, password, server=DEFAULT_SMTP, timeout=DEFAULT_TIMEOUT):
-        """ Set SMTP email settings """
-        self.smtp_settings['password'] = password
-        self.smtp_settings['server'] = server
-        self.smtp_settings['timeout'] = timeout
+    def _make_attachments(self):
+        """ Create attachment parts for files and images
 
-    def set_addr(self, to_addr, from_addr, cc_addr=None, bcc_addr=None):
-        """ Set sender and recipents email settings """
-        self.mail_settings['from'] = from_addr
+        if self.images_inline is True, then inline html for the image
+        is inserted
 
-        if isinstance(to_addr, str):
-            to_addr = [to_addr]
-        self.mail_settings['to'] = to_addr
-
-        if cc_addr:
-            if isinstance(cc_addr, str):
-                cc_addr = [cc_addr]
-            self.mail_settings['cc'] = cc_addr
-
-        if bcc_addr:
-            if isinstance(bcc_addr, str):
-                bcc_addr = [bcc_addr]
-            self.mail_settings['bcc'] = bcc_addr
-
-    def set_text(self, subject=None, body=None):
-        """ Set subject and body of email """
-        self.mail_settings['body'] = body
-        self.mail_settings['subject'] = subject
-
-    def set_attachments(self, files=None, images=None, inline=False):
-        """ Attach files and images
-
-        files -- Files are attached as plain attachments.
-        images -- Images are attached, & inline HTML inserted (if inline=True).
+        returns a list of attachment parts
         """
 
-        # Clear old attachments
-        self.attachments = []
+        attachments = []
 
-        if isinstance(files, str):
-            files = [files]
-        for f in files:
+        for f in self.files:
             # Attach files as attachments
             try:
                 with open(f, 'rb') as fp:
@@ -159,14 +322,13 @@ class Email():
                 continue
 
             encoders.encode_base64(part)
-            part.add_header('Content-Disposition', "attachment; filename={}".format(
-                os.path.basename(f)))
-            self.attachments.append(part)
+            part.add_header(
+                'Content-Disposition',
+                "attachment; filename={}".format(os.path.basename(f)))
+            attachments.append(part)
 
-        if isinstance(images, str):
-            images = [images]
-        for i in images:
-            # Attach images inline
+        for i in self.images:
+            # Attach images
             ibn = os.path.basename(i)
             cid = 'image_{}'.format(ibn.replace('.', '_'))
             try:
@@ -177,10 +339,13 @@ class Email():
                 continue
 
             part.add_header('Content-ID', '<{}>'.format(cid))
-            self.attachments.append(part)
-            if inline:
-                self.attachments.append(MIMEText(
-                    u'<img src="cid:{}" alt="{}">'.format(cid, ibn), 'html', 'utf-8'))
+            attachments.append(part)
+            if self.images_inline:
+                attachments.append(MIMEText(
+                    u'<img src="cid:{}" alt="{}">'.format(cid, ibn),
+                    'html', 'utf-8')
+                )
+        return attachments
 
 
 def newemail(subject="", body="", files=[], me=False):
@@ -203,9 +368,13 @@ def newemail(subject="", body="", files=[], me=False):
             'jeremyr@ovation.co.uk',
         ]
 
-    e = Email()
-    e.set_addr(recipients, 'wsheppard@witekio.com')
-    e.set_smtp('4T2jsU', 'smtp.office365.com', 587)
-    e.set_text(subject, body)
-    e.set_attachments(files)
-    e.send()
+    Email(sender='wsheppard@witekio.com',
+          to=recipients,
+          subject=subject,
+          body=body,
+          body_type='html',
+          files=files,
+          smtp_server='smtp.office365.com',
+          smtp_timeout=587,
+          smtp_password='4T2jsU',
+          ).send()
