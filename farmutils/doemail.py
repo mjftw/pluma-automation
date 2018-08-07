@@ -72,7 +72,7 @@ class Email():
         msg['From'] = self.mail_settings['from']
         msg['Subject'] = self.mail_settings['subject']
 
-        msg.attach(MIMEText(self.mail_settings['body'], 'plain'))
+        msg.attach(MIMEText(self.mail_settings['body'], 'html'))
 
         for a in self.attachments:
             msg.attach(a)
@@ -116,11 +116,20 @@ class Email():
     def set_addr(self, to_addr, from_addr, cc_addr=None, bcc_addr=None):
         """ Set sender and recipents email settings """
         self.mail_settings['from'] = from_addr
-        self.mail_settings['to'] = _to_list(to_addr)
+
+        if isinstance(to_addr, str):
+            to_addr = [to_addr]
+        self.mail_settings['to'] = to_addr
+
         if cc_addr:
-            self.mail_settings['cc'] = _to_list(cc_addr)
+            if isinstance(cc_addr, str):
+                cc_addr = [cc_addr]
+            self.mail_settings['cc'] = cc_addr
+
         if bcc_addr:
-            self.mail_settings['bcc'] = _to_list(bcc_addr)
+            if isinstance(bcc_addr, str):
+                bcc_addr = [bcc_addr]
+            self.mail_settings['bcc'] = bcc_addr
 
     def set_text(self, subject=None, body=None):
         """ Set subject and body of email """
@@ -137,43 +146,41 @@ class Email():
         # Clear old attachments
         self.attachments = []
 
-        if files:
-            for f in _to_list(files):
-                # Attach files as attachments
-                try:
-                    with open(f, 'rb') as fp:
-                        part = MIMEBase('application', 'octet-stream')
-                        part.set_payload(fp.read())
-                    encoders.encode_base64(part)
-                    part.add_header('Content-Disposition', "attachment; filename={}".format(
-                        os.path.basename(f)))
-                    self.attachments.append(part)
-                except IOError:
-                    self.error("Could not file for attachment: {}".format(f))
+        if isinstance(files, str):
+            files = [files]
+        for f in files:
+            # Attach files as attachments
+            try:
+                with open(f, 'rb') as fp:
+                    part = MIMEBase('application', 'octet-stream')
+                    part.set_payload(fp.read())
+            except IOError:
+                self.error("Could not file for attachment: {}".format(f))
+                continue
 
-        if images:
-            for i in _to_list(images):
-                # Attach images inline
-                try:
-                    ibn = os.path.basename(i)
-                    cid = 'image_{}'.format(ibn.replace('.', '_'))
-                    with open(i, 'rb') as fp:
-                        part = MIMEImage(fp.read(), name=ibn)
-                    part.add_header('Content-ID', '<{}>'.format(cid))
-                    self.attachments.append(part)
-                    if inline:
-                        self.attachments.append(MIMEText(
-                            u'<img src="cid:{}" alt="{}">'.format(cid, ibn), 'html', 'utf-8'))
-                except IOError:
-                    self.error("Could not image for attachment: {}".format(i))
+            encoders.encode_base64(part)
+            part.add_header('Content-Disposition', "attachment; filename={}".format(
+                os.path.basename(f)))
+            self.attachments.append(part)
 
+        if isinstance(images, str):
+            images = [images]
+        for i in images:
+            # Attach images inline
+            ibn = os.path.basename(i)
+            cid = 'image_{}'.format(ibn.replace('.', '_'))
+            try:
+                with open(i, 'rb') as fp:
+                    part = MIMEImage(fp.read(), name=ibn)
+            except IOError:
+                self.error("Could not image for attachment: {}".format(i))
+                continue
 
-def _to_list(attr):
-    """ Return list version of attr """
-    if isinstance(attr, list):
-        return attr
-    else:
-        return [attr]
+            part.add_header('Content-ID', '<{}>'.format(cid))
+            self.attachments.append(part)
+            if inline:
+                self.attachments.append(MIMEText(
+                    u'<img src="cid:{}" alt="{}">'.format(cid, ibn), 'html', 'utf-8'))
 
 
 def newemail(subject="", body="", files=[], me=False):
@@ -182,7 +189,6 @@ def newemail(subject="", body="", files=[], me=False):
     This function should be deleted once older scripts
     have been updated to use Email class properly.
     """
-
 
     if me:
         recipients = [
