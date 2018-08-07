@@ -26,6 +26,7 @@ class Email():
                  images_inline=False,
                  smtp_server='smtp.office365.com',
                  smtp_timeout=587,
+                 smtp_authfile=None,
                  smtp_password=None,
                  smtp_username=None
                  ):
@@ -43,6 +44,7 @@ class Email():
 
         self.smtp_server = smtp_server
         self.smtp_timeout = smtp_timeout
+        self.smtp_authfile = smtp_authfile
         self.smtp_password = smtp_password
         self.smtp_username = smtp_username
 
@@ -230,7 +232,12 @@ class Email():
         """ Send email with current settings """
         with smtplib.SMTP(self.smtp_server, self.smtp_timeout) as smtp:
             smtp.starttls()
-            smtp.login(self.smtp_username, self.smtp_password)
+            if self.smtp_authfile:
+                (username, password) = self._read_authfile()
+            else:
+                username = self.smtp_username
+                password = self.smtp_password
+            smtp.login(username, password)
             text = msg.as_string()
 
             recipients = self.to
@@ -278,10 +285,22 @@ class Email():
             self.error("From address is not set")
             valid = False
 
-        # Check SMTP settings
-        if not self.smtp_password:
-            self.error("smtp password not set")
-            valid = False
+        if self.smtp_authfile:
+            try:
+                if not self._read_authfile():
+                    self.error('Invalid smtp authfile {}'.format(
+                        self.smtp_authfile))
+            except IOError as e:
+                self.error("{}".format(str(e)))
+                valid = False
+        else:
+            if not self.smtp_username:
+                self.error("smtp username not set, and no auth file")
+                valid = False
+            if not self.smtp_password:
+                self.error("smtp password not set, and no auth file")
+                valid = False
+
         if not self.smtp_server:
             self.error("smtp server not set")
             valid = False
@@ -299,6 +318,21 @@ class Email():
             raise EmailInvalidSettings
 
         return valid
+
+    def _read_authfile(self):
+        """ Check smtp authfile has exactly 2 lines.
+            Expected authfile format:
+                [smtp_username]
+                [smtp_password]
+        """
+        with open(self.smtp_authfile, 'r') as fd:
+            auth = fd.read().splitlines()
+        if len(auth) != 2 or not auth[0] or not auth[1]:
+            return None
+        else:
+            username = auth[0]
+            password = auth[1]
+            return (username, password)
 
     def _make_attachments(self):
         """ Create attachment parts for files and images
