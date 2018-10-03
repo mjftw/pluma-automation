@@ -1,5 +1,5 @@
-from farmclass import Farmclass
-from usb import USB
+from .farmclass import Farmclass
+from .usb import USB
 
 
 class Hub(Farmclass, USB):

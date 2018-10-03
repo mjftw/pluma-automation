@@ -21,7 +21,7 @@ class Farmclass():
             message = '{}: {}'.format(prefix, message)
         if hasattr(self, 'logfile') and self.logfile:
             logdir = os.path.dirname(self.logfile)
-            if not os.path.exists(logdir):
+            if logdir and not os.path.exists(logdir):
                 os.makedirs(logdir)
             with open(self.logfile, 'a') as logfd:
                 logfd.write(message + '\n')

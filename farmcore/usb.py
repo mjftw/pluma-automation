@@ -9,7 +9,6 @@ import pyudev
 
 driver_path = '/sys/bus/usb/drivers/usb/'
 
-
 class NoPartitions(Exception):
     pass
 
@@ -53,16 +52,12 @@ class USB():
         self.bind()
 
     def get_device(self):
-        try:
-            for _ in range(20):
-                d = pyudev.Devices.from_path(
-                    self.puctx, '/bus/usb/devices/{}'.format(self.usb_device))
-                if d is not None:
-                    break
-                time.sleep(1)
-        except:
-            raise NoDevice("No device for [{}]".format(self.usb_device))
-        return d
+        for d in pyudev.Context().list_devices(subsystem='usb'):
+            if d.device_path.endswith(self.usb_device):
+                return d
+
+        raise NoDevice("No device for [{}]".format(self.usb_device))
+
 
     @property
     def devinfo(self):

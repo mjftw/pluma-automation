@@ -5,7 +5,7 @@ import time
 import pexpect
 import pexpect.fdpexpect
 
-from farmclass import Farmclass
+from .farmclass import Farmclass
 
 
 DEFAULT_PROMPT = r'>>FARM>>'
@@ -82,7 +82,7 @@ class Console(Farmclass):
         return self._buffer_size
 
     def decode(self, text):
-        return text.decode(self.encoding)
+        return text.decode(self.encoding, 'replace')
 
     def encode(self, text):
         return text.encode(self.encoding)

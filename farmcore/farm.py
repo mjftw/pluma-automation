@@ -1,4 +1,5 @@
-from farmclass import Farmclass
+from .farmclass import Farmclass
+from .board import Board
 from .usbrelay import USBRelay
 from .powerrelay import PowerRelay
 from .serialconsole import SerialConsole

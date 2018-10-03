@@ -3,11 +3,10 @@
 # import farm
 # import hwconfig
 
-from farmclass import Farmclass
-from interact import Interact
-from serialconsole import SerialConsole
+from .farmclass import Farmclass
+from .serialconsole import SerialConsole
 
-DEFAULT_LOGFILE = None
+DEFAULT_LOGFILE = object()
 
 class NoBoard(Exception):
     pass
@@ -20,17 +19,22 @@ class Board(Farmclass):
         self.sdmux = sdmux
         self.name = name
         self.baud = 115200  # TODO: Remove hardcoding
-        self.console = SerialConsole(self.hub.get_tty(), self.baud)
+        self._console = None
 
         if logfile is DEFAULT_LOGFILE:
             self.logfile = "/tmp/board_{}.log".format(self.name)
         else:
             self.logfile = logfile
 
-        self.update_logger_hier()
+        self.update_logger()
 
-    def update_logger_hier(self):
-        """ Default logging format for boards """
+    @property
+    def console(self):
+        if self._console is None:
+            self._console = SerialConsole(self.hub.get_serial(), self.baud)
+        return self._console
+
+    def update_logger(self):
         self.set_logger(
             logname=self.name,
             logfile=self.logfile,
@@ -38,6 +42,11 @@ class Board(Farmclass):
             logtime=True,
             reccurse=True
         )
+
+    def log(self, message):
+        self.update_logger()
+        super().log(message)
+
 
 def get_board(boards, name):
     for b in boards:

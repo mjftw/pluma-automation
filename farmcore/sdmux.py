@@ -3,8 +3,7 @@
 import sys
 import serial
 
-from farmclass import Farmclass
-import usb
+from .farmclass import Farmclass
 
 class SDMux(Farmclass):
     """ SD Mux driver """
@@ -16,7 +15,7 @@ class SDMux(Farmclass):
     @property
     def serialdev(self):
         """ Check we can get tty device node every time we use it """
-        return self.usbrelay.get_tty()
+        return self.usbrelay.get_relay()
 
     def sdhost(self):
         """ Switch the SD card to the host """

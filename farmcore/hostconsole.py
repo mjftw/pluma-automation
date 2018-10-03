@@ -3,7 +3,7 @@
 import pexpect
 import pexpect.fdpexpect
 
-from console import Console
+from .console import Console
 
 
 class HostConsole(Console):

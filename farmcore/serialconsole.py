@@ -3,7 +3,7 @@ import time
 import serial
 import pexpect.fdpexpect
 
-from console import Console
+from .console import Console
 
 
 class SerialConsole(Console):

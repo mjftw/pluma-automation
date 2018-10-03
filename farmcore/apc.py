@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """ The APC is a switched rack PDU which controlls whether a board is powered """
-import console
 import sys
 import time
 import pexpect.exceptions as pex
 
-from farmclass import Farmclass
+from .farmclass import Farmclass
 
 
 class NoAPC(Exception):
