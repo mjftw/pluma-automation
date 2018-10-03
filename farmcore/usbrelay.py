@@ -11,7 +11,7 @@ from farmcore.usb import USB
 
 
 class USBRelay(FarmBase, USB):
-    sdmux_map = [
+    port_map = [
         dict(a=b'1', b=b'q'),
         dict(a=b'2', b=b'w'),
         dict(a=b'3', b=b'e'),

@@ -1,5 +1,11 @@
 from farmclass import Farmclass
-
+from .usbrelay import USBRelay
+from .powerrelay import PowerRelay
+from .serialconsole import SerialConsole
+from .hostconsole import HostConsole
+from .hub import Hub
+from .sdmux import SDMux
+from .apc import APC
 
 class Farm(Farmclass):
     def __init__(self, boards):

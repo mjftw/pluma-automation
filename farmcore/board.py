@@ -14,16 +14,16 @@ class NoBoard(Exception):
 
 
 class Board(Farmclass):
-    def __init__(self, name, apc, hub, sdmux, logfile=DEFAULT_LOGFILE):
-        self.apc = apc
+    def __init__(self, name, power, hub, sdmux, logfile=DEFAULT_LOGFILE):
+        self.power = power
         self.hub = hub
         self.sdmux = sdmux
         self.name = name
-        self.act = Interact()
         self.baud = 115200  # TODO: Remove hardcoding
+        self.console = SerialConsole(self.hub.get_tty(), self.baud)
 
         if logfile is DEFAULT_LOGFILE:
-            self.logfile = "/tmp/board_{}_MWEBSTERDEV.log".format(self.name)
+            self.logfile = "/tmp/board_{}.log".format(self.name)
         else:
             self.logfile = logfile
 
@@ -38,13 +38,6 @@ class Board(Farmclass):
             logtime=True,
             reccurse=True
         )
-
-    def init_console(self):
-        if self.act.console is None:
-            self.act.switch_console(
-                SerialConsole(self.hub.get_tty(), self.baud))
-            self.update_logger_hier()
-
 
 def get_board(boards, name):
     for b in boards:

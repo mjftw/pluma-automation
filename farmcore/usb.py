@@ -133,7 +133,8 @@ class USB():
 
     def get_serial(self):
         devinfo = self.filter_downstream({
-            'subsystem': 'tty'
+            'subsystem': 'tty',
+            'vendor': 'FTDI'
         })
         if not devinfo:
             raise NoDevice('No serial devices on {}'.format(self.usb_device))
