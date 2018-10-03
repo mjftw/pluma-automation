@@ -1,7 +1,8 @@
 #!/usb/bin/env python3
 
 import time
-import sys,os
+import sys
+import os
 import serial
 import pexpect
 import pexpect.fdpexpect as pfd

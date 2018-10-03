@@ -1,8 +1,9 @@
 
-import os,sys
+import os
+import sys
 from farmcore.farm_base import FarmBase
 from farmcore.farm_board import FarmBoard
-from farmcore import usb,farm
+from farmcore import usb, farm
 from importlib import import_module
 
 boards = []
@@ -12,9 +13,11 @@ class NoBoard(Exception):
 
 class Board(FarmBase):
     def __init__(self, name, apc_port, hub, sdm):
-        self.apc, self.apc_index = apc_port
+        if apc_port:
+            self.apc, self.apc_index = apc_port
         self.hub = hub
-        self.sdm = sdm
+        if sdm:
+            self.sdm = sdm
         self.name = name
         self.log("Registered board at {}".format(hub))
         boards.append(self)
@@ -25,24 +28,23 @@ class Board(FarmBase):
     def on(self):
         self.log("PWR On")
         return self.apc.on(self.apc_index)
-    
+
     def off(self):
         self.log("PWR Off")
         return self.apc.off(self.apc_index)
 
     def use(self, *a, **kw):
-        return FarmBoard( self, *a, **kw )
+        return FarmBoard(self, *a, **kw)
 
 def get_board(name):
-
     if not boards:
-        cfg = os.environ.get('FARMCFG',None)
+        cfg = os.environ.get('FARMCFG', None)
         if cfg:
-            print("We have a config. It is {}".format( cfg ))
+            print("We have a config. It is {}".format(cfg))
             fp = os.path.dirname(os.path.abspath(cfg))
-            tld_rel = "{}/..".format( fp )
-            tld = os.path.realpath( tld_rel ) 
-            sys.path.append( tld )
+            tld_rel = "{}/..".format(fp)
+            tld = os.path.realpath(tld_rel)
+            sys.path.append(tld)
             import_module(os.path.basename(cfg))
         else:
             raise NoBoard
