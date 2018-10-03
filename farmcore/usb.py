@@ -140,13 +140,13 @@ class USB():
         else:
             return devinfo[0]['devnode']
 
-    def get_sdmux(self):
+    def get_relay(self):
         devinfo = self.filter_downstream({
             'subsystem': 'tty',
             'vendor': 'DLP_Design'
         })
         if not devinfo:
-            raise IOError('No sdmux devices on {}'.format(self.usb_device))
+            raise IOError('No relay devices on {}'.format(self.usb_device))
         else:
             return devinfo[0]['devnode']
 

@@ -6,22 +6,12 @@ import serial
 from farmclass import Farmclass
 import usb
 
-# Map is board/host
-sdmux_map = [
-        dict(board=b'1', host=b'q'),
-        dict(board=b'2', host=b'w'),
-        dict(board=b'3', host=b'e'),
-        dict(board=b'4', host=b'r'),
-]
-
-
 class SDMux(Farmclass):
     """ SD Mux driver """
-    def __init__(self, usbrelay, index, apc, baud=9600):
+    def __init__(self, usbrelay, index, apc):
         self.usbrelay = usbrelay
         self.index = index
         self.apc = apc
-        self.baud = baud
 
     @property
     def serialdev(self):
@@ -33,15 +23,11 @@ class SDMux(Farmclass):
         print("Switching SDMux on USB {}, index {} to host...".format(
             self.usbrelay.usbdev, self.index))
         self.usbrelay.rebind()
-        s = serial.Serial(self.serialdev, self.baud)
-        s.write(sdmux_map[self.index]['host'])
-        s.close()
+        self.usbrelay.toggle(self.index, 'A')
 
     def sdboard(self):
         """ Switch the SD card to the board """
         print("Switching SDMux on USB {}, index {} to board...".format(
             self.usbrelay.usb, self.index))
         self.usbrelay.rebind()
-        s = serial.Serial(self.serialdev, self.baud)
-        s.write(sdmux_map[self.index]['board'])
-        s.close()
+        self.usbrelay.toggle(self.index, 'B')
