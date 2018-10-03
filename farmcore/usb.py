@@ -2,12 +2,10 @@
 
 import sys
 import os
-import stat
 import time
-from pprint import pprint as pp
-import subprocess as sp
+import subprocess
+
 import pyudev
-import board
 
 driver_path = '/sys/bus/usb/drivers/usb/'
 
@@ -27,126 +25,192 @@ class NoDevice(Exception):
 class USB():
     def __init__(self, device):
         self.puctx = pyudev.Context()
-        self.device = device
+        self.usb_device = device
+
+    def __repr__(self):
+        return '{}'.format(self.usb_device)
 
     @property
     def is_bound(self):
-        return os.path.isdir(os.path.join(driver_path, self.device))
-
-    def _get_dev(self):
-        try:
-            for _ in range(20):
-                d = pyudev.Devices.from_path(
-                    self.puctx, '/bus/usb/devices/{}'.format(self.device))
-                if d is not None:
-                    break
-                time.sleep(1)
-        except:
-            raise NoDevice("No device for [{}]".format(self.device))
-        return d
+        return os.path.isdir(os.path.join(driver_path, self.usb_device))
 
     def unbind(self):
         if not self.is_bound:
             return
         with open(os.path.join(driver_path, 'unbind'), 'w') as fd:
-            fd.write(self.device)
+            fd.write(self.usb_device)
         time.sleep(1)
 
     def bind(self):
         if self.is_bound:
             return
         with open(os.path.join(driver_path, 'bind'), 'w') as fd:
-            fd.write(self.device)
+            fd.write(self.usb_device)
         time.sleep(1)
 
     def rebind(self):
         self.unbind()
         self.bind()
 
-    def get_devnode(self, subsys, devtype=None, vendor_id=None, attempts=1):
-        """ Find the device node for the first device matches """
-        dev = self._get_dev()
-        for _ in range(attempts):
-            if devtype is not None:
-                devices = self.puctx.list_devices(
-                    subsystem=subsys, DEVTYPE=devtype, parent=dev)
-            else:
-                devices = self.puctx.list_devices(
-                    subsystem=subsys, parent=dev)
-            for m in devices:
-                if(vendor_id is not None and
-                        (m.get('ID_VENDOR') is None or
-                            m['ID_VENDOR'] != vendor_id)):
-                    continue
-                if(subsys == 'block' and
-                        int(m.attributes.get('size')) == 0):
-                    continue
-                return m.device_node
-            if(attempts > 1):
+    def get_device(self):
+        try:
+            for _ in range(20):
+                d = pyudev.Devices.from_path(
+                    self.puctx, '/bus/usb/devices/{}'.format(self.usb_device))
+                if d is not None:
+                    break
                 time.sleep(1)
-        return None
+        except:
+            raise NoDevice("No device for [{}]".format(self.usb_device))
+        return d
+
+    @property
+    def devinfo(self):
+        return self._pack_devinfo(self.get_device())
+
+    @property
+    def downstream(self):
+        infolist = []
+
+        downstream_devs = self.puctx.list_devices(
+            parent=self.get_device())
+
+        for dev in downstream_devs:
+            info = self._pack_devinfo(dev)
+            if info:
+                infolist.append(self._pack_devinfo(dev))
+
+        return infolist
+
+    def _pack_devinfo(self, device):
+        devinfo = {}
+        if device.device_node is None:
+            return devinfo
+        else:
+            devinfo['devnode'] = device.device_node
+
+        devinfo['subsystem'] = device.subsystem
+        devinfo['vendor'] = device.get('ID_VENDOR')
+        devinfo['sysname'] = device.sys_name
+
+        devinfo['devtype'] = device.get('DEVTYPE')
+        if(devinfo['devtype'] == 'disk' or
+           devinfo['devtype'] == 'partition'):
+            devinfo['size'] = int(device.attributes.get('size'))
+
+        return devinfo
+
+    def filter_downstream(self, filters={}, excludes={}):
+        return self._filter_dictarr(
+            filters=filters, excludes=excludes, dictarr=self.downstream)
+
+    def _filter_dictarr(self, filters={}, excludes={}, dictarr=[{}]):
+        match_vals = []
+        for d in dictarr:
+            match = True
+            # Check match list.
+            # If the dict array queried DOES NOT HAVE the required
+            # field, OR the field HAS A DIFFERENT value, do not match
+            for k, v in filters.items():
+                if not match:
+                    break
+                if k not in d or d[k] != v:
+                    match = False
+
+            # Check exclude list
+            # If the dict array queried HAS the required filed AND
+            # the field has the SAME VALUE, do not match
+            for k, v in excludes.items():
+                if not match:
+                    break
+                if k in d and d[k] == v:
+                    match = False
+
+            if match:
+                match_vals.append(d)
+
+        return match_vals
+
+    def get_serial(self):
+        devinfo = self.filter_downstream({
+            'subsystem': 'tty'
+        })
+        if not devinfo:
+            raise NoDevice('No serial devices on {}'.format(self.usb_device))
+        else:
+            return devinfo[0]['devnode']
+
+    def get_sdmux(self):
+        devinfo = self.filter_downstream({
+            'subsystem': 'tty',
+            'vendor': 'DLP_Design'
+        })
+        if not devinfo:
+            raise IOError('No sdmux devices on {}'.format(self.usb_device))
+        else:
+            return devinfo[0]['devnode']
 
     def get_block(self):
-        """ Wrapper for get_devnode for block devices"""
-        devnode = self.get_devnode(
-            subsys='block', devtype='disk', attempts=10)
-        if devnode is None:
-            raise NoDisks('No block devices on {}'.format(self.device))
+        devinfo = self.filter_downstream({
+            'subsystem': 'block',
+            'devtype': 'disk'
+        }, {
+            'size': 0
+        })
+        if not devinfo:
+            raise NoDisks('No block devices on {}'.format(self.usb_device))
         else:
-            return devnode
+            return (devinfo[0]['devnode'], devinfo[0]['size'])
 
-    # Get first partition name for block device
     def get_part(self):
-        """ Wrapper for get_devnode for disk partitions"""
-        devnode = self.get_devnode(
-            subsys='block', devtype='partition', attempts=5)
-        if devnode is None:
-            raise NoPartitions('No partitions on {}'.format(self.device))
+        devinfo = self.filter_downstream({
+            'subsystem': 'block',
+            'devtype': 'partition'
+        }, {
+            'size': 0
+        })
+        if not devinfo:
+            raise NoPartitions('No partitions on {}'.format(self.usb_device))
         else:
-            return devnode
+            return (devinfo[0]['devnode'], devinfo[0]['size'])
 
-    def get_tty(self):
-        """ Wrapper for get_devnode for tty devices"""
-        devnode = self.get_devnode(
-            subsys='tty', attempts=5)
-        if devnode is None:
-            raise NoDevice('No tty devices on {}'.format(self.device))
-        else:
-            return devnode
+    def get_parent(self):
+        dev = self.get_device()
+        pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
+        return pdev.sys_name
 
     def show_ancestry(self):
-        dev = self._get_dev()
+        dev = self.get_device()
+        if dev is None:
+            return None
 
-        while d.parent:
+        while dev.parent:
             p = dev.parent
             print(dir(p))
             print(p.driver, p.subsystem, p.sys_name, p.device_path, p.sys_path)
-            sp.run(['ls', "{}/driver".format(p.sys_path)])
+            subprocess.run(['ls', "{}/driver".format(p.sys_path)])
             dev = p
 
     def rebind_host(self):
-        dev = self._get_dev
+        d = self.get_device()
+        if d is None:
+            return None
 
         # Keep going until we find no more parents
-        while dev.parent:
-            dev = dev.parent
+        while d.parent:
+            d = d.parent
 
-        path = os.path.join(dev.sys_path, 'driver')
-        path = os.path.realpath(path)
+        driver_path = "{}/driver".format(d.sys_path)
+        driver_path = os.path.realpath(driver_path)
 
-        # print("WARN: Rebinding HOST {} at {}".format(dev.sys_name, self.get_driver_path()))
-        unbind_path = os.path.join(driver_path, 'unbind')
-        bind_path = os.path.join(driver_path, 'bind')
+        print("WARN: Rebinding HOST {} at {}".format(d.sys_name, driver_path))
 
-        os.chmod(unbind_path, stat.S_IWOTH)
-        os.chmod(bind_path, stat.S_IWOTH)
+        subprocess.run(['sudo', 'chmod', 'a+w', driver_path + "/unbind"])
+        subprocess.run(['sudo', 'chmod', 'a+w', driver_path + "/bind"])
 
-        with open(unbind_path, 'w') as fd:
-            f.write(dev.sys_name)
+        with open("{}/unbind".format(driver_path), 'w') as f:
+            f.write(d.sys_name)
 
         time.sleep(2)
-        with open(bind_path, 'w') as fd:
-            f.write(dev.sys_name)
-
-#find_block( device )
-#find_serial( device )
+        with open("{}/bind".format(driver_path), 'w') as f:
+            f.write(d.sys_name)
