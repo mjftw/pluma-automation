@@ -52,7 +52,7 @@ class USB():
         self.bind()
 
     def get_device(self):
-        for d in pyudev.Context().list_devices(subsystem='usb'):
+        for d in self.puctx.list_devices(subsystem='usb'):
             if d.device_path.endswith(self.usb_device):
                 return d
 

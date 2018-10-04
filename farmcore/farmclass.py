@@ -10,23 +10,24 @@ class Farmclass():
 
     def log(self, message):
         prefix = ''
-        if hasattr(self, '_appendtype') and self._appendtype:
-            prefix = '[{}]{}'.format(self._appendtype, prefix)
-        if hasattr(self, 'logname') and self.logname:
-            prefix = '{}{}'.format(self.logname, prefix)
-        if hasattr(self, '_logtime') and self._logtime:
-            timestr = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
-            prefix = '{} {}'.format(timestr, prefix)
-        if prefix != '':
-            message = '{}: {}'.format(prefix, message)
-        if hasattr(self, 'logfile') and self.logfile:
-            logdir = os.path.dirname(self.logfile)
-            if logdir and not os.path.exists(logdir):
-                os.makedirs(logdir)
-            with open(self.logfile, 'a') as logfd:
-                logfd.write(message + '\n')
-        else:
-            print(message)
+        if hasattr(self, 'logon') and self.logon is True:
+            if hasattr(self, '_appendtype') and self._appendtype:
+                prefix = '[{}]{}'.format(self._appendtype, prefix)
+            if hasattr(self, 'logname') and self.logname:
+                prefix = '{}{}'.format(self.logname, prefix)
+            if hasattr(self, 'logtime') and self.logtime:
+                timestr = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+                prefix = '{} {}'.format(timestr, prefix)
+            if prefix != '':
+                message = '{}: {}'.format(prefix, message)
+            if hasattr(self, 'logfile') and self.logfile:
+                logdir = os.path.dirname(self.logfile)
+                if logdir and not os.path.exists(logdir):
+                    os.makedirs(logdir)
+                with open(self.logfile, 'a') as logfd:
+                    logfd.write(message + '\n')
+            else:
+                print(message)
 
     def _get_hier(self):
         farmobjs = {}
@@ -41,10 +42,12 @@ class Farmclass():
         return farmobjs, attrs
 
     def set_logger(self, logname=None, logfile=None,
-                   appendtype=None, logtime=False, reccurse=False):
+                   appendtype=None, logtime=False, reccurse=False,
+                   logon=True):
+        self.logon = logon
         self.logfile = logfile
         self.logname = logname
-        self._logtime = logtime
+        self.logtime = logtime
         if appendtype:
             if isinstance(appendtype, bool):
                 self._appendtype = '{}'.format(type(self).__name__)
@@ -59,7 +62,7 @@ class Farmclass():
                     logname=self.logname,
                     logfile=logfile,
                     appendtype=self._appendtype,
-                    logtime=self._logtime,
+                    logtime=self.logtime,
                     reccurse=reccurse,
                 )
 

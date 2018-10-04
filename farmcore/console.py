@@ -78,7 +78,7 @@ class Console(Farmclass):
         return len(self._buffer)
 
     def _flush_get_size(self):
-        self.flush()
+        self.flush(True)
         return self._buffer_size
 
     def decode(self, text):
@@ -151,6 +151,7 @@ class Console(Farmclass):
             time.sleep(sleep_time)
             elapsed += sleep_time
 
+
         raise TimeoutNoRecieveStop('Timeout waiting for quiet')
         return False
 
@@ -174,7 +175,6 @@ class Console(Farmclass):
         if not recieve:
             self._pex.sendline(cmd)
         else:
-            self.wait_for_quiet()
             self.flush(True)
             self._pex.sendline(cmd)
             if match:
