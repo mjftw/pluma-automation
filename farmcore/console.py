@@ -159,6 +159,10 @@ class Console(Farmclass):
              cmd,
              recieve=False,
              match=None,
+             log_pass_result=False,
+             log_fail_result=False,
+             timeout=-1,
+             sleep_time=-1
              ):
         if not self.is_open:
             self.open()
@@ -171,6 +175,13 @@ class Console(Farmclass):
             cmd = self.encode(cmd)
 
         result = None
+        matched = False
+
+        """ Assign default timeout and sleep values if unassigned """
+        data_timeout = timeout if timeout >= 0 else 30
+        quiet_timeout = timeout if timeout >= 0 else 3
+        data_sleep = sleep_time if sleep_time >= 0 else 1.0
+        quiet_sleep = sleep_time if sleep_time >= 0 else 1.0
 
         if not recieve:
             self._pex.sendline(cmd)
@@ -178,13 +189,21 @@ class Console(Farmclass):
             self.flush(True)
             self._pex.sendline(cmd)
             if match:
-                self.wait_for_data(match=match)
+                matched = self.wait_for_data(
+                    timeout=data_timeout,
+                    sleep_time=data_sleep,
+                    match=match)
                 result = self.decode(self._pex.before)
             else:
-                self.wait_for_quiet()
+                self.wait_for_quiet(
+                    timeout=quiet_timeout,
+                    sleep_time=quiet_sleep)
                 result = self._buffer
 
-        self.log("Command result:\n{}".format(result))
+        if (matched and log_pass_result or
+                not matched and log_fail_result):
+            self.log("Command result:\n{}".format(result))
+
         return result
 
     def check_alive(self, timeout=10.0):
