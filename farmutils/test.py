@@ -1,6 +1,8 @@
 class TestSuite():
     def __init__(self, tests=None, setup_func=None, report_func=None):
         self.tests = tests
+        self.setup_args = None
+        self.report_args = None
         self.setup_func = setup_func
         self.report_func = report_func
 
@@ -18,7 +20,7 @@ class TestSuite():
         elif isinstance(tests, test):
             self._tests = [tests]
         elif tests is None:
-            self._tests = None
+            self._tests = []
         else:
             raise AttributeError(
                 "Must be either: single test, list of tests, or None")
@@ -32,10 +34,16 @@ class TestSuite():
 
     @setup_func.setter
     def setup_func(self, f):
-        if callable(f):
+        """ Function with args """
+        if isinstance(f, tuple) and callable(f[0]):
+            self._setup_func = f[0]
+            self.setup_args = list(f[1:])
+        elif callable(f):
             self._setup_func = f
+            self.setup_args = None
         elif f is None:
             self._setup_func = None
+            self.setup_args = None
         else:
             raise AttributeError("Must be callable")
 
@@ -48,22 +56,34 @@ class TestSuite():
 
     @result_func.setter
     def result_func(self, f):
-        if callable(f):
-            self._result_func = f
+        if isinstance(f, tuple) and callable(f[0]):
+            self._setup_func = f[0]
+            self.setup_args = list(f[1:])
+        elif callable(f):
+            self._setup_func = f
+            self.setup_args = None
         elif f is None:
-            self._result_func = None
+            self._setup_func = None
+            self.setup_args = None
         else:
             raise AttributeError("Must be callable")
 
     def run(self):
         if self.setup_func:
-            self.setup_func()
+            if self.setup_args:
+                self.setup_func(self.setup_args)
+            else:
+                self.setup_func()
 
         for test in self.tests:
             test()
 
         if self.report_func:
-            self.report_func()
+            if self.report_args:
+                self.report_func(*self.report_args)
+            else:
+                self.report_func()
+
 
 
 class test():

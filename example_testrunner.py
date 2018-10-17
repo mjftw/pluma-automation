@@ -15,8 +15,8 @@ def my_teardown():
     print("Test teardown")
 
 
-def suite_setup():
-    print("Suite setup")
+def suite_setup(*args):
+    print("Suite setup. {}".format(*args))
 
 
 def suite_report():
@@ -26,7 +26,7 @@ def suite_report():
 def main():
     suite = TestSuite(
         [my_test, my_test],
-        suite_setup,
+        (suite_setup, "Hello!", 10),
         suite_report
     )
 
