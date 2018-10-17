@@ -6,6 +6,9 @@ class TestSuite():
         self.setup_func = setup_func
         self.report_func = report_func
 
+    def __call__(self):
+        self.run()
+
     @property
     def tests(self):
         if hasattr(self, "_tests"):
@@ -85,26 +88,43 @@ class TestSuite():
                 self.report_func()
 
 
-
 class test():
     def __init__(self, fbody):
+        self.args = None
+        self.setup_args = None
+        self.teardown_args = None
         self.fbody = fbody
         self.fsetup = None
         self.fteardown = None
         self.success = None
 
-    def __call__(self):
+    def __call__(self, args=None):
+        if args:
+            if hasattr(args, '__ittr__'):
+                self.args = list(args)
+            else:
+                self.args = args
+
         if self.fsetup:
             print("Running setup: {}".format(self.fsetup.__name__))
-            self.fsetup()
+            if self.setup_args:
+                self.fsetup(self.setup_args)
+            else:
+                self.fsetup()
 
         if self.fbody:
             print("Starting test: {}".format(self.fbody.__name__))
-            self.success = self.fbody()
+            if self.args:
+                self.success = self.fbody(self.args)
+            else:
+                self.success = self.fbody()
 
         if self.fteardown:
             print("Running teardown: {}".format(self.fteardown.__name__))
-            self.fteardown()
+            if self.teardown_args:
+                self.fteardown(*self.teardown_args)
+            else:
+                self.fteardown()
 
         if isinstance(self.success, bool):
             return self.success
