@@ -2,8 +2,8 @@ from farmutils.test import TestSuite, Test
 
 
 @Test
-def my_test():
-    print("Test body")
+def my_test(arg1):
+    print("Test body, arg1={}".format(arg1))
     return True
 
 
@@ -45,7 +45,7 @@ def suite_run_condition(suite, ntimes):
 
 
 def main():
-    my_test()
+    my_test("__test__")
 
     suite = TestSuite(
         tests=Test(

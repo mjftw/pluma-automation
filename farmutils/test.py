@@ -157,10 +157,10 @@ class Test():
 
     def __call__(self, args=None):
         if args:
-            if hasattr(args, '__ittr__'):
-                self.args = list(args)
-            else:
+            if isinstance(args, list):
                 self.args = args
+            else:
+                self.args = [args]
 
         if self.fsetup:
             if self.setup_args:
