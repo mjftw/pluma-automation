@@ -1,17 +1,16 @@
-
-
+""" This class is inherited in order add hierachy to a class """
 class Hierachy():
     @property
-    def reccurse_hier(self):
-        if hasattr(self, "_reccurse_hier"):
-            return self._reccurse_hier
+    def _reccurse_hier(self):
+        if hasattr(self, "__reccurse_hier"):
+            return self.__reccurse_hier
         else:
             return False
 
-    @reccurse_hier.setter
-    def reccurse_hier(self, reccurse_hier):
-        self._reccurse_hier = reccurse_hier
-        self._children_set_attr("reccurse_hier", reccurse_hier)
+    @_reccurse_hier.setter
+    def _reccurse_hier(self, _reccurse_hier):
+        self.__reccurse_hier = _reccurse_hier
+        self._children_set_attr("_reccurse_hier", _reccurse_hier)
 
     def _get_hier(self):
         children = {}
@@ -33,7 +32,7 @@ class Hierachy():
             child._children_set_attr(attr, value)
 
     def show_hier(self, indent_level=1, indent_size=4, reccurse=True):
-        """ Return strung containing all local vars, and get children to do the same """
+        """ Return string containing all local vars, and get children to do the same """
         children = {}
         attrs = {}
         hier_str = ''
@@ -69,6 +68,7 @@ def hier_setter(f):
         f(*args)
         self = args[0]
         if isinstance(self, Hierachy):
-            if self.log_reccurse:
-                self._children_set_attr(f.__name__, f)
+            if self._reccurse_hier:
+                self._children_set_attr(
+                    f.__name__, getattr(self, f.__name__))
     return wrapper

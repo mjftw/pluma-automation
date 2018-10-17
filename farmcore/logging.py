@@ -1,7 +1,30 @@
+import datetime
+import os
 
 from .hierachy import hier_setter
 
-DEFAULT_LOG_TIMEFORMAT = "%y-%m-%d %H:%M:%S"
+
+""" Enable logging """
+DEFAULT_LOG_ON = True
+
+""" Echo log to stdout """
+DEFAULT_LOG_ECHO = True
+
+""" Add hierachial path to logs """
+DEFAULT_LOG_HIER_PATH = False
+
+""" Time format string """
+DEFAULT_LOG_TIME_FORMAT = "%y-%m-%d %H:%M:%S"
+
+""" Add timestamp to logs """
+DEFAULT_LOG_TIME = False
+
+""" Add log name to logs """
+DEFAULT_LOG_NAME = None
+
+""" Log file to write to """
+DEFAULT_LOG_FILE = None
+
 
 class Logging():
     @property
@@ -9,7 +32,7 @@ class Logging():
         if hasattr(self, "_log_on"):
             return self._log_on
         else:
-            return False
+            return DEFAULT_LOG_ON
 
     @log_on.setter
     @hier_setter
@@ -21,7 +44,7 @@ class Logging():
         if hasattr(self, "_log_name"):
             return self._log_name
         else:
-            return None
+            return DEFAULT_LOG_NAME
 
     @log_name.setter
     @hier_setter
@@ -33,7 +56,7 @@ class Logging():
         if hasattr(self, "_log_time"):
             return self._log_time
         else:
-            return False
+            return DEFAULT_LOG_TIME
 
     @log_time.setter
     @hier_setter
@@ -41,11 +64,23 @@ class Logging():
         self._log_time = log_time
 
     @property
+    def log_time_format(self):
+        if hasattr(self, "_log_time_format"):
+            return self._log_time_format
+        else:
+            return DEFAULT_LOG_TIME_FORMAT
+
+    @log_time_format.setter
+    @hier_setter
+    def log_time_format(self, log_time_format):
+        self._log_time_format = log_time_format
+
+    @property
     def log_file(self):
         if hasattr(self, "_log_file"):
             return self._log_file
         else:
-            return None
+            return DEFAULT_LOG_FILE
 
     @log_file.setter
     @hier_setter
@@ -57,7 +92,7 @@ class Logging():
         if hasattr(self, "_log_echo"):
             return self._log_echo
         else:
-            return False
+            return DEFAULT_LOG_ECHO
 
     @log_echo.setter
     @hier_setter
@@ -69,7 +104,7 @@ class Logging():
         if hasattr(self, "_log_hier_path"):
             return self._log_hier_path
         else:
-            return False
+            return DEFAULT_LOG_HIER_PATH
 
     @log_hier_path.setter
     @hier_setter
@@ -90,8 +125,8 @@ class Logging():
                 prefix = '[{}]{}'.format(self.log_hier_path, prefix)
             if self.log_name:
                 prefix = '{}{}'.format(self.log_name, prefix)
-            if self.log_time:
-                timestr = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
+            if self.log_time and self.log_time_format:
+                timestr = datetime.datetime.now().strftime(self.log_time_format)
                 prefix = '{} {}'.format(timestr, prefix)
             if prefix:
                 message = '{}: {}'.format(prefix, message)
