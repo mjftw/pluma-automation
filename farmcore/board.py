@@ -21,31 +21,18 @@ class Board(Farmclass):
         self.baud = 115200  # TODO: Remove hardcoding
         self._console = None
 
-        if logfile is DEFAULT_LOGFILE:
-            self.logfile = "/tmp/board_{}.log".format(self.name)
-        else:
-            self.logfile = logfile
+        self.log_reccurse = True
 
-        self.update_logger()
+        if logfile is DEFAULT_LOGFILE:
+            self.log_file = "/tmp/board_{}.log".format(self.name)
+        else:
+            self.log_file = logfile
 
     @property
     def console(self):
         if self._console is None:
             self._console = SerialConsole(self.hub.get_serial(), self.baud)
         return self._console
-
-    def update_logger(self):
-        self.set_logger(
-            logname=self.name,
-            logfile=self.logfile,
-            appendtype=True,
-            logtime=True,
-            reccurse=True
-        )
-
-    def log(self, message):
-        self.update_logger()
-        super().log(message)
 
 
 def get_board(boards, name):
