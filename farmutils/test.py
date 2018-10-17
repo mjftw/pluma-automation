@@ -1,10 +1,19 @@
 class TestSuite():
-    def __init__(self, tests=None, setup_func=None, report_func=None):
+    def __init__(self, tests=None, setup_func=None, report_func=None,
+            run_condition_func=None):
         self.tests = tests
         self.setup_args = None
         self.report_args = None
+        self.run_condition_args = None
         self.setup_func = setup_func
         self.report_func = report_func
+        self.run_condition_func = run_condition_func
+        self.num_iterations_run = 0
+        self.num_iterations_pass = 0
+        self.num_iterations_fail = 0
+        self.num_tests_run = 0
+        self.num_tests_pass = 0
+        self.num_tests_fail = 0
 
     def __call__(self):
         self.run()
@@ -38,54 +47,90 @@ class TestSuite():
     @setup_func.setter
     def setup_func(self, f):
         """ Function with args """
+        self.setup_args = [self]
         if isinstance(f, tuple) and callable(f[0]):
             self._setup_func = f[0]
-            self.setup_args = list(f[1:])
+            self.setup_args += list(f[1:])
         elif callable(f):
             self._setup_func = f
-            self.setup_args = None
         elif f is None:
             self._setup_func = None
-            self.setup_args = None
         else:
             raise AttributeError("Must be callable")
 
     @property
-    def result_func(self):
-        if hasattr(self, "_result_func"):
-            return self._result_func
+    def report_func(self):
+        if hasattr(self, "_report_func"):
+            return self._report_func
         else:
             return None
 
-    @result_func.setter
-    def result_func(self, f):
+    @report_func.setter
+    def report_func(self, f):
+        self.report_args = [self]
         if isinstance(f, tuple) and callable(f[0]):
-            self._setup_func = f[0]
-            self.setup_args = list(f[1:])
+            self._report_func = f[0]
+            self.report_args += list(f[1:])
         elif callable(f):
-            self._setup_func = f
-            self.setup_args = None
+            self._report_func = f
         elif f is None:
-            self._setup_func = None
-            self.setup_args = None
+            self._report_func = None
         else:
             raise AttributeError("Must be callable")
 
+    @property
+    def run_condition_func(self):
+        if hasattr(self, "_run_condition_func"):
+            return self._run_condition_func
+        else:
+            return None
+
+    @run_condition_func.setter
+    def run_condition_func(self, f):
+        self.run_condition_args = [self]
+        if isinstance(f, tuple) and callable(f[0]):
+            self._run_condition_func = f[0]
+            self.run_condition_args += list(f[1:])
+        elif callable(f):
+            self._run_condition_func = f
+        elif f is None:
+            self._run_condition_func = None
+        else:
+            raise AttributeError("Must be callable")
+
+    def run_iteration(self):
+        all_tests_pass = True
+        for test in self.tests:
+            success = test()
+            self.num_tests_run += 1
+            if success:
+                self.num_tests_pass += 1
+            else:
+                self.num_tests_fail += 1
+                all_tests_pass = False
+
+        self.num_iterations_run += 1
+        if all_tests_pass:
+            self.num_iterations_pass += 1
+        else:
+            self.num_iterations_fail += 1
+
     def run(self):
         if self.setup_func:
-            if self.setup_args:
-                self.setup_func(self.setup_args)
-            else:
-                self.setup_func()
+            print("Running suite setup function: {}".format(
+                self.setup_func.__name__))
+            self.setup_func(*self.setup_args)
 
-        for test in self.tests:
-            test()
+        if self.run_condition_func:
+            while self.run_condition_func(*self.run_condition_args):
+                self.run_iteration()
+        else:
+            self.run_iteration()
 
         if self.report_func:
-            if self.report_args:
-                self.report_func(*self.report_args)
-            else:
-                self.report_func()
+            print("Running suite report function: {}".format(
+                self.report_func.__name__))
+            self.report_func(*self.report_args)
 
 
 class test():
@@ -108,14 +153,14 @@ class test():
         if self.fsetup:
             print("Running setup: {}".format(self.fsetup.__name__))
             if self.setup_args:
-                self.fsetup(self.setup_args)
+                self.fsetup(*self.setup_args)
             else:
                 self.fsetup()
 
         if self.fbody:
             print("Starting test: {}".format(self.fbody.__name__))
             if self.args:
-                self.success = self.fbody(self.args)
+                self.success = self.fbody(*self.args)
             else:
                 self.success = self.fbody()
 
