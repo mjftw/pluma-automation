@@ -18,6 +18,9 @@ class TestSuite():
     def __call__(self):
         self.run()
 
+    def __repr__(self):
+        return self.__class__.__name__
+
     @property
     def tests(self):
         if hasattr(self, "_tests"):
@@ -27,9 +30,9 @@ class TestSuite():
 
     @tests.setter
     def tests(self, tests):
-        if isinstance(tests, list) and isinstance(tests[0], test):
+        if isinstance(tests, list) and isinstance(tests[0], Test):
             self._tests = tests
-        elif isinstance(tests, test):
+        elif isinstance(tests, Test):
             self._tests = [tests]
         elif tests is None:
             self._tests = []
@@ -124,8 +127,9 @@ class TestSuite():
         self.num_tests_fail = 0
 
         if self.setup_func:
-            print("Running suite setup function: {}".format(
-                self.setup_func.__name__))
+            args_string = ", ".join(str(e) for e in self.setup_args)
+            print("Running suite setup function: {}({})".format(
+                self.setup_func.__name__, args_string))
             self.setup_func(*self.setup_args)
 
         if self.run_condition_func:
@@ -135,19 +139,20 @@ class TestSuite():
             self.run_iteration()
 
         if self.report_func:
-            print("Running suite report function: {}".format(
-                self.report_func.__name__))
+            args_string = ", ".join(str(e) for e in self.report_args)
+            print("Running suite report function: {}({})".format(
+                self.report_func.__name__, args_string))
             self.report_func(*self.report_args)
 
 
-class test():
-    def __init__(self, fbody):
+class Test():
+    def __init__(self, fbody=None, fsetup=None, fteardown=None):
         self.args = None
         self.setup_args = None
         self.teardown_args = None
         self.fbody = fbody
-        self.fsetup = None
-        self.fteardown = None
+        self.fsetup = fsetup
+        self.fteardown = fteardown
         self.success = None
 
     def __call__(self, args=None):
@@ -158,33 +163,78 @@ class test():
                 self.args = args
 
         if self.fsetup:
-            print("Running setup: {}".format(self.fsetup.__name__))
             if self.setup_args:
+                args_string = ", ".join(str(e) for e in self.setup_args)
+                print("Running setup: {}({})".format(
+                    self.fsetup.__name__, args_string))
                 self.fsetup(*self.setup_args)
             else:
+                print("Running setup: {}()".format(self.fsetup.__name__))
                 self.fsetup()
 
         if self.fbody:
-            print("Starting test: {}".format(self.fbody.__name__))
             if self.args:
+                args_string = ", ".join(str(e) for e in self.args)
+                print("Running test: {}({})".format(
+                    self.fbody.__name__, args_string))
                 self.success = self.fbody(*self.args)
             else:
+                print("Running test: {}()".format(self.fbody.__name__))
                 self.success = self.fbody()
 
         if self.fteardown:
-            print("Running teardown: {}".format(self.fteardown.__name__))
             if self.teardown_args:
+                args_string = ", ".join(str(e) for e in self.teardown_args)
+                print("Running teardown: {}({})".format(
+                    self.fteardown.__name__, args_string))
                 self.fteardown(*self.teardown_args)
             else:
+                print("Running teardown: {}()".format(self.fteardown.__name__))
                 self.fteardown()
 
         if isinstance(self.success, bool):
             return self.success
 
-    def setup(self, fsetup):
-        self.fsetup = fsetup
-        return fsetup
+    def setup(self, f):
+        self.fsetup = f
+        return f
 
-    def teardown(self, fteardown):
-        self.fteardown = fteardown
-        return fteardown
+    def teardown(self, f):
+        self.fteardown = f
+        return f
+
+    @property
+    def fsetup(self):
+        return self._fsetup
+
+    @fsetup.setter
+    def fsetup(self, f):
+        if isinstance(f, tuple) and callable(f[0]):
+            self._fsetup = f[0]
+            self.setup_args = list(f[1:])
+        elif callable(f):
+            self._fsetup = f
+            self.setup_args = None
+        elif f is None:
+            self._fsetup = None
+            self.setup_args = None
+        else:
+            raise AttributeError("Must be callable")
+
+    @property
+    def fteardown(self):
+        return self._fteardown
+
+    @fteardown.setter
+    def fteardown(self, f):
+        if isinstance(f, tuple) and callable(f[0]):
+            self._fteardown = f[0]
+            self.teardown_args = list(f[1:])
+        elif callable(f):
+            self._fteardown = f
+            self.teardown_args = None
+        elif f is None:
+            self._fteardown = None
+            self.teardown_args = None
+        else:
+            raise AttributeError("Must be callable")

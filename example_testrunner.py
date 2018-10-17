@@ -1,7 +1,7 @@
-from farmutils.test import TestSuite, test
+from farmutils.test import TestSuite, Test
 
 
-@test
+@Test
 def my_test():
     print("Test body")
     return True
@@ -15,6 +15,18 @@ def my_setup():
 @my_test.teardown
 def my_teardown():
     print("Test teardown")
+
+
+def my_fsetup(arg1):
+    print("In my_fsetup, arg1={}".format(arg1))
+
+
+def my_fbody():
+    print("In my_fbody")
+
+
+def my_fteardown():
+    print("In my_fteardown")
 
 
 def suite_setup(suite, *args):
@@ -33,12 +45,18 @@ def suite_run_condition(suite, ntimes):
 
 
 def main():
+    my_test()
+
     suite = TestSuite(
-        tests=my_test,
+        tests=Test(
+            fbody=my_fbody,
+            fsetup=(my_fsetup, 12343),
+            fteardown=my_fteardown
+        ),
         setup_func=(suite_setup, "Hello!", 10),
     )
 
-    suite.run_condition_func = (suite_run_condition, 5)
+    suite.run_condition_func = (suite_run_condition, 3)
     suite.report_func = suite_report
 
     suite.run()
