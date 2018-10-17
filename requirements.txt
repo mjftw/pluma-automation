@@ -1,0 +1,4 @@
+# $ pip3 install -r requirements.txt
+pyserial
+pyudev
+pexpect>=4.6
