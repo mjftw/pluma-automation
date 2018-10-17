@@ -116,6 +116,13 @@ class TestSuite():
             self.num_iterations_fail += 1
 
     def run(self):
+        self.num_iterations_run = 0
+        self.num_iterations_pass = 0
+        self.num_iterations_fail = 0
+        self.num_tests_run = 0
+        self.num_tests_pass = 0
+        self.num_tests_fail = 0
+
         if self.setup_func:
             print("Running suite setup function: {}".format(
                 self.setup_func.__name__))
