@@ -1,6 +1,8 @@
+from . import testlib
+
 class TestSuite():
     def __init__(self, tests=None, setup_func=None, report_func=None,
-            run_condition_func=None):
+            run_condition_func=None, report_n_iterations=None, run_forever=False):
         self.tests = tests
         self.setup_args = None
         self.report_args = None
@@ -8,6 +10,8 @@ class TestSuite():
         self.setup_func = setup_func
         self.report_func = report_func
         self.run_condition_func = run_condition_func
+        self.run_forever = run_forever
+        self.report_n_iterations = report_n_iterations
         self.num_iterations_run = 0
         self.num_iterations_pass = 0
         self.num_iterations_fail = 0
@@ -118,31 +122,43 @@ class TestSuite():
         else:
             self.num_iterations_fail += 1
 
+    def run_func(self, f, args, name=""):
+        if f:
+            args_string = ", ".join(str(e) for e in args)
+            print("Running suite {} function: {}({})".format(
+                name, f.__name__, args_string))
+            return f(*args)
+
+    def run_setup(self):
+        return self.run_func(self.setup_func, self.setup_args, "setup")
+
+    def run_report(self):
+        return self.run_func(self.report_func, self.report_args, "report")
+
     def run(self):
-        self.num_iterations_run = 0
-        self.num_iterations_pass = 0
-        self.num_iterations_fail = 0
-        self.num_tests_run = 0
-        self.num_tests_pass = 0
-        self.num_tests_fail = 0
+        while True:
+            self.num_iterations_run = 0
+            self.num_iterations_pass = 0
+            self.num_iterations_fail = 0
+            self.num_tests_run = 0
+            self.num_tests_pass = 0
+            self.num_tests_fail = 0
 
-        if self.setup_func:
-            args_string = ", ".join(str(e) for e in self.setup_args)
-            print("Running suite setup function: {}({})".format(
-                self.setup_func.__name__, args_string))
-            self.setup_func(*self.setup_args)
+            self.run_setup()
 
-        if self.run_condition_func:
-            while self.run_condition_func(*self.run_condition_args):
+            if self.run_condition_func:
+                while self.run_condition_func(*self.run_condition_args):
+                    self.run_iteration()
+                    if (self.report_n_iterations and
+                        self.num_iterations_run % self.report_n_iterations == 0):
+                        self.run_report()
+            else:
                 self.run_iteration()
-        else:
-            self.run_iteration()
 
-        if self.report_func:
-            args_string = ", ".join(str(e) for e in self.report_args)
-            print("Running suite report function: {}({})".format(
-                self.report_func.__name__, args_string))
-            self.report_func(*self.report_args)
+            self.run_report()
+
+            if not self.run_forever:
+                return
 
 
 class Test():
@@ -162,38 +178,37 @@ class Test():
             else:
                 self.args = [args]
 
-        if self.fsetup:
-            if self.setup_args:
-                args_string = ", ".join(str(e) for e in self.setup_args)
-                print("Running setup: {}({})".format(
-                    self.fsetup.__name__, args_string))
-                self.fsetup(*self.setup_args)
-            else:
-                print("Running setup: {}()".format(self.fsetup.__name__))
-                self.fsetup()
+        self.run_setup()
 
-        if self.fbody:
-            if self.args:
-                args_string = ", ".join(str(e) for e in self.args)
-                print("Running test: {}({})".format(
-                    self.fbody.__name__, args_string))
-                self.success = self.fbody(*self.args)
-            else:
-                print("Running test: {}()".format(self.fbody.__name__))
-                self.success = self.fbody()
+        self.success = self.run_body()
 
-        if self.fteardown:
-            if self.teardown_args:
-                args_string = ", ".join(str(e) for e in self.teardown_args)
-                print("Running teardown: {}({})".format(
-                    self.fteardown.__name__, args_string))
-                self.fteardown(*self.teardown_args)
-            else:
-                print("Running teardown: {}()".format(self.fteardown.__name__))
-                self.fteardown()
+        self.run_teardown()
 
         if isinstance(self.success, bool):
             return self.success
+
+    def run_func(self, f, name, args=None):
+        result = None
+        if f:
+            if args:
+                args_string = ", ".join(str(e) for e in args)
+                print("Running {}: {}({})".format(
+                    name, f.__name__, args_string))
+                result = f(*args)
+            else:
+                print("Running teardown: {}()".format(f.__name__))
+                result = f()
+
+        return result
+
+    def run_setup(self):
+        return self.run_func(self.fsetup, "setup", self.setup_args)
+
+    def run_body(self):
+        return self.run_func(self.fbody, "test", self.args)
+
+    def run_teardown(self):
+        return self.run_func(self.fteardown, "teardown", self.teardown_args)
 
     def setup(self, f):
         self.fsetup = f
