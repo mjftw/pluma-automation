@@ -1,17 +1,72 @@
-from . import testlib
+""" Test func decorator  """
+def test_func(f):
+    def test(*args, **kwargs):
+        return (f, args, kwargs)
+    return test
 
-class TestSuite():
+class TestBase():
+    def __call__(self):
+        self.run()
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+    def create_func(self, f, name=""):
+        if not f:
+            return None
+
+        func = {}
+
+        if callable(f):
+            try:
+                if isinstance(f(), tuple) and len(f()) > 0 and callable(f()[0]):
+                    f = f()
+            except TypeError:
+                f = test_func(f)()
+        if isinstance(f, tuple) and callable(f[0]):
+            func['f'] = f[0]
+            func['args'] = list(filter(lambda x: isinstance(x, tuple), f[1:]))[0]
+            func['kwargs'] = list(filter(lambda x: isinstance(x, dict), f[1:]))[0]
+        else:
+            raise AttributeError("Must be tuple of function, and (optional) args")
+
+        if 'f' in func:
+            func['name'] = name
+
+        return func
+
+    def run_func(self, func, echo=True):
+        if not func:
+            return None
+
+        if 'f' in func:
+            # args_string = ", ".join(str(e) for e in args)
+            args_string = ", ".join(str(v) for v in func['args'])
+            if func['kwargs']:
+                args_string += ", " + ", ".join(
+                    "{}={}".format(k, v) for k, v in func['kwargs'].items())
+            if echo:
+                print("Running {} function: {}({})".format(
+                    func['name'], func['f'].__name__, args_string))
+
+            return func['f'](self, *func['args'], **func['kwargs'])
+
+    def attr_getter(self, attr):
+        if hasattr(self, attr):
+            return getattr(self, attr)
+        else:
+            return None
+
+class TestSuite(TestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, report_n_iterations=None, run_forever=False):
         self.tests = tests
-        self.setup_args = None
-        self.report_args = None
-        self.run_condition_args = None
-        self.setup_func = setup_func
-        self.report_func = report_func
-        self.run_condition_func = run_condition_func
+        self.setup = setup_func
+        self.report = report_func
+        self.run_condition = run_condition_func
         self.run_forever = run_forever
         self.report_n_iterations = report_n_iterations
+
         self.num_iterations_run = 0
         self.num_iterations_pass = 0
         self.num_iterations_fail = 0
@@ -19,18 +74,9 @@ class TestSuite():
         self.num_tests_pass = 0
         self.num_tests_fail = 0
 
-    def __call__(self):
-        self.run()
-
-    def __repr__(self):
-        return self.__class__.__name__
-
     @property
     def tests(self):
-        if hasattr(self, "_tests"):
-            return self._tests
-        else:
-            return None
+        return self.attr_getter("_tests")
 
     @tests.setter
     def tests(self, tests):
@@ -43,67 +89,32 @@ class TestSuite():
         else:
             raise AttributeError(
                 "Must be either: single test, list of tests, or None")
+        for test in self.tests:
+            test.suite = self
 
     @property
-    def setup_func(self):
-        if hasattr(self, "_setup_func"):
-            return self._setup_func
-        else:
-            return None
+    def setup(self):
+        return self.attr_getter("_setup")
 
-    @setup_func.setter
-    def setup_func(self, f):
-        """ Function with args """
-        self.setup_args = [self]
-        if isinstance(f, tuple) and callable(f[0]):
-            self._setup_func = f[0]
-            self.setup_args += list(f[1:])
-        elif callable(f):
-            self._setup_func = f
-        elif f is None:
-            self._setup_func = None
-        else:
-            raise AttributeError("Must be callable")
+    @setup.setter
+    def setup(self, f):
+        self._setup = self.create_func(f, "setup")
 
     @property
-    def report_func(self):
-        if hasattr(self, "_report_func"):
-            return self._report_func
-        else:
-            return None
+    def report(self):
+        return self.attr_getter("_report")
 
-    @report_func.setter
-    def report_func(self, f):
-        self.report_args = [self]
-        if isinstance(f, tuple) and callable(f[0]):
-            self._report_func = f[0]
-            self.report_args += list(f[1:])
-        elif callable(f):
-            self._report_func = f
-        elif f is None:
-            self._report_func = None
-        else:
-            raise AttributeError("Must be callable")
+    @report.setter
+    def report(self, f):
+        self._report = self.create_func(f, "report")
 
     @property
-    def run_condition_func(self):
-        if hasattr(self, "_run_condition_func"):
-            return self._run_condition_func
-        else:
-            return None
+    def run_condition(self):
+        return self.attr_getter("_run_condition")
 
-    @run_condition_func.setter
-    def run_condition_func(self, f):
-        self.run_condition_args = [self]
-        if isinstance(f, tuple) and callable(f[0]):
-            self._run_condition_func = f[0]
-            self.run_condition_args += list(f[1:])
-        elif callable(f):
-            self._run_condition_func = f
-        elif f is None:
-            self._run_condition_func = None
-        else:
-            raise AttributeError("Must be callable")
+    @run_condition.setter
+    def run_condition(self, f):
+        self._run_condition = self.create_func(f, "run_condition")
 
     def run_iteration(self):
         all_tests_pass = True
@@ -122,19 +133,6 @@ class TestSuite():
         else:
             self.num_iterations_fail += 1
 
-    def run_func(self, f, args, name=""):
-        if f:
-            args_string = ", ".join(str(e) for e in args)
-            print("Running suite {} function: {}({})".format(
-                name, f.__name__, args_string))
-            return f(*args)
-
-    def run_setup(self):
-        return self.run_func(self.setup_func, self.setup_args, "setup")
-
-    def run_report(self):
-        return self.run_func(self.report_func, self.report_args, "report")
-
     def run(self):
         while True:
             self.num_iterations_run = 0
@@ -144,112 +142,63 @@ class TestSuite():
             self.num_tests_pass = 0
             self.num_tests_fail = 0
 
-            self.run_setup()
+            self.run_func(self.setup)
 
-            if self.run_condition_func:
-                while self.run_condition_func(*self.run_condition_args):
+            if self.run_condition:
+                while self.run_func(self.run_condition, echo=False):
                     self.run_iteration()
                     if (self.report_n_iterations and
                         self.num_iterations_run % self.report_n_iterations == 0):
-                        self.run_report()
+                        self.run_func(self.report)
             else:
                 self.run_iteration()
-
-            self.run_report()
+                self.run_func(self.report)
 
             if not self.run_forever:
                 return
 
 
-class Test():
+class Test(TestBase):
     def __init__(self, fbody=None, fsetup=None, fteardown=None):
-        self.args = None
-        self.setup_args = None
-        self.teardown_args = None
-        self.fbody = fbody
-        self.fsetup = fsetup
-        self.fteardown = fteardown
-        self.success = None
+        self.body = fbody
+        self.setup = fsetup
+        self.teardown = fteardown
 
-    def __call__(self, args=None):
-        if args:
-            if isinstance(args, list):
-                self.args = args
-            else:
-                self.args = [args]
+        self.suite = None
+        self.success = False
 
-        self.run_setup()
+    @property
+    def body(self):
+        return self.attr_getter("_body")
 
-        self.success = self.run_body()
+    @body.setter
+    def body(self, f):
+        self._body = self.create_func(f, "test")
 
-        self.run_teardown()
+    @property
+    def setup(self):
+        return self.attr_getter("_setup")
 
-        if isinstance(self.success, bool):
-            return self.success
-
-    def run_func(self, f, name, args=None):
-        result = None
-        if f:
-            if args:
-                args_string = ", ".join(str(e) for e in args)
-                print("Running {}: {}({})".format(
-                    name, f.__name__, args_string))
-                result = f(*args)
-            else:
-                print("Running teardown: {}()".format(f.__name__))
-                result = f()
-
-        return result
-
-    def run_setup(self):
-        return self.run_func(self.fsetup, "setup", self.setup_args)
-
-    def run_body(self):
-        return self.run_func(self.fbody, "test", self.args)
-
-    def run_teardown(self):
-        return self.run_func(self.fteardown, "teardown", self.teardown_args)
-
+    @setup.setter
     def setup(self, f):
-        self.fsetup = f
-        return f
+        self._setup = self.create_func(f, "setup")
 
+    @property
+    def teardown(self):
+        return self.attr_getter("_teardown")
+
+    @teardown.setter
     def teardown(self, f):
-        self.fteardown = f
-        return f
+        self._teardown = self.create_func(f, "teardown")
 
-    @property
-    def fsetup(self):
-        return self._fsetup
+    def run(self):
+        self.run_func(self.setup)
+        self.success = self.run_func(self.body)
 
-    @fsetup.setter
-    def fsetup(self, f):
-        if isinstance(f, tuple) and callable(f[0]):
-            self._fsetup = f[0]
-            self.setup_args = list(f[1:])
-        elif callable(f):
-            self._fsetup = f
-            self.setup_args = None
-        elif f is None:
-            self._fsetup = None
-            self.setup_args = None
+        if self.setup:
+            self.run_func(self.teardown)
+
+        if self.success:
+            return True
         else:
-            raise AttributeError("Must be callable")
-
-    @property
-    def fteardown(self):
-        return self._fteardown
-
-    @fteardown.setter
-    def fteardown(self, f):
-        if isinstance(f, tuple) and callable(f[0]):
-            self._fteardown = f[0]
-            self.teardown_args = list(f[1:])
-        elif callable(f):
-            self._fteardown = f
-            self.teardown_args = None
-        elif f is None:
-            self._fteardown = None
-            self.teardown_args = None
-        else:
-            raise AttributeError("Must be callable")
+            return False
