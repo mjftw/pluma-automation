@@ -1,13 +1,10 @@
-import sys
-sys.path.append('/home/phil/farm/farm-core/farmcore')
-sys.path.append('/home/phil/farm/farm-core/farmutils')
-import time
 import datetime
 import os
 
 
 from farmcore import farm
 from farmutils.doemail import Email
+from farmutils.test import TestSuite, Test, testlib
 
 
 def main():
@@ -27,20 +24,36 @@ def main():
     paladin.console.logon = False
     paladin.power.logon = True
 
-    boot_test(paladin, 10000)
+    iterations = 1000
+    boot_string = "login"
 
+    # When running on a beaglebone the TZ is not set, so these are UTC times and you need to take account of any DST adjustment.
+    start_hour = 9
+    stop_hour = 10
 
-def time_in_range(start_hour, end_hour):
-    now = datetime.datetime.now()
-    return (start_hour <= now.hour and now.hour < end_hour)
+    suite = TestSuite(
+        setup_func=testlib.ss_boot(paladin, boot_string, iterations),
+        tests=Test(
+            fbody=testlib.tb_boot(paladin, boot_string)
+        ),
+        report_func=(send_test_report, paladin),
+        run_condition_func=testlib.sc_time_in_range(9, 10),
+        run_forever=True
+    )
 
+    suite.run()
 
-def send_test_report(board, test_no, pass_no, fail_no):
+def send_test_report(suite, board):
     board.log("Sending test report")
+
+    timestr = datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")
+    os.rename("paladin.log", "paladin_{}.log".format(timestr))
 
     body = """ --------- Automated Paladin boot test report ---------
                Boot attempts: {}, Pass: {}, Fail: {}""".format(
-                   test_no, pass_no, fail_no
+                   suite.num_tests_run,
+                   suite.num_tests_pass,
+                   suite.num_tests_fail
                )
     Email(
        sender="probinson@witekio.com",
@@ -51,51 +64,6 @@ def send_test_report(board, test_no, pass_no, fail_no):
        files=[board.logfile],
        smtp_authfile='./smtp.auth'
     ).send()
-
-
-def boot_test(board, itterations):
-
-    boot_string = "login"
-
-    pass_no = 0
-    fail_no = 0
-    test_no = 0
-
-    board.log("---- Beggining boot test over {} itterations with boot string '{}' ---- ".format(
-        itterations, boot_string)
-    )
-
-    # When running on a beaglebone the TZ is not set, so these are UTC times and you need to take account of any DST adjustment.
-    start_hour = 9
-    stop_hour = 10
-
-    while True:
-        while not time_in_range(start_hour, stop_hour):
-            test_no += 1
-            board.power.restart()
-            try:
-                board.console.send("", True, boot_string, False)
-                pass_no += 1
-
-            except farm.TimeoutNoRecieve:
-                board.log("TIMEOUT waiting for boot string...")
-                fail_no += 1
-
-            board.log("Test #: {}, pass #: {}, fail #: {}".format(
-                test_no, pass_no, fail_no)
-            )
-
-        send_test_report(board, test_no, pass_no, fail_no)
-        # reset metrics and archive the log file
-        pass_no = 0
-        fail_no = 0
-        test_no = 0
-        timestr = datetime.datetime.now().strftime("%y-%m-%d_%H:%M:%S")
-        os.rename("paladin.log", "paladin_{}.log".format(timestr))
-
-        while time_in_range(start_hour, stop_hour):
-            time.sleep(600)
-
 
 
 if __name__ == '__main__':
