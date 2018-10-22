@@ -17,18 +17,6 @@ def sc_time_in_range(suite, start_hour, end_hour):
     return (start_hour <= now.hour and now.hour < end_hour)
 
 
-@test_func
-def test_body(suite, board, boot_string):
-    success = False
-    board.power.restart()
-    try:
-        board.console.send("", True, boot_string, False)
-        success = True
-    except farm.TimeoutNoRecieve:
-        board.log("TIMEOUT waiting for boot string...")
-
-    return success
-
 
 @test_func
 def tt_log_stats(suite, board, test_no, pass_no, fail_no):
@@ -43,6 +31,58 @@ def tt_log_stats(suite, board, test_no, pass_no, fail_no):
 
 
 @test_func
-def ss_boot(suite, board, boot_string, iterations):
-    board.log("---- Beggining boot test over {} iterations with boot string '{}' ---- ".format(
-        iterations, boot_string))
+def ss_boot(__, board, boot_string, iterations):
+    board.log("---- Beggining boot test with boot string '{}' ---- ".format(
+        boot_string))
+
+
+@test_func
+def ss_log_test_plan(suite, board):
+    message = "Starting test suite:\n"
+    if suite.setup_func:
+        message += "\t{}: {}\n".format(
+            suite.setup_func['name'],
+            suite.setup_func['f'].__name__)
+    if suite.run_condition_func:
+        message += "\t{}: {}\n".format(
+            suite.run_condition_func['name'],
+            suite.run_condition_func['f'].__name__)
+    if suite.report_func:
+        message += "\t{}: {}\n".format(
+            suite.report_func['name'],
+            suite.report_func['f'].__name__)
+    message += "\n".join(suite.tests)
+    board.log(message)
+
+
+@test_func
+def tb_boot(__, board, boot_str="linux"):
+    board.log("Starting linux boot test with boot string \"{}\"".format(boot_str))
+    board.power.restart()
+    (__, matched) = board.console.send(cmd="", recieve=True, match=boot_str)
+    if matched:
+        return True
+    else:
+        board.log("TIMEOUT waiting for boot string...")
+        return False
+
+
+@test_func
+def tb_login(__, board, user="root", pw=None, prompt="#"):
+    board.log("Starting login test with user={}, pass={}, prompt={}".format(
+        user, pw, prompt
+    ))
+    (__, matched) = board.console.send(cmd="", recieve=True, match=["login", "Password", prompt])
+    if not matched:
+        return False
+    if matched == "login":
+        (__, matched) = board.console.send(cmd=user, recieve=True, match=["login", "Password", prompt])
+    if matched == "Password":
+        if not pw:
+            return False
+        (__, matched) = board.console.send(cmd=pw, recieve=True, match=["login", "Password", prompt])
+    if matched == prompt:
+        return True
+    else:
+        return False
+

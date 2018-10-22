@@ -49,7 +49,12 @@ class TestBase():
                 print("Running {} function: {}({})".format(
                     func['name'], func['f'].__name__, args_string))
 
-            return func['f'](self, *func['args'], **func['kwargs'])
+            if hasattr(self, "suite") and self.suite:
+                suite = self.suite
+            else:
+                suite = None
+
+            return func['f'](suite, *func['args'], **func['kwargs'])
 
     def attr_getter(self, attr):
         if hasattr(self, attr):
@@ -59,13 +64,19 @@ class TestBase():
 
 class TestSuite(TestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
-            run_condition_func=None, report_n_iterations=None, run_forever=False):
+            run_condition_func=None, name=None, report_n_iterations=None,
+            continue_on_fail=True, run_forever=False):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
         self.run_condition = run_condition_func
+
+        self.name = name
         self.run_forever = run_forever
         self.report_n_iterations = report_n_iterations
+        self.continue_on_fail = continue_on_fail
+
+        self.suite = self
 
         self.num_iterations_run = 0
         self.num_iterations_pass = 0
@@ -74,14 +85,25 @@ class TestSuite(TestBase):
         self.num_tests_pass = 0
         self.num_tests_fail = 0
 
+        self.tests_passed = []
+        self.tests_failed = []
+
     @property
     def tests(self):
         return self.attr_getter("_tests")
 
     @tests.setter
     def tests(self, tests):
-        if isinstance(tests, list) and isinstance(tests[0], Test):
-            self._tests = tests
+        self._tests = []
+        if isinstance(tests, list):
+            for test in tests:
+                if isinstance(test, Test):
+                    self._tests += test
+                elif callable(test):
+                    self._tests += Test(test)
+                else:
+                    raise AttributeError(
+                        "Must be either: single test, list of tests, or None")
         elif isinstance(tests, Test):
             self._tests = [tests]
         elif tests is None:
@@ -119,34 +141,45 @@ class TestSuite(TestBase):
     def run_iteration(self):
         all_tests_pass = True
         for test in self.tests:
-            success = test()
+            success = test.run()
             self.num_tests_run += 1
             if success:
                 self.num_tests_pass += 1
+                if test not in self.tests_passed:
+                    self.tests_passed += test
             else:
                 self.num_tests_fail += 1
+                if test not in self.tests_failed:
+                    self.tests_failed += test
                 all_tests_pass = False
+            if not all_tests_pass and not self.continue_on_fail:
+                break
 
         self.num_iterations_run += 1
         if all_tests_pass:
             self.num_iterations_pass += 1
+            return True
         else:
             self.num_iterations_fail += 1
+            return False
 
     def run(self):
+        self.num_iterations_run = 0
+        self.num_iterations_pass = 0
+        self.num_iterations_fail = 0
+        self.num_tests_run = 0
+        self.num_tests_pass = 0
+        self.num_tests_fail = 0
+
+        self.run_func(self.setup)
+
         while True:
-            self.num_iterations_run = 0
-            self.num_iterations_pass = 0
-            self.num_iterations_fail = 0
-            self.num_tests_run = 0
-            self.num_tests_pass = 0
-            self.num_tests_fail = 0
-
-            self.run_func(self.setup)
-
             if self.run_condition:
                 while self.run_func(self.run_condition, echo=False):
-                    self.run_iteration()
+                    success = self.run_iteration()
+                    if not success and not self.continue_on_fail:
+                        self.run_func(self.report)
+                        return
                     if (self.report_n_iterations and
                         self.num_iterations_run % self.report_n_iterations == 0):
                         self.run_func(self.report)
@@ -166,6 +199,15 @@ class Test(TestBase):
 
         self.suite = None
         self.success = False
+
+    def __repr__(self):
+        funcs = "{}:".format(__class__.__name__)
+        if self.setup:
+            funcs += "\n\tSetup: {}".format(self.setup.__name__)
+        if self.body:
+            funcs += "\n\tBody: {}".format(self.body.__name__)
+        if self.teardown:
+            funcs += "\n\tTeardown: {}".format(self.teardown.__name__)
 
     @property
     def body(self):
