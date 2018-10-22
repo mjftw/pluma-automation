@@ -88,7 +88,7 @@ class Console(Farmclass):
         return text.encode(self.encoding)
 
     def wait_for_data(self, timeout=10.0, sleep_time=0.1,
-                      match=None, start_bytes=None):
+                      match=None, start_bytes=None, verbose=True):
         if not self.is_open:
             self.open()
 
@@ -105,24 +105,26 @@ class Console(Farmclass):
 
         while(elapsed <= timeout):
             if match:
-                self.log("Waiting for pattern [{}]: Waited[{:.1f}/{:.1f}s]...".format(
-                    match, elapsed, timeout))
-                if self._pex.expect(expects) > 1:
-                    return True
+                if verbose:
+                    self.log("Waiting for pattern [{}]: Waited[{:.1f}/{:.1f}s]...".format(
+                        match, elapsed, timeout))
+                matched = expects[self._pex.expect(expects)]
+                if matched in match:
+                    return matched
             else:
                 current_bytes = self._flush_get_size()
-                self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
-                    elapsed, timeout, current_bytes-start_bytes))
+                if verbose:
+                    self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                        elapsed, timeout, current_bytes-start_bytes))
                 if current_bytes > start_bytes:
                     return True
 
             time.sleep(sleep_time)
             elapsed += sleep_time
 
-        raise TimeoutNoRecieve('Timeout waiting to recieve data')
         return False
 
-    def wait_for_quiet(self, timeout=10.0, quiet=0.3, sleep_time=0.1):
+    def wait_for_quiet(self, timeout=10.0, quiet=0.3, sleep_time=0.1, verbose=True):
         if not self.is_open:
             self.open()
 
@@ -139,9 +141,10 @@ class Console(Farmclass):
             else:
                 time_quiet = 0
 
-            self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
-                elapsed, timeout, time_quiet, quiet, current_bytes
-                ))
+            if verbose:
+                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                    elapsed, timeout, time_quiet, quiet, current_bytes
+                    ))
 
             if time_quiet > quiet:
                 return True
@@ -151,16 +154,15 @@ class Console(Farmclass):
             time.sleep(sleep_time)
             elapsed += sleep_time
 
-
-        raise TimeoutNoRecieveStop('Timeout waiting for quiet')
         return False
 
     def send(self,
-             cmd,
+             cmd=None,
              recieve=False,
              match=None,
-             log_pass_result=False,
-             log_fail_result=False,
+             log_recieved_on_pass=False,
+             log_recieved_on_fail=False,
+             log_verbose=True,
              timeout=-1,
              sleep_time=-1
              ):
@@ -169,12 +171,16 @@ class Console(Farmclass):
         if not self.is_open:
             raise RuntimeError("Could not open device")
 
-        self.log("Sending command:\n{}".format(cmd))
+        if log_verbose:
+            self.log("Sending command:\n{}".format(cmd))
+
+        if not cmd:
+            cmd=""
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
 
-        result = None
+        recieved = None
         matched = False
 
         """ Assign default timeout and sleep values if unassigned """
@@ -185,6 +191,7 @@ class Console(Farmclass):
 
         if not recieve:
             self._pex.sendline(cmd)
+            return (None, None)
         else:
             self.flush(True)
             self._pex.sendline(cmd)
@@ -192,19 +199,20 @@ class Console(Farmclass):
                 matched = self.wait_for_data(
                     timeout=data_timeout,
                     sleep_time=data_sleep,
-                    match=match)
-                result = self.decode(self._pex.before)
+                    match=match,
+                    verbose=log_verbose)
+                recieved = self.decode(self._pex.before)
+                if (matched and log_recieved_on_pass or
+                        not matched and log_recieved_on_fail):
+                    self.log("Command result:\n{}".format(result))
+                return (recieved, matched)
             else:
                 self.wait_for_quiet(
                     timeout=quiet_timeout,
-                    sleep_time=quiet_sleep)
-                result = self._buffer
-
-        if (matched and log_pass_result or
-                not matched and log_fail_result):
-            self.log("Command result:\n{}".format(result))
-
-        return result
+                    sleep_time=quiet_sleep,
+                    verbose=log_verbose)
+                recieved = self._buffer
+                return (recieved, None)
 
     def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()
