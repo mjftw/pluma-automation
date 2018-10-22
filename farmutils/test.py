@@ -146,11 +146,11 @@ class TestSuite(TestBase):
             if success:
                 self.num_tests_pass += 1
                 if test not in self.tests_passed:
-                    self.tests_passed += test
+                    self.tests_passed.append(test)
             else:
                 self.num_tests_fail += 1
                 if test not in self.tests_failed:
-                    self.tests_failed += test
+                    self.tests_failed.append(test)
                 all_tests_pass = False
             if not all_tests_pass and not self.continue_on_fail:
                 break
@@ -203,11 +203,12 @@ class Test(TestBase):
     def __repr__(self):
         funcs = "{}:".format(__class__.__name__)
         if self.setup:
-            funcs += "\n\tSetup: {}".format(self.setup.__name__)
+            funcs += "\n\t{}: {}".format(self.setup['name'], self.setup['f'].__name__)
         if self.body:
-            funcs += "\n\tBody: {}".format(self.body.__name__)
+            funcs += "\n\t{}: {}".format(self.body['name'], self.body['f'].__name__)
         if self.teardown:
-            funcs += "\n\tTeardown: {}".format(self.teardown.__name__)
+            funcs += "\n\t{}: {}".format(self.teardown['name'], self.teardown['f'].__name__)
+        return funcs
 
     @property
     def body(self):

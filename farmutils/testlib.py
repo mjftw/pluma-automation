@@ -39,19 +39,19 @@ def ss_boot(__, board, boot_string, iterations):
 @test_func
 def ss_log_test_plan(suite, board):
     message = "Starting test suite:\n"
-    if suite.setup_func:
+    if suite.setup:
         message += "\t{}: {}\n".format(
-            suite.setup_func['name'],
-            suite.setup_func['f'].__name__)
-    if suite.run_condition_func:
+            suite.setup['name'],
+            suite.setup['f'].__name__)
+    if suite.run_condition:
         message += "\t{}: {}\n".format(
-            suite.run_condition_func['name'],
-            suite.run_condition_func['f'].__name__)
-    if suite.report_func:
+            suite.run_condition['name'],
+            suite.run_condition['f'].__name__)
+    if suite.report:
         message += "\t{}: {}\n".format(
-            suite.report_func['name'],
-            suite.report_func['f'].__name__)
-    message += "\n".join(suite.tests)
+            suite.report['name'],
+            suite.report['f'].__name__)
+    message += str(suite.tests)
     board.log(message)
 
 
