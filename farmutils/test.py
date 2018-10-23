@@ -27,6 +27,10 @@ class TestBase():
             func['f'] = f[0]
             func['args'] = list(filter(lambda x: isinstance(x, tuple), f[1:]))[0]
             func['kwargs'] = list(filter(lambda x: isinstance(x, dict), f[1:]))[0]
+            func['str'] = "{}({})".format(
+                func['f'].__name__,
+                ", ".join([str(a) for a in func['args']] + [
+                "{}={}".format(k, v) for k, v in func['kwargs'].items()]))
         else:
             raise AttributeError("Must be tuple of function, and (optional) args")
 
@@ -40,14 +44,9 @@ class TestBase():
             return None
 
         if 'f' in func:
-            # args_string = ", ".join(str(e) for e in args)
-            args_string = ", ".join(str(v) for v in func['args'])
-            if func['kwargs']:
-                args_string += ", " + ", ".join(
-                    "{}={}".format(k, v) for k, v in func['kwargs'].items())
             if echo:
-                print("Running {} function: {}({})".format(
-                    func['name'], func['f'].__name__, args_string))
+                print("Running {} function: {}".format(
+                    func['name'], func['str']))
 
             if hasattr(self, "suite") and self.suite:
                 suite = self.suite
@@ -128,6 +127,7 @@ class TestSuite(TestBase):
 
     @report.setter
     def report(self, f):
+        print("In report setter")
         self._report = self.create_func(f, "report")
 
     @property
@@ -203,11 +203,11 @@ class Test(TestBase):
     def __repr__(self):
         funcs = "{}:".format(__class__.__name__)
         if self.setup:
-            funcs += "\n\t{}: {}".format(self.setup['name'], self.setup['f'].__name__)
+            funcs += "\n\t{}: {}".format(self.setup['name'], self.setup['str'])
         if self.body:
-            funcs += "\n\t{}: {}".format(self.body['name'], self.body['f'].__name__)
+            funcs += "\n\t{}: {}".format(self.body['name'], self.body['str'])
         if self.teardown:
-            funcs += "\n\t{}: {}".format(self.teardown['name'], self.teardown['f'].__name__)
+            funcs += "\n\t{}: {}".format(self.teardown['name'], self.teardown['str'])
         return funcs
 
     @property

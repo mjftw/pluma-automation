@@ -17,9 +17,8 @@ def sc_time_in_range(suite, start_hour, end_hour):
     return (start_hour <= now.hour and now.hour < end_hour)
 
 
-
 @test_func
-def tt_log_stats(suite, board, test_no, pass_no, fail_no):
+def tt_log_stats(suite, board):
     if suite is None:
         raise TestMustBeInSuite
 
@@ -42,18 +41,38 @@ def ss_log_test_plan(suite, board):
     if suite.setup:
         message += "\t{}: {}\n".format(
             suite.setup['name'],
-            suite.setup['f'].__name__)
+            suite.setup['str'])
     if suite.run_condition:
         message += "\t{}: {}\n".format(
             suite.run_condition['name'],
-            suite.run_condition['f'].__name__)
+            suite.run_condition['str'])
     if suite.report:
         message += "\t{}: {}\n".format(
             suite.report['name'],
-            suite.report['f'].__name__)
+            suite.report['str'])
     message += str(suite.tests)
     board.log(message)
 
+
+@test_func
+def sr_log_test_results(suite, board):
+    print("In func {}".format(__name__))
+    message = "Test suite results: \n".format(suite.name)
+    for test in suite.tests_passed:
+        message += "\t{}: PASS\n".format(
+            test.body['str'])
+    for test in suite.tests_failed:
+        message += "\t{}: FAIL\n".format(
+            test.body['str'])
+    message += "Total tests:\n"
+    message += "\tRun = {}\n".format(suite.num_tests_run)
+    message += "\tPass = {}\n".format(suite.num_tests_pass)
+    message += "\tFail = {}\n".format(suite.num_tests_fail)
+    message += "Total iterations:\n"
+    message += "\tRun = {}\n".format(suite.num_iterations_run)
+    message += "\tPass = {}\n".format(suite.num_iterations_pass)
+    message += "\tFail = {}\n".format(suite.num_iterations_fail)
+    board.log(message)
 
 @test_func
 def tb_boot(__, board, boot_str="linux"):
