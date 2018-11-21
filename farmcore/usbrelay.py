@@ -3,13 +3,14 @@ import serial
 import time
 
 from .farmclass import Farmclass
+from .usb import USB
 
 # There are USB relays which have four channels 0,1,2,3
 # The SDMUXes are connected to them
 # The SDMUXes are also powered by the APC unit.
 
 
-class USBRelay(Farmclass):
+class USBRelay(Farmclass, USB):
     port_map = [
         dict(a=b'1', b=b'q'),
         dict(a=b'2', b=b'w'),
@@ -19,14 +20,17 @@ class USBRelay(Farmclass):
 
     def __init__(self, hub):
         self.hub = hub
-        self._devnode = None
         self._ser = None
+
+        USB.__init__(self, None)
 
     @property
     def devnode(self):
-        if self._devnode is None:
-            self._devnode = self.hub.get_relay()
-        return self._devnode
+        return self.hub.get_relay()['devnode']
+
+    @property
+    def usb_device(self):
+        return self.hub.get_relay()['usbpath']
 
     @property
     def ser(self):
@@ -53,4 +57,4 @@ class USBRelay(Farmclass):
         return (self, key)
 
     def __repr__(self):
-        return "USBRelay[{}]".format(self.usbpath)
+        return "USBRelay[{}]".format(self.usb_device)
