@@ -7,7 +7,7 @@ from .console import Console
 
 
 class SerialConsole(Console):
-    def __init__(self, port, baud, timeout=10):
+    def __init__(self, port, baud, timeout=0.01):
         self.port = port
         self.timeout = timeout
         self.baud = baud
