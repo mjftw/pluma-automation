@@ -31,19 +31,37 @@ class APC(Farmclass):
         self.console = TelnetConsole(self.host)
 
     def _login(self):
-        try:
-            self.console.open()
-        except CannotOpen as e:
-            self.log('ERROR: Failed to gain control of APC console. Is it in use?')
+        e = None
+        for _ in range(1, 5):
+            try:
+                self.console.open()
+                e = None
+            except CannotOpen as ex:
+                e = ex
+                self.log('WARNING: Failed to gain control of APC console. Is it in use?')
+                self.log('Sleeping 1 second and retrying...')
+                time.sleep(1)
+
+        if e:
             raise e
 
-        self.console.login(
-            username=self.username,
-            password=self.password,
-            username_match='User Name',
-            password_match='Password',
-            success_match='Control Console'
-        )
+        for _ in range(1, 5):
+            try:
+                self.console.login(
+                    username=self.username,
+                    password=self.password,
+                    username_match='User Name',
+                    password_match='Password',
+                    success_match='Control Console'
+                )
+                return
+            except RuntimeError as ex:
+                e = ex
+                self.log('WARNING: Failed to log in')
+                self.log('Sleeping 1 second and retrying...')
+                time.sleep(1)
+
+        raise e
 
     def _disconnect(self):
         if self.console.is_open:
