@@ -23,14 +23,18 @@ class SubclassException(Exception):
     pass
 
 
+class CannotOpen(Exception):
+    pass
+
+
 class Console(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
-    def __init__(self, encoding='ascii'):
+    def __init__(self, encoding='ascii', linesep='\r\n'):
         if type(self) is Console:
             raise SubclassException(
                 "Class is a base class and must be inherited")
         self._check_attr('_pex')
-
+        self.linesep = linesep
         self.encoding = encoding
         self._buffer = ''
 
@@ -77,8 +81,8 @@ class Console(Farmclass):
     def _buffer_size(self):
         return len(self._buffer)
 
-    def _flush_get_size(self):
-        self.flush(True)
+    def _flush_get_size(self, clear_buf=False):
+        self.flush(clear_buf)
         return self._buffer_size
 
     def decode(self, text):
@@ -134,7 +138,7 @@ class Console(Farmclass):
         last_bytes = 0
 
         while(elapsed <= timeout):
-            current_bytes = self._flush_get_size()
+            current_bytes = self._flush_get_size(False)
 
             if current_bytes == last_bytes:
                 time_quiet += sleep_time
@@ -149,7 +153,7 @@ class Console(Farmclass):
             if time_quiet > quiet:
                 return True
 
-            last_bytes = self._flush_get_size()
+            last_bytes = self._flush_get_size(False)
 
             time.sleep(sleep_time)
             elapsed += sleep_time
@@ -164,18 +168,18 @@ class Console(Farmclass):
              log_recieved_on_fail=False,
              log_verbose=True,
              timeout=-1,
-             sleep_time=-1
+             sleep_time=-1,
+             quiet_time=-1
              ):
         if not self.is_open:
             self.open()
         if not self.is_open:
-            raise RuntimeError("Could not open device")
+            raise CannotOpen
 
         if log_verbose:
             self.log("Sending command:\n{}".format(cmd))
 
-        if not cmd:
-            cmd=""
+        cmd = cmd or ''
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
@@ -184,12 +188,15 @@ class Console(Farmclass):
         matched = False
 
         """ Assign default timeout and sleep values if unassigned """
-        data_timeout = timeout if timeout >= 0 else 30
+        data_timeout = timeout if timeout >= 0 else 5
         quiet_timeout = timeout if timeout >= 0 else 3
-        data_sleep = sleep_time if sleep_time >= 0 else 1.0
-        quiet_sleep = sleep_time if sleep_time >= 0 else 1.0
+        data_sleep = sleep_time if sleep_time >= 0 else 0.1
+        quiet_sleep = sleep_time if sleep_time >= 0 else 0.1
+        quiet_time = quiet_time if quiet_time >= 0 else 0.3
 
-        if not recieve:
+        self._pex.linesep = self.encode(self.linesep)
+
+        if not recieve and not match:
             self._pex.sendline(cmd)
             return (None, None)
         else:
@@ -210,6 +217,7 @@ class Console(Farmclass):
                 self.wait_for_quiet(
                     timeout=quiet_timeout,
                     sleep_time=quiet_sleep,
+                    quiet=quiet_time,
                     verbose=log_verbose)
                 recieved = self._buffer
                 return (recieved, None)
@@ -234,3 +242,26 @@ class Console(Farmclass):
             self.send('stty echo')
         else:
             self.send('stty -echo')
+
+    def login(self, success_match, username, username_match,
+              password=None, password_match=None):
+        matches = [username_match, success_match]
+        if password and password_match:
+            matches.append(password_match)
+
+        fail_message = "ERROR: Failed to log in"
+
+        (__, matched) = self.send(log_verbose=True, recieve=True, match=matches)
+        if not matched:
+            self.log(fail_message)
+            raise RuntimeError(fail_message)
+
+        if matched == username_match:
+            (__, matched) = self.send(log_verbose=True, cmd=username, recieve=True, match=matches)
+
+        if password and password_match and matched == password_match:
+            (__, matched) = self.send(log_verbose=True, cmd=password, recieve=True, match=matches)
+
+        if matched != success_match:
+            self.log(fail_message)
+            raise RuntimeError(fail_message)

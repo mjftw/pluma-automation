@@ -3,7 +3,7 @@
 import pexpect
 import pexpect.fdpexpect
 
-from .console import Console
+from .console import Console, CannotOpen
 
 
 class HostConsole(Console):
@@ -14,7 +14,7 @@ class HostConsole(Console):
 
     @property
     def is_open(self):
-        if self._pex and self._pex.isalive:
+        if self._pex and self._pex.isalive():
             return True
         else:
             return False
@@ -22,7 +22,7 @@ class HostConsole(Console):
     def open(self):
         self._pex = pexpect.spawn(self.command, timeout=0.01)
         if not self.is_open:
-            raise RuntimeError("Could not start host console")
+            raise CannotOpen
 
     def close(self):
         self._pex.sendintr()
@@ -32,3 +32,4 @@ class HostConsole(Console):
         if not self.is_open:
             self.open()
         self._pex.interact()
+

@@ -3,15 +3,10 @@
 import sys
 import time
 
-from hostconsole import HostConsole
+from .hostconsole import HostConsole
 
 
 class TelnetConsole(HostConsole):
-    def __init__(self, host, user, pw):
+    def __init__(self, host):
         self.host = host
-        self.user = user
-        self.pw = pw
-        super.__init__('telnet {}'.format(host))
-
-    def login(self):
-        pass
+        super().__init__('telnet {}'.format(host))

@@ -5,6 +5,8 @@ import time
 import pexpect.exceptions as pex
 
 from .farmclass import Farmclass
+from .telnetconsole import TelnetConsole
+from .console import CannotOpen
 
 
 class NoAPC(Exception):
@@ -16,89 +18,61 @@ class InvalidPort(Exception):
 
 
 class APC(Farmclass):
-    def __init__(self, host, user, pw, port):
+    def __init__(self, host, username, password, port):
         self.host = host
-        self.user = user
-        self.pw = pw
-        self.spawn = None
+        self.username = username
+        self.password = password
+
         if 1 <= port <= 8:
             self.port = port
         else:
             raise InvalidPort("Invalid port[{}]").format(port)
 
-    @property
-    def index(self):
-        return self.port - 1
-
-    def _init_spawn(self):
-        if not self.spawn:
-            cl = "telnet {}".format(self.host)
-            for _ in range(5):
-                self.spawn = interact.genSpawn(
-                    cl, logfile=open('/tmp/apclog', 'ab'), timeout=5)
-                self.spawn.linesep = '\r\n'.encode('ascii')
-
-                try:
-                    # This can get to EOF which in this instance means that the
-                    # telnet sesssion has gone away. This is USUALLLY becuase only
-                    # one user can _login at a time but it could be something else.
-                    self._login()
-                except pex.EOF:
-                    print("Warning - APC Blocked. Waiting then trying again...")
-                    time.sleep(2)
-                else:
-                    return
-
-            raise IOError("Couldn't connect to APC.")
+        self.console = TelnetConsole(self.host)
 
     def _login(self):
-        self.spawn.waitr('User Name')
-        self.spawn.snr(self.user)
-        self.spawn.send_newline()
-        self.spawn.waitr('Password')
-        self.spawn.snr(self.pw)
-        self.spawn.send_newline()
+        try:
+            self.console.open()
+        except CannotOpen as e:
+            self.log('ERROR: Failed to gain control of APC console. Is it in use?')
+            raise e
+
+        self.console.login(
+            username=self.username,
+            password=self.password,
+            username_match='User Name',
+            password_match='Password',
+            success_match='Control Console'
+        )
 
     def _disconnect(self):
-        if self.spawn:
-            self.spawn.sendcontrol('c')
-            self.spawn.waitr('^> ')
-            self._send(4)
-            self.spawn.close(force=True)
-            self.spawn = None
+        if self.console.is_open:
+            self.console.send('>]')
 
-    def _send(self, s):
-        self.spawn.waitr('^> ')
-        self.spawn.snr(str(s))
-        self.spawn.send_newline()
+    def _switch(self, state):
+        if state not in ['on', 'off']:
+            raise RuntimeError('Invalid state! Expected "on" or "off"')
 
-    def menu(self, l):
-        for e in l:
-            self._send(e)
+        self._login()
+
+        self.console.send('1', match=' Device Manager')
+        self.console.send('2', match='Outlet Management')
+        self.console.send('1', match='Outlet Control/Configuration')
+        self.console.send(str(self.port), match='Outlet {}'.format(self.port))
+        self.console.send('1', match='Control Outlet')
+        self.console.send('1' if state == 'on' else '2', match="Enter 'YES' to continue")
+        self.console.send('YES', match='Press <ENTER> to continue')
+        self.console.send('', match='Control Outlet')
+
+        self._disconnect()
+        self.console.close()
 
     def on(self, dummy=None):
-        self._init_spawn()
-        self.menu([1, 2, 1, self.index, 1, 1])
-        self.spawn.snr('YES')
-        self.spawn.send_newline()
-        self.spawn.send_newline()
-        self.spawn.waitr('^> ')
-        self._disconnect()
+        self._switch('on')
 
     def off(self, dummy=None):
-        self._init_spawn()
-        self.menu([1, 2, 1, self.port, 1, 2])
-        self.spawn.snr('YES')
-        self.spawn.send_newline()
-        self.spawn.send_newline()
-        self.spawn.waitr('^> ')
-        self._disconnect()
+        self._switch('off')
 
-
-def get_apc(apcs, host, port):
-    for apc in apcs:
-        if apc.port == port and apc.host == host:
-            return apc
-
-    raise NoAPC("Can't find APC with host[{}], port[{}]".format(
-        host, port))
+    def reboot(self):
+        self.off()
+        self.on()
