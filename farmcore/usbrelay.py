@@ -4,6 +4,7 @@ import time
 
 from .farmclass import Farmclass
 from .usb import USB
+from .serialconsole import SerialConsole
 
 # There are USB relays which have four channels 0,1,2,3
 # The SDMUXes are connected to them
@@ -20,9 +21,15 @@ class USBRelay(Farmclass, USB):
 
     def __init__(self, hub):
         self.hub = hub
-        self._ser = None
+        self._console = None
 
         USB.__init__(self, None)
+
+    @property
+    def console(self):
+        if self._console is None:
+            self._console = SerialConsole(self.devnode, 9600)
+        return self._console
 
     @property
     def devnode(self):
@@ -32,26 +39,26 @@ class USBRelay(Farmclass, USB):
     def usb_device(self):
         return self.hub.get_relay()['usbpath']
 
-    @property
-    def ser(self):
-        if self._ser is None:
-            self._ser = serial.Serial(self.devnode, 9600)
-        return self._ser
+    def unbind(self):
+        self.console.close()
+        USB.unbind(self)
+        self._console = None
 
-    def write(self, data):
-        return self.ser.write(data)
+    def bind(self):
+        USB.bind(self)
+        self.console.open()
 
     def toggle(self, port, throw):
         if port not in range(1, 4):
-            self.err("Port must be 1, 2, 3, or 4")
+            self.error("Port must be 1, 2, 3, or 4")
         if throw not in ['A', 'a', 'B', 'b']:
-            self.err("Throw direction must be A or B")
+            self.error("Throw direction must be A or B")
 
         if throw in ['A', 'a']:
-            self.write(self.port_map[port-1]['a'])
+            self.console.send(self.port_map[port-1]['a'])
 
         if throw in ['B', 'b']:
-            self.write(self.port_map[port-1]['b'])
+            self.console.send(self.port_map[port-1]['b'])
 
     def __getitem__(self, key):
         return (self, key)
