@@ -138,3 +138,8 @@ class Logging():
                     logfd.write(message + '\n')
             if self.log_echo:
                 print(message)
+
+    def error(self, message):
+        message = "ERROR: {}".format(message)
+        self.log(message)
+        raise RuntimeError(message)
