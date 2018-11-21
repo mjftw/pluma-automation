@@ -3,6 +3,9 @@
 # import farm
 # import hwconfig
 
+from pexpect import TIMEOUT, EOF
+
+
 from .farmclass import Farmclass
 from .serialconsole import SerialConsole
 
@@ -11,15 +14,18 @@ DEFAULT_LOGFILE = object()
 class NoBoard(Exception):
     pass
 
+class BootValidationError(Exception):
+    pass
 
 class Board(Farmclass):
-    def __init__(self, name, power, hub, sdmux, logfile=DEFAULT_LOGFILE):
+    def __init__(self, name, power, hub, sdmux,
+                 console=None, bootstr=None, logfile=DEFAULT_LOGFILE):
         self.power = power
         self.hub = hub
         self.sdmux = sdmux
         self.name = name
-        self.baud = 115200  # TODO: Remove hardcoding
-        self._console = None
+        self.console = console or SerialConsole(hub.get_serial()['devnode'], 115200)
+        self.bootstr = bootstr
 
         self.log_reccurse = True
 
@@ -28,11 +34,15 @@ class Board(Farmclass):
         else:
             self.log_file = logfile
 
-    @property
-    def console(self):
-        if self._console is None:
-            self._console = SerialConsole(self.hub.get_serial(), self.baud)
-        return self._console
+    def reboot_and_validate(self):
+        if not self.bootstr:
+            raise BootValidationError("Cannot validate boot. Not bootstring given")
+
+        self.power.reboot()
+        (__, matched) = self.console.send(match=self.bootstr, timeout=30)
+
+        if matched is TIMEOUT or matched is EOF:
+            raise BootValidationError("Did not get bootstring: {}".format(self.bootstr))
 
 
 def get_board(boards, name):
