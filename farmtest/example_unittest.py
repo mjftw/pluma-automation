@@ -1,5 +1,5 @@
-from farmutils.test import TestSuite, Test, deferred_function
-from farmutils import testlib
+from farmtest.unittest import UnitTestSuite, UnitTest, deferred_function
+from farmtest import unittestlib
 from farmcore.farmobj_mock import FarmobjMock
 
 
@@ -36,28 +36,22 @@ def foo(bar, barbar):
 def main():
     mock_board = FarmobjMock()
 
-    # foo(9, barbar="a")
-    # print(foo)
-    # foo.run()
-
-    my_test = Test(
+    my_test = UnitTest(
         fsetup=my_fsetup(),
         fbody=my_testbody(10),
-        fteardown=testlib.tt_log_stats(mock_board)
+        fteardown=unittestlib.tt_log_stats(mock_board)
     )
 
-    my_suite = TestSuite(
+    my_suite = UnitTestSuite(
         tests=my_test,
-        setup_func=testlib.ss_log_test_plan(mock_board),
-        # setup_func=my_ssetup(1, "hello", [], arg5=3, arg4="!"),
-        report_func=testlib.sr_log_test_results(mock_board),
-        run_condition_func=testlib.sc_run_n_iterations(3),
-        # report_n_iterations=3,
+        setup_func=unittestlib.ss_log_test_plan(mock_board),
+        report_func=unittestlib.sr_log_test_results(mock_board),
+        run_condition_func=unittestlib.sc_run_n_iterations(3),
+        report_n_iterations=3,
     )
-
-    # print(my_suite.setup)
 
     my_suite.run()
+
 
 if __name__ == "__main__":
     main()
