@@ -3,6 +3,8 @@ import subprocess
 
 from farmcore import farm
 from farmtest.test import TestRunner
+from farmtest.unittest import UnitTest, UnitTestSuite
+
 
 class OverwriteMountsTest():
     def __init__(self, board):
@@ -37,6 +39,30 @@ class ProcessInfoTest():
         self.board.console.send('touch /tmp/boardmount/made_by_lab')
         self.board.console.send('ps aux > /tmp/boardmount/board_test.txt')
 
+
+class MemStatsTest():
+    def __init__(self, board):
+        self.board = board
+
+    def test_body(self):
+        def unit_vmstat_setup(suite):
+            self.board.console.send('vmstat -n 1 > /tmp/boardmount/vmstatdata &')
+
+        def unit_vmstat_body(suite):
+            time.sleep(10)
+
+        def unit_vmstat_teardown(suite):
+            self.board.console.send('killall vmstat')
+
+        unit_vmstat = UnitTest(
+            fsetup=unit_vmstat_setup,
+            fbody=unit_vmstat_body,
+            fteardown=unit_vmstat_teardown
+        )
+
+        unit_vmstat.run()
+
+
 def main():
     hub = farm.Hub('1-4.1.3')
     board = farm.Board(
@@ -56,7 +82,8 @@ def main():
         board,
         tests=[
             OverwriteMountsTest(board),
-            ProcessInfoTest(board)
+            ProcessInfoTest(board),
+            MemStatsTest(board)
         ])
 
     tr.run()
