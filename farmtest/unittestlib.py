@@ -2,6 +2,7 @@ import datetime
 
 from .unittest import deferred_function
 
+
 class TestMustBeInSuite(Exception):
     pass
 
@@ -27,12 +28,6 @@ def tt_log_stats(suite, board):
         suite.num_tests_pass,
         suite.num_tests_fail
         ))
-
-
-@deferred_function
-def ss_boot(__, board, boot_string, iterations):
-    board.log("---- Beggining boot test with boot string '{}' ---- ".format(
-        boot_string))
 
 
 @deferred_function
@@ -73,35 +68,3 @@ def sr_log_test_results(suite, board):
     message += "\tPass = {}\n".format(suite.num_iterations_pass)
     message += "\tFail = {}\n".format(suite.num_iterations_fail)
     board.log(message)
-
-@deferred_function
-def tb_boot(__, board, boot_str="linux"):
-    board.log("Starting linux boot test with boot string \"{}\"".format(boot_str))
-    board.power.restart()
-    (__, matched) = board.console.send(cmd="", recieve=True, match=boot_str)
-    if matched:
-        return True
-    else:
-        board.log("TIMEOUT waiting for boot string...")
-        return False
-
-
-@deferred_function
-def tb_login(__, board, user="root", pw=None, prompt="#"):
-    board.log("Starting login test with user={}, pass={}, prompt={}".format(
-        user, pw, prompt
-    ))
-    (__, matched) = board.console.send(cmd="", recieve=True, match=["login", "Password", prompt])
-    if not matched:
-        return False
-    if matched == "login":
-        (__, matched) = board.console.send(cmd=user, recieve=True, match=["login", "Password", prompt])
-    if matched == "Password":
-        if not pw:
-            return False
-        (__, matched) = board.console.send(cmd=pw, recieve=True, match=["login", "Password", prompt])
-    if matched == prompt:
-        return True
-    else:
-        return False
-
