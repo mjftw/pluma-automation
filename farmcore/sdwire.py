@@ -24,10 +24,10 @@ class SDWire(Farmclass, StorageBase):
 
     def to_host(self):
         self._open()
-        self.ftdi.set_bitmode(mode=0x20, bitmask=0xf0)
+        self.ftdi.set_bitmode(mode=0x20, bitmask=0xf1)
         self._close()
 
     def to_board(self):
         self._open()
-        self.ftdi.set_bitmode(mode=0x20, bitmask=0xf1)
+        self.ftdi.set_bitmode(mode=0x20, bitmask=0xf0)
         self._close()
