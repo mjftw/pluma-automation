@@ -1,3 +1,4 @@
+import time
 
 class TestFunctionNotSet(Exception):
     pass
@@ -67,7 +68,7 @@ class UnitTestBase():
 class UnitTestSuite(UnitTestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
-            continue_on_fail=True, run_forever=False):
+            continue_on_fail=True, run_forever=False, iteration_end_sleep_s=0):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
@@ -77,6 +78,7 @@ class UnitTestSuite(UnitTestBase):
         self.run_forever = run_forever
         self.report_n_iterations = report_n_iterations
         self.continue_on_fail = continue_on_fail
+        self.iteration_end_sleep_s = iteration_end_sleep_s
 
         self.num_iterations_run = 0
         self.num_iterations_pass = 0
@@ -159,10 +161,13 @@ class UnitTestSuite(UnitTestBase):
         self.num_iterations_run += 1
         if all_tests_pass:
             self.num_iterations_pass += 1
-            return True
         else:
             self.num_iterations_fail += 1
-            return False
+
+        if all_tests_pass or self.continue_on_fail:
+            time.sleep(self.iteration_end_sleep_s)
+
+        return all_tests_pass
 
     def run(self):
         self.num_iterations_run = 0

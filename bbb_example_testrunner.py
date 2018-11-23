@@ -65,7 +65,8 @@ class MemStatsTest():
 
         UnitTestSuite(
             tests=unit_vmstat,
-            run_condition_func=unittestlib.sc_run_n_iterations(3)
+            run_condition_func=unittestlib.sc_run_n_iterations(3),
+            iteration_end_sleep_s=5
         ).run()
 
 
