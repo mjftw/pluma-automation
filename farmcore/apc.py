@@ -6,7 +6,7 @@ import pexpect.exceptions as pex
 
 from .farmclass import Farmclass
 from .telnetconsole import TelnetConsole
-from .console import CannotOpen
+from .console import CannotOpen, LoginFailed
 
 
 class NoAPC(Exception):
@@ -55,7 +55,7 @@ class APC(Farmclass):
                     success_match='Control Console'
                 )
                 return
-            except RuntimeError as ex:
+            except LoginFailed as ex:
                 e = ex
                 self.log('WARNING: Failed to log in')
                 self.log('Sleeping 1 second and retrying...')
@@ -73,7 +73,7 @@ class APC(Farmclass):
 
         self._login()
 
-        self.console.send('1', match=' Device Manager')
+        self.console.send('1', match='Device Manager')
         self.console.send('2', match='Outlet Management')
         self.console.send('1', match='Outlet Control/Configuration')
         self.console.send(str(self.port), match='Outlet {}'.format(self.port))

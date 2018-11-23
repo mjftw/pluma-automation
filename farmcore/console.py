@@ -27,6 +27,10 @@ class CannotOpen(Exception):
     pass
 
 
+class LoginFailed(Exception):
+    pass
+
+
 class Console(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
     def __init__(self, encoding='ascii', linesep='\r\n'):
@@ -137,7 +141,8 @@ class Console(Farmclass):
 
         last_bytes = 0
 
-        while(elapsed <= timeout):
+        current_bytes = self._flush_get_size(False)
+        while(elapsed < timeout):
             current_bytes = self._flush_get_size(False)
 
             if current_bytes == last_bytes:
@@ -243,25 +248,33 @@ class Console(Farmclass):
         else:
             self.send('stty -echo')
 
-    def login(self, success_match, username, username_match,
-              password=None, password_match=None):
-        matches = [username_match, success_match]
+    def login(self, username, username_match,
+              password=None, password_match=None, success_match=None):
+        matches = [username_match]
         if password and password_match:
             matches.append(password_match)
+        if success_match:
+            matches.append(success_match)
 
-        fail_message = "ERROR: Failed to log in"
+        fail_message = "ERROR: Failed to log in: U={} P={}".format(
+            username, password)
 
-        (__, matched) = self.send(log_verbose=True, recieve=True, match=matches)
+        (__, matched) = self.send(log_verbose=True, match=matches)
         if not matched:
             self.log(fail_message)
-            raise RuntimeError(fail_message)
+            raise LoginFailed(fail_message)
 
         if matched == username_match:
-            (__, matched) = self.send(log_verbose=True, cmd=username, recieve=True, match=matches)
+            matches.remove(username_match)
+            (__, matched) = self.send(log_verbose=True, cmd=username, match=matches, timeout=2)
 
-        if password and password_match and matched == password_match:
-            (__, matched) = self.send(log_verbose=True, cmd=password, recieve=True, match=matches)
+        if password_match and matched == password_match:
+            if not password:
+                raise LoginFailed(fail_message)
+            (__, matched) = self.send(log_verbose=True, cmd=password,  match=matches, timeout=2)
 
-        if matched != success_match:
+        if ((success_match and matched != success_match) or
+                matched == pexpect.TIMEOUT or
+                matched == pexpect.EOF):
             self.log(fail_message)
-            raise RuntimeError(fail_message)
+            raise LoginFailed(fail_message)
