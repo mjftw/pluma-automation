@@ -13,14 +13,18 @@ class StorageBase():
         raise NotImplemented('This method must be implimented by inheriting class')
 
     # TODO: Impliment these
-    def mount_host(self, devnode, mountpoint):
-        raise NotImplemented
+    def mount_host(self):
+        print("--- Manual Intervention Required! ---")
+        input("Mount host storage at /tmp/boardmount, then press <ENTER>")
 
-    def unmount_host(self, devnode, mountpoint):
-        raise NotImplemented
+    def unmount_host(self):
+        print("--- Manual Intervention Required! ---")
+        input("Unmount /tmp/boardmount, then press <ENTER>")
 
-    def mount_board(self, devnode):
-        raise NotImplemented
+    def mount_board(self):
+        print("--- Manual Intervention Required! ---")
+        input("Mount board storage at /tmp/boardmount, then press <ENTER>")
 
-    def unmount_board(self, devnode, mountpoint):
-        raise NotImplemented
+    def unmount_board(self):
+        print("--- Manual Intervention Required! ---")
+        input("Unmount /tmp/boardmount, then press <ENTER>")
