@@ -4,6 +4,7 @@ import subprocess
 from farmcore import farm
 from farmtest.test import TestRunner
 from farmtest.unittest import UnitTest, UnitTestSuite
+from farmtest import unittestlib
 
 
 class OverwriteMountsTest():
@@ -46,7 +47,9 @@ class MemStatsTest():
 
     def test_body(self):
         def unit_vmstat_setup(suite):
-            self.board.console.send('vmstat -n 1 > /tmp/boardmount/vmstatdata &')
+            self.board.console.send(
+                'vmstat -n 1 > /tmp/boardmount/vmstatdata{} &'.format(
+                suite.num_iterations_run))
 
         def unit_vmstat_body(suite):
             time.sleep(10)
@@ -60,7 +63,10 @@ class MemStatsTest():
             fteardown=unit_vmstat_teardown
         )
 
-        unit_vmstat.run()
+        UnitTestSuite(
+            tests=unit_vmstat,
+            run_condition_func=unittestlib.sc_run_n_iterations(3)
+        ).run()
 
 
 def main():
