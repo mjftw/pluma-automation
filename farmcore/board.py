@@ -11,21 +11,28 @@ from .serialconsole import SerialConsole
 
 DEFAULT_LOGFILE = object()
 
-class NoBoard(Exception):
-    pass
-
 class BootValidationError(Exception):
     pass
 
+class LoginError(Exception):
+    pass
+
 class Board(Farmclass):
-    def __init__(self, name, power, hub, sdmux,
-                 console=None, bootstr=None, logfile=DEFAULT_LOGFILE):
+    def __init__(self, name, power, hub,
+            storage=None, console=None,
+            login_user='root', login_pass=None,
+            bootstr=None, prompt=None,logfile=DEFAULT_LOGFILE):
         self.power = power
         self.hub = hub
-        self.sdmux = sdmux
+        self.storage = storage
         self.name = name
         self.console = console or SerialConsole(hub.get_serial()['devnode'], 115200)
         self.bootstr = bootstr
+        self.prompt = prompt
+        self.login_user = login_user
+        self.login_pass = login_pass
+        self.login_user_match = 'login:'
+        self.login_pass_match = 'Password:'
 
         self.log_reccurse = True
 
@@ -41,9 +48,17 @@ class Board(Farmclass):
         self.power.reboot()
         (__, matched) = self.console.send(match=self.bootstr, timeout=30)
 
-        if matched is TIMEOUT or matched is EOF:
+        if matched is False or matched is TIMEOUT or matched is EOF:
             raise BootValidationError("Did not get bootstring: {}".format(self.bootstr))
 
+    def login(self):
+        self.console.login(
+            username=self.login_user,
+            password=self.login_pass,
+            username_match=self.login_user_match,
+            password_match=self.login_pass_match,
+            success_match=self.prompt
+        )
 
 def get_board(boards, name):
     for b in boards:
