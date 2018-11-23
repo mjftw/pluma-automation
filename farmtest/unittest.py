@@ -48,7 +48,7 @@ class deferred_function():
         else:
             return self.f()
 
-class TestBase():
+class UnitTestBase():
     def to_deffered_func(self, f, name=None):
         if f is None:
             return None
@@ -63,7 +63,7 @@ class TestBase():
         return f
 
 
-class TestSuite(TestBase):
+class UnitTestSuite(UnitTestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False):
@@ -194,7 +194,7 @@ class TestSuite(TestBase):
                 return
 
 
-class Test(TestBase):
+class UnitTest(UnitTestBase):
     def __init__(self, fbody=None, fsetup=None, fteardown=None):
         self.suite = None
         self.success = False

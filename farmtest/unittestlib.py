@@ -1,6 +1,6 @@
 import datetime
 
-from .test import deferred_function
+from .unittest import deferred_function
 
 class TestMustBeInSuite(Exception):
     pass
