@@ -6,6 +6,7 @@ from .serialconsole import SerialConsole
 from .hostconsole import HostConsole
 from .hub import Hub
 from .sdmux import SDMux
+from .sdwire import SDWire
 from .apc import APC
 
 from .console import TimeoutNoRecieve
