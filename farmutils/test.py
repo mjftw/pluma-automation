@@ -1,65 +1,67 @@
-""" Test func decorator  """
-def test_func(f):
-    def test(*args, **kwargs):
-        return (f, args, kwargs)
-    return test
 
-class TestBase():
-    def __call__(self):
-        self.run()
+class TestFunctionNotSet(Exception):
+    pass
+
+""" Can be used as a function decorator """
+class deferred_function():
+    def __init__(self, f, *args, **kwargs):
+        self.f = f
+
+        self.name = None
+
+        if args or kwargs:
+            self.save_args(*args, **kwargs)
+        else:
+            self.args = None
+            self.kwargs = None
+            self.args_ready = False
+
+    def __call__(self, *args, **kwargs):
+            self.save_args(*args, **kwargs)
+            return self
 
     def __repr__(self):
-        return self.__class__.__name__
+        return "{}({})".format(
+            self.f.__name__,
+            ", ".join([str(a) for a in self.args] + [
+            "{}={}".format(k, v) for k, v in self.kwargs.items()]))
 
-    def create_func(self, f, name=""):
-        if not f:
-            return None
+    def __bool__(self):
+        return self.args_ready
 
-        func = {}
+    def save_args(self, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.args_ready = True
 
-        if callable(f):
-            try:
-                if isinstance(f(), tuple) and len(f()) > 0 and callable(f()[0]):
-                    f = f()
-            except TypeError:
-                f = test_func(f)()
-        if isinstance(f, tuple) and callable(f[0]):
-            func['f'] = f[0]
-            func['args'] = list(filter(lambda x: isinstance(x, tuple), f[1:]))[0]
-            func['kwargs'] = list(filter(lambda x: isinstance(x, dict), f[1:]))[0]
-            func['str'] = "{}({})".format(
-                func['f'].__name__,
-                ", ".join([str(a) for a in func['args']] + [
-                "{}={}".format(k, v) for k, v in func['kwargs'].items()]))
+    def run(self, override_args=None, override_kwargs=None):
+        if override_args:
+        args = tuple(extra_args + self.args)
+        kwargs = dict(extra_kwargs + self.kwargs)
+
+        if args and kwargs:
+            return self.f(*args, **kwargs)
+        elif args:
+            return self.f(*args)
+        elif kwargs:
+            return self.f(**kwargs)
         else:
-            raise AttributeError("Must be tuple of function, and (optional) args")
+            return self.f()
 
-        if 'f' in func:
-            func['name'] = name
-
-        return func
-
-    def run_func(self, func, echo=True):
-        if not func:
+class TestBase():
+    def to_deffered_func(self, f, name=None):
+        if f is None:
             return None
 
-        if 'f' in func:
-            if echo:
-                print("Running {} function: {}".format(
-                    func['name'], func['str']))
-
-            if hasattr(self, "suite") and self.suite:
-                suite = self.suite
+        if not isinstance(f, deferred_function):
+            if callable(f):
+                f = deferred_function(f)
             else:
-                suite = None
+                raise AttributeError("Function must be callable")
 
-            return func['f'](suite, *func['args'], **func['kwargs'])
+        f.name = name
+        return f
 
-    def attr_getter(self, attr):
-        if hasattr(self, attr):
-            return getattr(self, attr)
-        else:
-            return None
 
 class TestSuite(TestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
@@ -75,8 +77,6 @@ class TestSuite(TestBase):
         self.report_n_iterations = report_n_iterations
         self.continue_on_fail = continue_on_fail
 
-        self.suite = self
-
         self.num_iterations_run = 0
         self.num_iterations_pass = 0
         self.num_iterations_fail = 0
@@ -89,7 +89,7 @@ class TestSuite(TestBase):
 
     @property
     def tests(self):
-        return self.attr_getter("_tests")
+        return self._tests
 
     @tests.setter
     def tests(self, tests):
@@ -113,35 +113,35 @@ class TestSuite(TestBase):
         for test in self.tests:
             test.suite = self
 
+
     @property
     def setup(self):
-        return self.attr_getter("_setup")
+        return self._setup
 
     @setup.setter
     def setup(self, f):
-        self._setup = self.create_func(f, "setup")
+        self._setup = self.to_deffered_func(f, "setup")
 
     @property
     def report(self):
-        return self.attr_getter("_report")
+        return self._report
 
     @report.setter
     def report(self, f):
-        print("In report setter")
-        self._report = self.create_func(f, "report")
+        self._report = self.to_deffered_func(f, "report")
 
     @property
     def run_condition(self):
-        return self.attr_getter("_run_condition")
+        return self._run_condition
 
     @run_condition.setter
     def run_condition(self, f):
-        self._run_condition = self.create_func(f, "run_condition")
+        self._run_condition = self.to_deffered_func(f, "run condition")
 
     def run_iteration(self):
         all_tests_pass = True
         for test in self.tests:
-            success = test.run()
+            success = test.run(self)
             self.num_tests_run += 1
             if success:
                 self.num_tests_pass += 1
@@ -171,21 +171,24 @@ class TestSuite(TestBase):
         self.num_tests_pass = 0
         self.num_tests_fail = 0
 
-        self.run_func(self.setup)
+        self.setup(self)
 
         while True:
             if self.run_condition:
-                while self.run_func(self.run_condition, echo=False):
+                while self.run_condition.run(self):
                     success = self.run_iteration()
                     if not success and not self.continue_on_fail:
-                        self.run_func(self.report)
+                        if self.report:
+                            self.report.run(self)
                         return
                     if (self.report_n_iterations and
                         self.num_iterations_run % self.report_n_iterations == 0):
-                        self.run_func(self.report)
+                        if self.report:
+                            self.report.run(self)
             else:
                 self.run_iteration()
-                self.run_func(self.report)
+                if self.report:
+                    self.report.run(self)
 
             if not self.run_forever:
                 return
@@ -193,53 +196,59 @@ class TestSuite(TestBase):
 
 class Test(TestBase):
     def __init__(self, fbody=None, fsetup=None, fteardown=None):
+        self.suite = None
+        self.success = False
+
         self.body = fbody
         self.setup = fsetup
         self.teardown = fteardown
 
-        self.suite = None
-        self.success = False
 
     def __repr__(self):
         funcs = "{}:".format(__class__.__name__)
         if self.setup:
-            funcs += "\n\t{}: {}".format(self.setup['name'], self.setup['str'])
+            funcs += "\n\t{}: {}".format(self.setup.name, str(self.setup))
         if self.body:
-            funcs += "\n\t{}: {}".format(self.body['name'], self.body['str'])
+            funcs += "\n\t{}: {}".format(self.body.name, str(self.body))
         if self.teardown:
-            funcs += "\n\t{}: {}".format(self.teardown['name'], self.teardown['str'])
+            funcs += "\n\t{}: {}".format(self.teardown.name, str(self.teardown))
         return funcs
 
     @property
     def body(self):
-        return self.attr_getter("_body")
+        return self._body
 
     @body.setter
     def body(self, f):
-        self._body = self.create_func(f, "test")
+        self._body = self.to_deffered_func(f, "test")
 
     @property
     def setup(self):
-        return self.attr_getter("_setup")
+        return self._setup
 
     @setup.setter
     def setup(self, f):
-        self._setup = self.create_func(f, "setup")
+        self._setup = self.to_deffered_func(f, "setup")
 
     @property
     def teardown(self):
-        return self.attr_getter("_teardown")
+        return self._teardown
 
     @teardown.setter
     def teardown(self, f):
-        self._teardown = self.create_func(f, "teardown")
+        self._teardown = self.to_deffered_func(f, "teardown")
 
     def run(self):
-        self.run_func(self.setup)
-        self.success = self.run_func(self.body)
+        if not self.body:
+            raise TestFunctionNotSet
 
         if self.setup:
-            self.run_func(self.teardown)
+            self.setup.run(self.suite)
+
+        self.success = self.body.run(self.suite)
+
+        if self.setup and self.teardown:
+            self.teardown.run(self.suite)
 
         if self.success:
             return True

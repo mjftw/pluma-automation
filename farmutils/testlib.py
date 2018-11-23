@@ -1,23 +1,23 @@
 import datetime
 
-from .test import test_func
+from .test import deferred_function
 
 class TestMustBeInSuite(Exception):
     pass
 
 
-@test_func
+@deferred_function
 def sc_run_n_iterations(suite, ntimes):
     return suite.num_iterations_run < ntimes
 
 
-@test_func
+@deferred_function
 def sc_time_in_range(suite, start_hour, end_hour):
     now = datetime.datetime.now()
     return (start_hour <= now.hour and now.hour < end_hour)
 
 
-@test_func
+@deferred_function
 def tt_log_stats(suite, board):
     if suite is None:
         raise TestMustBeInSuite
@@ -29,13 +29,13 @@ def tt_log_stats(suite, board):
         ))
 
 
-@test_func
+@deferred_function
 def ss_boot(__, board, boot_string, iterations):
     board.log("---- Beggining boot test with boot string '{}' ---- ".format(
         boot_string))
 
 
-@test_func
+@deferred_function
 def ss_log_test_plan(suite, board):
     message = "Starting test suite:\n"
     if suite.setup:
@@ -54,7 +54,7 @@ def ss_log_test_plan(suite, board):
     board.log(message)
 
 
-@test_func
+@deferred_function
 def sr_log_test_results(suite, board):
     print("In func {}".format(__name__))
     message = "Test suite results: \n".format(suite.name)
@@ -74,7 +74,7 @@ def sr_log_test_results(suite, board):
     message += "\tFail = {}\n".format(suite.num_iterations_fail)
     board.log(message)
 
-@test_func
+@deferred_function
 def tb_boot(__, board, boot_str="linux"):
     board.log("Starting linux boot test with boot string \"{}\"".format(boot_str))
     board.power.restart()
@@ -86,7 +86,7 @@ def tb_boot(__, board, boot_str="linux"):
         return False
 
 
-@test_func
+@deferred_function
 def tb_login(__, board, user="root", pw=None, prompt="#"):
     board.log("Starting login test with user={}, pass={}, prompt={}".format(
         user, pw, prompt
