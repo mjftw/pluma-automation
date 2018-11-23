@@ -266,12 +266,12 @@ class Console(Farmclass):
 
         if matched == username_match:
             matches.remove(username_match)
-            (__, matched) = self.send(log_verbose=True, cmd=username, match=matches, timeout=2)
+            (__, matched) = self.send(log_verbose=True, cmd=username, match=matches, timeout=5)
 
         if password_match and matched == password_match:
             if not password:
                 raise LoginFailed(fail_message)
-            (__, matched) = self.send(log_verbose=True, cmd=password,  match=matches, timeout=2)
+            (__, matched) = self.send(log_verbose=True, cmd=password,  match=matches, timeout=5)
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
