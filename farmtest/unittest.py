@@ -14,17 +14,21 @@ class deferred_function():
         else:
             self.args = None
             self.kwargs = None
-            self.args_ready = False
+            self.args_ready = True
 
     def __call__(self, *args, **kwargs):
             self.save_args(*args, **kwargs)
             return self
 
     def __repr__(self):
-        return "{}({})".format(
-            self.f.__name__,
-            ", ".join([str(a) for a in self.args] + [
-            "{}={}".format(k, v) for k, v in self.kwargs.items()]))
+        args_str = '' if not self.args else ', '.join(
+            [str(a) for a in self.args]
+        )
+        kwargs_str = '' if not self.kwargs else ', '.join(
+            ["{}={}".format(k, v) for k, v in self.kwargs.items()]
+        )
+        return "{}({}{}{})".format(
+            self.f.__name__, args_str, ', ' if args_str else '', kwargs_str)
 
     def __bool__(self):
         return self.args_ready
@@ -34,19 +38,16 @@ class deferred_function():
         self.kwargs = kwargs
         self.args_ready = True
 
-    def run(self, override_args=None, override_kwargs=None):
-        if override_args:
-        args = tuple(extra_args + self.args)
-        kwargs = dict(extra_kwargs + self.kwargs)
-
-        if args and kwargs:
-            return self.f(*args, **kwargs)
-        elif args:
-            return self.f(*args)
-        elif kwargs:
-            return self.f(**kwargs)
+    def run(self, suite=None):
+        if self.args and self.kwargs:
+            return self.f(suite, *self.args, **self.kwargs)
+        elif self.args:
+            return self.f(suite, *self.args)
+        elif self.kwargs:
+            return self.f(suite, **self.kwargs)
         else:
-            return self.f()
+            return self.f(suite)
+
 
 class UnitTestBase():
     def to_deffered_func(self, f, name=None):
@@ -96,14 +97,14 @@ class UnitTestSuite(UnitTestBase):
         self._tests = []
         if isinstance(tests, list):
             for test in tests:
-                if isinstance(test, Test):
+                if isinstance(test, UnitTest):
                     self._tests += test
                 elif callable(test):
-                    self._tests += Test(test)
+                    self._tests += UnitTest(test)
                 else:
                     raise AttributeError(
                         "Must be either: single test, list of tests, or None")
-        elif isinstance(tests, Test):
+        elif isinstance(tests, UnitTest):
             self._tests = [tests]
         elif tests is None:
             self._tests = []
@@ -171,7 +172,8 @@ class UnitTestSuite(UnitTestBase):
         self.num_tests_pass = 0
         self.num_tests_fail = 0
 
-        self.setup(self)
+        if self.setup:
+            self.setup(self)
 
         while True:
             if self.run_condition:
@@ -196,13 +198,11 @@ class UnitTestSuite(UnitTestBase):
 
 class UnitTest(UnitTestBase):
     def __init__(self, fbody=None, fsetup=None, fteardown=None):
-        self.suite = None
         self.success = False
 
         self.body = fbody
         self.setup = fsetup
         self.teardown = fteardown
-
 
     def __repr__(self):
         funcs = "{}:".format(__class__.__name__)
@@ -238,17 +238,17 @@ class UnitTest(UnitTestBase):
     def teardown(self, f):
         self._teardown = self.to_deffered_func(f, "teardown")
 
-    def run(self):
+    def run(self, suite=None):
         if not self.body:
             raise TestFunctionNotSet
 
         if self.setup:
-            self.setup.run(self.suite)
+            self.setup.run(suite)
 
-        self.success = self.body.run(self.suite)
+        self.success = self.body.run(suite)
 
         if self.setup and self.teardown:
-            self.teardown.run(self.suite)
+            self.teardown.run(suite)
 
         if self.success:
             return True
