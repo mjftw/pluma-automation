@@ -79,14 +79,19 @@ class Hub(Farmclass, USB):
         return match_vals
 
     def get_serial(self):
-        devinfo = self.filter_downstream({
-            'subsystem': 'tty',
-            'vendor': 'FTDI'
-        })
-        if not devinfo:
+        serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
+        for vendor in serial_vendors:
             devinfo = self.filter_downstream({
-                'vendor': 'FTDI'
+                'subsystem': 'tty',
+                'vendor': vendor
             })
+            if not devinfo:
+                devinfo = self.filter_downstream({
+                    'vendor': vendor
+                })
+            if devinfo:
+                break
+
         if not devinfo:
             raise NoDevice('No serial devices on {}'.format(self.usb_device))
         else:
