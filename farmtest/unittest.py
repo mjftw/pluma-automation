@@ -1,4 +1,6 @@
 import time
+from copy import copy
+
 
 class TestFunctionNotSet(Exception):
     pass
@@ -55,14 +57,18 @@ class UnitTestBase():
         if f is None:
             return None
 
-        if not isinstance(f, deferred_function):
+        new_f = None
+
+        if isinstance(f, deferred_function):
+            new_f = copy(f)
+        else:
             if callable(f):
-                f = deferred_function(f)
+                new_f = deferred_function(f)
             else:
                 raise AttributeError("Function must be callable")
 
-        f.name = name
-        return f
+        new_f.name = name
+        return new_f
 
 
 class UnitTestSuite(UnitTestBase):
@@ -100,9 +106,9 @@ class UnitTestSuite(UnitTestBase):
         if isinstance(tests, list):
             for test in tests:
                 if isinstance(test, UnitTest):
-                    self._tests += test
+                    self._tests.append(test)
                 elif callable(test):
-                    self._tests += UnitTest(test)
+                    self._tests.append(UnitTest(test))
                 else:
                     raise AttributeError(
                         "Must be either: single test, list of tests, or None")
