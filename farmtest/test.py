@@ -36,6 +36,9 @@ class ExampleTest():
 
 import time
 
+from farmcore.console import LoginFailed
+from farmcore.board import BootValidationError
+
 
 class TaskFailed(Exception):
     pass
@@ -68,11 +71,17 @@ class TestCore():
 
     def _board_on_and_validate(self):
         self.board.log("=!= BOARD ON AND VALIDATE =!=")
-        self.board.reboot_and_validate()
+        try:
+            self.board.reboot_and_validate()
+        except BootValidationError as e:
+            raise TaskFailed(str(e))
 
     def _board_login(self):
         self.board.log("=!= BOARD LOGIN =!=")
-        self.board.login()
+        try:
+            self.board.login()
+        except LoginFailed as e:
+            raise TaskFailed(str(e))
 
     def pre_board_mount(self):
         self.board.log("=== PRE BOARD MOUNT ===")
