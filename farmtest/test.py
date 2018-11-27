@@ -37,6 +37,10 @@ class ExampleTest():
 import time
 
 
+class TaskFailed(Exception):
+    pass
+
+
 class TestCore():
     tasks = [
         '_host_mount', 'prepare', '_host_unmount',
@@ -164,7 +168,18 @@ class TestRunner():
                 if test.__class__ != TestCore:
                     self.board.log("Running: {} - {}".format(
                         _test_name(test), task_name))
-                task_func()
+                try:
+                    task_func()
+                except TaskFailed as e:
+                    self.board.log("Task failed: {} - {}: {}".format(
+                        _test_name(test), task_name, str(e)))
+                    if 'report' in self.tasks:
+                        if task_name == 'report':
+                            raise e
+                        else:
+                            self._run_task('report')
+                            exit(1)
+
 
 
 def _test_name(test):
