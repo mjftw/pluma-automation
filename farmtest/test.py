@@ -44,10 +44,15 @@ class TaskFailed(Exception):
     pass
 
 
-class TestCore():
+class TestBase():
+    tasks_failed = []
+
+
+class TestCore(TestBase):
     tasks = [
         '_host_mount', 'prepare', '_host_unmount',
-        'pre_board_on', '_board_on_and_validate', '_board_login',
+        'pre_board_on', '_board_on_and_validate',
+        'pre_board_login', '_board_login',
         'pre_board_mount', '_board_mount', 'post_board_mount',
         'test_body',
         'pre_board_unmount', '_board_unmount',
@@ -75,6 +80,9 @@ class TestCore():
             self.board.reboot_and_validate()
         except BootValidationError as e:
             raise TaskFailed(str(e))
+
+    def pre_board_login(self):
+        self.board.log("=== PRE BOARD LOGIN ===")
 
     def _board_login(self):
         self.board.log("=!= BOARD LOGIN =!=")
@@ -182,12 +190,13 @@ class TestRunner():
                 except TaskFailed as e:
                     self.board.log("Task failed: {} - {}: {}".format(
                         _test_name(test), task_name, str(e)))
+                    test.tasks_failed.append({'name': task_name, 'cause': str(e)})
                     if 'report' in self.tasks:
                         if task_name == 'report':
                             raise e
                         else:
                             self._run_task('report')
-                            exit(1)
+                            sys.exit(1)
 
 
 
