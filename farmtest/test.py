@@ -178,7 +178,7 @@ class TestRunner():
             self.add_test(test)
 
     def __call__(self):
-        self.run()
+        return self.run()
 
     def run(self):
         if (self.use_testcore and "TestCore" not in
@@ -192,6 +192,12 @@ class TestRunner():
             self._run_task(task)
 
         self.board.log("\n== ALL TESTS COMPLETED ==", colour='blue', bold=True)
+
+        # Check if any tasks failed
+        if [t.tasks_failed for t in self.tests]:
+            return False
+        else:
+            return True
 
     def add_test(self, test, index=None):
         if index is None:
@@ -220,22 +226,33 @@ class TestRunner():
                         _test_name(test), task_name))
                 try:
                     task_func()
-                except TaskFailed as e:
+                # If exception is one we deliberately caused, don't handle it
+                except KeyboardInterrupt as e:
+                    raise e
+                except InterruptedError as e:
+                    raise e
+                # For all other exceptions, we want to know about it
+                except Exception as e:
                     test.tasks_failed.append({
-                        'name': task_name,
+                        'exception': e.__class__.__name__,
                         'cause': str(e),
+                        'name': task_name,
                         'trace': traceback.format_exc()
                         })
                     if self.email_on_fail:
                         self.send_fail_email(test)
                     self.board.log("Task failed: {} - {}: {}".format(
                         _test_name(test), task_name, str(e)))
-                    if 'report' in self.tasks:
-                        if task_name == 'report':
-                            raise e
-                        else:
-                            self._run_task('report')
-                            sys.exit(1)
+                    # If it was a TaskFailed exception, try to run the report tasks
+                    if isinstance(e, TaskFailed):
+                        if 'report' in self.tasks:
+                            if task_name == 'report':
+                                raise e
+                            else:
+                                self._run_task('report')
+                                sys.exit(1)
+                    else:
+                        raise e
 
 
     def send_fail_email(self, test):
@@ -253,14 +270,19 @@ class TestRunner():
             self.board.name, datetime.datetime.now()
         )
 
-        for task in test.tasks_failed:
+        for failed in test.tasks_failed:
                 email.body += '''
                     <b>Failed:</b> {}.{}()<br>
+                    <b>Exception:</b> {}<br>
                     <b>Cause:</b> {}<br>
                     <b>Trace:</b> {}<br>
                     <hr>
-                    '''.format(_test_name(test), task['name'], task['cause'],
-                    '<br>'.join(task['trace'].split('\n')))
+                    '''.format(
+                        _test_name(test),
+                        failed['name'],
+                        failed['exception'],
+                        failed['cause'],
+                        '<br>'.join(failed['trace'].split('\n')))
 
         email.body += '''
             <b>Platform: </b>{}<br><hr>
