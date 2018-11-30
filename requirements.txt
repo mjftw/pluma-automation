@@ -3,3 +3,4 @@ pyserial
 pyudev
 pexpect>=4.6
 pyftdi
+python-daemon
