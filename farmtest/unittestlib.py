@@ -13,9 +13,27 @@ def sc_run_n_iterations(suite, ntimes):
 
 
 @deferred_function
-def sc_time_in_range(suite, start_hour, end_hour):
+def sc_time_in_range(start_hour, end_hour):
     now = datetime.datetime.now()
     return (start_hour <= now.hour and now.hour < end_hour)
+
+@deferred_function
+def sc_run_daily_at_hour(suite, start_hour):
+    data_key = 'sc_run_daily_at_hour:run_dates'
+
+    now = datetime.datetime.now()
+    date_now = now.strftime("%Y/%m/%d")
+
+    if start_hour <= now.hour:
+        if not data_key in suite.data:
+            suite.data[data_key] = [date_now]
+            return True
+
+        if date_now not in suite.data[data_key]:
+            suite.data[data_key].append(date_now)
+            return True
+
+    return False
 
 
 @deferred_function
