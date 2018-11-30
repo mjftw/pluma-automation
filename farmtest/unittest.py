@@ -1,4 +1,5 @@
 import time
+import inspect
 from copy import copy
 
 
@@ -42,14 +43,17 @@ class deferred_function():
         self.args_ready = True
 
     def run(self, suite=None):
-        if self.args and self.kwargs:
-            return self.f(suite, *self.args, **self.kwargs)
-        elif self.args:
-            return self.f(suite, *self.args)
-        elif self.kwargs:
-            return self.f(suite, **self.kwargs)
+        # Check if first argument to function is 'suite'
+        expects_suite = next(iter(inspect.getargspec(self.f).args)) == 'suite'
+
+        args = self.args or []
+        if expects_suite:
+            args = [suite] + list(args)
+
+        if self.kwargs:
+            return self.f(*args, **self.kwargs)
         else:
-            return self.f(suite)
+            return self.f(*args)
 
 
 class UnitTestBase():
@@ -81,17 +85,25 @@ class UnitTestSuite(UnitTestBase):
         self.run_condition = run_condition_func
 
         self.name = name
-        self.run_forever = run_forever
-        self.report_n_iterations = report_n_iterations
-        self.continue_on_fail = continue_on_fail
-        self.iteration_end_sleep_s = iteration_end_sleep_s
 
-        self.num_iterations_run = 0
-        self.num_iterations_pass = 0
-        self.num_iterations_fail = 0
-        self.num_tests_run = 0
-        self.num_tests_pass = 0
-        self.num_tests_fail = 0
+        # Runtime settings
+        self.settings = {}
+        self.settings['run_forever'] = run_forever
+        self.settings['report_n_iterations'] = report_n_iterations
+        self.settings['continue_on_fail'] = continue_on_fail
+        self.settings['iteration_end_sleep_s'] = iteration_end_sleep_s
+
+        # Runtime statistics
+        self.stats = {}
+        self.stats['num_iterations_run'] = 0
+        self.stats['num_iterations_pass'] = 0
+        self.stats['num_iterations_fail'] = 0
+        self.stats['num_tests_run'] = 0
+        self.stats['num_tests_pass'] = 0
+        self.stats['num_tests_fail'] = 0
+
+        # Global data to be used by tests
+        self.data = {}
 
         self.tests_passed = []
         self.tests_failed = []
@@ -114,6 +126,8 @@ class UnitTestSuite(UnitTestBase):
                         "Must be either: single test, list of tests, or None")
         elif isinstance(tests, UnitTest):
             self._tests = [tests]
+        elif callable(tests):
+            self._tests = [UnitTest(tests)]
         elif tests is None:
             self._tests = []
         else:
@@ -121,7 +135,6 @@ class UnitTestSuite(UnitTestBase):
                 "Must be either: single test, list of tests, or None")
         for test in self.tests:
             test.suite = self
-
 
     @property
     def setup(self):
@@ -151,37 +164,37 @@ class UnitTestSuite(UnitTestBase):
         all_tests_pass = True
         for test in self.tests:
             success = test.run(self)
-            self.num_tests_run += 1
+            self.stats['num_tests_run'] += 1
             if success:
-                self.num_tests_pass += 1
+                self.stats['num_tests_pass'] += 1
                 if test not in self.tests_passed:
                     self.tests_passed.append(test)
             else:
-                self.num_tests_fail += 1
+                self.stats['num_tests_fail'] += 1
                 if test not in self.tests_failed:
                     self.tests_failed.append(test)
                 all_tests_pass = False
-            if not all_tests_pass and not self.continue_on_fail:
+            if not all_tests_pass and not self.settings['continue_on_fail']:
                 break
 
-        self.num_iterations_run += 1
+        self.stats['num_iterations_run'] += 1
         if all_tests_pass:
-            self.num_iterations_pass += 1
+            self.stats['num_iterations_pass'] += 1
         else:
-            self.num_iterations_fail += 1
+            self.stats['num_iterations_fail'] += 1
 
-        if all_tests_pass or self.continue_on_fail:
-            time.sleep(self.iteration_end_sleep_s)
+        if all_tests_pass or self.settings['continue_on_fail']:
+            time.sleep(self.settings['iteration_end_sleep_s'])
 
         return all_tests_pass
 
     def run(self):
-        self.num_iterations_run = 0
-        self.num_iterations_pass = 0
-        self.num_iterations_fail = 0
-        self.num_tests_run = 0
-        self.num_tests_pass = 0
-        self.num_tests_fail = 0
+        self.stats['num_iterations_run'] = 0
+        self.stats['num_iterations_pass'] = 0
+        self.stats['num_iterations_fail'] = 0
+        self.stats['num_tests_run'] = 0
+        self.stats['num_tests_pass'] = 0
+        self.stats['num_tests_fail'] = 0
 
         if self.setup:
             self.setup(self)
@@ -190,12 +203,12 @@ class UnitTestSuite(UnitTestBase):
             if self.run_condition:
                 while self.run_condition.run(self):
                     success = self.run_iteration()
-                    if not success and not self.continue_on_fail:
+                    if not success and not self.settings['continue_on_fail']:
                         if self.report:
                             self.report.run(self)
                         return
-                    if (self.report_n_iterations and
-                        self.num_iterations_run % self.report_n_iterations == 0):
+                    if (self.settings['report_n_iterations'] and
+                        self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
                             self.report.run(self)
             else:
@@ -203,7 +216,7 @@ class UnitTestSuite(UnitTestBase):
                 if self.report:
                     self.report.run(self)
 
-            if not self.run_forever:
+            if not self.settings['run_forever']:
                 return
 
 
