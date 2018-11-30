@@ -1,5 +1,7 @@
-import subprocess
 import re
+
+from farmutils.helpers import run_host_cmd
+
 
 class StorageException(Exception):
     pass
@@ -27,29 +29,29 @@ class StorageBase():
             raise StorageException('Mount failed: No mountpoint given')
 
         # Check if already mounted
-        (output, ret) = self._host_cmd('mount')
+        (output, ret) = run_host_cmd('mount')
 
         # Unmount if mounted
         if re.search('{}.*'.format(devnode), output):
             self.unmount_host(devnode)
 
-        (output, ret) = self._host_cmd('mount {} {}'.format(devnode, mountpoint))
+        (output, ret) = run_host_cmd('mount {} {}'.format(devnode, mountpoint))
         if ret != 0:
             raise StorageException('Failed to mount {} at {}: [ERR-{}] {}'.format(
                 devnode, mountpoint, ret, output))
 
     def unmount_host(self, devnode):
         # Check if actually mounted, and unmount until not mounted
-        (output, ret) = self._host_cmd('mount')
+        (output, ret) = run_host_cmd('mount')
         tries = 0
         max_tries = 10
 
         while re.search('{}.*'.format(devnode), output) and tries < max_tries:
-            (output, ret) = self._host_cmd('umount {}'.format(devnode))
+            (output, ret) = run_host_cmd('umount {}'.format(devnode))
             if ret != 0:
                 raise StorageException('Unmount failed [ERR-{}] {}'.format(ret, output))
             tries += 1
-            (output, ret) = self._host_cmd('mount')
+            (output, ret) = run_host_cmd('mount')
 
         if tries >= max_tries:
             raise StorageException('Unmount failed after {} attempts'.format(tries))
@@ -61,7 +63,3 @@ class StorageBase():
     def unmount_board(self):
         print("--- Manual Intervention Required! ---")
 
-    def _host_cmd(self, cmd):
-        cmd = cmd.split()
-        cp = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return (cp.communicate()[0].decode('utf-8'), cp.returncode)
