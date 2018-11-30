@@ -132,6 +132,10 @@ class Logging():
         else:
             self._log_hier_path = False
 
+    def log_file_clear(self):
+        if self.log_file:
+            open(self.log_file, 'w').close()
+
     def log(self, message, colour=None, bold=False):
         prefix = ''
         if self.log_on:
