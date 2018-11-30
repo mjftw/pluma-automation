@@ -65,7 +65,8 @@ class APC(Farmclass):
 
     def _disconnect(self):
         if self.console.is_open:
-            self.console.send('>]')
+            self.console.send('\x03', match='Control Console')
+            self.console.send('4', match='Connection Closed')
 
     def _switch(self, state):
         if state not in ['on', 'off']:
@@ -76,7 +77,7 @@ class APC(Farmclass):
         self.console.send('1', match='Device Manager')
         self.console.send('2', match='Outlet Management')
         self.console.send('1', match='Outlet Control/Configuration')
-        self.console.send(str(self.port), match='Outlet {}'.format(self.port))
+        self.console.send(str(self.port), match='Outlet       : {}'.format(self.port))
         self.console.send('1', match='Control Outlet')
         self.console.send('1' if state == 'on' else '2', match="Enter 'YES' to continue")
         self.console.send('YES', match='Press <ENTER> to continue')
