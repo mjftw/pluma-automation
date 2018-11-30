@@ -1,3 +1,10 @@
+import sys
+import traceback
+import platform
+import datetime
+
+from farmutils.doemail import Email
+
 '''
 class ExampleTest():
     def __init__(self, board):
@@ -142,7 +149,7 @@ class TestCore(TestBase):
             else:
                 devnode = self.board.hub.get_part()['devnode']
         if not devnode:
-            raise TaskFailed('Cannot mount: No block device downstream of hub')
+            raise TaskFailed('Cannot mount: No block device partition downstream of hub')
 
         self.board.storage.mount_host(devnode)
 
@@ -210,9 +217,14 @@ class TestRunner():
                 try:
                     task_func()
                 except TaskFailed as e:
+                    test.tasks_failed.append({
+                        'name': task_name,
+                        'cause': str(e),
+                        'trace': traceback.format_exc()
+                        })
+                    self.send_fail_email(test)
                     self.board.log("Task failed: {} - {}: {}".format(
                         _test_name(test), task_name, str(e)))
-                    test.tasks_failed.append({'name': task_name, 'cause': str(e)})
                     if 'report' in self.tasks:
                         if task_name == 'report':
                             raise e
@@ -221,6 +233,40 @@ class TestRunner():
                             sys.exit(1)
 
 
+    def send_fail_email(self, test):
+        lab_maintainers = ['mwebster@witekio.com']
+        email = Email(
+            sender='lab@witekio.com',
+            to=lab_maintainers,
+            files=self.board.log_file,
+            body='',
+            body_type='html'
+        )
+
+        email.subject = 'Testing Failed: {} [{}] [{}]'.format(
+            [_test_name(t) for t in self.tests],
+            self.board.name, datetime.datetime.now()
+        )
+        email.body += '''
+            <b>Platform: </b>{}<br><hr>
+            '''.format('<br>'.join(list(str(platform.uname()).split(','))))
+
+        for task in test.tasks_failed:
+                email.body += '''
+                    <b>Failed:</b> {}<br>
+                    <b>Cause:</b> {}<br>
+                    <b>Trace:</b> {}<br>
+                    <hr>
+                    '''.format(task['name'], task['cause'],
+                    '<br>'.join(task['trace'].split('\n')))
+        email.body += '<b>Board Info:</b><br>'
+        email.body += '<br>'.join(self.board.show_hier().split('\n'))
+        email.body += '<hr><br>'
+
+        self.board.log(email.subject)
+        self.board.log('Informing lab maintainers via email')
+
+        email.send()
 
 def _test_name(test):
     return test.__class__.__name__
