@@ -247,18 +247,20 @@ class TestRunner():
             [_test_name(t) for t in self.tests],
             self.board.name, datetime.datetime.now()
         )
+
+        for task in test.tasks_failed:
+                email.body += '''
+                    <b>Failed:</b> {}.{}()<br>
+                    <b>Cause:</b> {}<br>
+                    <b>Trace:</b> {}<br>
+                    <hr>
+                    '''.format(_test_name(test), task['name'], task['cause'],
+                    '<br>'.join(task['trace'].split('\n')))
+
         email.body += '''
             <b>Platform: </b>{}<br><hr>
             '''.format('<br>'.join(list(str(platform.uname()).split(','))))
 
-        for task in test.tasks_failed:
-                email.body += '''
-                    <b>Failed:</b> {}<br>
-                    <b>Cause:</b> {}<br>
-                    <b>Trace:</b> {}<br>
-                    <hr>
-                    '''.format(task['name'], task['cause'],
-                    '<br>'.join(task['trace'].split('\n')))
         email.body += '<b>Board Info:</b><br>'
         email.body += '<br>'.join(self.board.show_hier().split('\n'))
         email.body += '<hr><br>'
