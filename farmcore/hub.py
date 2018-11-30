@@ -77,7 +77,7 @@ class Hub(Farmclass, USB):
 
         return match_vals
 
-    def get_serial(self):
+    def get_serial(self, key=None):
         serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
         for vendor in serial_vendors:
             devinfo = self.filter_downstream({
@@ -94,9 +94,12 @@ class Hub(Farmclass, USB):
         if not devinfo:
             None
         else:
-            return devinfo[0]
+            if key:
+                return devinfo[0][key]
+            else:
+                return devinfo[0]
 
-    def get_relay(self):
+    def get_relay(self, key=None):
         devinfo = self.filter_downstream({
             'subsystem': 'tty',
             'vendor': 'DLP_Design'
@@ -109,9 +112,12 @@ class Hub(Farmclass, USB):
         if not devinfo:
             None
         else:
-            return devinfo[0]
+            if key:
+                return devinfo[0][key]
+            else:
+                return devinfo[0]
 
-    def get_block(self):
+    def get_block(self, key=None):
         devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'disk'
@@ -123,7 +129,7 @@ class Hub(Farmclass, USB):
         else:
             return devinfo[0]
 
-    def get_part(self):
+    def get_part(self, key=None):
         devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'partition'
@@ -133,7 +139,10 @@ class Hub(Farmclass, USB):
         if not devinfo:
             None
         else:
-            return devinfo[0]
+            if key:
+                return devinfo[0][key]
+            else:
+                return devinfo[0]
 
     def get_parent(self):
         dev = self.get_device()
