@@ -68,7 +68,19 @@ class TestCore(TestBase):
 
     def _host_unmount(self):
         self.board.log("=!= HOST UNMOUNT =!=")
-        self.board.storage.unmount_host()
+
+        #TODO: Move this functionality to the board class
+        devnode = None
+        for _ in range(1, 5):
+            if not self.board.hub.get_part():
+                time.sleep(1)
+            else:
+                devnode = self.board.hub.get_part()['devnode']
+        if devnode:
+            self.board.storage.unmount_host(devnode)
+        else:
+            self.board.log("Cannot find block device. Continuing anyway")
+
         self.board.storage.to_board()
 
     def pre_board_on(self):
@@ -122,7 +134,17 @@ class TestCore(TestBase):
     def _host_mount(self):
         self.board.log("=!= HOST MOUNT =!=")
         self.board.storage.to_host()
-        self.board.storage.mount_host()
+
+        devnode = None
+        for _ in range(1, 5):
+            if not self.board.hub.get_part():
+                time.sleep(1)
+            else:
+                devnode = self.board.hub.get_part()['devnode']
+        if not devnode:
+            raise TaskFailed('Cannot mount: No block device downstream of hub')
+
+        self.board.storage.mount_host(devnode)
 
     def report(self):
         self.board.log("=== REPORT ===")
@@ -158,7 +180,7 @@ class TestRunner():
         for task in self.tasks:
             self._run_task(task)
 
-        self.board.log("== All Tests Finished ==")
+        self.board.log("== ALL TESTS COMPLETED ==")
 
     def add_test(self, test, index=None):
         if index is None:
