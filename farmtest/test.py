@@ -64,10 +64,10 @@ class TestCore(TestBase):
         self.board = board
 
     def prepare(self):
-        self.board.log("=== PREPARE ===")
+        self.board.log("\n=== PREPARE ===", colour='blue', bold=True)
 
     def _host_unmount(self):
-        self.board.log("=!= HOST UNMOUNT =!=")
+        self.board.log("\n=!= HOST UNMOUNT =!=", bold=True)
 
         #TODO: Move this functionality to the board class
         devnode = None
@@ -84,55 +84,55 @@ class TestCore(TestBase):
         self.board.storage.to_board()
 
     def pre_board_on(self):
-        self.board.log("=== PRE BOARD ON ===")
+        self.board.log("\n=== PRE BOARD ON ===", colour='blue', bold=True)
 
     def _board_on_and_validate(self):
-        self.board.log("=!= BOARD ON AND VALIDATE =!=")
+        self.board.log("\n=!= BOARD ON AND VALIDATE =!=", bold=True)
         try:
             self.board.reboot_and_validate()
         except BootValidationError as e:
             raise TaskFailed(str(e))
 
     def pre_board_login(self):
-        self.board.log("=== PRE BOARD LOGIN ===")
+        self.board.log("\n=== PRE BOARD LOGIN ===", colour='blue', bold=True)
 
     def _board_login(self):
-        self.board.log("=!= BOARD LOGIN =!=")
+        self.board.log("\n=!= BOARD LOGIN =!=", bold=True)
         try:
             self.board.login()
         except LoginFailed as e:
             raise TaskFailed(str(e))
 
     def pre_board_mount(self):
-        self.board.log("=== PRE BOARD MOUNT ===")
+        self.board.log("\n=== PRE BOARD MOUNT ===", colour='blue', bold=True)
 
     def _board_mount(self):
-        self.board.log("=!= BOARD MOUNT =!=")
+        self.board.log("\n=!= BOARD MOUNT =!=", bold=True)
         self.board.storage.to_board()
         self.board.storage.mount_board()
 
     def post_board_mount(self):
-        self.board.log("=== POST BOARD MOUNT ===")
+        self.board.log("\n=== POST BOARD MOUNT ===", colour='blue', bold=True)
 
     def test_body(self):
-        self.board.log("=== TEST BODY ===")
+        self.board.log("\n=== TEST BODY ===", colour='blue', bold=True)
 
     def pre_board_unmount(self):
-        self.board.log("=== PRE BOARD UNMOUNT ===")
+        self.board.log("\n=== PRE BOARD UNMOUNT ===", colour='blue', bold=True)
 
     def _board_unmount(self):
-        self.board.log("=!= BOARD UNMOUNT =!=")
+        self.board.log("\n=!= BOARD UNMOUNT =!=", bold=True)
         self.board.storage.unmount_board()
 
     def _board_off(self):
-        self.board.log("=!= BOARD OFF =!=")
+        self.board.log("\n=!= BOARD OFF =!=", bold=True)
         self.board.power.off()
 
     def post_board_off(self):
-        self.board.log("=== POST BOARD OFF ===")
+        self.board.log("\n=== POST BOARD OFF ===", colour='blue', bold=True)
 
     def _host_mount(self):
-        self.board.log("=!= HOST MOUNT =!=")
+        self.board.log("\n=!= HOST MOUNT =!=", bold=True)
         self.board.storage.to_host()
 
         devnode = None
@@ -147,7 +147,7 @@ class TestCore(TestBase):
         self.board.storage.mount_host(devnode)
 
     def report(self):
-        self.board.log("=== REPORT ===")
+        self.board.log("\n=== REPORT ===", colour='blue', bold=True)
 
 
 class TestRunner():
@@ -180,7 +180,7 @@ class TestRunner():
         for task in self.tasks:
             self._run_task(task)
 
-        self.board.log("== ALL TESTS COMPLETED ==")
+        self.board.log("\n== ALL TESTS COMPLETED ==", colour='blue', bold=True)
 
     def add_test(self, test, index=None):
         if index is None:
