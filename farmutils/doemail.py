@@ -7,6 +7,12 @@ from email.mime.text import MIMEText
 from email import encoders
 
 
+DEFAULT_SMTP_AUTHFILE = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), os.pardir, 'smtp.auth')
+if not os.path.isfile(DEFAULT_SMTP_AUTHFILE):
+    DEFAULT_SMTP_AUTHFILE = None
+
+
 class EmailInvalidSettings(Exception):
     pass
 
@@ -26,7 +32,7 @@ class Email():
                  images_inline=False,
                  smtp_server='smtp.office365.com',
                  smtp_timeout=587,
-                 smtp_authfile=None,
+                 smtp_authfile=DEFAULT_SMTP_AUTHFILE,
                  smtp_password=None,
                  smtp_username=None
                  ):
