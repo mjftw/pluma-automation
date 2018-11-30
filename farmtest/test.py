@@ -57,7 +57,7 @@ class TestBase():
 
 class TestCore(TestBase):
     tasks = [
-        '_host_mount', 'prepare', '_host_unmount',
+        'pre_host_mount', '_host_mount', 'prepare', '_host_unmount',
         'pre_board_on', '_board_on_and_validate',
         'pre_board_login', '_board_login',
         'pre_board_mount', '_board_mount', 'post_board_mount',
@@ -69,6 +69,24 @@ class TestCore(TestBase):
 
     def __init__(self, board):
         self.board = board
+
+    def pre_host_mount(self):
+        self.board.log("\n=== PRE HOST MOUNT ===", colour='blue', bold=True)
+
+    def _host_mount(self):
+        self.board.log("\n=!= HOST MOUNT =!=", bold=True)
+        self.board.storage.to_host()
+
+        devnode = None
+        for _ in range(1, 5):
+            if not self.board.hub.get_part():
+                time.sleep(1)
+            else:
+                devnode = self.board.hub.get_part('devnode')
+        if not devnode:
+            raise TaskFailed('Cannot mount: No block device partition downstream of hub')
+
+        self.board.storage.mount_host(devnode)
 
     def prepare(self):
         self.board.log("\n=== PREPARE ===", colour='blue', bold=True)
@@ -82,11 +100,11 @@ class TestCore(TestBase):
             if not self.board.hub.get_part():
                 time.sleep(1)
             else:
-                devnode = self.board.hub.get_part()['devnode']
+                devnode = self.board.hub.get_part('devnode')
         if devnode:
             self.board.storage.unmount_host(devnode)
         else:
-            self.board.log("Cannot find block device. Continuing anyway")
+            self.board.log("Cannot find block device partition. Continuing anyway")
 
         self.board.storage.to_board()
 
@@ -138,28 +156,14 @@ class TestCore(TestBase):
     def post_board_off(self):
         self.board.log("\n=== POST BOARD OFF ===", colour='blue', bold=True)
 
-    def _host_mount(self):
-        self.board.log("\n=!= HOST MOUNT =!=", bold=True)
-        self.board.storage.to_host()
-
-        devnode = None
-        for _ in range(1, 5):
-            if not self.board.hub.get_part():
-                time.sleep(1)
-            else:
-                devnode = self.board.hub.get_part()['devnode']
-        if not devnode:
-            raise TaskFailed('Cannot mount: No block device partition downstream of hub')
-
-        self.board.storage.mount_host(devnode)
-
     def report(self):
         self.board.log("\n=== REPORT ===", colour='blue', bold=True)
 
 
 class TestRunner():
-    def __init__(self, board, tests=None):
+    def __init__(self, board, tests=None, email_on_fail=True):
         self.board = board
+        self.email_on_fail = email_on_fail
         self.tests = []
         tests = tests or []
         if not isinstance(tests, list):
@@ -222,7 +226,8 @@ class TestRunner():
                         'cause': str(e),
                         'trace': traceback.format_exc()
                         })
-                    self.send_fail_email(test)
+                    if self.email_on_fail:
+                        self.send_fail_email(test)
                     self.board.log("Task failed: {} - {}: {}".format(
                         _test_name(test), task_name, str(e)))
                     if 'report' in self.tasks:
