@@ -11,17 +11,6 @@ driver_path = '/sys/bus/usb/drivers/usb/'
 
 puctx = pyudev.Context()
 
-class NoPartitions(Exception):
-    pass
-
-
-class NoDisks(Exception):
-    pass
-
-
-class NoDevice(Exception):
-    pass
-
 
 class USB():
     def __init__(self, device):

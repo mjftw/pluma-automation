@@ -8,7 +8,6 @@ class Hub(Farmclass, USB):
     def __init__(self, usb_device):
         USB.__init__(self, usb_device)
 
-
     @property
     def devinfo(self):
         return self._pack_devinfo(self.get_device())
@@ -93,7 +92,7 @@ class Hub(Farmclass, USB):
                 break
 
         if not devinfo:
-            raise NoDevice('No serial devices on {}'.format(self.usb_device))
+            None
         else:
             return devinfo[0]
 
@@ -108,7 +107,7 @@ class Hub(Farmclass, USB):
             })
 
         if not devinfo:
-            raise IOError('No relay devices on {}'.format(self.usb_device))
+            None
         else:
             return devinfo[0]
 
@@ -120,7 +119,7 @@ class Hub(Farmclass, USB):
             'size': 0
         })
         if not devinfo:
-            raise IOError('No block devices on {}'.format(self.usb_device))
+            None
         else:
             return devinfo[0]
 
@@ -132,7 +131,7 @@ class Hub(Farmclass, USB):
             'size': 0
         })
         if not devinfo:
-            raise NoPartitions('No partitions on {}'.format(self.usb_device))
+            None
         else:
             return devinfo[0]
 
