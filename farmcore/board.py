@@ -41,12 +41,13 @@ class Board(Farmclass):
         else:
             self.log_file = logfile
 
-    def reboot_and_validate(self):
-        if not self.bootstr:
+    def reboot_and_validate(self, override_boostr=None):
+        bootstr = override_boostr or self.bootstr
+        if not bootstr:
             raise BootValidationError("Cannot validate boot. Not bootstring given")
 
         self.power.reboot()
-        (__, matched) = self.console.send(match=self.bootstr, timeout=30)
+        (__, matched) = self.console.send(match=bootstr, timeout=30)
 
         if matched is False or matched is TIMEOUT or matched is EOF:
             raise BootValidationError("Did not get bootstring: {}".format(self.bootstr))
@@ -59,6 +60,7 @@ class Board(Farmclass):
             password_match=self.login_pass_match,
             success_match=self.prompt
         )
+
 
 def get_board(boards, name):
     for b in boards:
