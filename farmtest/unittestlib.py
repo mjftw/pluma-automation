@@ -9,7 +9,7 @@ class TestMustBeInSuite(Exception):
 
 @deferred_function
 def sc_run_n_iterations(suite, ntimes):
-    return suite.num_iterations_run < ntimes
+    return suite.stats['num_iterations_run'] < ntimes
 
 
 @deferred_function
@@ -42,9 +42,9 @@ def tt_log_stats(suite, board):
         raise TestMustBeInSuite
 
     board.log("Test #: {}, pass #: {}, fail #: {}".format(
-        suite.num_tests_run,
-        suite.num_tests_pass,
-        suite.num_tests_fail
+        suite.stats['num_tests_run'],
+        suite.stats['num_tests_pass'],
+        suite.stats['num_tests_fail']
         ))
 
 
@@ -78,11 +78,11 @@ def sr_log_test_results(suite, board):
         message += "\t{}: FAIL\n".format(
             test.body['str'])
     message += "Total tests:\n"
-    message += "\tRun = {}\n".format(suite.num_tests_run)
-    message += "\tPass = {}\n".format(suite.num_tests_pass)
-    message += "\tFail = {}\n".format(suite.num_tests_fail)
+    message += "\tRun = {}\n".format(suite.stats['num_tests_run'])
+    message += "\tPass = {}\n".format(suite.stats['num_tests_pass'])
+    message += "\tFail = {}\n".format(suite.stats['num_tests_fail'])
     message += "Total iterations:\n"
-    message += "\tRun = {}\n".format(suite.num_iterations_run)
-    message += "\tPass = {}\n".format(suite.num_iterations_pass)
-    message += "\tFail = {}\n".format(suite.num_iterations_fail)
+    message += "\tRun = {}\n".format(suite.stats['num_iterations_run'])
+    message += "\tPass = {}\n".format(suite.stats['num_iterations_pass'])
+    message += "\tFail = {}\n".format(suite.stats['num_iterations_fail'])
     board.log(message)
