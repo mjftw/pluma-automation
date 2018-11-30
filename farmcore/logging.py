@@ -26,6 +26,20 @@ DEFAULT_LOG_NAME = None
 DEFAULT_LOG_FILE = None
 
 
+ascii_colmap = {
+    'black': '\033[30m',
+    'red': '\033[31m',
+    'green': '\033[32m',
+    'yellow': '\033[33m',
+    'blue': '\033[34m',
+    'purple': '\033[35m',
+    'cyan': '\033[36m',
+    'white': '\033[3m',
+    'bold': '\033[1m',
+    'normal': '\033[0m'
+}
+
+
 class Logging():
     @property
     def log_on(self):
@@ -118,7 +132,7 @@ class Logging():
         else:
             self._log_hier_path = False
 
-    def log(self, message):
+    def log(self, message, colour=None, bold=False):
         prefix = ''
         if self.log_on:
             if self.log_hier_path:
@@ -137,9 +151,21 @@ class Logging():
                 with open(self.log_file, 'a') as logfd:
                     logfd.write(message + '\n')
             if self.log_echo:
+                if colour in ascii_colmap:
+                    message = '{}{}{}'.format(
+                        ascii_colmap[colour],
+                        message,
+                        ascii_colmap['normal']
+                    )
+                if bold:
+                    message = '{}{}{}'.format(
+                        ascii_colmap['bold'],
+                        message,
+                        ascii_colmap['normal']
+                    )
                 print(message)
 
     def error(self, message):
         message = "ERROR: {}".format(message)
-        self.log(message)
+        self.log(message, colour='red', bold=True)
         raise RuntimeError(message)
