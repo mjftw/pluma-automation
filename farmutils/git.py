@@ -1,33 +1,28 @@
 import subprocess
 from os import chdir
 
+from farmutils.helpers import run_host_cmd
 
-def reset_repos(base_dir, repos, tag, default_tag=None):
+def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
     for repo in repos:
-        print("Changing to {}/{}....".format(base_dir, repo))
+        log_func('Resetting repo [{}] to tag [{}]...'.format(repo, tag))
         chdir('{}/{}'.format(base_dir, repo))
-        _run("git fetch --all")
+        run_host_cmd("git fetch --all")
         try:
-            _run("git reset --hard {}".format(tag))
+            run_host_cmd("git reset --hard {}".format(tag))
         except subprocess.CalledProcessError as e:
-            if tag == default_tag:
-                print("Failed to reset repo [{}] to tag [{}]".format(
+            if tag == default_tag or default_tag is None:
+                log_func("Failed to reset repo [{}] to tag [{}]".format(
                     repo, tag))
                 raise e
             else:
-                print("Failed to reset repo [{}] to [{}] - so using default [{}]".format(
+                log_func("Failed to reset repo [{}] to [{}] - so using default [{}]".format(
                     repo, tag, default_tag))
-                _run("git reset --hard {}".format(default_tag))
+                run_host_cmd("git reset --hard {}".format(default_tag))
 
 
 def get_latest_tag(srcdir, branch):
     chdir(srcdir)
-    _run("git fetch --all")
-    tag = _run("git describe origin/{}".format(branch), stdout=subprocess.PIPE)
-    tag = tag.stdout.decode('ascii').strip()
-    return tag
-
-
-def _run(cmd, *args, **kwargs):
-    kwargs['check'] = True
-    return subprocess.run(cmd.split(), *args, **kwargs)
+    run_host_cmd("git fetch --all")
+    tag, rc = run_host_cmd("git describe origin/{}".format(branch))
+    return tag.rstrip()
