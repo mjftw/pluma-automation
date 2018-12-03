@@ -54,6 +54,9 @@ class TaskFailed(Exception):
 class TestBase():
     tasks_failed = []
 
+    def __init__(self, board):
+        self.board = board
+
 
 class TestCore(TestBase):
     tasks = [
@@ -66,9 +69,6 @@ class TestCore(TestBase):
         '_board_off', 'post_board_off',
         '_host_mount', 'report'
     ]
-
-    def __init__(self, board):
-        self.board = board
 
     def pre_host_mount(self):
         self.board.log("\n=== PRE HOST MOUNT ===", colour='blue', bold=True)
@@ -265,7 +265,7 @@ class TestRunner():
             body_type='html'
         )
 
-        email.subject = 'Testing Failed: {} [{}] [{}]'.format(
+        email.subject = 'TestRunner Exception Occured: {} [{}] [{}]'.format(
             [_test_name(t) for t in self.tests],
             self.board.name, datetime.datetime.now()
         )
