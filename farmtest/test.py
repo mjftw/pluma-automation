@@ -47,7 +47,19 @@ from farmcore.console import LoginFailed
 from farmcore.board import BootValidationError
 
 
-class TaskFailed(Exception):
+class TestingException(Exception):
+    pass
+
+
+class TaskFailed(TestingException):
+    pass
+
+
+class AbortTesting(TestingException):
+    pass
+
+
+class AbortTestingAndReport(AbortTesting):
     pass
 
 
@@ -188,10 +200,12 @@ class TestRunner():
         self.board.log("Running tests: {}".format(
             list(map(lambda t: t.__class__.__name__, self.tests))))
 
-        for task in self.tasks:
-            self._run_task(task)
-
-        self.board.log("\n== ALL TESTS COMPLETED ==", colour='blue', bold=True)
+        try:
+            for task in self.tasks:
+                self._run_task(task)
+            self.board.log("\n== ALL TESTS COMPLETED ==", colour='blue', bold=True)
+        except AbortTesting as e:
+            self.board.log("\n== TESTING ABORTED EARLY ==", colour='red', bold=True)
 
         # Check if any tasks failed
         if [t.tasks_failed for t in self.tests]:
@@ -230,6 +244,14 @@ class TestRunner():
                 except KeyboardInterrupt as e:
                     raise e
                 except InterruptedError as e:
+                    raise e
+                # If reqest to abort testing, do so
+                except AbortTesting as e:
+                    self.board.log('Testing aborted by task {} - {}: {}'.format(
+                        _test_name(test), task_name, str(e)))
+                    if (isinstance(e, AbortTestingAndReport) and
+                            'report' in self.tasks):
+                        self._run_task('report')
                     raise e
                 # For all other exceptions, we want to know about it
                 except Exception as e:
