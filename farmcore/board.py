@@ -50,7 +50,7 @@ class Board(Farmclass):
         (__, matched) = self.console.send(match=bootstr, timeout=30)
 
         if matched is False or matched is TIMEOUT or matched is EOF:
-            raise BootValidationError("Did not get bootstring: {}".format(self.bootstr))
+            raise BootValidationError("Did not get bootstring: {}".format(bootstr))
 
     def login(self):
         self.console.login(
