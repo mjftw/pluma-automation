@@ -1,4 +1,5 @@
 import datetime
+import time
 
 from .unittest import deferred_function
 
@@ -86,3 +87,17 @@ def sr_log_test_results(suite, board):
     message += "\tPass = {}\n".format(suite.stats['num_iterations_pass'])
     message += "\tFail = {}\n".format(suite.stats['num_iterations_fail'])
     board.log(message)
+
+
+@deferred_function
+def sleep_and_notify(duration, unit, mode, log_func=print):
+    log_func("Now waiting {} {}...".format(
+        duration, unit))
+    for duration in reversed(range(1, duration+1)):
+        log_func("{} {} to go...".format(duration, unit))
+        if unit == 'hours':
+            time.sleep(60*60)
+        if unit == 'minutes':
+            time.sleep(60)
+        if unit == 'seconds':
+            time.sleep(1)
