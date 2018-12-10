@@ -169,7 +169,8 @@ class Logging():
                     )
                 print(message)
 
-    def error(self, message):
+    def error(self, message, exception=None):
         message = "ERROR: {}".format(message)
         self.log(message, colour='red', bold=True)
-        raise RuntimeError(message)
+        if exception:
+            raise exception(message)
