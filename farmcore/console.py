@@ -31,6 +31,10 @@ class LoginFailed(Exception):
     pass
 
 
+class ExceptionKeywordRecieved(Exception):
+    pass
+
+
 class Console(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
     def __init__(self, encoding='ascii', linesep='\r\n'):
@@ -103,7 +107,7 @@ class Console(Farmclass):
         if match:
             if not isinstance(match, list):
                 match = [match]
-            expects = [pexpect.TIMEOUT, pexpect.EOF] + match
+            watches = [pexpect.TIMEOUT, pexpect.EOF] + match
         else:
             self.flush()
             if start_bytes is None:
@@ -116,7 +120,7 @@ class Console(Farmclass):
                 if verbose:
                     self.log("Waiting for pattern [{}]: Waited[{:.1f}/{:.1f}s]...".format(
                         match, elapsed, timeout))
-                matched = expects[self._pex.expect(expects)]
+                matched = watches[self._pex.expect(watches)]
                 if matched in match:
                     return matched
             else:
@@ -169,6 +173,7 @@ class Console(Farmclass):
              cmd=None,
              recieve=False,
              match=None,
+             excepts=None,
              log_recieved_on_pass=False,
              log_recieved_on_fail=False,
              log_verbose=True,
@@ -192,6 +197,19 @@ class Console(Farmclass):
         recieved = None
         matched = False
 
+        match = match or []
+        excepts = excepts or []
+        watches = []
+
+        if not isinstance(match, list):
+            match = [match]
+
+        if not isinstance(excepts, list):
+            excepts = [excepts]
+
+        watches.extend(match)
+        watches.extend(excepts)
+
         """ Assign default timeout and sleep values if unassigned """
         data_timeout = timeout if timeout >= 0 else 5
         quiet_timeout = timeout if timeout >= 0 else 3
@@ -201,22 +219,28 @@ class Console(Farmclass):
 
         self._pex.linesep = self.encode(self.linesep)
 
-        if not recieve and not match:
+        if not recieve and not watches:
             self._pex.sendline(cmd)
             return (None, None)
         else:
             self.flush(True)
             self._pex.sendline(cmd)
-            if match:
+            if watches:
                 matched = self.wait_for_data(
                     timeout=data_timeout,
                     sleep_time=data_sleep,
-                    match=match,
+                    match=watches,
                     verbose=log_verbose)
                 recieved = self.decode(self._pex.before)
                 if (matched and log_recieved_on_pass or
-                        not matched and log_recieved_on_fail):
-                    self.log("Command result:\n{}".format(result))
+                        (not matched and log_recieved_on_fail and
+                        matched not in excepts)):
+                    self.log("console $ {}\n{}".format(cmd, recieved))
+                if matched in excepts:
+                    message='Matched [{}] is in exceptions list [{}]'.format(
+                        matched, excepts)
+                    self.error("console $ {}\n{}\n{}".format(cmd, recieved, message),
+                        exception=ExceptionKeywordRecieved)
                 return (recieved, matched)
             else:
                 self.wait_for_quiet(
