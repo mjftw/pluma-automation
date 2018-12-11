@@ -20,3 +20,24 @@ def run_host_cmd(command, stdin=None, *args, **kwargs):
     return (child_proc.communicate(
         input=None if not stdin else bytes(stdin, 'utf-8')
     )[0].decode('utf-8'), child_proc.returncode)
+
+
+def format_json_for_vc(db_file, db_output_file):
+    '''
+    Formats a packed json file with line separators and key ordering
+    so that it can be committed to version control.
+    '''
+    with open(db_file) as f:
+        db_str = f.readline()
+
+    try:
+        db_dict = json.loads(db_str)
+        db_json = json.dumps(db_dict,
+            sort_keys=True, indent=4, separators=(',', ': '))
+
+        with open(db_output_file, 'w') as f:
+            f.writelines(db_json)
+    except JSONDecodeError as e:
+        # If we could not decode the json input file, then just abort
+        print('Caught error: {}'.format(str(e)))
+        return
