@@ -1,4 +1,5 @@
 import subprocess
+import json
 
 
 def run_host_cmd(command, stdin=None, *args, **kwargs):
@@ -37,7 +38,7 @@ def format_json_for_vc(db_file, db_output_file):
 
         with open(db_output_file, 'w') as f:
             f.writelines(db_json)
-    except JSONDecodeError as e:
+    except json.JSONDecodeError as e:
         # If we could not decode the json input file, then just abort
         print('Caught error: {}'.format(str(e)))
         return
