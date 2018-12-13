@@ -78,7 +78,8 @@ class UnitTestBase():
 class UnitTestSuite(UnitTestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
-            continue_on_fail=True, run_forever=False, iteration_end_sleep_s=0):
+            continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
+            setup_every_iteration=False):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
@@ -91,7 +92,8 @@ class UnitTestSuite(UnitTestBase):
         self.settings['run_forever'] = run_forever
         self.settings['report_n_iterations'] = report_n_iterations
         self.settings['continue_on_fail'] = continue_on_fail
-        self.settings['iteration_end_sleep_s'] = iteration_end_sleep_s
+        self.settings['condition_check_interval_s'] = condition_check_interval_s
+        self.settings['setup_every_iteration'] = setup_every_iteration
 
         # Runtime statistics
         self.stats = {}
@@ -161,6 +163,9 @@ class UnitTestSuite(UnitTestBase):
         self._run_condition = self.to_deffered_func(f, "run condition")
 
     def run_iteration(self):
+        if self.setup and self.settings['setup_every_iteration']:
+            self.setup.run(self)
+
         all_tests_pass = True
         for test in self.tests:
             success = test.run(self)
@@ -183,9 +188,6 @@ class UnitTestSuite(UnitTestBase):
         else:
             self.stats['num_iterations_fail'] += 1
 
-        if all_tests_pass or self.settings['continue_on_fail']:
-            time.sleep(self.settings['iteration_end_sleep_s'])
-
         return all_tests_pass
 
     def run(self):
@@ -196,8 +198,8 @@ class UnitTestSuite(UnitTestBase):
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_fail'] = 0
 
-        if self.setup:
-            self.setup(self)
+        if self.setup and not self.settings['setup_every_iteration']:
+            self.setup.run(self)
 
         while True:
             if self.run_condition:
@@ -211,8 +213,10 @@ class UnitTestSuite(UnitTestBase):
                         self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
                             self.report.run(self)
+                    time.sleep(self.settings['condition_check_interval_s'])
             else:
                 self.run_iteration()
+
                 if self.report:
                     self.report.run(self)
 
@@ -263,11 +267,11 @@ class UnitTest(UnitTestBase):
         self._teardown = self.to_deffered_func(f, "teardown")
 
     def run(self, suite=None):
-        if not self.body:
-            raise TestFunctionNotSet
-
         if self.setup:
             self.setup.run(suite)
+
+        if not self.body:
+            raise TestFunctionNotSet
 
         self.success = self.body.run(suite)
 
