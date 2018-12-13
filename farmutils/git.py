@@ -227,6 +227,11 @@ def compile_version_list(srcdir, version_filters):
     else:
         filtered_versions = None
 
+    # Sort the final versions
+    filtered_versions = list(map(lambda v: tuple(v.split('.')), filtered_versions))
+    filtered_versions.sort()
+    filtered_versions = list(map(lambda v: '{}.{}.{}'.format(v[0], v[1], v[2]), filtered_versions))
+
     return filtered_versions or None
 
 
