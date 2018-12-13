@@ -215,6 +215,9 @@ def compile_version_list(srcdir, version_filters):
 
     filtered_versions_lists = [filter_versions(all_versions, f) for f in version_filters]
 
+    if None in filtered_versions_lists:
+        return None
+
     if filtered_versions_lists:
         filtered_versions = set(filtered_versions_lists[0])
         for v in filtered_versions_lists[1:]:
