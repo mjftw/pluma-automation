@@ -213,14 +213,15 @@ class UnitTestSuite(UnitTestBase):
                         self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
                             self.report.run(self)
-                    time.sleep(self.settings['condition_check_interval_s'])
             else:
                 self.run_iteration()
 
                 if self.report:
                     self.report.run(self)
 
-            if not self.settings['run_forever']:
+            if self.settings['run_forever']:
+                time.sleep(self.settings['condition_check_interval_s'])
+            else:
                 return
 
 
