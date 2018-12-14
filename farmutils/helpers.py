@@ -29,16 +29,11 @@ def format_json_for_vc(db_file, db_output_file):
     so that it can be committed to version control.
     '''
     with open(db_file) as f:
-        db_str = f.readline()
+        db_str = f.read()
 
-    try:
-        db_dict = json.loads(db_str)
-        db_json = json.dumps(db_dict,
-            sort_keys=True, indent=4, separators=(',', ': '))
+    db_dict = json.loads(db_str)
+    db_json = json.dumps(db_dict,
+        sort_keys=True, indent=4, separators=(',', ': '))
 
-        with open(db_output_file, 'w') as f:
-            f.writelines(db_json)
-    except json.JSONDecodeError as e:
-        # If we could not decode the json input file, then just abort
-        print('Caught error: {}'.format(str(e)))
-        return
+    with open(db_output_file, 'w') as f:
+        f.writelines(db_json)
