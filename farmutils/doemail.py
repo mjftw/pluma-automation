@@ -1,5 +1,7 @@
 import os
 import smtplib
+import traceback
+import platform
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.image import MIMEImage
@@ -388,33 +390,48 @@ class Email():
         return attachments
 
 
-def newemail(subject="", body="", files=[], me=False):
-    """ Glue function for backwards compatibility
+def send_exception_email(exception, board=None):
+    lab_maintainers = ['mwebster@witekio.com']
+    email = Email(
+        sender='lab@witekio.com',
+        to=lab_maintainers,
+        files=board.log_file,
+        body='',
+        body_type='html'
+    )
 
-    This function should be deleted once older scripts
-    have been updated to use Email class properly.
-    """
+    error_info = {
+        'exception': exception.__class__.__name__,
+        'cause': str(exception),
+        'trace': traceback.format_exc()
+        }
 
-    if me:
-        recipients = [
-            'wsheppard@witekio.com',
-            'sheppard.will@gmail.com',
-        ]
-    else:
-        recipients = [
-            'wsheppard@witekio.com',
-            'amurray@witekio.com',
-            'elangley@witekio.com',
-            'jeremyr@ovation.co.uk',
-        ]
+    email.subject = 'Unhandled Exception Occured: [{}]'.format(
+        error_info['exception'])
+    if board:
+        email.subject =('{} [{}]'.format(email.subject, board.name))
 
-    Email(sender='wsheppard@witekio.com',
-          to=recipients,
-          subject=subject,
-          body=body,
-          body_type='html',
-          files=files,
-          smtp_server='smtp.office365.com',
-          smtp_timeout=587,
-          smtp_password='4T2jsU',
-          ).send()
+
+    email.body += '''
+        <b>Exception:</b> {}<br>
+        <b>Cause:</b> {}<br>
+        <b>Trace:</b> {}<br>
+        <hr>
+        '''.format(
+            error_info['exception'],
+            error_info['cause'],
+            '<br>'.join(error_info['trace'].split('\n')))
+
+    email.body += '''
+        <b>Platform: </b>{}<br><hr>
+        '''.format('<br>'.join(list(str(platform.uname()).split(','))))
+
+    if board:
+        email.body += '<b>Board Info:</b><br>'
+        email.body += '<br>'.join(board.show_hier().split('\n'))
+        email.body += '<hr><br>'
+
+        board.log(email.subject)
+        board.log('Informing lab maintainers via email')
+
+    email.send()
