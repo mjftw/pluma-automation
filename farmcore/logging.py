@@ -14,7 +14,7 @@ DEFAULT_LOG_ECHO = True
 DEFAULT_LOG_HIER_PATH = False
 
 """ Time format string """
-DEFAULT_LOG_TIME_FORMAT = "%y-%m-%d %H:%M:%S"
+DEFAULT_LOG_TIME_FORMAT = "%d-%m-%y %H:%M:%S"
 
 """ Add timestamp to logs """
 DEFAULT_LOG_TIME = False
