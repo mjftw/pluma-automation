@@ -259,7 +259,8 @@ class TestRunner():
                         'exception': e.__class__.__name__,
                         'cause': str(e),
                         'name': task_name,
-                        'trace': traceback.format_exc()
+                        'trace': traceback.format_exc(),
+                        'time': datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')
                         })
                     if self.email_on_fail:
                         self.send_fail_email(test)
@@ -290,6 +291,7 @@ class TestRunner():
                     <b>Failed:</b> {}.{}()<br>
                     <b>Exception:</b> {}<br>
                     <b>Cause:</b> {}<br>
+                    <b>Time:</b> {}<br>
                     <b>Trace:</b> {}
                     <hr><br>
                     '''.format(
@@ -297,6 +299,7 @@ class TestRunner():
                         failed['name'],
                         failed['exception'],
                         failed['cause'],
+                        failed['time'],
                         '<br>'.join(failed['trace'].split('\n')))
 
         email.body += '''
