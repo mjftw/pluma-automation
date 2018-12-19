@@ -41,6 +41,9 @@ class Board(Farmclass):
         else:
             self.log_file = logfile
 
+    def __repr__(self):
+        return 'Board: [{}]'.format(self.name)
+
     def reboot_and_validate(self, override_boostr=None):
         bootstr = override_boostr or self.bootstr
         if not bootstr:
