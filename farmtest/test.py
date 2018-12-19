@@ -265,10 +265,6 @@ class TestRunner():
                         self.send_fail_email(test)
                     self.board.log("Task failed: {} - {}: {}".format(
                         _test_name(test), task_name, str(e)))
-                    # If it was a TaskFailed exception, try to run the report tasks
-                    if isinstance(e, TaskFailed):
-                        if 'report' in self.tasks and task_name != 'report':
-                            self._run_task('report')
 
                     raise AbortTesting(str(e))
 
