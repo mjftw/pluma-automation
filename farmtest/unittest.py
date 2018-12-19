@@ -32,8 +32,15 @@ class deferred_function():
             ["{}={}".format(k, v) for k, v in self.kwargs.items()]
         )
 
+        if hasattr(self.f, '__name__'):
+            name = self.f.__name__
+        elif hasattr(self.f, '__class__') and hasattr(self.f.__class__, '__name__'):
+            name = self.f.__class__.__name__
+        else:
+            name = self.__class__.__name__
+
         return "{}({}{}{})".format(
-            self.f.__name__, args_str, ', ' if args_str else '', kwargs_str)
+            name, args_str, ', ' if args_str and kwargs_str else '', kwargs_str)
 
     def __bool__(self):
         return self.args_ready
