@@ -267,14 +267,10 @@ class TestRunner():
                         _test_name(test), task_name, str(e)))
                     # If it was a TaskFailed exception, try to run the report tasks
                     if isinstance(e, TaskFailed):
-                        if 'report' in self.tasks:
-                            if task_name == 'report':
-                                raise e
-                            else:
-                                self._run_task('report')
-                                sys.exit(1)
-                    else:
-                        raise e
+                        if 'report' in self.tasks and task_name != 'report':
+                            self._run_task('report')
+
+                    raise AbortTesting(str(e))
 
 
     def send_fail_email(self, test):
@@ -287,18 +283,19 @@ class TestRunner():
             body_type='html'
         )
 
-        email.subject = 'TestRunner Exception Occured: {} [{}] [{}]'.format(
-            [_test_name(t) for t in self.tests],
-            self.board.name, datetime.datetime.now()
-        )
+        email.subject = 'TestRunner Exception Occured: [{}: {}] [{}]'.format(
+            _test_name(test), ', '.join([f['name'] for f in test.tasks_failed]),
+             self.board.name)
+        email.body += '<b> Tests:</b> {}<br><hr><br>'.format(
+            [_test_name(t) for t in self.tests])
 
         for failed in test.tasks_failed:
                 email.body += '''
                     <b>Failed:</b> {}.{}()<br>
                     <b>Exception:</b> {}<br>
                     <b>Cause:</b> {}<br>
-                    <b>Trace:</b> {}<br>
-                    <hr>
+                    <b>Trace:</b> {}
+                    <hr><br>
                     '''.format(
                         _test_name(test),
                         failed['name'],
@@ -307,7 +304,7 @@ class TestRunner():
                         '<br>'.join(failed['trace'].split('\n')))
 
         email.body += '''
-            <b>Platform: </b>{}<br><hr>
+            <b>Platform: </b>{}<br><hr><br>
             '''.format('<br>'.join(list(str(platform.uname()).split(','))))
 
         email.body += '<b>Board Info:</b><br>'
