@@ -31,6 +31,7 @@ class deferred_function():
         kwargs_str = '' if not self.kwargs else ', '.join(
             ["{}={}".format(k, v) for k, v in self.kwargs.items()]
         )
+
         return "{}({}{}{})".format(
             self.f.__name__, args_str, ', ' if args_str else '', kwargs_str)
 
@@ -79,11 +80,12 @@ class UnitTestSuite(UnitTestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
-            setup_every_iteration=False):
+            setup_every_iteration=False, log_func=None):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
         self.run_condition = run_condition_func
+        self.log = log_func or print
 
         self.name = name
 
@@ -163,18 +165,24 @@ class UnitTestSuite(UnitTestBase):
         self._run_condition = self.to_deffered_func(f, "run condition")
 
     def run_iteration(self):
+        self.log("Starting iteration: {}".format(
+            self.stats['num_iterations_run']))
         if self.setup and self.settings['setup_every_iteration']:
+            self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
 
         all_tests_pass = True
         for test in self.tests:
+            self.log("Running test: {}".format(test))
             success = test.run(self)
             self.stats['num_tests_run'] += 1
             if success:
+                self.log("{} - PASS".format(test))
                 self.stats['num_tests_pass'] += 1
                 if test not in self.tests_passed:
                     self.tests_passed.append(test)
             else:
+                self.log("{} - FAIL".format(test))
                 self.stats['num_tests_fail'] += 1
                 if test not in self.tests_failed:
                     self.tests_failed.append(test)
@@ -185,8 +193,10 @@ class UnitTestSuite(UnitTestBase):
         self.stats['num_iterations_run'] += 1
         if all_tests_pass:
             self.stats['num_iterations_pass'] += 1
+            self.log("Test iteration complete: ALL TESTS PASSED")
         else:
             self.stats['num_iterations_fail'] += 1
+            self.log("Test iteration complete: NOT ALL TESTS PASSED")
 
         return all_tests_pass
 
@@ -198,35 +208,54 @@ class UnitTestSuite(UnitTestBase):
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_fail'] = 0
 
+        self.log("Starting UnitTestSuite with settings: {}".format(
+            self.settings))
+
         if self.setup and not self.settings['setup_every_iteration']:
+            self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
 
         while True:
             if self.run_condition:
-                while self.run_condition.run(self):
+                self.log("Checking run condition function: {}".format(
+                    self.run_condition))
+                run_now = self.run_condition.run(self)
+
+                while run_now:
                     success = self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
                         if self.report:
+                            self.log("Running report function: {}".format(self.setup))
                             self.report.run(self)
                         return
                     if (self.settings['report_n_iterations'] and
                         self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
+                            self.log("Running report function: {}".format(self.setup))
                             self.report.run(self)
+
+                    self.log("Checking run condition function: {}".format(
+                        self.run_condition))
+                    run_now = self.run_condition.run(self)
             else:
                 self.run_iteration()
 
                 if self.report:
+                    self.log("Running report function: {}".format(self.setup))
                     self.report.run(self)
 
             if self.settings['run_forever']:
-                time.sleep(self.settings['condition_check_interval_s'])
+                if self.settings['condition_check_interval_s']:
+                    self.log("Sleeping for {} seconds...".format(
+                        self.settings['condition_check_interval_s']))
+                    time.sleep(self.settings['condition_check_interval_s'])
             else:
+                self.log("UnitTestSuite finished")
                 return
 
 
 class UnitTest(UnitTestBase):
-    def __init__(self, fbody=None, fsetup=None, fteardown=None):
+    def __init__(self, fbody=None, fsetup=None, fteardown=None, log_func=None):
         self.success = False
 
         self.body = fbody
@@ -235,12 +264,9 @@ class UnitTest(UnitTestBase):
 
     def __repr__(self):
         funcs = "{}:".format(__class__.__name__)
-        if self.setup:
-            funcs += "\n\t{}: {}".format(self.setup.name, str(self.setup))
-        if self.body:
-            funcs += "\n\t{}: {}".format(self.body.name, str(self.body))
-        if self.teardown:
-            funcs += "\n\t{}: {}".format(self.teardown.name, str(self.teardown))
+        funcs += "\n\tSetup: {}".format(str(self.setup))
+        funcs += "\n\tBody: {}".format(str(self.body))
+        funcs += "\n\tTeardown: {}".format(str(self.teardown))
         return funcs
 
     @property
