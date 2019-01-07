@@ -20,6 +20,7 @@ def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
         run_host_cmd("git fetch --all")
         try:
             run_host_cmd("git reset --hard {}".format(tag))
+            run_host_cmd("git clean -d -f -x")
         except subprocess.CalledProcessError as e:
             if tag == default_tag or default_tag is None:
                 log_func("Failed to reset repo [{}] to tag [{}]".format(
