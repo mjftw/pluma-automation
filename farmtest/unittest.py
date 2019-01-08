@@ -6,8 +6,8 @@ from copy import copy
 class TestFunctionNotSet(Exception):
     pass
 
-""" Can be used as a function decorator """
 class deferred_function():
+    """ Can be used as a function decorator """
     def __init__(self, f, *args, **kwargs):
         self.f = f
 
@@ -87,12 +87,13 @@ class UnitTestSuite(UnitTestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
-            setup_every_iteration=False, log_func=None):
+            setup_every_iteration=False, log_func=print):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
         self.run_condition = run_condition_func
-        self.log = log_func or print
+
+        self.log_func = log_func or print
 
         self.name = name
 
@@ -170,6 +171,9 @@ class UnitTestSuite(UnitTestBase):
     @run_condition.setter
     def run_condition(self, f):
         self._run_condition = self.to_deffered_func(f, "run condition")
+
+    def log(self, message):
+        self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
