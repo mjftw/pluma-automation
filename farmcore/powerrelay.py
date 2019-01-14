@@ -1,9 +1,9 @@
 import time
 
 from .usbrelay import USBRelay
+from .powerbase import PowerBase
 
-
-class PowerRelay(USBRelay):
+class PowerRelay(USBRelay, PowerBase):
     def __init__(self, hub, on_seq, off_seq):
         USBRelay.__init__(self, hub)
         self.on_seq = on_seq
@@ -24,8 +24,3 @@ class PowerRelay(USBRelay):
 
     def off(self):
         self._do_sequence(self.off_seq)
-
-    def reboot(self):
-        self.log("Rebooting")
-        self.off()
-        self.on()

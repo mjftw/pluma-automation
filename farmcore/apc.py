@@ -7,6 +7,7 @@ import pexpect.exceptions as pex
 from .farmclass import Farmclass
 from .telnetconsole import TelnetConsole
 from .console import CannotOpen, LoginFailed
+from .powerbase import PowerBase
 
 
 class NoAPC(Exception):
@@ -17,7 +18,7 @@ class InvalidPort(Exception):
     pass
 
 
-class APC(Farmclass):
+class APC(Farmclass, PowerBase):
     def __init__(self, host, username, password, port):
         self.host = host
         self.username = username
@@ -91,7 +92,3 @@ class APC(Farmclass):
 
     def off(self, dummy=None):
         self._switch('off')
-
-    def reboot(self):
-        self.off()
-        self.on()
