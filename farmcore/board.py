@@ -18,15 +18,23 @@ class LoginError(Exception):
     pass
 
 class Board(Farmclass):
-    def __init__(self, name, power, hub,
+    def __init__(self, name, power=None, hub=None, muxpi=None,
             storage=None, console=None,
             login_user='root', login_pass=None,
-            bootstr=None, prompt=None,logfile=DEFAULT_LOGFILE):
-        self.power = power
-        self.hub = hub
-        self.storage = storage
+            bootstr=None, prompt=None, logfile=DEFAULT_LOGFILE):
         self.name = name
-        self.console = console or SerialConsole(hub.get_serial()['devnode'], 115200)
+
+        self.muxpi = muxpi
+        if self.muxpi:
+            self.muxpi.attach_board(self)
+        elif power and hub:
+            self.power = power
+            self.hub = hub
+            self.storage = storage
+            self.console = console or SerialConsole(hub.get_serial()['devnode'], 115200)
+        else:
+            raise TypeError("__init__() must set argument 'muxpi' or both 'power' and 'hub'")
+
         self.bootstr = bootstr
         self.prompt = prompt
         self.login_user = login_user
