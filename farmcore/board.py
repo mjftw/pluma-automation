@@ -35,12 +35,12 @@ class Board(Farmclass):
         else:
             raise TypeError("__init__() must set argument 'muxpi' or both 'power' and 'hub'")
 
-        self.bootstr = bootstr
         self.prompt = prompt
         self.login_user = login_user
         self.login_pass = login_pass
         self.login_user_match = 'login:'
         self.login_pass_match = 'Password:'
+        self.bootstr = bootstr or self.login_user_match
 
         self.log_reccurse = True
 
