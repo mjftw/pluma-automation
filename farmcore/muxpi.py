@@ -89,8 +89,8 @@ class MuxPi(Farmclass):
 
         return recieved.strip() or None
 
-        def stm_help(self):
-            return self.stm_cmd('help')
+    def stm_help(self):
+        return self.stm_cmd('help')
 
 class MuxPiPower(PowerBase):
     def __init__(self, muxpi):
