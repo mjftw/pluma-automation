@@ -95,6 +95,7 @@ class TestCore(TestBase):
                 time.sleep(1)
             else:
                 devnode = self.board.hub.get_part('devnode')
+                break
         if not devnode:
             raise TaskFailed('Cannot mount: No block device partition downstream of hub')
 
@@ -113,6 +114,7 @@ class TestCore(TestBase):
                 time.sleep(1)
             else:
                 devnode = self.board.hub.get_part('devnode')
+                break
         if devnode:
             self.board.storage.unmount_host(devnode)
         else:
