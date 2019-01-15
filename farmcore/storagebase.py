@@ -1,4 +1,5 @@
 import re
+import os
 
 from farmutils.helpers import run_host_cmd
 
@@ -34,6 +35,9 @@ class StorageBase():
         # Unmount if mounted
         if re.search('{}.*'.format(devnode), output):
             self.unmount_host(devnode)
+
+        if not os.path.isdir(mountpoint):
+            os.mkdir(mountpoint)
 
         (output, ret) = run_host_cmd('mount {} {}'.format(devnode, mountpoint))
         if ret != 0:
