@@ -31,7 +31,8 @@ class Hierachy():
             setattr(child, attr, value)
             child._children_set_attr(attr, value)
 
-    def show_hier(self, indent_level=1, indent_size=4, reccurse=True):
+    def show_hier(self, indent_level=1, indent_size=4, reccurse=True,
+            exclude=[]):
         """ Return string containing all local vars, and get children to do the same """
         children = {}
         attrs = {}
@@ -47,6 +48,17 @@ class Hierachy():
 
         children, attrs = self._get_hier()
 
+        exclude_children = []
+        for k in children:
+            if children[k] in exclude:
+                attrs[k] = '(Circular reference hidden)'
+                exclude_children.append(k)
+
+        for k in exclude_children:
+            del children[k]
+
+        exclude.append(self)
+
         for key in attrs:
             hier_str += ("-"*indent_level*indent_size +
                   "{}: {}\n".format(key, attrs[key]))
@@ -55,7 +67,9 @@ class Hierachy():
                 hier_str += children[key].show_hier(
                     indent_level=indent_level+1,
                     indent_size=indent_size,
-                    reccurse=reccurse)
+                    reccurse=reccurse,
+                    exclude=exclude
+                )
             else:
                 hier_str += ("-"*indent_level*indent_size +
                     "{}: {}\n".format(key, type(children[key]).__name__))
