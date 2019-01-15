@@ -39,6 +39,9 @@ class MuxPi(Farmclass):
         if board:
             self.attach_board(board)
 
+    def __repr__(self):
+        return 'MuxPi'
+
     def attach_board(self, board):
         if not isinstance(board, Board):
             raise MuxPiError("Board given must be of the Board class")
@@ -95,6 +98,9 @@ class MuxPi(Farmclass):
 class MuxPiPower(PowerBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
+    
+    def __repr__(self):
+        return 'MuxPiPower'
 
     def on(self):
         self.muxpi.stm_cmd('power on')
@@ -106,6 +112,9 @@ class MuxPiPower(PowerBase):
 class MuxPiStorage(StorageBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
+
+    def __repr__(self):
+        return 'MuxPiStorage'
 
     def to_host(self):
         self.muxpi.stm_cmd('mux TS')

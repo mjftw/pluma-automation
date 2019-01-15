@@ -16,7 +16,7 @@ class SerialConsole(Console):
         super().__init__()
 
     def __repr__(self):
-        return "Serial console device: {}".format(self._ser.port)
+        return "SerialConsole[{}]".format(self.port)
 
     @property
     def is_open(self):
