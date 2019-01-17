@@ -3,10 +3,10 @@ import platform
 from .farmclass import Farmclass
 from .board import Board
 from .serialconsole import SerialConsole
-from farmutils.helpers import run_host_cmd
 from .storagebase import StorageBase
 from .powerbase import PowerBase
 from .hub import Hub
+from farmutils import run_host_cmd
 
 
 class MuxPiError(Exception):
@@ -52,7 +52,6 @@ class MuxPi(Farmclass):
         self.board.storage = self.dut_storage
         self.board.console = self.dut_console
         self.board.hub = self.internal_hub
-
 
     def stm_cmd(self, cmd):
         '''
