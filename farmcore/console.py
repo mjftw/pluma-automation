@@ -115,14 +115,14 @@ class Console(Farmclass):
 
         elapsed = 0.0
 
-        while(elapsed <= timeout):
+        while(elapsed < timeout):
             if match:
                 if verbose:
-                    self.log("Waiting for pattern [{}]: Waited[{:.1f}/{:.1f}s]...".format(
+                    self.log("Waiting for patterns:{} Waited[{:.1f}/{:.1f}s]...".format(
                         match, elapsed, timeout))
                 matched = watches[self._pex.expect(watches)]
                 if matched in match:
-                    return matched
+                    return self.decode(self._pex.after)
             else:
                 current_bytes = self._flush_get_size()
                 if verbose:
