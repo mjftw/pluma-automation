@@ -41,6 +41,7 @@ def get_latest_tag(srcdir, branch):
 
 def get_tag_list(srcdir):
     chdir(srcdir)
+    run_host_cmd("git fetch --all")
     result, __ = run_host_cmd("git tag -l")
     return None if not result else result.split('\n')
 
