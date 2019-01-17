@@ -87,7 +87,7 @@ class UnitTestSuite(UnitTestBase):
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
-            setup_every_iteration=False, log_func=print):
+            setup_every_iteration=False, force_initial_run=False, log_func=print):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
@@ -104,6 +104,7 @@ class UnitTestSuite(UnitTestBase):
         self.settings['continue_on_fail'] = continue_on_fail
         self.settings['condition_check_interval_s'] = condition_check_interval_s
         self.settings['setup_every_iteration'] = setup_every_iteration
+        self.settings['force_initial_run'] = force_initial_run
 
         # Runtime statistics
         self.stats = {}
@@ -228,9 +229,14 @@ class UnitTestSuite(UnitTestBase):
 
         while True:
             if self.run_condition:
-                self.log("Checking run condition function: {}".format(
-                    self.run_condition))
-                run_now = self.run_condition.run(self)
+                if (self.settings['force_initial_run'] and
+                        self.stats['num_iterations_run'] == 0):
+                    self.log("Ignoring run condition for first run")
+                    run_now = True
+                else:
+                    self.log("Checking run condition function: {}".format(
+                        self.run_condition))
+                    run_now = self.run_condition.run(self)
 
                 while run_now:
                     success = self.run_iteration()
