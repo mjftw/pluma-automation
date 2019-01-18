@@ -1,10 +1,14 @@
 import platform
+import time
 
 from .farmclass import Farmclass
 from .board import Board
 from .serialconsole import SerialConsole
 from .storagebase import StorageBase
 from .powerbase import PowerBase
+from .relaybase import RelayBase
+from .powerrelay import PowerRelay
+
 from .hub import Hub
 from farmutils import run_host_cmd
 
@@ -94,10 +98,10 @@ class MuxPi(Farmclass):
     def stm_help(self):
         return self.stm_cmd('help')
 
-class MuxPiPower(PowerBase):
+class MuxPiPower(Farmclass, PowerBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
-    
+
     def __repr__(self):
         return 'MuxPiPower'
 
@@ -107,8 +111,43 @@ class MuxPiPower(PowerBase):
     def off(self):
         self.muxpi.stm_cmd('power off')
 
+    def reboot(self):
+        self.off()
+        time.sleep(0.25)
+        self.on()
 
-class MuxPiStorage(StorageBase):
+class MuxPiDyper(Farmclass, RelayBase):
+    def __init__(self, muxpi):
+        self.muxpi = muxpi
+
+    def __repr__(self):
+        return 'MuxPiDyper'
+
+    def toggle(self, port, throw):
+        if port not in [1, 2]:
+            raise ValueError("Port must be 1 or 2. Given[{}]".format(
+                port))
+        if throw not in ['on', 'off']:
+            raise ValueError("Throw direction must be 'on' or 'off'. Given[{}]".format(
+                throw))
+
+        self.muxpi.stm_cmd('dyper {} {}'.format(port, throw))
+
+class MuxPiPowerDyper(Farmclass, PowerRelay):
+    def __init__(self, muxpi, on_seq, off_seq):
+        self.muxpi = muxpi
+        PowerRelay.__init__(self, relay=MuxPiDyper(self.muxpi),
+            on_seq=on_seq, off_seq=off_seq)
+
+    def __repr__(self):
+        return 'MuxPiPowerDyper'
+
+    def reboot(self):
+        self.off()
+        self.on()
+
+
+class MuxPiStorage(Farmclass, StorageBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
 
