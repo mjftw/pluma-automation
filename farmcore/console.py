@@ -174,6 +174,7 @@ class Console(Farmclass):
              recieve=False,
              match=None,
              excepts=None,
+             send_newline=True,
              log_recieved_on_pass=False,
              log_recieved_on_fail=False,
              log_verbose=True,
@@ -220,11 +221,17 @@ class Console(Farmclass):
         self._pex.linesep = self.encode(self.linesep)
 
         if not recieve and not watches:
-            self._pex.sendline(cmd)
+            if send_newline:
+                self._pex.sendline(cmd)
+            else:
+                self._pex.send(cmd)
             return (None, None)
         else:
             self.flush(True)
-            self._pex.sendline(cmd)
+            if send_newline:
+                self._pex.sendline(cmd)
+            else:
+                self._pex.send(cmd)
             if watches:
                 matched = self.wait_for_data(
                     timeout=data_timeout,
