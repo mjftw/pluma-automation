@@ -58,7 +58,8 @@ class Board(Farmclass):
             raise BootValidationError("Cannot validate boot. Not bootstring given")
 
         self.power.reboot()
-        (__, matched) = self.console.send(match=bootstr, timeout=30)
+        (__, matched) = self.console.send(match=bootstr,
+            send_newline=False, timeout=60)
 
         if matched is False or matched is TIMEOUT or matched is EOF:
             raise BootValidationError("Did not get bootstring: {}".format(bootstr))
