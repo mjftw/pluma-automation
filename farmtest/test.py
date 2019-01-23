@@ -175,9 +175,11 @@ class TestCore(TestBase):
 
 
 class TestRunner():
-    def __init__(self, board, tests=None, email_on_fail=True):
+    def __init__(self, board,
+            tests=None, skip_tasks=None, email_on_fail=True):
         self.board = board
         self.email_on_fail = email_on_fail
+        self.skip_tasks = skip_tasks or []
         self.tests = []
         tests = tests or []
         if not isinstance(tests, list):
@@ -232,6 +234,10 @@ class TestRunner():
     def _run_task(self, task_name):
         if "mount" in task_name and not self.board.storage:
             self.board.log("Board does not have storage. Skipping task: {}".format(task_name))
+            return
+        if task_name in self.skip_tasks:
+            self.board.log("Skipping task: {}".format(task_name),
+                colour='green', bold=True)
             return
 
         for test in self.tests:
