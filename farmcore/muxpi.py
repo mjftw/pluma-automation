@@ -1,5 +1,6 @@
 import platform
 import time
+import threading
 
 from .farmclass import Farmclass
 from .board import Board
@@ -28,6 +29,18 @@ class MuxPi(Farmclass):
         self.dut_storage = MuxPiStorage(self)
         self.internal_hub = Hub('2-1')
 
+        self.sampling_current = False
+        self.sampling_voltage = False
+
+        self._current_samples = []
+        self._sampling_current_stop = False
+        self._sampling_current_thread = None
+        self._voltage_samples = []
+        self._sampling_voltage_stop = False
+        self._sampling_voltage_thread = None
+
+        self._stm_cmd_lock = False
+
         self.stm_console = SerialConsole('/dev/ttyS2', 115200)
         self.dut_console = SerialConsole('/dev/ttyS1', dut_serial_baud)
 
@@ -45,6 +58,16 @@ class MuxPi(Farmclass):
 
     def __repr__(self):
         return 'MuxPi'
+
+    def sample_voltage(self):
+        '''Returns the voltage on ADC2 in V. Max is 3.3V.
+            ADC1 is connected to current sensor'''
+        return float(
+            self.stm_cmd('voltage 2').replace(' ', '').split(':')[1])/1000
+
+    def sample_current(self):
+        '''Returns the DUT current in mA'''
+        return self.stm_cmd('current')
 
     def attach_board(self, board):
         if not isinstance(board, Board):
@@ -90,13 +113,93 @@ class MuxPi(Farmclass):
         key --- Get current state of given key or both if no key number is given: key [1|2]
         uart --- Get current value of UART voltage or set if new value is given [in millivolts]
         '''
-        recieved, __ = self.stm_console.send(cmd, match=['OK'],
-            excepts=['Unknown command', 'Error processing command'])
+        while(self._stm_cmd_lock):
+            pass
 
+        self._stm_cmd_lock = True
+
+        recieved, __ = self.stm_console.send(cmd, match=['OK'],
+            excepts=['Unknown command', 'Error processing command'],
+            log_verbose=False)
+
+        self._stm_cmd_lock = False
         return recieved.strip() or None
 
     def stm_help(self):
         return self.stm_cmd('help')
+
+    def start_sampling_current(self, frequency, max_samples=None):
+        if self.sampling_current:
+            return False
+
+        self._sampling_current_thread = threading.Thread(
+            target=self._current_thread_method, args=(frequency, max_samples,))
+
+        self._sampling_current_thread.start()
+        return True
+
+    def stop_sampling_current(self):
+        if not self.sampling_current or not self._sampling_current_thread:
+            return None
+
+        self._sampling_current_stop = True
+
+        self._sampling_current_thread.join()
+        self._sampling_current_thread = None
+
+        return self._current_samples
+
+    def _current_thread_method(self, frequency, max_samples):
+        self._current_samples = []
+        self.sampling_current = True
+
+        while(not self._sampling_current_stop and
+            (max_samples is None or
+                len(self._current_samples) <= max_samples)):
+
+            sample = (self.sample_current(), time.time())
+            self._current_samples.append(sample)
+
+            time.sleep(1.0/frequency)
+
+        self.sampling_current = False
+        self._sampling_current_stop = False
+
+    def start_sampling_voltage(self, frequency, max_samples=None):
+        if self.sampling_voltage:
+            return False
+
+        self._sampling_voltage_thread = threading.Thread(
+            target=self._voltage_thread_method, args=(frequency, max_samples,))
+
+        self._sampling_voltage_thread.start()
+        return True
+
+    def stop_sampling_voltage(self):
+        if not self.sampling_voltage or not self._sampling_voltage_thread:
+            return None
+
+        self._sampling_voltage_stop = True
+
+        self._sampling_voltage_thread.join()
+        self._sampling_voltage_thread = None
+
+        return self._voltage_samples
+
+    def _voltage_thread_method(self, frequency, max_samples):
+        self._voltage_samples = []
+        self.sampling_voltage = True
+
+        while(not self._sampling_voltage_stop and
+            (max_samples is None or
+                len(self._voltage_samples) <= max_samples)):
+
+            sample = (self.sample_voltage(), time.time())
+            self._voltage_samples.append(sample)
+
+            time.sleep(1.0/frequency)
+
+        self.sampling_voltage = False
 
 class MuxPiPower(Farmclass, PowerBase):
     def __init__(self, muxpi):
