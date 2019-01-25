@@ -1,4 +1,4 @@
-from .board import Board
+from .board import Board, BootValidationError, LoginError
 from .usbrelay import USBRelay
 from .powerrelay import PowerRelay
 from .apc import APC
