@@ -178,7 +178,7 @@ def compile_version_list(srcdir, version_filters):
 
     Filters should be of the form:
     'x.x.x': match only version x.x.x
-    '! x.x.x': match all versions except x.x.x
+    'x.x.x !': match all versions except x.x.x
     'x.x.x +': match version x.x.x, and all subsequent versions
     'x.x.x -': match version x.x.x, and all previous versions
     'x.x.x +y': match version x.x.x, and up to y subsequent versions
@@ -190,7 +190,6 @@ def compile_version_list(srcdir, version_filters):
     filter is given then only versions matching all filters will be returned.
     E.g. To get a list of upstream tags in range 1.1.100 - 1.1.200:
     version_filters = '1.1.100+ & 1.1.200-'
-
     '''
     if not version_filters:
         return None
