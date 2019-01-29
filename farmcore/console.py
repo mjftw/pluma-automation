@@ -121,6 +121,8 @@ class Console(Farmclass):
                     self.log("Waiting for patterns:{} Waited[{:.1f}/{:.1f}s]...".format(
                         match, elapsed, timeout))
                 matched = watches[self._pex.expect(watches)]
+                self.log('{}<<<matched>>>{}<<</matched>>>'.format(
+                    self._pex.before.replace, self._pex.after), force_echo=False)
                 if matched in match:
                     return self.decode(self._pex.after)
             else:
@@ -178,6 +180,7 @@ class Console(Farmclass):
              log_recieved_on_pass=False,
              log_recieved_on_fail=False,
              log_verbose=True,
+             log_recieved=False,
              timeout=-1,
              sleep_time=-1,
              quiet_time=-1
@@ -246,7 +249,8 @@ class Console(Farmclass):
                 if matched in excepts:
                     message='Matched [{}] is in exceptions list [{}]'.format(
                         matched, excepts)
-                    self.error("console $ {}\n{}\n{}".format(cmd, recieved, message),
+                    self.error("console $ {}\n{}{}\n{}".format(cmd, recieved,
+                        self._pex.after, message),
                         exception=ExceptionKeywordRecieved)
                 return (recieved, matched)
             else:
