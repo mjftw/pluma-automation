@@ -136,8 +136,13 @@ class Logging():
         if self.log_file:
             open(self.log_file, 'w').close()
 
-    def log(self, message, colour=None, bold=False):
+    def log(self, message, colour=None, bold=False, force_echo=None):
         prefix = ''
+        if force_echo is not None:
+            echo = force_echo
+        else:
+            echo = self.log_echo
+
         if self.log_on:
             if self.log_hier_path:
                 prefix = '[{}]{}'.format(self.log_hier_path, prefix)
@@ -154,7 +159,7 @@ class Logging():
                     os.makedirs(logdir)
                 with open(self.log_file, 'a') as logfd:
                     logfd.write(message + '\n')
-            if self.log_echo:
+            if echo:
                 if colour in ascii_colmap:
                     message = '{}{}{}'.format(
                         ascii_colmap[colour],
