@@ -45,6 +45,7 @@ class Console(Farmclass):
         self.linesep = linesep
         self.encoding = encoding
         self._buffer = ''
+        self._last_recieved = ''
 
     def _check_attr(self, attr):
         if not hasattr(self, attr):
@@ -121,8 +122,6 @@ class Console(Farmclass):
                     self.log("Waiting for patterns:{} Waited[{:.1f}/{:.1f}s]...".format(
                         match, elapsed, timeout))
                 matched = watches[self._pex.expect(watches)]
-                self.log('{}<<<matched>>>{}<<</matched>>>'.format(
-                    self._pex.before.replace, self._pex.after), force_echo=False)
                 if matched in match:
                     return self.decode(self._pex.after)
             else:
@@ -242,10 +241,15 @@ class Console(Farmclass):
                     match=watches,
                     verbose=log_verbose)
                 recieved = self.decode(self._pex.before)
-                if (matched and log_recieved_on_pass or
-                        (not matched and log_recieved_on_fail and
-                        matched not in excepts)):
-                    self.log("console $ {}\n{}".format(cmd, recieved))
+                new_recieved = recieved[len(self._last_recieved):]
+                if matched:
+                    self._last_recieved = ''
+                    match_str = '<<<matched>>>{}<<</matched>>>'.format(matched)
+                else:
+                    self._last_recieved = recieved
+                    match_str = '<<<not_matched>>>'
+                self.log("Sent: {}\nRecieved: {}{}".format(
+                    cmd, new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     message='Matched [{}] is in exceptions list [{}]'.format(
                         matched, excepts)
