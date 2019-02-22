@@ -8,6 +8,7 @@ from pexpect import TIMEOUT, EOF
 
 from .farmclass import Farmclass
 from .serialconsole import SerialConsole
+from .console import ExceptionKeywordRecieved
 
 DEFAULT_LOGFILE = object()
 
@@ -52,15 +53,20 @@ class Board(Farmclass):
     def __repr__(self):
         return 'Board[{}]'.format(self.name)
 
-    def reboot_and_validate(self, override_boostr=None, override_timeout=None):
+    def reboot_and_validate(self, override_boostr=None, override_timeout=None,
+            exception_bootstr=None):
         timeout = override_timeout or 60
         bootstr = override_boostr or self.bootstr
         if not bootstr:
             raise BootValidationError("Cannot validate boot. Not bootstring given")
 
         self.power.reboot()
-        (__, matched) = self.console.send(match=bootstr,
-            send_newline=False, timeout=timeout)
+        try:
+            (__, matched) = self.console.send(match=bootstr,
+                send_newline=False, timeout=timeout, excepts=exception_bootstr)
+        except ExceptionKeywordRecieved as e:
+            raise BootValidationError('Matched exception keyword: {}'.format(
+                str(e)))
 
         if matched is False or matched is TIMEOUT or matched is EOF:
             raise BootValidationError("Did not get bootstring: {}".format(bootstr))
