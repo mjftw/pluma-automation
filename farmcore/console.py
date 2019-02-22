@@ -251,11 +251,8 @@ class Console(Farmclass):
                 self.log("Sent: {}\nRecieved: {}{}".format(
                     cmd, new_recieved, match_str), force_echo=False)
                 if matched in excepts:
-                    message='Matched [{}] is in exceptions list [{}]'.format(
-                        matched, excepts)
-                    self.error("console $ {}\n{}{}\n{}".format(cmd, recieved,
-                        self._pex.after, message),
-                        exception=ExceptionKeywordRecieved)
+                    self.error('Matched [{}] is in exceptions list {}'.format(
+                        matched, excepts), exception=ExceptionKeywordRecieved)
                 return (recieved, matched)
             else:
                 self.wait_for_quiet(
