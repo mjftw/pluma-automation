@@ -212,6 +212,7 @@ class UnitTestSuite(UnitTestBase):
 
         return all_tests_pass
 
+    #TODO: Add exception catching and email reporting
     def run(self):
         self.stats['num_iterations_run'] = 0
         self.stats['num_iterations_pass'] = 0

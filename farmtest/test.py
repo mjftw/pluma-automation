@@ -4,6 +4,7 @@ import platform
 import datetime
 
 from farmutils.doemail import Email
+from farmutils.error import send_exception_email
 
 '''
 class ExampleTest():
@@ -68,6 +69,9 @@ class TestBase():
 
     def __init__(self, board):
         self.board = board
+
+    def __repr__(self):
+        return self.__class__.__name__
 
 
 class TestCore(TestBase):
@@ -198,7 +202,7 @@ class TestRunner():
 
     def run(self):
         if (self.use_testcore and "TestCore" not in
-                (_test_name(t) for t in self.tests)):
+                (str(t) for t in self.tests)):
             self.add_test(TestCore(self.board), 0)
 
         self.board.log("Running tests: {}".format(
@@ -219,16 +223,16 @@ class TestRunner():
 
     def add_test(self, test, index=None):
         if index is None:
-            self.board.log("Appending test: {}".format(_test_name(test)))
+            self.board.log("Appending test: {}".format(str(test)))
             self.tests.append(test)
         else:
             self.board.log("Inserting test at position {}: {} ".format(
-                index, _test_name(test)))
+                index, str(test)))
             self.tests.insert(index, test)
 
     def rm_test(self, test):
         if test in self.tests:
-            self.board.log("Removed test: {}".format(_test_name(test)))
+            self.board.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
     def _run_task(self, task_name):
@@ -245,7 +249,7 @@ class TestRunner():
             if task_func:
                 if test.__class__ != TestCore:
                     self.board.log("Running: {} - {}".format(
-                        _test_name(test), task_name))
+                        str(test), task_name))
                 try:
                     task_func()
                 # If exception is one we deliberately caused, don't handle it
@@ -253,75 +257,45 @@ class TestRunner():
                     raise e
                 except InterruptedError as e:
                     raise e
-                # If reqest to abort testing, do so
+                # If request to abort testing, do so
                 except AbortTesting as e:
                     self.board.log('Testing aborted by task {} - {}: {}'.format(
-                        _test_name(test), task_name, str(e)))
+                        str(test), task_name, str(e)))
                     if (isinstance(e, AbortTestingAndReport) and
                             'report' in self.tasks):
                         self._run_task('report')
                     raise e
                 # For all other exceptions, we want to know about it
                 except Exception as e:
-                    test.tasks_failed.append({
-                        'exception': e.__class__.__name__,
-                        'cause': str(e),
-                        'name': task_name,
-                        'trace': traceback.format_exc(),
-                        'time': datetime.datetime.now().strftime('%d-%m-%y %H:%M:%S')
-                        })
+                    test.tasks_failed.append(task_name)
+
                     if self.email_on_fail:
-                        self.send_fail_email(test)
+                        self.send_fail_email(e, test, task_name)
                     self.board.log("Task failed: {} - {}: {}".format(
-                        _test_name(test), task_name, str(e)))
+                        str(test), task_name, str(e)))
 
                     raise AbortTesting(str(e))
 
 
-    def send_fail_email(self, test):
+    def send_fail_email(self, exception, test_failed, task_failed):
+        #TODO: Move to a config file
         lab_maintainers = ['mwebster@witekio.com']
-        email = Email(
-            sender='lab@witekio.com',
-            to=lab_maintainers,
-            files=self.board.log_file,
-            body='',
-            body_type='html'
+
+        subject = 'TestRunner Exception Occured: [{}: {}] [{}]'.format(
+            str(test_failed), task_failed, self.board.name)
+        body = '''
+        <b>Tests:</b> {}<br>
+        <b>Test Failed:</b> {}<br>
+        <b>Task Failed:</b> {}
+        '''.format(
+            [str(t) for t in self.tests],
+            str(test_failed),
+            task_failed)
+
+        send_exception_email(
+            exception=exception,
+            recipients=lab_maintainers,
+            board=self.board,
+            subject=subject,
+            prepend_body=body
         )
-
-        email.subject = 'TestRunner Exception Occured: [{}: {}] [{}]'.format(
-            _test_name(test), ', '.join([f['name'] for f in test.tasks_failed]),
-             self.board.name)
-        email.body += '<b> Tests:</b> {}<br><hr><br>'.format(
-            [_test_name(t) for t in self.tests])
-
-        for failed in test.tasks_failed:
-                email.body += '''
-                    <b>Failed:</b> {}.{}()<br>
-                    <b>Exception:</b> {}<br>
-                    <b>Cause:</b> {}<br>
-                    <b>Time:</b> {}<br>
-                    <b>Trace:</b> {}
-                    <hr><br>
-                    '''.format(
-                        _test_name(test),
-                        failed['name'],
-                        failed['exception'],
-                        failed['cause'],
-                        failed['time'],
-                        '<br>'.join(failed['trace'].split('\n')))
-
-        email.body += '''
-            <b>Platform: </b>{}<br><hr><br>
-            '''.format('<br>'.join(list(str(platform.uname()).split(','))))
-
-        email.body += '<b>Board Info:</b><br>'
-        email.body += '<br>'.join(self.board.show_hier().split('\n'))
-        email.body += '<hr><br>'
-
-        self.board.log(email.subject)
-        self.board.log('Informing lab maintainers via email')
-
-        email.send()
-
-def _test_name(test):
-    return test.__class__.__name__
