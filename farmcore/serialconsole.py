@@ -1,5 +1,3 @@
-import sys
-import time
 import serial
 import pexpect.fdpexpect
 

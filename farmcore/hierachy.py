@@ -1,5 +1,6 @@
-""" This class is inherited in order add hierachy to a class """
 class Hierachy():
+    """ This class is inherited in order add hierachy to a class """
+
     @property
     def _reccurse_hier(self):
         if hasattr(self, "__reccurse_hier"):

@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-
-import sys
-import serial
-import time
-
 from .farmclass import Farmclass
 from .storagebase import StorageBase
 

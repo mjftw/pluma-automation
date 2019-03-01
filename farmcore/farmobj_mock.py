@@ -1,5 +1,6 @@
 from .farmclass import Farmclass
 
+
 class FarmobjMock(Farmclass):
     def __init__(self, children=None):
         self.num_children = 0

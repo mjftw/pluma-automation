@@ -3,6 +3,7 @@ import time
 from .powerbase import PowerBase
 from .relaybase import RelayBase
 
+
 class PowerRelay(PowerBase):
     def __init__(self, relay, on_seq, off_seq):
         if not isinstance(relay, RelayBase):

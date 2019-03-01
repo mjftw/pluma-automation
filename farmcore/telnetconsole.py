@@ -1,8 +1,3 @@
-#!/usb/bin/env python3
-
-import sys
-import time
-
 from .hostconsole import HostConsole
 
 

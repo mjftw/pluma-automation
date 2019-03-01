@@ -1,6 +1,7 @@
 from .hierachy import Hierachy
 from .logging import Logging
 
+
 class Farmclass(Hierachy, Logging):
     """ Contains functionality common to all farm objects """
 

@@ -1,5 +1,3 @@
-#!/usb/bin/env python3
-
 import pexpect
 import pexpect.fdpexpect
 

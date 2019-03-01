@@ -9,9 +9,7 @@ from .storagebase import StorageBase
 from .powerbase import PowerBase
 from .relaybase import RelayBase
 from .powerrelay import PowerRelay
-
 from .hub import Hub
-from farmutils import run_host_cmd
 
 
 class MuxPiError(Exception):
