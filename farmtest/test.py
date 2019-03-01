@@ -3,7 +3,7 @@ import traceback
 import platform
 import datetime
 
-from farmutils.doemail import Email
+from farmutils.email import Email
 from farmutils.error import send_exception_email
 
 '''

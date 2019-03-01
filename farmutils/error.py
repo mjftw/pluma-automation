@@ -2,7 +2,7 @@ import traceback
 import platform
 from datetime import datetime
 
-from .doemail import Email
+from .email import Email
 
 def send_exception_email(exception, recipients, board=None, subject=None, prepend_body=None):
     email = Email(
