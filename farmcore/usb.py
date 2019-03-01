@@ -1,18 +1,15 @@
-#!/usr/bin/env python3
-
-import sys
 import os
 import time
 import subprocess
 
 import pyudev
 
-driver_path = '/sys/bus/usb/drivers/usb/'
-
 puctx = pyudev.Context()
 
 
 class USB():
+    driver_path = '/sys/bus/usb/drivers/usb/'
+
     def __init__(self, device):
         if not hasattr(self, 'usb_device'):
             self.usb_device = device
@@ -22,19 +19,19 @@ class USB():
 
     @property
     def is_bound(self):
-        return os.path.isdir(os.path.join(driver_path, self.usb_device))
+        return os.path.isdir(os.path.join(self.driver_path, self.usb_device))
 
     def unbind(self):
         if not self.is_bound:
             return
-        with open(os.path.join(driver_path, 'unbind'), 'w') as fd:
+        with open(os.path.join(self.driver_path, 'unbind'), 'w') as fd:
             fd.write(self.usb_device)
         time.sleep(1)
 
     def bind(self):
         if self.is_bound:
             return
-        with open(os.path.join(driver_path, 'bind'), 'w') as fd:
+        with open(os.path.join(self.driver_path, 'bind'), 'w') as fd:
             fd.write(self.usb_device)
         time.sleep(1)
 
@@ -58,17 +55,17 @@ class USB():
         while d.parent:
             d = d.parent
 
-        driver_path = "{}/driver".format(d.sys_path)
-        driver_path = os.path.realpath(driver_path)
+        self.driver_path = "{}/driver".format(d.sys_path)
+        self.driver_path = os.path.realpath(self.driver_path)
 
-        print("WARN: Rebinding HOST {} at {}".format(d.sys_name, driver_path))
+        print("WARN: Rebinding HOST {} at {}".format(d.sys_name, self.driver_path))
 
-        subprocess.run(['sudo', 'chmod', 'a+w', driver_path + "/unbind"])
-        subprocess.run(['sudo', 'chmod', 'a+w', driver_path + "/bind"])
+        subprocess.run(['sudo', 'chmod', 'a+w', self.driver_path + "/unbind"])
+        subprocess.run(['sudo', 'chmod', 'a+w', self.driver_path + "/bind"])
 
-        with open("{}/unbind".format(driver_path), 'w') as f:
+        with open("{}/unbind".format(self.driver_path), 'w') as f:
             f.write(d.sys_name)
 
         time.sleep(2)
-        with open("{}/bind".format(driver_path), 'w') as f:
+        with open("{}/bind".format(self.driver_path), 'w') as f:
             f.write(d.sys_name)
