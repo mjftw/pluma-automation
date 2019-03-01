@@ -1,8 +1,4 @@
-#!/usr/bin/env python3
-""" The APC is a switched rack PDU which controlls whether a board is powered """
-import sys
 import time
-import pexpect.exceptions as pex
 
 from .farmclass import Farmclass
 from .telnetconsole import TelnetConsole
@@ -19,6 +15,8 @@ class InvalidPort(Exception):
 
 
 class APC(Farmclass, PowerBase):
+    """ The APC is a switched rack PDU which controls whether a board is powered """
+
     def __init__(self, host, username, password, port):
         self.host = host
         self.username = username
