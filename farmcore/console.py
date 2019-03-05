@@ -179,12 +179,8 @@ class Console(Farmclass):
              log_recieved=False,
              timeout=-1,
              sleep_time=-1,
-             quiet_time=-1,
-             decode_recieved=True
+             quiet_time=-1
              ):
-        ''' Known bug: @decode_recieved=False does not prevent decoding
-            recieved if no match string was specified.'''
-
         if not self.is_open:
             self.open()
         if not self.is_open:
@@ -241,19 +237,16 @@ class Console(Farmclass):
                     sleep_time=data_sleep,
                     match=watches,
                     verbose=log_verbose)
-                if decode_recieved:
-                    recieved = self.decode(self._pex.before)
-                    new_recieved = recieved[len(self._last_recieved):]
-                    if matched:
-                        self._last_recieved = ''
-                        match_str = '<<<matched>>>{}<<</matched>>>'.format(matched)
-                    else:
-                        self._last_recieved = recieved
-                        match_str = '<<<not_matched>>>'
-                    self.log("Sent: {}\nRecieved: {}{}".format(
-                        cmd, new_recieved, match_str), force_echo=False)
+                recieved = self.decode(self._pex.before)
+                new_recieved = recieved[len(self._last_recieved):]
+                if matched:
+                    self._last_recieved = ''
+                    match_str = '<<<matched>>>{}<<</matched>>>'.format(matched)
                 else:
-                    recieved = self._pex.before
+                    self._last_recieved = recieved
+                    match_str = '<<<not_matched>>>'
+                self.log("Sent: {}\nRecieved: {}{}".format(
+                    cmd, new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
                         matched, excepts), exception=ExceptionKeywordRecieved)
