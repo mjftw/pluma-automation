@@ -49,11 +49,15 @@ class AsyncSampler():
         self._samples_lock.release()
 
         while(self._sampling.is_set() and
-                (max_samples is None or len(self._samples) <= max_samples)):
+                (max_samples is None or len(self._samples) < max_samples)):
 
+            start_time = time.time()
             sample = (self.sample_func(), time.time())
+
             self._samples_lock.acquire()
             self._samples.append(sample)
             self._samples_lock.release()
 
-            time.sleep(1.0/frequency)
+            sleep_time = 1.0/frequency - (time.time()-start_time)
+            if sleep_time > 0:
+                time.sleep(sleep_time)
