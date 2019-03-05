@@ -9,3 +9,4 @@ from .hub import Hub
 from .sdmux import SDMux
 from .sdwire import SDWire
 from .muxpi import MuxPi, MuxPiDyper, MuxPiPowerDyper
+from .asyncsampler import AsyncSampler
