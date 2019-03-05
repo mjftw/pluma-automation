@@ -1,6 +1,6 @@
 import time
 
-from .serialconsole import SerialConsole
+from serial import Serial
 
 
 class InvalidKeyPress(Exception):
@@ -69,19 +69,26 @@ class MultimeterTTI1604():
     }
 
     def __init__(self, port):
-        self.console = SerialConsole(port, 9600)
-        self.console.open = self._decorated_open()
+        self.serial = Serial(baudrate=9600, timeout=0.5, port=port)
+
+        # We need +9V on DTR to power opto-isolation in TTI1604
+        self.serial.setDTR(1)
+        # We need -9V on RTS to power opto-isolation in TTI1604
+        self.serial.setRTS(0)
+        self.press_button('remote_mode')
+
         self.last_unit = None
 
     @property
     def is_ready(self):
-        self.press_button('remote_mode')
         # If we are recieving data, it's on, otherwise it's off.
-        return self.console.wait_for_data(timeout=1)
+        self.serial.flushInput()
+
+        return True if (self.serial.read() != b'') else False
 
     def press_button(self, button):
         try:
-            self.console.send(self.button_map[button])
+            self.serial.write(self.button_map[button])
         except KeyError:
             raise InvalidKeyPress(
                 'Multimeter does not have button "{}"'.format(button))
@@ -89,10 +96,7 @@ class MultimeterTTI1604():
     def power_on(self):
         if not self.is_ready:
             self.press_button('Operate')
-
-    def power_off(self):
-        if self.is_ready:
-            self.press_button('Operate')
+            self.press_button('remote_mode')
 
     def measure(self, unit):
         valid_units = ['mV', 'V', 'mA', 'A', 'ohm']
@@ -145,38 +149,25 @@ class MultimeterTTI1604():
         return decoded_data, decoded_unit
 
     def _get_sample(self):
-        matched = None
-        recieved = None
-        num_bad_rx = 0
-        max_attempts = 5
+        packet = []
+        packet_len = 10
+        bytes_read = 0
 
-        # Check for valid data in response
-        while((matched != '\r' or len(recieved) < 8)
-                and num_bad_rx < max_attempts):
-            # Flush last packet
-            self.console.send(
-                match='\r', send_newline=False, decode_recieved=False,
-                timeout=1, quiet_time=1)
-            # Read new packet
-            recieved, matched = self.console.send(
-                match='\r', send_newline=False, decode_recieved=False,
-                timeout=1, quiet_time=1)
-            if not matched:
-                # Recieve timed out, multimeter is off or in local mode
-                self.power_on()
-                self.press_button('remote_mode')
-                # Give multimeter time to settle
-                time.sleep(1)
-            else:
-                recieved = list(recieved)
+        self.serial.flushInput()
 
-            num_bad_rx += 1
+        # Find alignment of next packet
+        while(self.serial.read() != b'\r' and bytes_read <= packet_len):
+            bytes_read += 1
 
-        if num_bad_rx >= max_attempts:
+        if bytes_read >= packet_len:
             raise MeasurementError(
                 'Could not get a valid response from multimeter')
 
-        return recieved
+        for _ in range(1, packet_len):
+            packet.append(
+                int.from_bytes(self.serial.read(), byteorder='little'))
+
+        return packet
 
     def _decode_data(self, data):
         if not isinstance(data, list) or len(data) < 9:
@@ -220,20 +211,6 @@ class MultimeterTTI1604():
             raise DecodeError('Invalid data')
 
         return data_str, unit
-
-    def _decorated_open(self):
-        def wrap(console=None):
-            console = console or self.console
-            SerialConsole.open(console)
-
-            # We need +9V on DTR to power opto-isolation in TTI1604
-            console._ser.setDTR(1)
-
-            # We need -9V on RTS to power opto-isolation in TTI1604
-            console._ser.setRTS(0)
-
-        return wrap
-
 
 def _bitfield_int(byte_str, start_bit, stop_bit):
     return int(byte_str[7-stop_bit:8-start_bit], 2)
