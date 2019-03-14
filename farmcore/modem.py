@@ -16,6 +16,10 @@ class ModemSim868(Farmclass):
         self.console = SerialConsole(port, 115200)
 
         self._recording_lock = False
+        self._recording_paused = False
+
+        self._recording_settings = None
+        self._recording_buffer = None
 
     def AT_send(self, *args, **kwargs):
         if self._recording_lock:
@@ -37,7 +41,7 @@ class ModemSim868(Farmclass):
 
         return True
 
-    def _phone_activity_status(self):
+    def phone_activity_status(self, check_while_recording=False):
         '''
         Return phone activity status.
             0: Ready
@@ -45,12 +49,25 @@ class ModemSim868(Farmclass):
             3: Incoming call
             4: Ongoing call
         '''
-        if not self.ready():
-            self.error('Modem not ready', ModemError)
+        paused_to_check = False
+        if self.call_recording_ongoing():
+            if check_while_recording:
+                self.call_recording_pause()
+                paused_to_check = True
+            else:
+                self.error('Must set check_while_recording to check phone status while recording',
+                    ModemError)
+        else:
+            # Don't check modem is ready if it is already recording
+            if not self.ready():
+                self.error('Modem not ready', ModemError)
 
         __, matched = self.AT_send('AT+CPAS', match='CPAS: [0-9]+')
         if not matched:
             self.error('Incorrect response from modem', ModemError)
+
+        if paused_to_check:
+            self.call_recording_resume()
 
         substr = re.findall('[0-9]+', matched)
         if not substr or len(substr) == 0:
@@ -58,16 +75,16 @@ class ModemSim868(Farmclass):
 
         return substr[0]
 
-    def ongoing_call(self):
+    def ongoing_call(self, check_while_recording=False):
         ''' If call ongoing, return True, else return False'''
-        if self._phone_activity_status() == '4':
+        if self.phone_activity_status(check_while_recording) == '4':
             return True
         else:
             return False
 
-    def incoming_call(self):
+    def incoming_call(self, check_while_recording=False):
         ''' If call incoming, return True, else return False'''
-        if self._phone_activity_status() == '3':
+        if self.phone_activity_status(check_while_recording) == '3':
             return True
         else:
             return False
@@ -173,59 +190,49 @@ class ModemSim868(Farmclass):
         Start a call recording.
         Starting a recording causes modem to stream audio data over UART.
         Starting recording stops AT commands from being sent unil recording stops.
+        Starting a recording drops any data buffered from paused recordings.
         '''
         if self.call_recording_ongoing():
             self.log('Cannot start recording, recording in progress')
             return False
 
+        if self._recording_paused:
+            self.log('Discarding paused recording data')
+
+        # Clear any saved data from paused recordings
+        self._recording_buffer = None
+
         # Start a recording, with data sent at a 100ms interval,
         # and a no sent at the end of transmission.
         # __, matched = self.AT_send('AT+CRECORD=1,5,2', #last 2 bytes are crc
-        __, matched = self.AT_send('AT+CRECORD=1,5,0',
-            match=['OK', 'CRECORD'], excepts='ERROR')
-        if not matched:
-            self.error('Failed to start recording', ModemError)
 
-        # Flush serial input buffer
-        self.console.flush(True)
+        self._recording_settings = '1,5,0'
+        self._start_recoding()
 
-        # From this point, direcly interract with Seiral Object
-        self._recording_lock = True
-
-        self.log('Started recording. Do not try to send AT commands before stopping')
+        self.log('Started recording. Do not try to send AT commands before ending recording')
 
         return True
 
     def call_recording_stop(self, file):
         '''
-        Stop an ongoing call recording.
+        Stop an ongoing call recording or paused recording.
         Returns True if recording saved to @file.
         Returns False if no recording is ongoing.
-        File format is AMR 4.75k
+        Output file format is AMR 4.75k.
         '''
-        if not self.call_recording_ongoing():
+        if not self.call_recording_ongoing() and not self._recording_paused:
+            self.error('No ongoing or paused recording, cannot stop',
+                ModemError)
             return False
 
-        serial = self.console._ser
-
-        # Write any data to serial to stop recording
-        serial.write(self.console.encode('0'))
-
-        data = serial.readall()
-        self._recording_lock = False
-
-        # Strip out AT commands from start and end of data
-        if data.startswith(self.console.encode('\r\n+CRECORD:')):
-            data = data[len('\r\n+CRECORD:'):]
-        if data.endswith(self.console.encode('\r\nOK\r\n')):
-            data = data[:-len('\r\nOK\r\n')]
+        self._stop_recoding_and_buffer()
 
         packets = []
 
         with open(file, 'wb') as f:
             # Write AMR file header
             f.write(b'#*AMR\n')
-            f.write(data)
+            f.write(self._recording_buffer)
 
             # Split data by packet header 0x7E
             # for p in [p for p in data.split(b'\x7E') if p]:
@@ -237,7 +244,86 @@ class ModemSim868(Farmclass):
             #     #TODO: Calculate CRC and check it
             #     f.write(p)
 
+        self._recording_buffer = None
+        self._recording_lock = False
+        self._recording_paused = False
+
+        self.log('Call recording stopped')
+
         return True
+
+    def call_recording_pause(self):
+        '''
+        Pause an ongoing recording, saving data to an internal buffer.
+        Pausing recording allows other AT commands to be sent.
+        Returns True if an ongoing recording was paused, False otherwise
+        '''
+        if self._recording_paused:
+            self.log('Recording already paused')
+            return False
+
+        if not self.call_recording_ongoing():
+            self.log('No call recording ongoing, no need to pause')
+            return False
+
+        self.log('Pausing call recording...')
+
+        self._stop_recoding_and_buffer()
+
+        self._recording_lock = False
+        self._recording_paused = True
+
+        return True
+
+    def call_recording_resume(self):
+        '''
+        Resume a paused recording, restoring saved data from the buffer
+        Return True if recording resumed, False if no recording ongoing
+        '''
+        if self.call_recording_ongoing():
+            self.log('Call recording ongoing, no need to resume')
+            return False
+
+        if not self._recording_paused:
+            self.error('No paused recording to resume', ModemError)
+
+        self._start_recoding()
+
+        self.log('Call recording resumed')
+
+        return True
+
+    def _stop_recoding_and_buffer(self):
+        serial = self.console._ser
+
+        # Write any data to serial to stop recording
+        serial.write(self.console.encode('0'))
+
+        data = serial.readall()
+
+        # Strip out AT commands from start and end of data
+        if data.startswith(self.console.encode('\r\n+CRECORD:')):
+            data = data[len('\r\n+CRECORD:'):]
+        if data.endswith(self.console.encode('\r\nOK\r\n')):
+            data = data[:-len('\r\nOK\r\n')]
+
+        if self._recording_buffer:
+            self._recording_buffer += data
+        else:
+            self._recording_buffer = data
+
+    def _start_recoding(self):
+        __, matched = self.AT_send('AT+CRECORD={}'.format(self._recording_settings),
+            match=['OK', 'CRECORD'], excepts='ERROR')
+        if not matched:
+            self.error('Failed to start recording', ModemError)
+
+        # Flush serial input buffer
+        self.console.flush(True)
+
+        # From this point, direcly interract with Seiral Object
+        self._recording_lock = True
+        self._recording_paused = False
 
     def send_sms(self, number, message):
         '''
