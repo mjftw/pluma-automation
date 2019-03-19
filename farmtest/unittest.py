@@ -176,6 +176,9 @@ class UnitTestSuite(UnitTestBase):
     def log(self, message):
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
+    #FIXME: Currently the same test object is used for each test iterration,
+    #   meaning that it maintains state. This causes many unexpected issues!
+    #   This needs to be fixed so that each iteraction gets a clean test object.
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
@@ -243,13 +246,13 @@ class UnitTestSuite(UnitTestBase):
                     success = self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
                         if self.report:
-                            self.log("Running report function: {}".format(self.setup))
+                            self.log("Running report function: {}".format(self.report))
                             self.report.run(self)
                         return
                     if (self.settings['report_n_iterations'] and
                         self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
-                            self.log("Running report function: {}".format(self.setup))
+                            self.log("Running report function: {}".format(self.report))
                             self.report.run(self)
 
                     self.log("Checking run condition function: {}".format(
@@ -258,9 +261,9 @@ class UnitTestSuite(UnitTestBase):
             else:
                 self.run_iteration()
 
-                if self.report:
-                    self.log("Running report function: {}".format(self.setup))
-                    self.report.run(self)
+            if self.report:
+                self.log("Running report function: {}".format(self.report))
+                self.report.run(self)
 
             if self.settings['run_forever']:
                 if self.settings['condition_check_interval_s']:
