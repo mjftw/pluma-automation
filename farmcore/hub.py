@@ -38,6 +38,8 @@ class Hub(Farmclass, USB):
 
         devinfo['subsystem'] = device.subsystem
         devinfo['vendor'] = device.get('ID_VENDOR')
+        devinfo['major'] = device.get('MAJOR')
+        devinfo['minor'] = device.get('MINOR')
 
         devinfo['devtype'] = device.get('DEVTYPE')
         if(devinfo['devtype'] == 'disk' or
@@ -78,18 +80,11 @@ class Hub(Farmclass, USB):
         return match_vals
 
     def get_serial(self, key=None):
-        serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
-        for vendor in serial_vendors:
-            devinfo = self.filter_downstream({
-                'subsystem': 'tty',
-                'vendor': vendor
-            })
-            if not devinfo:
-                devinfo = self.filter_downstream({
-                    'vendor': vendor
-                })
-            if devinfo:
-                break
+        ttyUSB_major = '188'
+        devinfo = self.filter_downstream({
+            'subsystem': 'tty',
+            'major': ttyUSB_major
+        })
 
         if not devinfo:
             None
