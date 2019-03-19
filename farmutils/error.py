@@ -57,7 +57,7 @@ def send_exception_email(exception, recipients, board=None, subject=None, prepen
             email.files.append(board.console.log_file)
 
         board.log(email.subject)
-        board.log(error_info)
+        board.log(str(error_info))
         board.log('Informing lab maintainers via email')
 
     email.send()
