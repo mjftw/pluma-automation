@@ -7,6 +7,10 @@ import pyudev
 puctx = pyudev.Context()
 
 
+class NoDevice(Exception):
+    pass
+
+
 class USB():
     driver_path = '/sys/bus/usb/drivers/usb/'
 
