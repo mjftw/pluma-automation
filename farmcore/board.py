@@ -33,6 +33,8 @@ class Board(Farmclass):
             self.storage = storage
             self.console = console or SerialConsole(hub.get_serial()['devnode'], 115200)
         else:
+            #TODO: This is not always the case as sometimes we may not use
+            #    a hub or control power. Allow this use case
             raise TypeError("__init__() must set argument 'muxpi' or both 'power' and 'hub'")
 
         self.prompt = prompt
