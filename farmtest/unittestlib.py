@@ -3,14 +3,15 @@ import time
 
 from .unittest import deferred_function
 
+#TODO: Revist with better name for this
 
-class TestMustBeInSuite(Exception):
+class TestMustBeInController(Exception):
     pass
 
 
 @deferred_function
-def sc_run_n_iterations(suite, ntimes):
-    return suite.stats['num_iterations_run'] < ntimes
+def sc_run_n_iterations(TestController, ntimes):
+    return TestController.stats['num_iterations_run'] < ntimes
 
 
 @deferred_function
@@ -18,74 +19,74 @@ def sc_time_in_range(start_hour, end_hour):
     now = datetime.datetime.now()
     return (start_hour <= now.hour and now.hour < end_hour)
 
+
 @deferred_function
-def sc_run_daily_at_hour(suite, start_hour):
+def sc_run_daily_at_hour(TestController, start_hour):
     data_key = 'sc_run_daily_at_hour:run_dates'
 
     now = datetime.datetime.now()
     date_now = now.strftime("%Y/%m/%d")
 
     if start_hour <= now.hour:
-        if not data_key in suite.data:
-            suite.data[data_key] = [date_now]
+        if not data_key in TestController.data:
+            TestController.data[data_key] = [date_now]
             return True
 
-        if date_now not in suite.data[data_key]:
-            suite.data[data_key].append(date_now)
+        if date_now not in TestController.data[data_key]:
+            TestController.data[data_key].append(date_now)
             return True
 
     return False
 
 
 @deferred_function
-def tt_log_stats(suite, board):
-    if suite is None:
-        raise TestMustBeInSuite
-
+def tt_log_stats(TestController, board):
+    if TestController is None:
+        raise TestMustBeInSController
     board.log("Test #: {}, pass #: {}, fail #: {}".format(
-        suite.stats['num_tests_run'],
-        suite.stats['num_tests_pass'],
-        suite.stats['num_tests_fail']
+        TestController.stats['num_tests_run'],
+        TestController.stats['num_tests_pass'],
+        TestController.stats['num_tests_fail']
         ))
 
 
 @deferred_function
-def ss_log_test_plan(suite, board):
-    message = "Starting test suite:\n"
-    if suite.setup:
+def ss_log_test_plan(TestController, board):
+    message = "Starting test TestController:\n"
+    if TestController.setup:
         message += "\t{}: {}\n".format(
-            suite.setup['name'],
-            suite.setup['str'])
-    if suite.run_condition:
+            TestController.setup['name'],
+            TestController.setup['str'])
+    if TestController.run_condition:
         message += "\t{}: {}\n".format(
-            suite.run_condition['name'],
-            suite.run_condition['str'])
-    if suite.report:
+            TestController.run_condition['name'],
+            TestController.run_condition['str'])
+    if TestController.report:
         message += "\t{}: {}\n".format(
-            suite.report['name'],
-            suite.report['str'])
-    message += str(suite.tests)
+            TestController.report['name'],
+            TestController.report['str'])
+    message += str(TestController.tests)
     board.log(message)
 
 
 @deferred_function
-def sr_log_test_results(suite, board):
+def sr_log_test_results(TestController, board):
     print("In func {}".format(__name__))
-    message = "Test suite results: \n".format(suite.name)
-    for test in suite.tests_passed:
+    message = "Test TestController results: \n".format(TestController.name)
+    for test in TestController.tests_passed:
         message += "\t{}: PASS\n".format(
             test.body['str'])
-    for test in suite.tests_failed:
+    for test in TestController.tests_failed:
         message += "\t{}: FAIL\n".format(
             test.body['str'])
     message += "Total tests:\n"
-    message += "\tRun = {}\n".format(suite.stats['num_tests_run'])
-    message += "\tPass = {}\n".format(suite.stats['num_tests_pass'])
-    message += "\tFail = {}\n".format(suite.stats['num_tests_fail'])
+    message += "\tRun = {}\n".format(TestController.stats['num_tests_run'])
+    message += "\tPass = {}\n".format(TestController.stats['num_tests_pass'])
+    message += "\tFail = {}\n".format(TestController.stats['num_tests_fail'])
     message += "Total iterations:\n"
-    message += "\tRun = {}\n".format(suite.stats['num_iterations_run'])
-    message += "\tPass = {}\n".format(suite.stats['num_iterations_pass'])
-    message += "\tFail = {}\n".format(suite.stats['num_iterations_fail'])
+    message += "\tRun = {}\n".format(TestController.stats['num_iterations_run'])
+    message += "\tPass = {}\n".format(TestController.stats['num_iterations_pass'])
+    message += "\tFail = {}\n".format(TestController.stats['num_iterations_fail'])
     board.log(message)
 
 
