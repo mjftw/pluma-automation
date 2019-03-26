@@ -6,23 +6,25 @@ from copy import copy
 class TestFunctionNotSet(Exception):
     pass
 
+
 class deferred_function():
     """ Can be used as a function decorator """
     def __init__(self, f, *args, **kwargs):
-        self.f = f
-
-        self.name = None
-
-        if args or kwargs:
-            self.save_args(*args, **kwargs)
+        if isinstance(f, deferred_function):
+            self.f = copy(f.f)
+            self.args = copy(f.args)
+            self.kwargs = copy(f.kwargs)
         else:
-            self.args = None
-            self.kwargs = None
-            self.args_ready = True
+            if not callable(f):
+                raise AttributeError("Function must be callable")
+            self.f = f
+            self.args = args
+            self.kwargs = kwargs
 
     def __call__(self, *args, **kwargs):
-            self.save_args(*args, **kwargs)
-            return self
+        self.args = args
+        self.kwargs = kwargs
+        return self
 
     def __repr__(self):
         args_str = '' if not self.args else ', '.join(
@@ -42,14 +44,6 @@ class deferred_function():
         return "{}({}{}{})".format(
             name, args_str, ', ' if args_str and kwargs_str else '', kwargs_str)
 
-    def __bool__(self):
-        return self.args_ready
-
-    def save_args(self, *args, **kwargs):
-        self.args = args
-        self.kwargs = kwargs
-        self.args_ready = True
-
     def run(self, suite=None):
         # Check if first argument to function is 'suite'
         expects_suite = next(iter(inspect.getargspec(self.f).args)) == 'suite'
@@ -64,26 +58,8 @@ class deferred_function():
             return self.f(*args)
 
 
-class UnitTestBase():
-    def to_deffered_func(self, f, name=None):
-        if f is None:
-            return None
-
-        new_f = None
-
-        if isinstance(f, deferred_function):
-            new_f = copy(f)
-        else:
-            if callable(f):
-                new_f = deferred_function(f)
-            else:
-                raise AttributeError("Function must be callable")
-
-        new_f.name = name
-        return new_f
-
-
-class UnitTestSuite(UnitTestBase):
+#TODO: Change to "TestController" (in new file)
+class UnitTestSuite():
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
@@ -155,7 +131,7 @@ class UnitTestSuite(UnitTestBase):
 
     @setup.setter
     def setup(self, f):
-        self._setup = self.to_deffered_func(f, "setup")
+        self._setup = None if f is None else deferred_function(f)
 
     @property
     def report(self):
@@ -163,7 +139,7 @@ class UnitTestSuite(UnitTestBase):
 
     @report.setter
     def report(self, f):
-        self._report = self.to_deffered_func(f, "report")
+        self._report = None if f is None else deferred_function(f)
 
     @property
     def run_condition(self):
@@ -171,7 +147,7 @@ class UnitTestSuite(UnitTestBase):
 
     @run_condition.setter
     def run_condition(self, f):
-        self._run_condition = self.to_deffered_func(f, "run condition")
+        self._run_condition = None if f is None else deferred_function(f)
 
     def log(self, message):
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
@@ -275,7 +251,7 @@ class UnitTestSuite(UnitTestBase):
                 return
 
 
-class UnitTest(UnitTestBase):
+class UnitTest():
     def __init__(self, fbody=None, fsetup=None, fteardown=None, log_func=None):
         self.success = False
 
@@ -296,7 +272,7 @@ class UnitTest(UnitTestBase):
 
     @body.setter
     def body(self, f):
-        self._body = self.to_deffered_func(f, "test")
+        self._body = None if f is None else deferred_function(f)
 
     @property
     def setup(self):
@@ -304,7 +280,7 @@ class UnitTest(UnitTestBase):
 
     @setup.setter
     def setup(self, f):
-        self._setup = self.to_deffered_func(f, "setup")
+        self._setup = None if f is None else deferred_function(f)
 
     @property
     def teardown(self):
@@ -312,7 +288,7 @@ class UnitTest(UnitTestBase):
 
     @teardown.setter
     def teardown(self, f):
-        self._teardown = self.to_deffered_func(f, "teardown")
+        self._teardown = None if f is None else deferred_function(f)
 
     def run(self, suite=None):
         if self.setup:
