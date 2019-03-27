@@ -65,8 +65,6 @@ class AbortTestingAndReport(AbortTesting):
 
 
 class TestBase():
-    tasks_failed = []
-
     def __init__(self, board):
         self.board = board
 
@@ -185,6 +183,7 @@ class TestRunner():
         self.email_on_fail = email_on_fail
         self.skip_tasks = skip_tasks or []
         self.tests = []
+        self.test_fails = []
         tests = tests or []
         if not isinstance(tests, list):
             tests = [tests]
@@ -216,7 +215,7 @@ class TestRunner():
             self.board.log("\n== TESTING ABORTED EARLY ==", colour='red', bold=True)
 
         # Check if any tasks failed
-        if [t.tasks_failed for t in self.tests]:
+        if self.test_fails:
             return False
         else:
             return True
@@ -267,12 +266,20 @@ class TestRunner():
                     raise e
                 # For all other exceptions, we want to know about it
                 except Exception as e:
-                    test.tasks_failed.append(task_name)
+                    failed = {
+                        'time': time.time(),
+                        'test': test,
+                        'task': task_name,
+                        'exception': e,
+                        'traceback': traceback.format_exc()
+                    }
+                    self.test_fails.append(failed)
 
                     if self.email_on_fail:
                         self.send_fail_email(e, test, task_name)
-                    self.board.log("Task failed: {} - {}: {}".format(
-                        str(test), task_name, str(e)))
+
+                    self.board.log('Task failed {}'.format(failed),
+                        colour='red', bold=True)
 
                     raise AbortTesting(str(e))
 
