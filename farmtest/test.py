@@ -26,13 +26,13 @@ class ExampleTest():
     def pre_board_mount(self):
         pass
 
-    def post_board_mount(self):
+    def pre_test_body(self):
         pass
 
     def test_body(self):
         pass
 
-    def pre_board_unmount(self):
+    def post_test_body(self):
         pass
 
     def post_board_off(self):
@@ -77,9 +77,9 @@ class TestCore(TestBase):
         'pre_host_mount', '_host_mount', 'prepare', '_host_unmount',
         'pre_board_on', '_board_on_and_validate',
         'pre_board_login', '_board_login',
-        'pre_board_mount', '_board_mount', 'post_board_mount',
-        'test_body',
-        'pre_board_unmount', '_board_unmount',
+        'pre_board_mount', '_board_mount',
+        'pre_test_body', 'test_body', 'post_test_body'
+        '_board_unmount',
         '_board_off', 'post_board_off',
         '_host_mount', 'report'
     ]
@@ -152,14 +152,14 @@ class TestCore(TestBase):
         self.board.storage.to_board()
         self.board.storage.mount_board()
 
-    def post_board_mount(self):
-        self.board.log("\n=== POST BOARD MOUNT ===", colour='blue', bold=True)
+    def pre_test_body(self):
+        self.board.log("\n=== PRE TEST BODY ===", colour='blue', bold=True)
 
     def test_body(self):
         self.board.log("\n=== TEST BODY ===", colour='blue', bold=True)
 
-    def pre_board_unmount(self):
-        self.board.log("\n=== PRE BOARD UNMOUNT ===", colour='blue', bold=True)
+    def post_test_body(self):
+        self.board.log("\n=== POST TEST BODY ===", colour='blue', bold=True)
 
     def _board_unmount(self):
         self.board.log("\n=!= BOARD UNMOUNT =!=", bold=True)
@@ -248,7 +248,7 @@ class TestRunner():
             if task_func:
                 if test.__class__ != TestCore:
                     self.board.log("Running: {} - {}".format(
-                        str(test), task_name))
+                        str(test), task_name), colour='green')
                 try:
                     task_func()
                 # If exception is one we deliberately caused, don't handle it
