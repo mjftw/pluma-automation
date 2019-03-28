@@ -136,12 +136,19 @@ class Logging():
         if self.log_file:
             open(self.log_file, 'w').close()
 
-    def log(self, message, colour=None, bold=False, force_echo=None):
+    def log(self, message, colour=None, bold=False,
+            force_echo=None, force_log_file=False):
         prefix = ''
+
         if force_echo is not None:
             echo = force_echo
         else:
             echo = self.log_echo
+
+        if force_log_file is not False:
+            log_file = force_log_file
+        else:
+            log_file = self.log_file
 
         if self.log_on:
             if self.log_hier_path:
@@ -153,11 +160,11 @@ class Logging():
                 prefix = '{} {}'.format(timestr, prefix)
             if prefix:
                 message = '{}: {}'.format(prefix, message)
-            if self.log_file:
-                logdir = os.path.dirname(self.log_file)
+            if log_file:
+                logdir = os.path.dirname(log_file)
                 if logdir and not os.path.exists(logdir):
                     os.makedirs(logdir)
-                with open(self.log_file, 'a') as logfd:
+                with open(log_file, 'a') as logfd:
                     logfd.write(message + '\n')
             if echo:
                 if colour in ascii_colmap:

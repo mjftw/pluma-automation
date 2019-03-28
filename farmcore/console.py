@@ -80,6 +80,9 @@ class Console(Farmclass):
             pass
 
         if clear_buf:
+            if self._buffer.strip():
+                self.log('<<flushed>>{}<</flushed>>'.format(self._buffer),
+                    force_echo=False)
             self._buffer = ''
         return self._buffer
 
@@ -187,7 +190,7 @@ class Console(Farmclass):
             raise CannotOpen
 
         if log_verbose:
-            self.log("Sending command:\n{}".format(cmd))
+            self.log("Sending command:\n{}".format(cmd), force_log_file=None)
 
         cmd = cmd or ''
 
@@ -224,6 +227,9 @@ class Console(Farmclass):
                 self._pex.sendline(cmd)
             else:
                 self._pex.send(cmd)
+
+            self.log('<<sent>>{}<</sent>>'.format(cmd), force_echo=False)
+
             return (None, None)
         else:
             self.flush(True)
@@ -231,6 +237,9 @@ class Console(Farmclass):
                 self._pex.sendline(cmd)
             else:
                 self._pex.send(cmd)
+
+            self.log('<<sent>>{}<</sent>>'.format(cmd), force_echo=False)
+
             if watches:
                 matched = self.wait_for_data(
                     timeout=data_timeout,
@@ -241,11 +250,12 @@ class Console(Farmclass):
                 new_recieved = recieved[len(self._last_recieved):]
                 if matched:
                     self._last_recieved = ''
-                    match_str = '<<<matched>>>{}<<</matched>>>'.format(matched)
+                    match_str = '<<matched expects={}>>{}<</matched>>'.format(
+                        watches, matched)
                 else:
                     self._last_recieved = recieved
-                    match_str = '<<<not_matched>>>'
-                self.log("Sent: {}\nRecieved: {}{}".format(
+                    match_str = '<<not_matched expects={}>>'.format(watches)
+                self.log("<<sent>>{}<</sent>>\n<<recieved>>{}{}<</recieved>>".format(
                     cmd, new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
