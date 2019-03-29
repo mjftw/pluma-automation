@@ -1,11 +1,13 @@
 from .unittest import UnitTest, deferred_function
+from farmutils.error import send_exception_email
 
 
 class TestController():
     def __init__(self, tests=None, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
-            setup_every_iteration=False, force_initial_run=False, log_func=print):
+            setup_every_iteration=False, force_initial_run=False, email_on_except=True,
+            log_func=print):
         self.tests = tests
         self.setup = setup_func
         self.report = report_func
@@ -23,6 +25,7 @@ class TestController():
         self.settings['condition_check_interval_s'] = condition_check_interval_s
         self.settings['setup_every_iteration'] = setup_every_iteration
         self.settings['force_initial_run'] = force_initial_run
+        self.settings['email_on_except'] = email_on_except
 
         # Runtime statistics
         self.stats = {}
@@ -133,8 +136,22 @@ class TestController():
 
         return all_tests_pass
 
-    #TODO: Add exception catching and email reporting
     def run(self):
+        if self.settings['email_on_except']:
+            try:
+                self._run()
+            # If exception is one we deliberately caused, don't handle it
+            except KeyboardInterrupt as e:
+                raise e
+            except InterruptedError as e:
+                raise e
+            except Exception as e:
+                send_exception_email(e)
+                raise e
+        else:
+            self._run()
+
+    def _run(self):
         self.stats['num_iterations_run'] = 0
         self.stats['num_iterations_pass'] = 0
         self.stats['num_iterations_fail'] = 0
