@@ -4,7 +4,10 @@ from datetime import datetime
 
 from .email import Email
 
-def send_exception_email(exception, recipients, board=None, subject=None, prepend_body=None):
+def send_exception_email(exception, recipients=None, board=None, subject=None, prepend_body=None):
+    maintainer_emails = ['mwebster@witekio.com']
+    recipients = recipients or maintainer_emails
+
     email = Email(
         sender='lab@witekio.com',
         to=recipients,
