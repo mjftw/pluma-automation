@@ -102,3 +102,15 @@ def sleep_and_notify(duration, unit, mode, log_func=print):
             time.sleep(60)
         if unit == 'seconds':
             time.sleep(1)
+
+
+@deferred_function
+def console_is_alive(console):
+    try:
+        return console.check_alive()
+    except KeyboardInterrupt as e:
+        raise e
+    except InterruptedError as e:
+        raise e
+    except Exception as e:
+        return False
