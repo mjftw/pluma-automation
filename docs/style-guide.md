@@ -75,6 +75,8 @@ The easiest way to make sure your code is compliant is to install a linter.
 There are many linters available for this purpose, but I would recommend [Pylama](https://github.com/klen/pylama), as this one is known to work. I use [VS Code ](https://code.visualstudio.com/) for development, and there is an extension available to make this liter run by default. Linters should be available for many other code editors as well.  
 Using a linter will help you write better code, with less effort.
 
+All the Lab code uses Python3, make sure your linter is set up for this as it may default to Python2.
+
 ## Lab Coding Guide
 This section covers some key points to follow to help write good code.  
 You could make the argument that these points could help you write better code on any project!
