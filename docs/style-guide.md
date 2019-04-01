@@ -162,5 +162,5 @@ This topic could fill many chapters of a book on it's own, but a few key points 
 - Write code to be as generic as possible
 - ...
 
-If you are writing something that is not specifically related to the project you are working on, then maybe this code would be a good addition to the `farm-core` core codebase, rather than the repositiory for the project.  
+If you are writing something that is not specifically related to the project you are working on, then maybe this code would be a good addition to the `farm-core` core codebase, rather than the repository for the project.  
 Adding code to the core codebase (where appropriate) means that the Lab may suddenly gain a new ability, that can be reused on many future projects.
