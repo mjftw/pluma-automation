@@ -3,7 +3,7 @@
 ## Introduction
 This document will outline the recommended coding style to be followed by developers working on the Witekio Automation Lab.
 
-The main rule you should follow when adding code to the Lab (and you could argue any code base) is to try to match the coding style for what is already.
+The main rule you should follow when adding code to the Lab *(and you could argue that this applies to any codebase)* is to try to match the coding style for what is already there.
 Your code should blend in with its surroundings, like a stealthy chameleon in a tree.  
 
 To quote [PEP20 - The Zen of Python](https://www.python.org/dev/peps/pep-0020/):
