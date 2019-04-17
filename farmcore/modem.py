@@ -1,11 +1,11 @@
 import time
 import re
+import sys
 
 try:
-    import RPI.GPIO as GPIO
-    connected_via_rpi = True
+    import RPi.GPIO as GPIO
 except ImportError:
-    connected_via_rpi = False
+    pass
 
 from .serialconsole import SerialConsole
 from .farmclass import Farmclass
@@ -382,10 +382,14 @@ class ModemSim868(Farmclass):
         raise NotImplementedError
 
     def hardware_reset(self):
-        if connected_via_rpi:
+        # Check if the Raspberry Pi GPIO library is loaded
+        if 'RPi.GPIO' in sys.modules:
             GPIO.setmode(GPIO.BOARD)
             GPIO.setup(self.hardware_reset_pin, GPIO.OUT)
-            GPIO.output(self.hardware_reset_pin, GPIO.LOW)
-            time.sleep(self.hardware_reset_wait_period)
-            GPIO.output(self.hardware_reset_pin, GPIO.HIGH)
+            while True:
+                GPIO.output(self.hardware_reset_pin, GPIO.LOW)
+                time.sleep(self.hardware_reset_wait_period)
+                GPIO.output(self.hardware_reset_pin, GPIO.HIGH)
+                if self.ready():
+                    break
             GPIO.cleanup()
