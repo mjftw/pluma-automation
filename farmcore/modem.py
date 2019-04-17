@@ -409,3 +409,5 @@ class ModemSim868(Farmclass):
                     Failed to reset modem after {} attempts!'.format(self.hardware_reset_max_attempts))
         else:
             self.log('RPi GPIO library is not loaded, skipping hardware reset.')
+            if not self.ready():
+                raise ModemError('Modem not ready')
