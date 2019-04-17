@@ -1,6 +1,12 @@
 import time
 import re
 
+try:
+    import RPI.GPIO as GPIO
+    connected_via_rpi = True
+except ImportError:
+    connected_via_rpi = False
+
 from .serialconsole import SerialConsole
 from .farmclass import Farmclass
 
@@ -20,6 +26,11 @@ class ModemSim868(Farmclass):
 
         self._recording_settings = None
         self._recording_buffer = None
+
+        self.hardware_reset_pin = 7
+        self.hardware_reset_wait_period = 4
+
+        self.hardware_reset()
 
     def AT_send(self, *args, **kwargs):
         if self._recording_lock:
@@ -369,3 +380,12 @@ class ModemSim868(Farmclass):
         Returns the number of SMS recieved
         '''
         raise NotImplementedError
+
+    def hardware_reset(self):
+        if connected_via_rpi:
+            GPIO.setmode(GPIO.BOARD)
+            GPIO.setup(self.hardware_reset_pin, GPIO.OUT)
+            GPIO.output(self.hardware_reset_pin, GPIO.LOW)
+            time.sleep(self.hardware_reset_wait_period)
+            GPIO.output(self.hardware_reset_pin, GPIO.HIGH)
+            GPIO.cleanup()
