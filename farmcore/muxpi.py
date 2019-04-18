@@ -4,9 +4,10 @@ import time
 from .baseclasses import Farmclass, StorageBase, PowerBase, RelayBase
 from .board import Board
 from .serialconsole import SerialConsole
-from .asyncsampler import AsyncSampler
 from .powerrelay import PowerRelay
 from .hub import Hub
+
+from farmutils import AsyncSampler
 
 
 class MuxPiError(Exception):
