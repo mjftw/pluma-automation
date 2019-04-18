@@ -1,5 +1,18 @@
 import time
 import re
+import sys
+
+try:
+    # The hardware reset functionality requires the use of
+    # GPIO. If the test suite is running on a Raspberry Pi,
+    # import the GPIO library to enable the feature,
+    # else skip the import - this is checked by the
+    # 'hardware_reset' method.
+    with open('/sys/firmware/devicetree/base/model') as model:
+        if 'Raspberry Pi' in model.read():
+            import RPi.GPIO as GPIO
+except (OSError, IOError):
+    pass
 
 from .serialconsole import SerialConsole
 from .farmclass import Farmclass
@@ -20,6 +33,10 @@ class ModemSim868(Farmclass):
 
         self._recording_settings = None
         self._recording_buffer = None
+
+        self.hardware_reset_pin = 7
+        self.hardware_reset_wait_period = 4
+        self.hardware_reset_max_attempts = 6
 
     def AT_send(self, *args, **kwargs):
         if self._recording_lock:
@@ -60,7 +77,7 @@ class ModemSim868(Farmclass):
         else:
             # Don't check modem is ready if it is already recording
             if not self.ready():
-                self.error('Modem not ready', ModemError)
+                self.hardware_reset()
 
         __, matched = self.AT_send('AT+CPAS', match='CPAS: [0-9]+')
         if not matched:
@@ -102,7 +119,7 @@ class ModemSim868(Farmclass):
             self.end_call()
 
         if not self.ready():
-            self.error('Modem not ready', ModemError)
+            self.hardware_reset()
 
         # Enable call notification and wait for incoming
         recieved, matched = self.AT_send(
@@ -148,7 +165,7 @@ class ModemSim868(Farmclass):
         '''
 
         if not self.ready():
-            self.error('Modem not ready', ModemError)
+            self.hardware_reset()
 
         if self.ongoing_call():
             self.log('Cannot make call, call ongoing')
@@ -330,7 +347,7 @@ class ModemSim868(Farmclass):
         Send the SMS message @message to @number
         '''
         if not self.ready():
-            self.error('Modem not ready', ModemError)
+            self.hardware_reset()
 
         # Set SMS to text mode
         __, matched = self.AT_send('AT+CMGF=1', match='OK')
@@ -369,3 +386,29 @@ class ModemSim868(Farmclass):
         Returns the number of SMS recieved
         '''
         raise NotImplementedError
+
+    def hardware_reset(self):
+        # Check if the Raspberry Pi GPIO library is loaded
+        if 'RPi.GPIO' in sys.modules:
+            reset_successful = False
+            # Setup reset pin in output mode
+            GPIO.setmode(GPIO.BOARD)
+            GPIO.setup(self.hardware_reset_pin, GPIO.OUT)
+            for i in range(self.hardware_reset_max_attempts):
+                # Toggle the GPIO until the modem is responsive to AT commands,
+                # or the maximum attempt count has been reached
+                GPIO.output(self.hardware_reset_pin, GPIO.LOW)
+                time.sleep(self.hardware_reset_wait_period)
+                GPIO.output(self.hardware_reset_pin, GPIO.HIGH)
+                if self.ready():
+                    reset_successful = True
+                    break
+            GPIO.cleanup()
+
+            if not reset_successful:
+                raise ModemError('\
+                    Failed to reset modem after {} attempts!'.format(self.hardware_reset_max_attempts))
+        else:
+            self.log('RPi GPIO library is not loaded, skipping hardware reset.')
+            if not self.ready():
+                raise ModemError('Modem not ready')
