@@ -1,6 +1,6 @@
 import re
 
-from .farmclass import Farmclass
+from .baseclasses import Farmclass
 from .usb import USB, puctx
 
 

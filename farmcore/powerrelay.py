@@ -1,22 +1,17 @@
 import time
 
-from .powerbase import PowerBase
-from .relaybase import RelayBase
+from .baseclasses import PowerBase, RelayBase
 
 
-class PowerRelay(PowerBase):
-    def __init__(self, relay, on_seq, off_seq):
-        if not isinstance(relay, RelayBase):
-            raise TypeError('relay must be an instance of RelayBase')
-
-        self.relay = relay
+class PowerRelay(PowerBase, RelayBase):
+    def __init__(self, on_seq, off_seq):
         self.on_seq = on_seq
         self.off_seq = off_seq
 
     def _do_sequence(self, seq):
         for action in seq:
             if isinstance(action, tuple):
-                self.relay.toggle(action[0], action[1])
+                self.toggle(action[0], action[1])
             if isinstance(action, str):
                 if action.endswith('ms'):
                     time.sleep(float(action[:-2])/1000)

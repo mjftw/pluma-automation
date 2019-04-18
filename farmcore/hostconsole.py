@@ -1,10 +1,10 @@
 import pexpect
 import pexpect.fdpexpect
 
-from .console import Console, CannotOpen
+from .baseclasses.consolebase import ConsoleBase, CannotOpen
 
 
-class HostConsole(Console):
+class HostConsole(ConsoleBase):
     def __init__(self, command):
         self.command = command
         self._pex = None

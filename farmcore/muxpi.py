@@ -1,15 +1,12 @@
 import platform
 import time
 
-from .farmclass import Farmclass
+from .baseclasses import Farmclass, StorageBase, PowerBase, RelayBase
 from .board import Board
 from .serialconsole import SerialConsole
-from .storagebase import StorageBase
-from .powerbase import PowerBase
-from .relaybase import RelayBase
+from .asyncsampler import AsyncSampler
 from .powerrelay import PowerRelay
 from .hub import Hub
-from .asyncsampler import AsyncSampler
 
 
 class MuxPiError(Exception):
@@ -120,7 +117,7 @@ class MuxPi(Farmclass):
         return self.stm_cmd('help')
 
 
-class MuxPiPower(Farmclass, PowerBase):
+class MuxPiPower(PowerBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
 
@@ -138,7 +135,7 @@ class MuxPiPower(Farmclass, PowerBase):
         time.sleep(0.25)
         self.on()
 
-class MuxPiDyper(Farmclass, RelayBase):
+class MuxPiDyper(RelayBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
 
@@ -155,7 +152,7 @@ class MuxPiDyper(Farmclass, RelayBase):
 
         self.muxpi.stm_cmd('dyper {} {}'.format(port, throw))
 
-class MuxPiPowerDyper(Farmclass, PowerRelay):
+class MuxPiPowerDyper(PowerRelay):
     def __init__(self, muxpi, on_seq, off_seq):
         self.muxpi = muxpi
         PowerRelay.__init__(self, relay=MuxPiDyper(self.muxpi),
@@ -169,7 +166,7 @@ class MuxPiPowerDyper(Farmclass, PowerRelay):
         self.on()
 
 
-class MuxPiStorage(Farmclass, StorageBase):
+class MuxPiStorage(StorageBase):
     def __init__(self, muxpi):
         self.muxpi = muxpi
 

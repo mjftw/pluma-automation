@@ -1,6 +1,8 @@
+from .farmclass import Farmclass
 import time
 
-class PowerBase():
+
+class PowerBase(Farmclass):
     reboot_delay = 0.5
 
     def on(self):
@@ -13,3 +15,7 @@ class PowerBase():
         self.off()
         time.sleep(self.reboot_delay)
         self.on()
+
+    def __bool__(self):
+        ''' Base class is falsey. Must inherit'''
+        return True if type(self) is not PowerBase else False

@@ -7,3 +7,6 @@ class Farmclass(Hierachy, Logging):
 
     def __repr__(self):
         return self.show_hier(reccurse=False)
+
+    def __bool__(self):
+        return True if type(self) is not Farmclass else False

@@ -15,7 +15,7 @@ except (OSError, IOError):
     pass
 
 from .serialconsole import SerialConsole
-from .farmclass import Farmclass
+from .baseclasses import Farmclass
 
 
 class ModemError(Exception):

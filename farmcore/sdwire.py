@@ -1,10 +1,9 @@
 from pyftdi.ftdi import Ftdi
 
-from .farmclass import Farmclass
-from .storagebase import StorageBase
+from .baseclasses import StorageBase
 
 
-class SDWire(Farmclass, StorageBase):
+class SDWire(StorageBase):
     def __init__(self, serial=None):
         self.serial = serial
         self.ftdi = Ftdi()

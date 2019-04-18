@@ -2,9 +2,9 @@ import time
 from pexpect import TIMEOUT, EOF
 
 
-from .farmclass import Farmclass
+from .baseclasses import Farmclass
 from .serialconsole import SerialConsole
-from .console import ExceptionKeywordRecieved
+from .baseclasses.consolebase import ExceptionKeywordRecieved
 
 
 DEFAULT_LOGFILE = object()
