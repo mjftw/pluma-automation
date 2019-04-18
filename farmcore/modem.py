@@ -8,8 +8,9 @@ try:
     # import the GPIO library to enable the feature,
     # else skip the import - this is checked by the
     # 'hardware_reset' method.
-    if 'Raspberry Pi' in open('/sys/firmware/devicetree/base/model').read():
-        import RPi.GPIO as GPIO
+    with open('/sys/firmware/devicetree/base/model') as model:
+        if 'Raspberry Pi' in model.read():
+            import RPi.GPIO as GPIO
 except (OSError, IOError):
     pass
 
