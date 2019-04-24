@@ -3,6 +3,7 @@ import time
 from .baseclasses import PowerBase, RelayBase
 
 
+# FIXME: We no longer have a reference to the Relay. Fix this.
 class PowerRelay(PowerBase, RelayBase):
     def __init__(self, on_seq, off_seq):
         self.on_seq = on_seq
