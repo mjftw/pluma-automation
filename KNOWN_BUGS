@@ -1,0 +1,1 @@
+BUG: Hub.get_relay() returns same as Hub.get_serial()
