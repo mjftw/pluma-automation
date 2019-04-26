@@ -83,7 +83,8 @@ class Hub(Farmclass, USB):
         ttyUSB_major = '188'
         devinfo = self.filter_downstream({
             'subsystem': 'tty',
-            'major': ttyUSB_major
+            'major': ttyUSB_major,
+            'vendor': 'FTDI'
         })
 
         if not devinfo:
