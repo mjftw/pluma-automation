@@ -5,6 +5,7 @@ import datetime
 
 from farmutils.email import Email
 from farmutils.error import send_exception_email
+from farmcore import BootValidationError
 
 '''
 class ExampleTest():
@@ -72,6 +73,9 @@ class TestBase():
         return self.__class__.__name__
 
 
+class BootTestBase(TestBase):
+    boot_success = None
+
 class TestCore(TestBase):
     tasks = [
         'pre_host_mount', '_host_mount', 'prepare', '_host_unmount',
@@ -132,7 +136,7 @@ class TestCore(TestBase):
         try:
             self.board.reboot_and_validate()
         except BootValidationError as e:
-            raise TaskFailed(str(e))
+            raise e
 
     def pre_board_login(self):
         self.board.log("\n=== PRE BOARD LOGIN ===", colour='blue', bold=True)
@@ -177,12 +181,16 @@ class TestCore(TestBase):
 
 
 class TestRunner():
-    def __init__(self, board,
-            tests=None, skip_tasks=None, email_on_fail=True):
+    def __init__(self, board, tests=None, boot_test=None,
+            skip_tasks=None, email_on_fail=True):
         self.board = board
         self.email_on_fail = email_on_fail
         self.skip_tasks = skip_tasks or []
         self.tests = []
+        if not isinstance(boot_test, BootTestBase):
+            raise AttributeError('Anvalid boot test. Must inherit BootTestBase')
+        self.boot_test = boot_test
+
         self.test_fails = []
         tests = tests or []
         if not isinstance(tests, list):
@@ -193,6 +201,10 @@ class TestRunner():
 
         # General purpose data for use globally between tests
         self.data = {}
+
+        if self.boot_test:
+            self.add_test(self.boot_test)
+
         for test in tests:
             self.add_test(test)
 
@@ -200,6 +212,8 @@ class TestRunner():
         return self.run()
 
     def run(self):
+        self.test_fails = []
+
         if (self.use_testcore and "TestCore" not in
                 (str(t) for t in self.tests)):
             self.add_test(TestCore(self.board), 0)
@@ -234,7 +248,11 @@ class TestRunner():
             self.board.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
-    def _run_task(self, task_name):
+    def _get_tests_by_name(self, test_name):
+        tests = [t for t in self.tests if str(t) == test_name]
+        return None if not tests else tests
+
+    def _run_task(self, task_name, test_name=None):
         if "mount" in task_name and not self.board.storage:
             self.board.log("Board does not have storage. Skipping task: {}".format(task_name))
             return
@@ -243,7 +261,24 @@ class TestRunner():
                 colour='green', bold=True)
             return
 
-        for test in self.tests:
+        # Run all task for all tests unless one is specified
+        if test_name:
+            tests_to_run = self._get_tests_by_name(test_name)
+            if not tests_to_run:
+                self.board.error(
+                    'Cannot run specified test {} as it is not in test list. Running all'.format(
+                    test_name))
+                tests_to_run = self.tests
+            self.board.log('Running {} for test [{}] only'.format(
+                task_name, test_name))
+        else:
+            tests_to_run = self.tests
+
+        for test in tests_to_run:
+            if (task_name == "_board_on_and_validate" and
+                self.boot_test):
+                # Initialise boot test result to success
+                self.boot_test.boot_success = True
             task_func = getattr(test, task_name, None)
             if task_func:
                 if test.__class__ != TestCore:
@@ -256,33 +291,47 @@ class TestRunner():
                     raise e
                 except InterruptedError as e:
                     raise e
-                # If request to abort testing, do so
-                except AbortTesting as e:
-                    self.board.log('Testing aborted by task {} - {}: {}'.format(
-                        str(test), task_name, str(e)))
-                    if (isinstance(e, AbortTestingAndReport) and
-                            'report' in self.tasks):
-                        self._run_task('report')
-                    raise e
-                # For all other exceptions, we want to know about it
                 except Exception as e:
-                    failed = {
-                        'time': time.time(),
-                        'test': test,
-                        'task': task_name,
-                        'exception': e,
-                        'traceback': traceback.format_exc()
-                    }
-                    self.test_fails.append(failed)
+                    # If request to abort testing, do so
+                    if isinstance(e, AbortTesting):
+                        self.board.log('Testing aborted by task {} - {}: {}'.format(
+                            str(test), task_name, str(e)))
+                        if (isinstance(e, AbortTestingAndReport) and
+                                'report' in self.tasks):
+                            self._run_task('report')
+                        raise e
+                    # If failed boot, and we have a specific boot test,
+                    #   run it's report function
+                    if (isinstance(e, BootValidationError) and
+                            self.boot_test):
+                            self.board.log('Boot test failed, running {}.report()'.format(
+                                str(self.boot_test)))
 
-                    if self.email_on_fail:
-                        self.send_fail_email(e, test, task_name)
+                            self.boot_test.boot_success = False
+                            self._run_task('report', str(self.boot_test))
+                            self._handle_failed_task(test, task_name, e)
+                    # For all other exceptions, we want to know about it
+                    else:
+                        self._handle_failed_task(test, task_name, e)
 
-                    self.board.log('Task failed {}'.format(failed),
-                        colour='red', bold=True)
+    def _handle_failed_task(self, test, task_name, exception, abort=True):
+        failed = {
+            'time': time.time(),
+            'test': test,
+            'task': task_name,
+            'exception': exception,
+            'traceback': traceback.format_exc()
+        }
+        self.test_fails.append(failed)
 
-                    raise AbortTesting(str(e))
+        if self.email_on_fail:
+            self.send_fail_email(e, test, task_name)
 
+        self.board.log('Task failed {}'.format(failed),
+            colour='red', bold=True)
+
+        if abort:
+            raise AbortTesting(str(exception))
 
     def send_fail_email(self, exception, test_failed, task_failed):
         #TODO: Move to a config file
