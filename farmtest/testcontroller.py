@@ -37,7 +37,13 @@ class TestController():
         self.stats['num_tests_fail'] = 0
 
         # Global data to be used by tests
-        self.data = {}
+        # Save TestController data here too
+        self.data = {
+            'TestController': {
+                'settings': self.settings,
+                'stats': self.stats
+            }
+        }
 
         self.tests_passed = []
         self.tests_failed = []
