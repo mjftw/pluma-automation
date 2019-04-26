@@ -30,6 +30,8 @@ class IPPowerPDU(Farmclass, PowerBase):
         self.username = username or 'admin'
         self.password = password or '12345678'
 
+        self.reboot_delay = 5
+
     def on(self):
         self._make_request('cmd=setpower+p6{}=1'.format(self.port))
 
