@@ -1,4 +1,6 @@
 import time
+import requests
+import re
 
 from .farmclass import Farmclass
 from .telnetconsole import TelnetConsole
@@ -6,15 +8,72 @@ from .console import CannotOpen, LoginFailed
 from .powerbase import PowerBase
 
 
-class NoAPC(Exception):
-    pass
-
-
 class InvalidPort(Exception):
     pass
 
 
-class APC(Farmclass, PowerBase):
+class RequestError(Exception):
+    pass
+
+
+class IPPowerPDU(Farmclass, PowerBase):
+    ''' IP Power 9258 is a PDU which can respond to http requests '''
+    def __init__(self, port,
+            host=None, netport=None, username=None, password=None):
+        if 1 <= port <= 4:
+            self.port = port
+        else:
+            raise InvalidPort("Invalid port[{}]").format(port)
+
+        self.host = host or '192.168.1.100'
+        self.netport = netport or 80
+        self.username = username or 'admin'
+        self.password = password or '12345678'
+
+    def on(self):
+        self._make_request('cmd=setpower+p6{}=1'.format(self.port))
+
+    def off(self):
+        self._make_request('cmd=setpower+p6{}=0'.format(self.port))
+
+    def is_on(self):
+        power_str_all = self._make_request('cmd=getpower')
+
+        try:
+            power_str = re.search(
+                'p6{}=[01]'.format(self.port), power_str_all).group(0)
+
+            if power_str[-1] == '1':
+                return True
+            elif power_str[-1] == '0':
+                return False
+        except (IndexError, AttributeError):
+            raise RequestError('Invalid power state string [{}]'.format(
+                power_str_all))
+
+    def _make_request(self, params):
+        #E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
+
+        if isinstance(params, list):
+            params = '&'.join(params)
+
+        params_str = '&'.join([
+            'user=' + self.username,
+            'pass=' + self.password,
+            params
+        ])
+
+        url = 'http://{}:{}/set.cmd?{}'.format(
+            self.host, self.netport, params_str)
+
+        r = requests.get(url)
+        if r.status_code != 200:
+            raise RequestError('Request failed. {}, Err[{}]'.format(
+                r.text, r.status_code))
+
+        return r.text
+
+class APCPDU(Farmclass, PowerBase):
     """ The APC is a switched rack PDU which controls whether a board is powered """
 
     def __init__(self, host, username, password, port):
