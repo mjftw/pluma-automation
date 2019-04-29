@@ -68,7 +68,7 @@ class IPPowerPDU(Farmclass, PowerBase):
         url = 'http://{}:{}/set.cmd?{}'.format(
             self.host, self.netport, params_str)
 
-        r = requests.get(url)
+        r = requests.get(url, timeout=3)
         if r.status_code != 200:
             raise RequestError('Request failed. {}, Err[{}]'.format(
                 r.text, r.status_code))
