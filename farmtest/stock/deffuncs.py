@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import time
 
 from ..unittest import deferred_function
@@ -15,7 +15,7 @@ def sc_run_n_iterations(TestController, ntimes):
 
 @deferred_function
 def sc_time_in_range(start_hour, end_hour):
-    now = datetime.datetime.now()
+    now = datetime.now()
     return (start_hour <= now.hour and now.hour < end_hour)
 
 
@@ -23,7 +23,7 @@ def sc_time_in_range(start_hour, end_hour):
 def sc_run_daily_at_hour(TestController, start_hour):
     data_key = 'sc_run_daily_at_hour:run_dates'
 
-    now = datetime.datetime.now()
+    now = datetime.now()
     date_now = now.strftime("%Y/%m/%d")
 
     if start_hour <= now.hour:
@@ -37,6 +37,20 @@ def sc_run_daily_at_hour(TestController, start_hour):
 
     return False
 
+@deferred_function
+def sc_run_in_datetime_range(datetime_start, datetime_end):
+    if (not isinstance(datetime_start, datetime) or
+            not isinstance(datetime_end, datetime)):
+        raise AttributeError(
+            'start and end datetimes must be of type "datetime"')
+
+    if datetime_start > datetime_end:
+        raise AttributeError('datetime_start must be more recent than datetime_end')
+
+    if datetime_end >= datetime.now() >= datetime_start:
+        return True
+    else:
+        return False
 
 @deferred_function
 def tt_log_stats(TestController, board):
