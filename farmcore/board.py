@@ -67,8 +67,8 @@ class Board(Farmclass):
             raise BootValidationError("Cannot validate boot. Not bootstring given")
 
         self.last_boot_len = None
-        start_time = time.time()
         self.power.reboot()
+        start_time = time.time()
         try:
             (__, matched) = self.console.send(
                 match=bootstr,
