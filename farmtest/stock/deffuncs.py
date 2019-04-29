@@ -1,9 +1,8 @@
 import datetime
 import time
 
-from .unittest import deferred_function
+from ..unittest import deferred_function
 
-#TODO: Revist with better name for this
 
 class TestMustBeInController(Exception):
     pass
