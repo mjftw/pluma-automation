@@ -8,11 +8,12 @@ class PowerMulti(PowerBase):
     '''Combine multiple different power objects. Allows for more
     complex power sequences.'''
 
-    def __init__(self, power_seq):
+    def __init__(self, power_seq, reverse_off_seq=True):
         if not isinstance(power_seq, list):
             power_seq = [power_seq]
 
         self.power_seq = power_seq
+        self.reverse_off_seq = reverse_off_seq
         self.reboot_delay = max(
             [p.reboot_delay for p in power_seq if isinstance(p, PowerBase)])
 
@@ -48,4 +49,7 @@ class PowerMulti(PowerBase):
         self._do_sequence(self.on_seq)
 
     def off(self):
-        self._do_sequence(self.off_seq)
+        if self.reverse_off_seq:
+            self._do_sequence(self.off_seq[::-1])
+        else:
+            self._do_sequence(self.off_seq)
