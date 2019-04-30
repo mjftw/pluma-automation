@@ -4,3 +4,4 @@ setuptools
 pyudev
 pexpect>=4.6
 pyftdi
+pyroute2

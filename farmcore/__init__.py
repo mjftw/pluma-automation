@@ -1,5 +1,7 @@
 from .board import Board, BootValidationError, LoginError
 from .usbrelay import USBRelay
+from .usbenet import USBEnet
+from .interface import Interface
 from .powerrelay import PowerRelay
 from .powermulti import PowerMulti
 from .pdu import APCPDU, IPPowerPDU
