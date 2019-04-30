@@ -1,5 +1,6 @@
 import re
 import os
+import tempfile
 
 from farmutils.helpers import run_host_cmd
 
@@ -27,7 +28,8 @@ class StorageBase():
     def mount_host(self, devnode, mountpoint=None):
         mountpoint = mountpoint or self.host_mountpoint
         if not mountpoint:
-            raise StorageException('Mount failed: No mountpoint given')
+            self.host_mountpoint = tempfile.mkdtemp(suffix='_lab')
+            mountpoint = self.host_mountpoint
 
         # Check if already mounted
         (output, ret) = run_host_cmd('mount')
