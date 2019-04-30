@@ -140,6 +140,8 @@ class Hub(Farmclass, USB):
             else:
                 return devinfo[0]
 
+    #TODO: Add a get_usbether() method
+
     def get_parent(self):
         dev = self.get_device()
         pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
