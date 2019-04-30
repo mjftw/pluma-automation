@@ -19,7 +19,8 @@ class RequestError(Exception):
 class IPPowerPDU(Farmclass, PowerBase):
     ''' IP Power 9258 is a PDU which can respond to http requests '''
     def __init__(self, port,
-            host=None, netport=None, username=None, password=None):
+            host=None, netport=None, username=None, password=None,
+            interface=None, interface_ip=None):
         if 1 <= port <= 4:
             self.port = port
         else:
@@ -29,6 +30,8 @@ class IPPowerPDU(Farmclass, PowerBase):
         self.netport = netport or 80
         self.username = username or 'admin'
         self.password = password or '12345678'
+        self.interface = interface
+        self.interface_ip = interface_ip or '192.168.1.110'
 
         self.reboot_delay = 5
 
@@ -68,7 +71,20 @@ class IPPowerPDU(Farmclass, PowerBase):
         url = 'http://{}:{}/set.cmd?{}'.format(
             self.host, self.netport, params_str)
 
-        r = requests.get(url, timeout=3)
+        try:
+            r = requests.get(url, timeout=3)
+        except requests.exceptions.ConnectTimeout as e:
+            if self.interface:
+                self.log(str(e))
+                self.log(
+                    'Setting interface address to {} and retrying...'.format(
+                        self.interface_ip))
+                self.interface.set_ip_address(self.interface_ip)
+                self.interface.up()
+                r = requests.get(url, timeout=3)
+            else:
+                raise e
+
         if r.status_code != 200:
             raise RequestError('Request failed. {}, Err[{}]'.format(
                 r.text, r.status_code))
