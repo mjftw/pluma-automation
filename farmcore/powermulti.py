@@ -14,11 +14,14 @@ class PowerMulti(PowerBase):
 
         self.power_seq = power_seq
         self.reverse_off_seq = reverse_off_seq
-        self.reboot_delay = max(
-            [p.reboot_delay for p in power_seq if isinstance(p, PowerBase)])
 
         self.on_seq = self._build_sequence('on')
         self.off_seq = self._build_sequence('off')
+
+    @property
+    def reboot_delay(self):
+        return max(
+            [p.reboot_delay for p in self.power_seq if isinstance(p, PowerBase)])
 
     def _build_sequence(self, method):
         seq = []
