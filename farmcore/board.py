@@ -48,6 +48,7 @@ class Board(Farmclass):
         self.boot_max_s = boot_max_s or 60
 
         self.last_boot_len = None
+        self.booted_to_prompt = False
 
         self.log_reccurse = True
 
@@ -63,6 +64,16 @@ class Board(Farmclass):
             exception_bootstr=None):
         timeout = override_timeout or self.boot_max_s
         bootstr = override_boostr or self.bootstr
+
+        # If we have set a prompt, add this to bootstr search
+        if self.prompt:
+            if not bootstr:
+                bootstr = self.prompt
+            elif isinstance(bootstr, list):
+                bootstr.append(self.prompt)
+            else:
+                bootstr = [bootstr, self.prompt]
+
         if not bootstr:
             raise BootValidationError("Cannot validate boot. Not bootstring given")
 
@@ -85,7 +96,16 @@ class Board(Farmclass):
 
         self.last_boot_len = round(time.time() - start_time, 2)
 
+        self.log('Boot success. Matched [{}]'.format(matched))
+
+        if self.prompt and matched == self.prompt:
+            self.booted_to_prompt = True
+
     def login(self):
+        if self.booted_to_prompt:
+            self.log('Booted to prompt. Not need to log in')
+            return
+
         self.console.login(
             username=self.login_user,
             password=self.login_pass,
