@@ -56,7 +56,7 @@ class IPPowerPDU(Farmclass, PowerBase):
             raise RequestError('Invalid power state string [{}]'.format(
                 power_str_all))
 
-    def _make_request(self, params):
+    def _make_request(self, params, max_tries=5):
         #E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
 
         if isinstance(params, list):
@@ -71,19 +71,28 @@ class IPPowerPDU(Farmclass, PowerBase):
         url = 'http://{}:{}/set.cmd?{}'.format(
             self.host, self.netport, params_str)
 
-        try:
-            r = requests.get(url, timeout=3)
-        except requests.exceptions.ConnectTimeout as e:
-            if self.interface:
-                self.log(str(e))
-                self.log(
-                    'Setting interface address to {} and retrying...'.format(
-                        self.interface_ip))
-                self.interface.set_ip_address(self.interface_ip)
-                self.interface.up()
+        success = False
+        exception = None
+        for _ in range(0, max_tries):
+            if success:
+                break
+            try:
                 r = requests.get(url, timeout=3)
-            else:
-                raise e
+                success = True
+            except requests.exceptions.Timeout as e:
+                exception = e
+                if (self.interface and
+                        self.interface.ip_address != self.interface_ip):
+                    self.log(str(e))
+                    self.log(
+                        'Setting interface address to {} and retrying...'.format(
+                            self.interface_ip))
+                    self.interface.set_ip_address(self.interface_ip)
+                    self.interface.up()
+                time.sleep(1)
+
+        if not success:
+            raise exception
 
         if r.status_code != 200:
             raise RequestError('Request failed. {}, Err[{}]'.format(
