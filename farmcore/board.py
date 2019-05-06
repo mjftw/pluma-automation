@@ -8,7 +8,6 @@ from .exceptions import ConsoleExceptionKeywordRecieved
 
 DEFAULT_LOGFILE = object()
 
-
 class BoardError(Exception):
     pass
 
@@ -19,6 +18,7 @@ class BoardBootValidationError(BoardError):
 
 class BoardLoginError(BoardError):
     pass
+
 
 
 class Board(Farmclass):
