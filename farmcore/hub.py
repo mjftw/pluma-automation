@@ -79,8 +79,6 @@ class Hub(Farmclass, USB):
 
         return match_vals
 
-    # FIXME: Removing the vendor check here has broken things
-    # get_serial now finds DLP_DESIGN relays as well.
     def get_serial(self, key=None):
         ttyUSB_major = '188'
         serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
