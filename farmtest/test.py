@@ -1,12 +1,3 @@
-import sys
-import traceback
-import platform
-import datetime
-
-from farmutils.email import Email
-from farmutils.error import send_exception_email
-from farmcore import BootValidationError
-
 '''
 class ExampleTest():
     def __init__(self, board):
@@ -43,9 +34,15 @@ class ExampleTest():
         pass
 '''
 
+import sys
+import traceback
+import platform
+import datetime
 import time
 
-from farmcore.console import LoginFailed
+from farmutils import Email, send_exception_email
+from farmcore import BootValidationError
+from farmcore.baseclasses.consolebase import LoginFailed
 from farmcore.board import BootValidationError
 
 
@@ -187,8 +184,8 @@ class TestRunner():
         self.email_on_fail = email_on_fail
         self.skip_tasks = skip_tasks or []
         self.tests = []
-        if not isinstance(boot_test, BootTestBase):
-            raise AttributeError('Anvalid boot test. Must inherit BootTestBase')
+        if boot_test and not isinstance(boot_test, BootTestBase):
+            raise AttributeError('Invalid boot test. Must inherit BootTestBase')
         self.boot_test = boot_test
 
         self.test_fails = []
@@ -325,7 +322,7 @@ class TestRunner():
         self.test_fails.append(failed)
 
         if self.email_on_fail:
-            self.send_fail_email(e, test, task_name)
+            self.send_fail_email(exception, test, task_name)
 
         self.board.log('Task failed {}'.format(failed),
             colour='red', bold=True)
