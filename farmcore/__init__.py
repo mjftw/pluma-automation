@@ -1,3 +1,4 @@
+from .exceptions import *
 from .board import Board
 from .usbrelay import USBRelay
 from .usbenet import USBEnet
