@@ -2,8 +2,7 @@ import time
 from pexpect import TIMEOUT, EOF
 
 
-from .baseclasses import Farmclass, PowerBase, StorageBase, ConsoleBase
-from .serialconsole import SerialConsole
+from .baseclasses import Farmclass
 from .baseclasses.consolebase import ExceptionKeywordRecieved
 
 
