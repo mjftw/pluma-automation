@@ -3,15 +3,19 @@ import time
 from serial import Serial
 
 
-class InvalidKeyPress(Exception):
+class MultimeterError(Exception):
     pass
 
 
-class MeasurementError(Exception):
+class MultimeterInvalidKeyPress(MultimeterError):
     pass
 
 
-class DecodeError(Exception):
+class MultimeterMeasurementError(MultimeterError):
+    pass
+
+
+class MultimeterDecodeError(MultimeterError):
     pass
 
 
@@ -90,7 +94,7 @@ class MultimeterTTI1604():
         try:
             self.serial.write(self.button_map[button])
         except KeyError:
-            raise InvalidKeyPress(
+            raise MultimeterInvalidKeyPress(
                 'Multimeter does not have button "{}"'.format(button))
 
     def power_on(self):
@@ -142,7 +146,7 @@ class MultimeterTTI1604():
                 data = self._get_sample()
                 decoded_data, decoded_unit = self._decode_data(data)
                 break
-            except DecodeError as e:
+            except MultimeterDecodeError as e:
                 if num_bad_rx >= max_attempts:
                     raise e
 
@@ -160,7 +164,7 @@ class MultimeterTTI1604():
             bytes_read += 1
 
         if bytes_read >= packet_len:
-            raise MeasurementError(
+            raise MultimeterMeasurementError(
                 'Could not get a valid response from multimeter')
 
         for _ in range(1, packet_len):
@@ -171,7 +175,7 @@ class MultimeterTTI1604():
 
     def _decode_data(self, data):
         if not isinstance(data, list) or len(data) < 9:
-            raise DecodeError('Invalid data')
+            raise MultimeterDecodeError('Invalid data')
 
         range_info = '{:08b}'.format(data[0])
         # func_info = '{:08b}'.format(data[1]) # Igonored for now
@@ -195,7 +199,7 @@ class MultimeterTTI1604():
                     pass
 
             if digit is None:
-                raise DecodeError('Unable to decode digit [{}]'.format(di))
+                raise MultimeterDecodeError('Unable to decode digit [{}]'.format(di))
 
             digits.append(digit)
             if decimal_place > 0:
@@ -208,7 +212,7 @@ class MultimeterTTI1604():
             data_str = '{}{}'.format(sign, value)
 
         if len(data_str) <= 2:
-            raise DecodeError('Invalid data')
+            raise MultimeterDecodeError('Invalid data')
 
         return data_str, unit
 

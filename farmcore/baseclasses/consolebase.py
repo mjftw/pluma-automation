@@ -8,27 +8,31 @@ from .farmclass import Farmclass
 DEFAULT_PROMPT = r'>>FARM>>'
 
 
-class TimeoutNoRecieve(Exception):
+class ConsoleError(Exception):
     pass
 
 
-class TimeoutNoRecieveStop(Exception):
+class ConsoleTimeoutNoRecieve(ConsoleError):
     pass
 
 
-class SubclassException(Exception):
+class ConsoleTimeoutNoRecieveStop(ConsoleError):
     pass
 
 
-class CannotOpen(Exception):
+class ConsoleSubclassException(ConsoleError):
     pass
 
 
-class LoginFailed(Exception):
+class ConsoleCannotOpen(ConsoleError):
     pass
 
 
-class ExceptionKeywordRecieved(Exception):
+class ConsoleLoginFailed(ConsoleError):
+    pass
+
+
+class ConsoleExceptionKeywordRecieved(ConsoleError):
     pass
 
 
@@ -36,7 +40,7 @@ class ConsoleBase(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
     def __init__(self, encoding='ascii', linesep='\r\n'):
         if type(self) is ConsoleBase:
-            raise SubclassException(
+            raise ConsoleSubclassException(
                 "Class is a base class and must be inherited")
         self._check_attr('_pex')
         self.linesep = linesep
@@ -50,12 +54,12 @@ class ConsoleBase(Farmclass):
 
     def _check_attr(self, attr):
         if not hasattr(self, attr):
-            raise SubclassException(
+            raise ConsoleSubclassException(
                 "Variable '{}' must be created by inheriting class".format(
                     attr))
 
     def _err_must_override(self):
-        raise SubclassException(
+        raise ConsoleSubclassException(
             "This function must be overridden by an inheriting class")
 
     @property
@@ -191,7 +195,7 @@ class ConsoleBase(Farmclass):
         if not self.is_open:
             self.open()
         if not self.is_open:
-            raise CannotOpen
+            raise ConsoleCannotOpen
 
         if log_verbose:
             self.log("Sending command:\n{}".format(cmd), force_log_file=None)
@@ -263,7 +267,7 @@ class ConsoleBase(Farmclass):
                     cmd, new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
-                        matched, excepts), exception=ExceptionKeywordRecieved)
+                        matched, excepts), exception=ConsoleExceptionKeywordRecieved)
                 return (recieved, matched)
             else:
                 self.wait_for_quiet(
@@ -309,7 +313,7 @@ class ConsoleBase(Farmclass):
         (__, matched) = self.send(log_verbose=True, match=matches)
         if not matched:
             self.log(fail_message)
-            raise LoginFailed(fail_message)
+            raise ConsoleLoginFailed(fail_message)
 
         if matched == username_match:
             matches.remove(username_match)
@@ -317,11 +321,11 @@ class ConsoleBase(Farmclass):
 
         if password_match and matched == password_match:
             if not password:
-                raise LoginFailed(fail_message)
+                raise ConsoleLoginFailed(fail_message)
             (__, matched) = self.send(log_verbose=True, cmd=password,  match=matches, timeout=5)
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
                 matched == pexpect.EOF):
             self.log(fail_message)
-            raise LoginFailed(fail_message)
+            raise ConsoleLoginFailed(fail_message)

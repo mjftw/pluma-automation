@@ -7,7 +7,11 @@ import pyudev
 puctx = pyudev.Context()
 
 
-class NoDevice(Exception):
+class USBError(Exception):
+    pass
+
+
+class USBNoDevice(USBError):
     pass
 
 
@@ -48,7 +52,7 @@ class USB():
             if d.device_path.endswith(self.usb_device):
                 return d
 
-        raise NoDevice("No device for [{}]".format(self.usb_device))
+        raise USBNoDevice("No device for [{}]".format(self.usb_device))
 
     def rebind_host(self):
         d = self.get_device()
