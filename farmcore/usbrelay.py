@@ -1,10 +1,10 @@
-from .farmclass import Farmclass
+
 from .usb import USB
 from .serialconsole import SerialConsole
-from .relaybase import RelayBase
+from .baseclasses import RelayBase
 
 
-class USBRelay(RelayBase, Farmclass, USB):
+class USBRelay(RelayBase, USB):
     # There are USB relays which have four channels 0,1,2,3
     # The SDMUXes are connected to them
     # The SDMUXes are also powered by the APC unit.

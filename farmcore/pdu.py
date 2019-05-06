@@ -2,10 +2,9 @@ import time
 import requests
 import re
 
-from .farmclass import Farmclass
 from .telnetconsole import TelnetConsole
 from .console import CannotOpen, LoginFailed
-from .powerbase import PowerBase
+from .baseclasses import PowerBase
 
 
 class InvalidPort(Exception):
@@ -16,7 +15,7 @@ class RequestError(Exception):
     pass
 
 
-class IPPowerPDU(Farmclass, PowerBase):
+class IPPowerPDU(PowerBase):
     ''' IP Power 9258 is a PDU which can respond to http requests '''
     def __init__(self, port,
             host=None, netport=None, username=None, password=None,
@@ -100,7 +99,7 @@ class IPPowerPDU(Farmclass, PowerBase):
 
         return r.text
 
-class APCPDU(Farmclass, PowerBase):
+class APCPDU(PowerBase):
     """ The APC is a switched rack PDU which controls whether a board is powered """
 
     def __init__(self, host, username, password, port):

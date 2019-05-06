@@ -1,8 +1,6 @@
 import time
 
-from .powerbase import PowerBase
-from .relaybase import RelayBase
-
+from .baseclasses import PowerBase
 
 class PowerRelay(PowerBase):
     def __init__(self, relay, on_seq, off_seq):

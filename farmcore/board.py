@@ -2,9 +2,8 @@ import time
 from pexpect import TIMEOUT, EOF
 
 
-from .farmclass import Farmclass
-from .serialconsole import SerialConsole
-from .console import ExceptionKeywordRecieved
+from .baseclasses import Farmclass
+from .baseclasses.consolebase import ExceptionKeywordRecieved
 
 
 DEFAULT_LOGFILE = object()
@@ -26,18 +25,14 @@ class Board(Farmclass):
             prompt=None, logfile=DEFAULT_LOGFILE):
         self.name = name
 
+        self.power = power
+        self.storage = storage
+        self.console = console
+        self.hub = hub
         self.muxpi = muxpi
+
         if self.muxpi:
             self.muxpi.attach_board(self)
-        elif power and hub:
-            self.power = power
-            self.hub = hub
-            self.storage = storage
-            self.console = console or SerialConsole(hub.get_serial()['devnode'], 115200)
-        else:
-            #TODO: This is not always the case as sometimes we may not use
-            #    a hub or control power. Allow this use case
-            raise TypeError("__init__() must set argument 'muxpi' or both 'power' and 'hub'")
 
         self.prompt = prompt
         self.login_user = login_user

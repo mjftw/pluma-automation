@@ -32,10 +32,10 @@ class ExceptionKeywordRecieved(Exception):
     pass
 
 
-class Console(Farmclass):
+class ConsoleBase(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
     def __init__(self, encoding='ascii', linesep='\r\n'):
-        if type(self) is Console:
+        if type(self) is ConsoleBase:
             raise SubclassException(
                 "Class is a base class and must be inherited")
         self._check_attr('_pex')
@@ -43,6 +43,10 @@ class Console(Farmclass):
         self.encoding = encoding
         self._buffer = ''
         self._last_recieved = ''
+
+    def __bool__(self):
+        ''' Base class is falsey. Must inherit'''
+        return True if type(self) is not ConsoleBase else False
 
     def _check_attr(self, attr):
         if not hasattr(self, attr):

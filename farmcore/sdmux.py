@@ -1,8 +1,7 @@
-from .farmclass import Farmclass
-from .storagebase import StorageBase
+from .baseclasses import StorageBase
 
 
-class SDMux(Farmclass, StorageBase):
+class SDMux(StorageBase):
     """ SD Mux driver """
     def __init__(self, usbrelay, index):
         self.usbrelay = usbrelay

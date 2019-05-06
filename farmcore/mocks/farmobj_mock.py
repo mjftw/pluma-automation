@@ -1,4 +1,4 @@
-from .farmclass import Farmclass
+from ..baseclasses import Farmclass
 
 
 class FarmobjMock(Farmclass):

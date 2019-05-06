@@ -3,6 +3,7 @@ import os
 import time
 import tempfile
 
+from .farmclass import Farmclass
 from farmutils.helpers import run_host_cmd
 
 
@@ -10,13 +11,17 @@ class StorageException(Exception):
     pass
 
 
-class StorageBase():
+class StorageBase(Farmclass):
     '''
     Base class for storage classes that can be switched between
     the host and board.
     '''
 
     host_mountpoint = None
+
+    def __bool__(self):
+        ''' Base class is falsey. Must inherit'''
+        return True if type(self) is not StorageBase else False
 
     def to_host(self):
         ''' Switch storage to the host '''

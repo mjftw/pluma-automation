@@ -15,7 +15,7 @@ except (OSError, IOError):
     pass
 
 from .serialconsole import SerialConsole
-from .farmclass import Farmclass
+from .baseclasses import Farmclass
 
 
 class ModemError(Exception):
@@ -250,16 +250,6 @@ class ModemSim868(Farmclass):
             # Write AMR file header
             f.write(b'#*AMR\n')
             f.write(self._recording_buffer)
-
-            # Split data by packet header 0x7E
-            # for p in [p for p in data.split(b'\x7E') if p]:
-            #     # Fix replaced bytes
-            #     p.replace(b'\x7D\x5E', b'\x7E')
-            #     p.replace(b'\x7D\x5D', b'\x7D')
-            #     crc = p[-2:]
-            #     p = p[:-2]
-            #     #TODO: Calculate CRC and check it
-            #     f.write(p)
 
         self._recording_buffer = None
         self._recording_lock = False

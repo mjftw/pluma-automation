@@ -1,10 +1,10 @@
-import serial
+from serial import Serial
 import pexpect.fdpexpect
 
-from .console import Console
+from .baseclasses import ConsoleBase
 
 
-class SerialConsole(Console):
+class SerialConsole(ConsoleBase):
     def __init__(self, port, baud, timeout=0.01):
         self.port = port
         self.timeout = timeout
@@ -25,7 +25,7 @@ class SerialConsole(Console):
 
     def open(self):
         self.log("Trying to open serial port {}".format(self.port))
-        self._ser = serial.Serial(
+        self._ser = Serial(
             port=self.port,
             baudrate=self.baud,
             timeout=self.timeout
