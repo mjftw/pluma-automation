@@ -1,1 +1,2 @@
-BUG: Hub.get_relay() returns same as Hub.get_serial()
+StorageBase.[un]mount_board() functions unimplimented
+TestController: Tests maintain state between runs due to being references not copies (See FIXME: in farmtest/testcontroller.py)
