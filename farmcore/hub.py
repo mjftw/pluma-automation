@@ -81,14 +81,24 @@ class Hub(Farmclass, USB):
 
     def get_serial(self, key=None):
         ttyUSB_major = '188'
-        devinfo = self.filter_downstream({
-            'subsystem': 'tty',
-            'major': ttyUSB_major,
-            'vendor': 'FTDI'
-        })
+        serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
+
+        for vendor in serial_vendors:
+            devinfo = self.filter_downstream({
+                'subsystem': 'tty',
+                'major': ttyUSB_major,
+                'vendor': vendor
+            })
+            if not devinfo:
+                devinfo = self.filter_downstream({
+                    'major': ttyUSB_major,
+                    'vendor': vendor
+                })
+            if devinfo:
+                break
 
         if not devinfo:
-            None
+            return None
         else:
             if key:
                 return devinfo[0][key]
@@ -106,7 +116,7 @@ class Hub(Farmclass, USB):
             })
 
         if not devinfo:
-            None
+            return None
         else:
             if key:
                 return devinfo[0][key]
@@ -121,7 +131,7 @@ class Hub(Farmclass, USB):
             'size': 0
         })
         if not devinfo:
-            None
+            return None
         else:
             return devinfo[0]
 
@@ -133,7 +143,7 @@ class Hub(Farmclass, USB):
             'size': 0
         })
         if not devinfo:
-            None
+            return None
         else:
             if key:
                 return devinfo[0][key]
