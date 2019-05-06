@@ -3,7 +3,7 @@ import requests
 import re
 
 from .telnetconsole import TelnetConsole
-from .console import CannotOpen, LoginFailed
+from .baseclasses.consolebase import CannotOpen, LoginFailed
 from .baseclasses import PowerBase
 
 

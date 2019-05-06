@@ -2,7 +2,7 @@ import os
 
 from .usb import USB
 from .interface import Interface
-from .farmclass import Farmclass
+from .baseclasses import Farmclass
 
 
 class USBEnet(Farmclass, Interface, USB):

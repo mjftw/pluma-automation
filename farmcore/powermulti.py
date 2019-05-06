@@ -1,7 +1,7 @@
 import time
 import re
 
-from .powerbase import PowerBase
+from .baseclasses import PowerBase
 
 
 class PowerMulti(PowerBase):

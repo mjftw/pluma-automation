@@ -1,7 +1,8 @@
 import pexpect
 import pexpect.fdpexpect
 
-from .baseclasses import ConsoleBase, CannotOpen
+from .baseclasses import ConsoleBase
+from .baseclasses.consolebase import CannotOpen
 
 
 class HostConsole(ConsoleBase):
