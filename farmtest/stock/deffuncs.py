@@ -1,43 +1,15 @@
-import datetime
+from datetime import datetime
+import json
 import time
 
-from .unittest import deferred_function
+from ..unittest import deferred_function
 
-#TODO: Revist with better name for this
 
 class TestMustBeInController(Exception):
     pass
 
 
-@deferred_function
-def sc_run_n_iterations(TestController, ntimes):
-    return TestController.stats['num_iterations_run'] < ntimes
-
-
-@deferred_function
-def sc_time_in_range(start_hour, end_hour):
-    now = datetime.datetime.now()
-    return (start_hour <= now.hour and now.hour < end_hour)
-
-
-@deferred_function
-def sc_run_daily_at_hour(TestController, start_hour):
-    data_key = 'sc_run_daily_at_hour:run_dates'
-
-    now = datetime.datetime.now()
-    date_now = now.strftime("%Y/%m/%d")
-
-    if start_hour <= now.hour:
-        if not data_key in TestController.data:
-            TestController.data[data_key] = [date_now]
-            return True
-
-        if date_now not in TestController.data[data_key]:
-            TestController.data[data_key].append(date_now)
-            return True
-
-    return False
-
+# ==== UnitTest Teardown functions ====
 
 @deferred_function
 def tt_log_stats(TestController, board):
@@ -49,6 +21,8 @@ def tt_log_stats(TestController, board):
         TestController.stats['num_tests_fail']
         ))
 
+
+# ==== TestController Setup functions ====
 
 @deferred_function
 def ss_log_test_plan(TestController, board):
@@ -68,6 +42,8 @@ def ss_log_test_plan(TestController, board):
     message += str(TestController.tests)
     board.log(message)
 
+
+# ==== TestController Report functions ====
 
 @deferred_function
 def sr_log_test_results(TestController, board):
@@ -89,6 +65,17 @@ def sr_log_test_results(TestController, board):
     message += "\tFail = {}\n".format(TestController.stats['num_iterations_fail'])
     board.log(message)
 
+
+@deferred_function
+def write_global_data(TestController, output_file, log_func=print):
+    log_func('Writing testing summary data to {}...'.format(
+        output_file))
+    with open(output_file, 'w') as f:
+        json_data = json.dumps(TestController.data, indent=4)
+        f.write(json_data)
+
+
+# ====== TestController Run Condition Functions ======
 
 @deferred_function
 def sleep_and_notify(duration, unit, mode, log_func=print):
@@ -113,4 +100,48 @@ def console_is_alive(console):
     except InterruptedError as e:
         raise e
     except Exception as e:
+        return False
+
+@deferred_function
+def sc_run_n_iterations(TestController, ntimes):
+    return TestController.stats['num_iterations_run'] < ntimes
+
+
+@deferred_function
+def sc_time_in_range(start_hour, end_hour):
+    now = datetime.now()
+    return (start_hour <= now.hour and now.hour < end_hour)
+
+
+@deferred_function
+def sc_run_daily_at_hour(TestController, start_hour):
+    data_key = 'sc_run_daily_at_hour:run_dates'
+
+    now = datetime.now()
+    date_now = now.strftime("%Y/%m/%d")
+
+    if start_hour <= now.hour:
+        if not data_key in TestController.data:
+            TestController.data[data_key] = [date_now]
+            return True
+
+        if date_now not in TestController.data[data_key]:
+            TestController.data[data_key].append(date_now)
+            return True
+
+    return False
+
+@deferred_function
+def sc_run_in_datetime_range(datetime_start, datetime_end):
+    if (not isinstance(datetime_start, datetime) or
+            not isinstance(datetime_end, datetime)):
+        raise AttributeError(
+            'start and end datetimes must be of type "datetime"')
+
+    if datetime_start > datetime_end:
+        raise AttributeError('datetime_start must be more recent than datetime_end')
+
+    if datetime_end >= datetime.now() >= datetime_start:
+        return True
+    else:
         return False

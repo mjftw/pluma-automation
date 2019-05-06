@@ -1,3 +1,4 @@
+import time
 from pexpect import TIMEOUT, EOF
 
 
@@ -21,7 +22,8 @@ class Board(Farmclass):
     def __init__(self, name, power=None, hub=None, muxpi=None,
             storage=None, console=None,
             login_user='root', login_pass=None,
-            bootstr=None, prompt=None, logfile=DEFAULT_LOGFILE):
+            bootstr=None, boot_max_s=None,
+            prompt=None, logfile=DEFAULT_LOGFILE):
         self.name = name
 
         self.muxpi = muxpi
@@ -43,6 +45,10 @@ class Board(Farmclass):
         self.login_user_match = 'login:'
         self.login_pass_match = 'Password:'
         self.bootstr = bootstr or self.login_user_match
+        self.boot_max_s = boot_max_s or 60
+
+        self.last_boot_len = None
+        self.booted_to_prompt = False
 
         self.log_reccurse = True
 
@@ -56,15 +62,31 @@ class Board(Farmclass):
 
     def reboot_and_validate(self, override_boostr=None, override_timeout=None,
             exception_bootstr=None):
-        timeout = override_timeout or 60
+        timeout = override_timeout or self.boot_max_s
         bootstr = override_boostr or self.bootstr
+
+        # If we have set a prompt, add this to bootstr search
+        if self.prompt:
+            if not bootstr:
+                bootstr = self.prompt
+            elif isinstance(bootstr, list):
+                bootstr.append(self.prompt)
+            else:
+                bootstr = [bootstr, self.prompt]
+
         if not bootstr:
             raise BootValidationError("Cannot validate boot. Not bootstring given")
 
+        self.last_boot_len = None
         self.power.reboot()
+        start_time = time.time()
         try:
-            (__, matched) = self.console.send(match=bootstr,
-                send_newline=False, timeout=timeout, excepts=exception_bootstr)
+            (__, matched) = self.console.send(
+                match=bootstr,
+                send_newline=False,
+                timeout=timeout,
+                sleep_time=1,
+                excepts=exception_bootstr)
         except ExceptionKeywordRecieved as e:
             raise BootValidationError('Matched exception keyword: {}'.format(
                 str(e)))
@@ -72,7 +94,18 @@ class Board(Farmclass):
         if matched is False or matched is TIMEOUT or matched is EOF:
             raise BootValidationError("Did not get bootstring: {}".format(bootstr))
 
+        self.last_boot_len = round(time.time() - start_time, 2)
+
+        self.log('Boot success. Matched [{}]'.format(matched))
+
+        if self.prompt and matched == self.prompt:
+            self.booted_to_prompt = True
+
     def login(self):
+        if self.booted_to_prompt:
+            self.log('Booted to prompt. Not need to log in')
+            return
+
         self.console.login(
             username=self.login_user,
             password=self.login_pass,

@@ -1,3 +1,6 @@
+import time
+import json
+
 from .unittest import UnitTest, deferred_function
 from farmutils.error import send_exception_email
 
@@ -37,7 +40,13 @@ class TestController():
         self.stats['num_tests_fail'] = 0
 
         # Global data to be used by tests
-        self.data = {}
+        # Save TestController data here too
+        self.data = {
+            'TestController': {
+                'settings': self.settings,
+                'stats': self.stats
+            }
+        }
 
         self.tests_passed = []
         self.tests_failed = []
@@ -103,6 +112,9 @@ class TestController():
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
+        self.log("Current stats:\n\tIterations passed: {}/{} , Total tests passed: {}/{} ".format(
+            self.stats['num_iterations_pass'], self.stats['num_iterations_run'],
+            self.stats['num_tests_pass'], self.stats['num_tests_run']))
         if self.setup and self.settings['setup_every_iteration']:
             self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
