@@ -1,15 +1,3 @@
-class BoardError(Exception):
-    pass
-
-
-class BoardBootValidationError(BoardError):
-    pass
-
-
-class BoardLoginError(BoardError):
-    pass
-
-
 import time
 from pexpect import TIMEOUT, EOF
 
@@ -21,6 +9,16 @@ from .exceptions import ConsoleExceptionKeywordRecieved
 DEFAULT_LOGFILE = object()
 
 
+class BoardError(Exception):
+    pass
+
+
+class BoardBootValidationError(BoardError):
+    pass
+
+
+class BoardLoginError(BoardError):
+    pass
 
 
 class Board(Farmclass):
