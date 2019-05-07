@@ -2,7 +2,7 @@ import subprocess
 from os import chdir
 import re
 
-from farmutils.helpers import run_host_cmd
+from .helpers import run_host_cmd
 
 
 class InvalidVersionSpecifier(Exception):
