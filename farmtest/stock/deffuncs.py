@@ -5,10 +5,6 @@ import time
 from ..unittest import deferred_function
 
 
-class TestMustBeInController(Exception):
-    pass
-
-
 # ==== UnitTest Teardown functions ====
 
 @deferred_function
