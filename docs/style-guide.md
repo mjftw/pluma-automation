@@ -4,10 +4,11 @@
 - [Witekio Lab Development Style Guide](#witekio-lab-development-style-guide)
   - [Introduction](#introduction)
   - [PEP8 Style Guide](#pep8-style-guide)
-  - [Lab Coding Guide](#lab-coding-guide)
+  - [General Guidelines](#general-guidelines)
     - [Readability](#readability)
     - [Be Explicit](#be-explicit)
     - [Reusablity](#reusablity)
+  - [Specific Guidelines](#specific-guidelines)
     - [Exceptions](#exceptions)
 
 ## Introduction
@@ -87,7 +88,7 @@ Using a linter will help you write better code, with less effort.
 
 All the Lab code uses Python3, make sure your linter is set up for this as it may default to Python2.
 
-## Lab Coding Guide
+## General Guidelines
 This section covers some key points to follow to help write good code.  
 You could make the argument that these points could help you write better code on any project!
 
@@ -176,6 +177,8 @@ This topic could fill many chapters of a book on it's own, but a few key points 
 
 If you are writing something that is not specifically related to the project you are working on, then maybe this code would be a good addition to the `farm-core` core codebase, rather than the repository for the project.  
 Adding code to the core codebase (where appropriate) means that the Lab may suddenly gain a new ability, that can be reused on many future projects.
+
+## Specific Guidelines
 
 ### Exceptions
 
