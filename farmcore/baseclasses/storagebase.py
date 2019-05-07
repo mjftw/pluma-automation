@@ -4,10 +4,10 @@ import time
 import tempfile
 
 from .farmclass import Farmclass
-from farmutils.helpers import run_host_cmd
+from farmutils import run_host_cmd
 
 
-class StorageException(Exception):
+class StorageError(Exception):
     pass
 
 
@@ -57,7 +57,7 @@ class StorageBase(Farmclass):
             time.sleep(1)
 
         if not success:
-            raise StorageException('Failed to mount {} at {} after {} attemps: [ERR-{}] {}'.format(
+            raise StorageError('Failed to mount {} at {} after {} attemps: [ERR-{}] {}'.format(
                 devnode, mountpoint, max_tries, ret, output))
 
     def unmount_host(self, devnode, max_tries=5):
@@ -88,7 +88,7 @@ class StorageBase(Farmclass):
             time.sleep(1)
 
         if not success:
-            raise StorageException(
+            raise StorageError(
                 'Unmount failed after {} attempts[ERR-{}] {}'.format(
                     max_tries, errno, errmsg))
 

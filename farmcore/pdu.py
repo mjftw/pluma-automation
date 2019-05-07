@@ -3,15 +3,19 @@ import requests
 import re
 
 from .telnetconsole import TelnetConsole
-from .baseclasses.consolebase import CannotOpen, LoginFailed
+from .exceptions import ConsoleCannotOpen, ConsoleLoginFailed
 from .baseclasses import PowerBase
 
 
-class InvalidPort(Exception):
+class PDUError(Exception):
     pass
 
 
-class RequestError(Exception):
+class PDUInvalidPort(PDUError):
+    pass
+
+
+class PDURequestError(PDUError):
     pass
 
 
@@ -23,7 +27,7 @@ class IPPowerPDU(PowerBase):
         if 1 <= port <= 4:
             self.port = port
         else:
-            raise InvalidPort("Invalid port[{}]").format(port)
+            raise PDUInvalidPort("Invalid port[{}]").format(port)
 
         self.host = host or '192.168.1.100'
         self.netport = netport or 80
@@ -52,7 +56,7 @@ class IPPowerPDU(PowerBase):
             elif power_str[-1] == '0':
                 return False
         except (IndexError, AttributeError):
-            raise RequestError('Invalid power state string [{}]'.format(
+            raise PDURequestError('Invalid power state string [{}]'.format(
                 power_str_all))
 
     def _make_request(self, params, max_tries=5):
@@ -94,7 +98,7 @@ class IPPowerPDU(PowerBase):
             raise exception
 
         if r.status_code != 200:
-            raise RequestError('Request failed. {}, Err[{}]'.format(
+            raise PDURequestError('Request failed. {}, Err[{}]'.format(
                 r.text, r.status_code))
 
         return r.text
@@ -110,7 +114,7 @@ class APCPDU(PowerBase):
         if 1 <= port <= 8:
             self.port = port
         else:
-            raise InvalidPort("Invalid port[{}]").format(port)
+            raise PDUInvalidPort("Invalid port[{}]").format(port)
 
         self.console = TelnetConsole(self.host)
 
@@ -120,7 +124,7 @@ class APCPDU(PowerBase):
             try:
                 self.console.open()
                 e = None
-            except CannotOpen as ex:
+            except ConsoleCannotOpen as ex:
                 e = ex
                 self.log('WARNING: Failed to gain control of APC console. Is it in use?')
                 self.log('Sleeping 1 second and retrying...')
@@ -139,7 +143,7 @@ class APCPDU(PowerBase):
                     success_match='Control Console'
                 )
                 return
-            except LoginFailed as ex:
+            except ConsoleLoginFailed as ex:
                 e = ex
                 self.log('WARNING: Failed to log in')
                 self.log('Sleeping 1 second and retrying...')

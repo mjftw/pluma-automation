@@ -13,7 +13,11 @@ if not os.path.isfile(DEFAULT_SMTP_AUTHFILE):
     DEFAULT_SMTP_AUTHFILE = None
 
 
-class EmailInvalidSettings(Exception):
+class EmailError(Exception):
+    pass
+
+
+class EmailInvalidSettings(EmailError):
     pass
 
 

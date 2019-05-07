@@ -41,9 +41,7 @@ import datetime
 import time
 
 from farmutils import Email, send_exception_email
-from farmcore import BootValidationError
-from farmcore.baseclasses.consolebase import LoginFailed
-from farmcore.board import BootValidationError
+from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
 
 
 class TestingException(Exception):
@@ -132,7 +130,7 @@ class TestCore(TestBase):
         self.board.log("\n=!= BOARD ON AND VALIDATE =!=", bold=True)
         try:
             self.board.reboot_and_validate()
-        except BootValidationError as e:
+        except BoardBootValidationError as e:
             raise e
 
     def pre_board_login(self):
@@ -142,7 +140,7 @@ class TestCore(TestBase):
         self.board.log("\n=!= BOARD LOGIN =!=", bold=True)
         try:
             self.board.login()
-        except LoginFailed as e:
+        except ConsoleLoginFailed as e:
             raise TaskFailed(str(e))
 
     def pre_board_mount(self):
@@ -299,7 +297,7 @@ class TestRunner():
                         raise e
                     # If failed boot, and we have a specific boot test,
                     #   run it's report function
-                    if (isinstance(e, BootValidationError) and
+                    if (isinstance(e, BoardBootValidationError) and
                             self.boot_test):
                             self.board.log('Boot test failed, running {}.report()'.format(
                                 str(self.boot_test)))

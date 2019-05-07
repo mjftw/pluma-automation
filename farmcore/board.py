@@ -3,17 +3,17 @@ from pexpect import TIMEOUT, EOF
 
 
 from .baseclasses import Farmclass
-from .baseclasses.consolebase import ExceptionKeywordRecieved
+from .exceptions import ConsoleExceptionKeywordRecieved
 
 
 DEFAULT_LOGFILE = object()
 
 
-class BootValidationError(Exception):
+class BoardError(Exception):
     pass
 
 
-class LoginError(Exception):
+class BoardBootValidationError(BoardError):
     pass
 
 
@@ -70,7 +70,7 @@ class Board(Farmclass):
                 bootstr = [bootstr, self.prompt]
 
         if not bootstr:
-            raise BootValidationError("Cannot validate boot. Not bootstring given")
+            raise BoardBootValidationError("Cannot validate boot. Not bootstring given")
 
         self.last_boot_len = None
         self.power.reboot()
@@ -82,12 +82,12 @@ class Board(Farmclass):
                 timeout=timeout,
                 sleep_time=1,
                 excepts=exception_bootstr)
-        except ExceptionKeywordRecieved as e:
-            raise BootValidationError('Matched exception keyword: {}'.format(
+        except ConsoleExceptionKeywordRecieved as e:
+            raise BoardBootValidationError('Matched exception keyword: {}'.format(
                 str(e)))
 
         if matched is False or matched is TIMEOUT or matched is EOF:
-            raise BootValidationError("Did not get bootstring: {}".format(bootstr))
+            raise BoardBootValidationError("Did not get bootstring: {}".format(bootstr))
 
         self.last_boot_len = round(time.time() - start_time, 2)
 

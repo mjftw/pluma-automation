@@ -1,4 +1,5 @@
-from .board import Board, BootValidationError, LoginError
+from .exceptions import *
+from .board import Board
 from .usbrelay import USBRelay
 from .usbenet import USBEnet
 from .interface import Interface

@@ -1,5 +1,16 @@
 # Witekio Lab Development Style Guide
 **UNDER DEVELOPMENT**
+
+- [Witekio Lab Development Style Guide](#witekio-lab-development-style-guide)
+  - [Introduction](#introduction)
+  - [PEP8 Style Guide](#pep8-style-guide)
+  - [General Guidelines](#general-guidelines)
+    - [Readability](#readability)
+    - [Be Explicit](#be-explicit)
+    - [Reusablity](#reusablity)
+  - [Specific Guidelines](#specific-guidelines)
+    - [Exceptions](#exceptions)
+
 ## Introduction
 This document will outline the recommended coding style to be followed by developers working on the Witekio Automation Lab.
 
@@ -77,7 +88,7 @@ Using a linter will help you write better code, with less effort.
 
 All the Lab code uses Python3, make sure your linter is set up for this as it may default to Python2.
 
-## Lab Coding Guide
+## General Guidelines
 This section covers some key points to follow to help write good code.  
 You could make the argument that these points could help you write better code on any project!
 
@@ -156,7 +167,7 @@ email = Email(
 ```
 
 
-## Reusablity
+### Reusablity
 When at all possible, code should be written to be as reusable as possible.  
 This topic could fill many chapters of a book on it's own, but a few key points could be:
 - Avoid dependencies wherever possible
@@ -166,3 +177,61 @@ This topic could fill many chapters of a book on it's own, but a few key points 
 
 If you are writing something that is not specifically related to the project you are working on, then maybe this code would be a good addition to the `farm-core` core codebase, rather than the repository for the project.  
 Adding code to the core codebase (where appropriate) means that the Lab may suddenly gain a new ability, that can be reused on many future projects.
+
+## Specific Guidelines
+
+### Exceptions
+
+We use exceptions to trigger when something has gone wrong, allowing us to never have silent failures.  
+To facilite this, exception names should match the problem they are designed to indicate.
+
+E.g.
+```python
+class MultimeterMeasurementError(MultimeterError):
+    pass
+```
+
+In the above example you can see that we have defined an new exception class, inheriting from `MultimeterError`. This is our base exception for all multimeter related exceptions, present in `multimeter.py`.
+
+```python
+class MultimeterError(Exception):
+    pass
+```
+
+If you need to add a new exception type for a given set of classes (e.g. Board related exceptions), then you should first add a base class that matches, as shown with `MultimeterError`.
+
+All new exceptions should br prefaced with a word describing the class of exceptions.
+```python
+# Bad
+class MeasurementError(Exception):
+    pass
+
+# Good
+class MultimeterMeasurementError(MultimeterError):
+    pass
+```
+
+
+In order to simplify importing exceptions in external scripts, we have a separate execeptions file (`exceptions.py`).  
+When adding new exceptions for a class to use, make sure to add this new exception to the exception file, so that it can be accessed outside of the package, without having to know exactly what file it is actually defined in.
+
+E.g. (Excerpt from `exceptions.py`)
+```python
+from .board import BoardError, BoardBootValidationError
+from .modem import ModemError
+```
+
+This allows external scripts to use the exceptions, without having to know the full path to the python file that defines them.  
+Not only does this make writing code easier, it also gives some protection against the internal structure of farmcore/farmtest/farmutils changing.
+
+E.g. (External script)
+```python
+# Without using exceptions.py
+from farmcore.baseclasses.consolebase import ConsoleLoginFailed
+from farmcore.board import BoardBootValidationError
+
+# With exceptions.py
+from farmcore.exceptions import ConsoleLoginFailed, BoardBootValidationError
+```
+
+The former is vounrable to breaking if for instance `ConsoleLoginFailed` moved to a different file in a new version of `farmcore`, but the latter is would not break.
