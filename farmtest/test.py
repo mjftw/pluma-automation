@@ -40,7 +40,7 @@ import platform
 import datetime
 import time
 
-from farmutils.email import Email, send_exception_email
+from farmutils import Email, send_exception_email
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
 
 
