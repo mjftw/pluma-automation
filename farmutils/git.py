@@ -80,7 +80,7 @@ def filter_versions(versions, v_filter):
 
     invalid_versions = list(filter(lambda v: not version_is_valid(v), versions))
     if invalid_versions:
-        raise InvalidVersionSpecifier('Invalid versions: {}'.format(
+        raise GitInvalidVersionSpecifier('Invalid versions: {}'.format(
             invalid_versions))
 
     # Strip spaces
@@ -112,7 +112,7 @@ def filter_versions(versions, v_filter):
         else:
             cond_pattern = '^[!\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
-                raise InvalidVersionSpecifier('Invalid condition [{}] in filter [{}]'.format(
+                raise GitInvalidVersionSpecifier('Invalid condition [{}] in filter [{}]'.format(
                     v_cond, v_filter))
 
             # 'x.x.x !': match all versions except x.x.x
@@ -147,7 +147,7 @@ def filter_versions(versions, v_filter):
 
             cond_pattern = '^[\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
-                raise InvalidVersionSpecifier('Invalid filter [{}]'.format(
+                raise GitInvalidVersionSpecifier('Invalid filter [{}]'.format(
                     v_filter))
 
             # '-y' : match up to the last y versions
