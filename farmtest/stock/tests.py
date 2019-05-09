@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from copy import copy
 
-from ..test import BootTestBase
+from ..test import TestBase, BootTestBase
 
 
 class StockBootTest(BootTestBase):
@@ -54,3 +54,27 @@ class StockBootTest(BootTestBase):
             save_data['console_log'] = new_logfile_path
 
         self.global_data[self.data_key].append(save_data)
+
+class StockSensorsTest(TestBase):
+    def __init__(self, board, global_data):
+        super().__init__(self)
+        self.board = board
+        self.global_data = global_data
+
+        self.data_key = str(self)
+        if (self.data_key not in self.global_data or
+                not isinstance(list, self.global_data[self.data_key])):
+            self.global_data[self.data_key] = []
+
+        self.save_data = {}
+
+    def prepare(self):
+        self.save_data = {}
+
+    def test_body(self):
+        #TODO: Add check that board has command sensors (from lm-sensors), with json option
+
+        self.save_data = self.board.console.get_json_data('sensors -j')
+
+    def report(self):
+        self.global_data[self.data_key].append(copy(self.save_data))
