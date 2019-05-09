@@ -339,12 +339,12 @@ class ConsoleBase(Farmclass):
         ''' Execute a command @cmd on target which generates JSON data.
         Parse this data, and return a dict of it.'''
 
-        recieved, matched = self.send(cmd, match='{((.|\n)*)}')
+        self.wait_for_quiet(quiet=1, sleep_time=0.5)
+        recieved, matched = self.send(cmd, match='{((.|\n)*)\n}')
 
         if not matched:
             raise ConsoleInvalidJSONRecieved(
                 f'Received is not JSON: {recieved}')
-
 
         data = json.loads(matched)
         return data
