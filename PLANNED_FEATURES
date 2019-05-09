@@ -1,0 +1,19 @@
+TestController:
+    - Add a method to add global data:
+        - TestController.save_data(test: TestBase, data: dict)
+        - This method would handle creating copies of the data so that the Test did not have to
+        - It would add a reference iteration number to the data
+        - If there is no test data for this Test on this iteration, it will append an empty dict to the data list for that test
+        - It will add the data to the dict for that Test on that iteration
+        - It will save all Test data for that iteration in its own data dict, in a section per iteration, with subsections for each test
+    - Add a method to retrieve test data from global data:
+        - TestController.get_test_data(test: TestBase, iteration: int = None, json: bool = False)
+        - Return a dict of all of the test data for that test only, with a reference to what iteration the data relates to
+        - Optional @json parameter to signal that the data returned should be a json formatted string, not a dict
+        - Optional @iteration parameter to signal that only data for that @test on that iteration should be returned
+    - Add a method to write test data to a file
+        - TestController.write_test_data(file: string, test: TestBase = None, iteration: int = None)
+        - Write a json formatted string to a file, with path @file, containing the global test data
+        - If the path to that file does not exist, create it
+        - Optional @test parameter to signal that only the data for that test should be written
+        - Optional @iteration parameter to signal that only data for that iteration should be written
