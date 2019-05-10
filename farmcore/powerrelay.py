@@ -28,7 +28,3 @@ class PowerRelay(PowerBase):
 
     def off(self):
         self._do_sequence(self.off_seq)
-
-    def reboot(self):
-        self.off()
-        self.on()
