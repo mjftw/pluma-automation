@@ -23,7 +23,7 @@ class IPPowerPDU(PowerBase):
     ''' IP Power 9258 is a PDU which can respond to http requests '''
     def __init__(self, port,
             host=None, netport=None, username=None, password=None,
-            interface=None, interface_ip=None), reboot_delay=None:
+            interface=None, interface_ip=None, reboot_delay=None):
         if 1 <= port <= 4:
             self.port = port
         else:
