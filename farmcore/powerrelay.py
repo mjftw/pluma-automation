@@ -11,7 +11,7 @@ class PowerRelay(PowerBase):
         self.on_seq = on_seq
         self.off_seq = off_seq
 
-        self.relay.reboot_delay = reboot_delay
+        PowerBase.__init__(self, reboot_delay)
 
     def _do_sequence(self, seq):
         for action in seq:
