@@ -5,6 +5,10 @@ import time
 class PowerBase(Farmclass):
     reboot_delay = 0.5
 
+    def __init__(self, reboot_delay=None):
+        if reboot_delay is not None:
+            self.reboot_delay = reboot_delay
+
     def on(self):
         raise NotImplemented('This method must be implimented by inheriting class')
 
