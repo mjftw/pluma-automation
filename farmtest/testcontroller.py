@@ -3,9 +3,10 @@ import json
 from datetime import datetime
 from copy import deepcopy
 
+from farmutils import send_exception_email, datetime_to_timestamp
+
 from .unittest import UnitTest, deferred_function
 from .test import TestRunner
-from farmutils.error import send_exception_email
 
 
 class TestController():
@@ -39,12 +40,11 @@ class TestController():
         self.stats = {}
         self.stats['num_iterations_run'] = 0
         self.stats['num_iterations_pass'] = 0
-        self.stats['num_iterations_fail'] = 0
         self.stats['num_tests_run'] = 0
         self.stats['num_tests_pass'] = 0
-        self.stats['num_tests_fail'] = 0
+        self.stats['num_tests_total'] = 0
 
-        self.results = {}
+        self.results = []
 
         # Global data to be used by tests
         # Save TestController data here too
@@ -84,15 +84,6 @@ class TestController():
     def log(self, message):
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
-    @property
-    def iteration_results(self):
-        try:
-            ir = [r for r in self.results
-                if r['iteration'] == self.stats['num_iterations_run']][0]
-        except IndexError:
-            ir = self._init_iteration_results()
-
-        return ir
 
     #FIXME: Currently the same test object is used for each test iterration,
     #   meaning that it maintains state. This causes many unexpected issues!
@@ -100,35 +91,28 @@ class TestController():
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
-        self.log("Current stats:\n\tIterations passed: {}/{} , Total tests passed: {}/{} ".format(
+        self.log("Current stats:\n\tIterations passed/total: {}/{} , Tests pass/run/total: {}/{}/{} ".format(
             self.stats['num_iterations_pass'], self.stats['num_iterations_run'],
-            self.stats['num_tests_pass'], self.stats['num_tests_run']))
+            self.stats['num_tests_pass'], self.stats['num_tests_run'],
+            self.stats['num_tests_total']))
 
         if self.setup and self.settings['setup_every_iteration']:
             self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
 
+        self._init_iteration()
+
         self.log("Running TestRunner: {}".format(self.testrunner))
-        self.iteration_results['success'] = self.testrunner.run()
-        self.iteration_results['ran'] = True
+        success = self.testrunner.run()
 
-        num_tests_pass = len([
-            t for t in self.testrunner.data if not t['tasks']['failed']])
-        num_tests_fail = self.testrunner.num_tests - num_tests_pass
+        self._finalise_iteration(success)
 
-        self.stats['num_tests_run'] += self.testrunner.num_tests
-        self.stats['num_tests_pass'] += num_tests_pass
-        self.stats['num_tests_fail'] += num_tests_fail
-
-        self.stats['num_iterations_run'] += 1
-        if self.iteration_results['success']:
-            self.stats['num_iterations_pass'] += 1
-            self.log("Test iteration complete: PASS".format(test))
+        if success:
+            self.log("Test iteration complete: PASS")
         else:
-            self.stats['num_iterations_fail'] += 1
-            self.log("Test iteration complete: FAIL".format(test))
+            self.log("Test iteration complete: FAIL")
 
-        return all_tests_pass
+        return success
 
     def run(self):
         if self.settings['email_on_except']:
@@ -145,15 +129,12 @@ class TestController():
         else:
             self._run()
 
-        self._finalise_iteration_results()
-
     def _run(self):
         self.stats['num_iterations_run'] = 0
         self.stats['num_iterations_pass'] = 0
-        self.stats['num_iterations_fail'] = 0
         self.stats['num_tests_run'] = 0
         self.stats['num_tests_pass'] = 0
-        self.stats['num_tests_fail'] = 0
+        self.stats['num_tests_total'] = 0
 
         self.log("Starting TestController with settings: {}".format(
             self.settings))
@@ -205,20 +186,39 @@ class TestController():
                 self.log("UnitTestSuite finished")
                 return
 
-    def _init_iteration_results(self):
+    def _init_iteration(self):
         skeleton = {
-            'iteration': self.settings['num_iterations_run']
-            'start': datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
+            'iteration': self.stats['num_iterations_run'],
+            'start': datetime_to_timestamp(datetime.now()),
             'end': None,
-            'success': None
+            'success': None,
             'TestRunner': self.testrunner.data
             }
-        }
         self.results.append(skeleton)
 
         return self.results[-1]
 
-    def _finalise_iteration_results(self):
+    def _finalise_iteration(self, success):
         # Create copies of all TestRunner data
-        self.iteration_results['TestRunner'] = deepcopy(self.testrunner.data)
-        self.iteration_results['end'] = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+        self.results[-1]['TestRunner'] = deepcopy(self.testrunner.data)
+
+        # Update stats
+        self.results[-1]['end'] = datetime_to_timestamp(datetime.now())
+        self.results[-1]['success'] = success
+        self.results[-1]['ran'] = True
+
+        num_tests_run = len([
+            k for k, v in self.testrunner.data.items()
+            if v['tasks']['ran']])
+        num_tests_pass = len([
+            k for k, v in self.testrunner.data.items()
+            if v['tasks']['ran'] and not v['tasks']['failed']])
+
+        if success:
+            self.stats['num_iterations_pass'] += 1
+
+        self.stats['num_tests_run'] += num_tests_run
+        self.stats['num_tests_pass'] += num_tests_pass
+        self.stats['num_tests_total'] += self.testrunner.num_tests
+
+        self.stats['num_iterations_run'] += 1

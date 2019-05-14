@@ -62,7 +62,7 @@ class AbortTestingAndReport(AbortTesting):
 
 
 class TestBase():
-    self.data = {}
+    data = {}
 
     def __init__(self, board):
         self.board = board
@@ -179,7 +179,7 @@ class TestCore(TestBase):
 
 class TestRunner():
     def __init__(self, board, tests=None, boot_test=None,
-            skip_tasks=None, email_on_fail=True):
+            skip_tasks=None, email_on_fail=True, use_testcore=True):
         self.board = board
         self.email_on_fail = email_on_fail
         self.skip_tasks = skip_tasks or []
@@ -194,7 +194,7 @@ class TestRunner():
             tests = [tests]
 
         self.tasks = TestCore.tasks
-        self.use_testcore = True
+        self.use_testcore = use_testcore
 
         # General purpose data for use globally between tests
         self.data = {}
@@ -208,29 +208,32 @@ class TestRunner():
     def __call__(self):
         return self.run()
 
+    def __repr__(self):
+        return f'[{self.__class__.__name__}]'
+
     @property
     def num_tests(self):
-        return len(
-            [t for t in self.tests if not isinstance(t, TestCore)])
+        return len(self.tests)
+
+    def _init_test_data(self, test):
+        test.data = {}
+        self.data[str(test)] = {
+            'tasks': {
+                'ran': [],
+                'failed': []
+            },
+            'data': test.data,
+            'order': self.tests.index(test)
+        }
 
     def run(self):
         self.test_fails = []
 
-        # Init test data
-        for t in self.tests:
-            t.data = {}
-
         # Init data
-        self.data = {
-            str(t): {
-                'tasks': {
-                    'ran': [],
-                    'failed': []
-                },
-                'data': t.data
-            }
-            for t in self.tests
-        }
+        self.data = {}
+
+        for test in self.tests:
+            self._init_test_data(test)
 
         if (self.use_testcore and "TestCore" not in
                 (str(t) for t in self.tests)):
@@ -254,7 +257,7 @@ class TestRunner():
 
     def add_test(self, test, index=None):
         if self._get_tests_by_name(str(test)):
-            self.board.error('Test [{}] already added', RuntimeError)
+            self.board.error(f'Test [{str(test)}] already added', RuntimeError)
 
         if index is None:
             self.board.log("Appending test: {}".format(str(test)))
@@ -263,6 +266,8 @@ class TestRunner():
             self.board.log("Inserting test at position {}: {} ".format(
                 index, str(test)))
             self.tests.insert(index, test)
+
+        self._init_test_data(test)
 
     def rm_test(self, test):
         if test in self.tests:
