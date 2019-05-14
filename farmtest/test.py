@@ -39,6 +39,7 @@ import traceback
 import platform
 import datetime
 import time
+from copy import copy
 
 from farmutils import Email, send_exception_email
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
@@ -61,12 +62,13 @@ class AbortTestingAndReport(AbortTesting):
 
 
 class TestBase():
+    self.data = {}
+
     def __init__(self, board):
         self.board = board
 
     def __repr__(self):
         return self.__class__.__name__
-
 
 class BootTestBase(TestBase):
     boot_success = None
@@ -206,8 +208,29 @@ class TestRunner():
     def __call__(self):
         return self.run()
 
+    @property
+    def num_tests(self):
+        return len(
+            [t for t in self.tests if not isinstance(t, TestCore)])
+
     def run(self):
         self.test_fails = []
+
+        # Init test data
+        for t in self.tests:
+            t.data = {}
+
+        # Init data
+        self.data = {
+            str(t): {
+                'tasks': {
+                    'ran': [],
+                    'failed': []
+                },
+                'data': t.data
+            }
+            for t in self.tests
+        }
 
         if (self.use_testcore and "TestCore" not in
                 (str(t) for t in self.tests)):
@@ -230,6 +253,9 @@ class TestRunner():
             return True
 
     def add_test(self, test, index=None):
+        if self._get_tests_by_name(str(test)):
+            self.board.error('Test [{}] already added', RuntimeError)
+
         if index is None:
             self.board.log("Appending test: {}".format(str(test)))
             self.tests.append(test)
@@ -276,6 +302,8 @@ class TestRunner():
                 self.boot_test.boot_success = True
             task_func = getattr(test, task_name, None)
             if task_func:
+                self.data[str(test)]['tasks']['ran'].append(task_name)
+
                 if test.__class__ != TestCore:
                     self.board.log("Running: {} - {}".format(
                         str(test), task_name), colour='green')
@@ -287,6 +315,8 @@ class TestRunner():
                 except InterruptedError as e:
                     raise e
                 except Exception as e:
+                    self.data[str(test)]['tasks']['failed'].append(task_name)
+
                     # If request to abort testing, do so
                     if isinstance(e, AbortTesting):
                         self.board.log('Testing aborted by task {} - {}: {}'.format(
@@ -327,6 +357,54 @@ class TestRunner():
 
         if abort:
             raise AbortTesting(str(exception))
+
+    # # TODO: Impliment function
+    # def add_test_data(self, test:TestBase, data:dict):
+    #     '''
+    #     - Add data to global data struct
+    #     - This method would handle creating copies of the data
+    #         so that the Test did not have to
+    #     - It will add a reference iteration number to the data
+    #     - If there is no test data for this Test on this iteration,
+    #         it will append an empty dict to the data list for that test
+    #     - It will add the data to the dict for that Test on that iteration
+    #     - It will save all Test data for that iteration in its own data dict,
+    #         in a section per iteration, with subsections for each test
+    #     '''
+    #     raise NotImplementedError
+
+    #     # Type check input
+    #     assert isinstance(test, TestBase)
+    #     assert isinstance(data, dict)
+
+
+    # # TODO: Impliment function
+    # def get_test_data(self, test:TestBase, iteration:int=None, json:bool=False):
+    #     '''
+    #     - Return a dict of all of the test data for that test only,
+    #         with a reference to what iteration the data relates to
+    #     - Optional @json parameter to signal that the data returned should be
+    #         a json formatted string, not a dict
+    #     - Optional @iteration parameter to signal that only data for that
+    #         @test on that iteration should be returned
+    #     '''
+    #     raise NotImplementedError
+
+    #     assert isinstance(test, TestBase)
+    #     assert isinstance(data, dict)
+
+    # # TODO: Impliment function
+    # def write_test_data(self, file:str, test:TestBase=None, iteration:int=None)
+    #     '''
+    #     - Write a json formatted string to a file, with
+    #         path @file, containing the global test data
+    #     - If the path to that file does not exist, create it
+    #     - Optional @test parameter to signal that
+    #         only the data for that test should be written
+    #     - Optional @iteration parameter to signal that only
+    #         data for that iteration should be written
+    #     '''
+    #     raise NotImplementedError
 
     def send_fail_email(self, exception, test_failed, task_failed):
         #TODO: Move to a config file

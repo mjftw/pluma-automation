@@ -7,25 +7,23 @@ TestController:
 
             E.g.
                 {
-                    {
-                        "TestController": {
-                            'settings: {
-                                ...
-                            },
-                            'stats: {
-                                ...
-                            }
+                    "TestController": {
+                        'settings: {
+                            ...
                         },
-                        "data": [
+                        'stats: {
+                            ...
+                        }
+                        "results": [
                             {
                                 "iteration": <iteration_num>,
                                 "success": <bool>,
                                 "date": <datetime stamp>,
-                                "tests": {
+                                "TestRunner": {
                                     "StockBootTest": {
-                                        "stats": {
-                                            "ran": <bool>,
-                                            "success": <bool>,
+                                        "tasks": {
+                                            "run": [task1, task2],
+                                            "failed": [task3],
                                         },
                                         "data": {
                                             "data 1": ...,
@@ -33,9 +31,9 @@ TestController:
                                         }
                                     },
                                     "MyTestClass": {
-                                        "stats": {
-                                            "ran": <bool>,
-                                            "success": <bool>,
+                                        "tasks": {
+                                            "run": [task1, task2],
+                                            "failed": [task3],
                                         },
                                         "data": {
                                             "data 1": ...,
@@ -47,7 +45,7 @@ TestController:
                             <next iteration data>,
                             ...
                         ]
-                    }
+                    },
                 }
         - This structure would allow generic data processing and graphing to be done
         - Add a method to add global data:

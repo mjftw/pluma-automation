@@ -1,17 +1,22 @@
 import time
 import json
+from datetime import datetime
+from copy import deepcopy
 
 from .unittest import UnitTest, deferred_function
+from .test import TestRunner
 from farmutils.error import send_exception_email
 
 
 class TestController():
-    def __init__(self, tests=None, setup_func=None, report_func=None,
+    def __init__(self, testrunner, setup_func=None, report_func=None,
             run_condition_func=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
             setup_every_iteration=False, force_initial_run=False, email_on_except=True,
             log_func=print):
-        self.tests = tests
+        assert isinstance(testrunner, TestRunner)
+
+        self.testrunner = testrunner
         self.setup = setup_func
         self.report = report_func
         self.run_condition = run_condition_func
@@ -39,45 +44,18 @@ class TestController():
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_fail'] = 0
 
+        self.results = {}
+
         # Global data to be used by tests
         # Save TestController data here too
         self.data = {
             'TestController': {
                 'settings': self.settings,
-                'stats': self.stats
+                'stats': self.stats,
+                'results': self.results
             }
         }
 
-        self.tests_passed = []
-        self.tests_failed = []
-
-    @property
-    def tests(self):
-        return self._tests
-
-    @tests.setter
-    def tests(self, tests):
-        self._tests = []
-        if isinstance(tests, list):
-            for test in tests:
-                if isinstance(test, UnitTest):
-                    self._tests.append(test)
-                elif callable(test):
-                    self._tests.append(UnitTest(test))
-                else:
-                    raise AttributeError(
-                        "Must be either: single test, list of tests, or None")
-        elif isinstance(tests, UnitTest):
-            self._tests = [tests]
-        elif callable(tests):
-            self._tests = [UnitTest(tests)]
-        elif tests is None:
-            self._tests = []
-        else:
-            raise AttributeError(
-                "Must be either: single test, list of tests, or None")
-        for test in self.tests:
-            test.suite = self
 
     @property
     def setup(self):
@@ -106,6 +84,16 @@ class TestController():
     def log(self, message):
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
+    @property
+    def iteration_results(self):
+        try:
+            ir = [r for r in self.results
+                if r['iteration'] == self.stats['num_iterations_run']][0]
+        except IndexError:
+            ir = self._init_iteration_results()
+
+        return ir
+
     #FIXME: Currently the same test object is used for each test iterration,
     #   meaning that it maintains state. This causes many unexpected issues!
     #   This needs to be fixed so that each iteraction gets a clean test object.
@@ -115,36 +103,30 @@ class TestController():
         self.log("Current stats:\n\tIterations passed: {}/{} , Total tests passed: {}/{} ".format(
             self.stats['num_iterations_pass'], self.stats['num_iterations_run'],
             self.stats['num_tests_pass'], self.stats['num_tests_run']))
+
         if self.setup and self.settings['setup_every_iteration']:
             self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
 
-        all_tests_pass = True
-        for test in self.tests:
-            self.log("Running test: {}".format(test))
-            success = test.run(self)
-            self.stats['num_tests_run'] += 1
-            if success:
-                self.log("{} - PASS".format(test))
-                self.stats['num_tests_pass'] += 1
-                if test not in self.tests_passed:
-                    self.tests_passed.append(test)
-            else:
-                self.log("{} - FAIL".format(test))
-                self.stats['num_tests_fail'] += 1
-                if test not in self.tests_failed:
-                    self.tests_failed.append(test)
-                all_tests_pass = False
-            if not all_tests_pass and not self.settings['continue_on_fail']:
-                break
+        self.log("Running TestRunner: {}".format(self.testrunner))
+        self.iteration_results['success'] = self.testrunner.run()
+        self.iteration_results['ran'] = True
+
+        num_tests_pass = len([
+            t for t in self.testrunner.data if not t['tasks']['failed']])
+        num_tests_fail = self.testrunner.num_tests - num_tests_pass
+
+        self.stats['num_tests_run'] += self.testrunner.num_tests
+        self.stats['num_tests_pass'] += num_tests_pass
+        self.stats['num_tests_fail'] += num_tests_fail
 
         self.stats['num_iterations_run'] += 1
-        if all_tests_pass:
+        if self.iteration_results['success']:
             self.stats['num_iterations_pass'] += 1
-            self.log("Test iteration complete: ALL TESTS PASSED")
+            self.log("Test iteration complete: PASS".format(test))
         else:
             self.stats['num_iterations_fail'] += 1
-            self.log("Test iteration complete: NOT ALL TESTS PASSED")
+            self.log("Test iteration complete: FAIL".format(test))
 
         return all_tests_pass
 
@@ -163,6 +145,8 @@ class TestController():
         else:
             self._run()
 
+        self._finalise_iteration_results()
+
     def _run(self):
         self.stats['num_iterations_run'] = 0
         self.stats['num_iterations_pass'] = 0
@@ -171,7 +155,7 @@ class TestController():
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_fail'] = 0
 
-        self.log("Starting UnitTestSuite with settings: {}".format(
+        self.log("Starting TestController with settings: {}".format(
             self.settings))
 
         if self.setup and not self.settings['setup_every_iteration']:
@@ -220,3 +204,21 @@ class TestController():
             else:
                 self.log("UnitTestSuite finished")
                 return
+
+    def _init_iteration_results(self):
+        skeleton = {
+            'iteration': self.settings['num_iterations_run']
+            'start': datetime.now().strftime('%Y-%m-%d-%H-%M-%S'),
+            'end': None,
+            'success': None
+            'TestRunner': self.testrunner.data
+            }
+        }
+        self.results.append(skeleton)
+
+        return self.results[-1]
+
+    def _finalise_iteration_results(self):
+        # Create copies of all TestRunner data
+        self.iteration_results['TestRunner'] = deepcopy(self.testrunner.data)
+        self.iteration_results['end'] = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
