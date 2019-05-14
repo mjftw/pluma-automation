@@ -6,19 +6,13 @@ from ..test import TestBase, BootTestBase
 
 
 class StockBootTest(BootTestBase):
-    def __init__(self, board, global_data, console_log_file, failed_logs_dir):
+    def __init__(self, board, console_log_file, failed_logs_dir):
         super().__init__(self)
         self.board = board
         self.console_log_file = console_log_file
         self.failed_logs_dir = failed_logs_dir
-        self.global_data = global_data
 
         self.start_datetime = None
-
-        self.data_key = str(self)
-        if (self.data_key not in self.global_data or
-                not isinstance(list, self.global_data[self.data_key])):
-            self.global_data[self.data_key] = []
 
     def prepare(self):
         if not os.path.exists(self.failed_logs_dir):
@@ -30,15 +24,13 @@ class StockBootTest(BootTestBase):
         self.board.console.log_file_clear()
 
     def report(self):
-        save_data = {
-            'boot_success': copy(self.boot_success)
-        }
+        self.data['boot_success'] = self.boot_success
 
         if self.boot_success:
             self.board.log('Successful boot in {}s'.format(
                 self.board.last_boot_len))
 
-            save_data['boot_time'] = copy(self.board.last_boot_len)
+            self.data['boot_time'] = self.board.last_boot_len
         else:
             logfile_format = '%Y_%m_%d_%H_%M_%S'
             logfile_timestamp = self.start_datetime.strftime(logfile_format)
@@ -51,30 +43,15 @@ class StockBootTest(BootTestBase):
                 new_logfile_path))
             os.rename(self.board.console.log_file, new_logfile_path)
 
-            save_data['console_log'] = new_logfile_path
+            self.data['console_log'] = new_logfile_path
 
-        self.global_data[self.data_key].append(save_data)
 
 class StockSensorsTest(TestBase):
-    def __init__(self, board, global_data):
+    def __init__(self, board):
         super().__init__(self)
         self.board = board
-        self.global_data = global_data
-
-        self.data_key = str(self)
-        if (self.data_key not in self.global_data or
-                not isinstance(list, self.global_data[self.data_key])):
-            self.global_data[self.data_key] = []
-
-        self.save_data = {}
-
-    def prepare(self):
-        self.save_data = {}
 
     def test_body(self):
         #TODO: Add check that board has command sensors (from lm-sensors), with json option
+        self.data['sensors'] = self.board.console.get_json_data('sensors -j')
 
-        self.save_data = self.board.console.get_json_data('sensors -j')
-
-    def report(self):
-        self.global_data[self.data_key].append(copy(self.save_data))
