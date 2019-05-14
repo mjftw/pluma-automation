@@ -1,6 +1,7 @@
 import time
 import requests
 import re
+import json
 
 from .telnetconsole import TelnetConsole
 from .exceptions import ConsoleCannotOpen, ConsoleLoginFailed
@@ -19,63 +20,25 @@ class PDURequestError(PDUError):
     pass
 
 
-class IPPowerPDU(PowerBase):
-    ''' IP Power 9258 is a PDU which can respond to http requests '''
-    def __init__(self, port,
-            host=None, netport=None, username=None, password=None,
-            interface=None, interface_ip=None, reboot_delay=None):
-        if 1 <= port <= 4:
-            self.port = port
-        else:
-            raise PDUInvalidPort("Invalid port[{}]").format(port)
-
-        self.host = host or '192.168.1.100'
-        self.netport = netport or 80
-        self.username = username or 'admin'
-        self.password = password or '12345678'
+class PDUReqestsBase():
+    def __init__(self, interface=None, interface_ip=None):
         self.interface = interface
-        self.interface_ip = interface_ip or '192.168.1.110'
+        self.interface_ip = interface_ip
 
-        PowerBase.__init__(self, reboot_delay)
+        assert hasattr(self, 'host')
+        assert hasattr(self, 'netport')
+        assert hasattr(self, 'log')
 
-    @PowerBase.on
-    def on(self):
-        self._make_request('cmd=setpower+p6{}=1'.format(self.port))
-
-    @PowerBase.off
-    def off(self):
-        self.log(f'{str(self)}: Power off...')
-        self._make_request('cmd=setpower+p6{}=0'.format(self.port))
-
-    def is_on(self):
-        power_str_all = self._make_request('cmd=getpower')
-
-        try:
-            power_str = re.search(
-                'p6{}=[01]'.format(self.port), power_str_all).group(0)
-
-            if power_str[-1] == '1':
-                return True
-            elif power_str[-1] == '0':
-                return False
-        except (IndexError, AttributeError):
-            raise PDURequestError('Invalid power state string [{}]'.format(
-                power_str_all))
-
-    def _make_request(self, params, max_tries=5):
-        #E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
-
+    def _make_request(self, endpoint, params=None, timeout=3, max_tries=5):
         if isinstance(params, list):
             params = '&'.join(params)
 
-        params_str = '&'.join([
-            'user=' + self.username,
-            'pass=' + self.password,
-            params
-        ])
-
-        url = 'http://{}:{}/set.cmd?{}'.format(
-            self.host, self.netport, params_str)
+        url = 'http://{}{}{}{}'.format(
+            self.host,
+            ':' + str(self.netport) if self.netport else '',
+            '/' + endpoint if endpoint else '',
+            '?' + params if params else ''
+        )
 
         success = False
         exception = None
@@ -83,7 +46,7 @@ class IPPowerPDU(PowerBase):
             if success:
                 break
             try:
-                r = requests.get(url, timeout=3)
+                r = requests.get(url, timeout=timeout)
                 success = True
             except requests.exceptions.Timeout as e:
                 exception = e
@@ -105,6 +68,84 @@ class IPPowerPDU(PowerBase):
                 r.text, r.status_code))
 
         return r.text
+
+class EnergeniePDU(PowerBase, PDUReqestsBase):
+    ''' Energenie ___ Smart Plug with http request interface'''
+    def __init__(self, host, netport=None, interface=None,
+        interface_ip=None, reboot_delay=None):
+
+        self.host = host
+        self.netport = netport or 5000
+
+        PowerBase.__init__(self, reboot_delay)
+        PDUReqestsBase.__init__(self, interface, interface_ip)
+
+    def get_info(self):
+        json_info = self._make_request(endpoint='socket', timeout=10)
+        return json.reads(json_info)
+
+    def on(self):
+        self._make_request(endpoint='socket/1')
+
+    def off(self):
+        self._make_request(endpoint='socket/0')
+
+    def is_on(self):
+        info = self.get_info()
+
+        if 'state' not in info:
+            raise PDURequestError('Reqest json text returned does not include "state"')
+
+        return True if info['state'] else False
+
+class IPPowerPDU(PowerBase, PDUReqestsBase):
+    ''' IP Power 9258 is a PDU which can respond to http requests '''
+    def __init__(self, port,
+            host=None, netport=None, username=None, password=None,
+            interface=None, interface_ip=None, reboot_delay=None):
+        if 1 <= port <= 4:
+            self.port = port
+        else:
+            raise PDUInvalidPort("Invalid port[{}]").format(port)
+
+        self.host = host or '192.168.1.100'
+        self.netport = netport or 80
+        self.username = username or 'admin'
+        self.password = password or '12345678'
+
+        PowerBase.__init__(self, reboot_delay)
+        PDUReqestsBase.__init__(self, interface, interface_ip or '192.168.1.110')
+
+    def make_request(params):
+        #E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
+        params_str = '&'.join([
+            'user=' + self.username,
+            'pass=' + self.password,
+            params
+        ])
+        self._make_request(endpoint='set.cmd', params=params_str)
+
+    def on(self):
+        self.make_request('cmd=setpower+p6{}=1'.format(self.port))
+
+    def off(self):
+        self.make_request('cmd=setpower+p6{}=0'.format(self.port))
+
+    def is_on(self):
+        power_str_all = self.make_request('cmd=getpower')
+
+        try:
+            power_str = re.search(
+                'p6{}=[01]'.format(self.port), power_str_all).group(0)
+
+            if power_str[-1] == '1':
+                return True
+            elif power_str[-1] == '0':
+                return False
+        except (IndexError, AttributeError):
+            raise PDURequestError('Invalid power state string [{}]'.format(
+                power_str_all))
+
 
 class APCPDU(PowerBase):
     """ The APC is a switched rack PDU which controls whether a board is powered """

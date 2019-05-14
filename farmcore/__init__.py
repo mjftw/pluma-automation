@@ -6,7 +6,7 @@ from .interface import Interface
 from .powerrelay import PowerRelay
 from .powermulti import PowerMulti
 from .softpower import SoftPower
-from .pdu import APCPDU, IPPowerPDU
+from .pdu import APCPDU, IPPowerPDU, EnergeniePDU
 from .serialconsole import SerialConsole
 from .hostconsole import HostConsole
 from .telnetconsole import TelnetConsole
