@@ -2,6 +2,8 @@ import os
 from datetime import datetime
 from copy import copy
 
+from farmutils import datetime_to_timestamp
+
 from ..test import TestBase, BootTestBase
 
 
@@ -32,8 +34,7 @@ class StockBootTest(BootTestBase):
 
             self.data['boot_time'] = self.board.last_boot_len
         else:
-            logfile_format = '%Y_%m_%d_%H_%M_%S'
-            logfile_timestamp = self.start_datetime.strftime(logfile_format)
+            logfile_timestamp = datetime_to_timestamp(self.start_datetime)
 
             new_logfile_path = os.path.join(
                 self.failed_logs_dir, 'console_{}.log'.format(
