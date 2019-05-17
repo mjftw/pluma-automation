@@ -38,13 +38,17 @@ class ConsoleExceptionKeywordRecieved(ConsoleError):
 
 class ConsoleBase(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
-    def __init__(self, encoding='ascii', linesep='\r\n'):
+    raw_logfile = None
+    _raw_logfile_fd = None
+
+    def __init__(self, encoding='ascii', linesep='\r\n', raw_logfile=None):
         if type(self) is ConsoleBase:
             raise ConsoleSubclassException(
                 "Class is a base class and must be inherited")
         self._check_attr('_pex')
         self.linesep = linesep
         self.encoding = encoding
+        self.raw_logfile = raw_logfile
         self._buffer = ''
         self._last_recieved = ''
 
@@ -67,13 +71,24 @@ class ConsoleBase(Farmclass):
         """ Check if the transport layer is ready to send and recieve"""
         self._err_must_override()
 
-    def open(self):
-        """ Open transport layer and create _pex object. E.g. Open serial port """
-        self._err_must_override()
+    def open(f):
+        def wrap(self):
+            f(self)
+            if self.raw_logfile:
+                self._raw_logfile_fd = open(self.raw_logfile, 'ab')
+                self._pex.logfile=self._raw_logfile_fd
+        return wrap
 
-    def close(self):
-        """ Close transport layer """
-        self._err_must_override()
+    def close(f):
+        def wrap(self):
+            f(self)
+            if self._raw_logfile_fd:
+                self._raw_logfile_fd.close()
+                self._raw_logfile_fd = None
+        return wrap
+
+    def raw_logfile_clear(self):
+        open(self.raw_logfile, 'w').close()
 
     def flush(self, clear_buf=False):
         if not self.is_open:

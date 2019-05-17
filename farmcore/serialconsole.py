@@ -5,10 +5,12 @@ from .baseclasses import ConsoleBase
 
 
 class SerialConsole(ConsoleBase):
-    def __init__(self, port, baud, timeout=0.01):
+    def __init__(self, port, baud, raw_logfile=None):
         self.port = port
-        self.timeout = timeout
         self.baud = baud
+        self.raw_logfile = raw_logfile
+        self._timeout = 0.001
+        self._serial_logfile_fd = None
         self._ser = None
         self._pex = None
         super().__init__()
@@ -23,15 +25,17 @@ class SerialConsole(ConsoleBase):
         else:
             return self._ser.isOpen()
 
+    @ConsoleBase.open
     def open(self):
         self.log("Trying to open serial port {}".format(self.port))
         self._ser = Serial(
             port=self.port,
             baudrate=self.baud,
-            timeout=self.timeout
+            timeout=self._timeout
         )
+
         self._pex = pexpect.fdpexpect.fdspawn(
-            fd=self._ser.fileno(), timeout=self.timeout)
+            fd=self._ser.fileno(), timeout=self._timeout)
 
         if not self.is_open:
             raise RuntimeError(
@@ -40,6 +44,7 @@ class SerialConsole(ConsoleBase):
         self.log("Init serial {} success".format(self.port))
         return
 
+    @ConsoleBase.close
     def close(self):
         if self.is_open:
             self._ser.flush()
