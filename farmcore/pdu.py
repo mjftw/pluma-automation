@@ -70,25 +70,53 @@ class PDUReqestsBase():
         return r.text
 
 class EnergeniePDU(PowerBase, PDUReqestsBase):
-    ''' Energenie ___ Smart Plug with http request interface'''
-    def __init__(self, host, netport=None, interface=None,
+    ''' Energenie MIHO005 Smart Plug with http request interface'''
+    def __init__(self, host, socket, netport=None, interface=None,
         interface_ip=None, reboot_delay=None):
+        assert isinstance(socket, int) and socket >= 0
 
         self.host = host
+        self.socket = socket
         self.netport = netport or 5000
+
+        self._retries = 3
 
         PowerBase.__init__(self, reboot_delay)
         PDUReqestsBase.__init__(self, interface, interface_ip)
 
+    @property
+    def endpoint(self):
+        return f'socket/{self.socket}'
+
     def get_info(self):
-        json_info = self._make_request(endpoint='socket', timeout=10)
-        return json.reads(json_info)
+        json_info = self._make_request(endpoint=self.endpoint, timeout=10)
+        return json.loads(json_info)
 
     def on(self):
-        self._make_request(endpoint='socket/1')
+        on = None
+        for i in range(0, self._retries):
+            self._make_request(endpoint=f'{self.endpoint}/on')
+            on = self.is_on()
+            if on:
+                break
+            else:
+                self.error(f'Failed to turn on. Attempt {i+1}/{self._retries}')
+
+        if not on:
+            self.error('Failed to turn on', PDUError)
 
     def off(self):
-        self._make_request(endpoint='socket/0')
+        on = None
+        for i in range(0, self._retries):
+            self._make_request(endpoint=f'{self.endpoint}/off')
+            on = self.is_on()
+            if not on:
+                break
+            else:
+                self.error(f'Failed to turn off. Attempt {i+1}/{self._retries}')
+
+        if on:
+            self.error('Failed to turn off', PDUError)
 
     def is_on(self):
         info = self.get_info()
