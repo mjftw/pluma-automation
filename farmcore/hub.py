@@ -110,11 +110,15 @@ class Hub(Farmclass, USB):
                     [d for d in devices[devtype] if devices[devtype]]):
                 hubpath = self.usb_device
                 info = {}
+                vendor = device["vendor_long"] or device["vendor"]
                 info['devpath'] = device['usbpath']
                 info['port'] = info['devpath'][info['devpath'].find(hubpath) + len(hubpath) + 1:]
-                info['prefix'] = devtype[0]
+                info['prefix'] = devtype
                 info['devname'] = f'{info["prefix"]}{i}'
-                info['devlabel'] = f'{devtype}{i} - {device["devnode"]}'
+                info['devlabel'] = f'{devtype}{i}'
+                if device['devnode'] and device['devnode'].startswith('/dev'):
+                    info['devlabel'] += f' - {device["devnode"]}'
+                info['devlabel'] += f'\n{vendor}\n{device["model"]}'
 
                 nodes.append(info)
 
