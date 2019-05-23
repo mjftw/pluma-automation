@@ -200,6 +200,13 @@ class Hub(Farmclass, USB):
 
         return self._filter_devinfo(devinfo, key, index)
 
+    def get_sdwire(self, key=None, index=0):
+        devinfo = self.filter_downstream({
+            'model': 'sd-wire'
+        })
+
+        return self._filter_devinfo(devinfo, key, index)
+
     #TODO: Add a get_usbether() method
 
     def get_parent(self):
