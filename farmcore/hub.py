@@ -94,7 +94,9 @@ class Hub(Farmclass, USB):
             'Serial': self.get_serial(index=None),
             'Relay': self.get_relay(index=None),
             'Block': self.get_block(index=None),
-            'Partition': self.get_part(index=None)
+            'Partition': self.get_part(index=None),
+            'Ethernet': self.get_ethernet(index=None),
+            'SD-Wire': self.get_sdwire(index=None)
         }
 
         dot = Digraph(
