@@ -1,4 +1,5 @@
 import re
+from graphviz import Digraph
 
 from .baseclasses import Farmclass
 from .usb import USB, puctx
@@ -79,24 +80,72 @@ class Hub(Farmclass, USB):
 
         return match_vals
 
+    def plot_downstream(self, image_file=None, image_format=None):
+        image_format = image_format or 'x11'
+        fileless_formats = ['xlib', 'x11']
+
+        if not image_file and image_format not in fileless_formats:
+            raise AttributeError(
+                f'Must supply image_file if format is not one of {fileless_formats}')
+
+        devices = {
+            'Serial': self.get_serial(index=None),
+            'Relay': self.get_relay(index=None),
+            'Block': self.get_block(index=None),
+            'Partition': self.get_part(index=None)
+        }
+
+        dot = Digraph(
+            format=image_format,
+            comment=f'Hub[{self.usb_device}] downstream devices')
+        dot.node('H1', f'Hub[{self.usb_device}]')
+
+        nodes = []
+        for devtype in devices:
+            for i, device in enumerate(
+                    [d for d in devices[devtype] if devices[devtype]]):
+                hubpath = self.usb_device
+                info = {}
+                info['devpath'] = device['usbpath']
+                info['port'] = info['devpath'][info['devpath'].find(hubpath) + len(hubpath) + 1:]
+                info['prefix'] = devtype[0]
+                info['devname'] = f'{info["prefix"]}{i}'
+                info['devlabel'] = f'{devtype}{i} - {device["devnode"]}'
+
+                nodes.append(info)
+
+        nodes.sort(key=lambda x: x['port'])
+        for node in nodes:
+            dot.node(node['devname'], node['devlabel'])
+            dot.edge('H1', node['devname'], label=f'Port[{node["port"]}]')
+
+        dot.render(image_file)
+
+        return dot.source
+
     def _filter_devinfo(self, devinfo, key, index):
-        if not devinfo:
-            return None
-        else:
+        filtered = None
+
+        if devinfo:
             if len(devinfo) > 1:
                 # Sort devinfo list by USB path, this corresponds to
                 #   USB port number on hub
                 devinfo.sort(key=lambda x:x['usbpath'])
             if key:
                 if index is None:
-                    return [info[key] for info in devinfo]
+                    filtered = [info[key] for info in devinfo]
                 else:
-                    return devinfo[index][key]
+                    filtered = devinfo[index][key]
             else:
                 if index is None:
-                    return devinfo
+                    filtered = devinfo
                 else:
-                    return devinfo[index]
+                    filtered = devinfo[index]
+        else:
+            if index is None:
+                filtered = []
+
+        return filtered
 
     def get_serial(self, key=None, index=0):
         ttyUSB_major = '188'
@@ -137,10 +186,7 @@ class Hub(Farmclass, USB):
         }, {
             'size': 0
         })
-        if not devinfo:
-            return None
-        else:
-            return devinfo[0]
+        return self._filter_devinfo(devinfo, key, index)
 
     def get_part(self, key=None, index=0):
         devinfo = self.filter_downstream({
