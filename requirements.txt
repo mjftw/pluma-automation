@@ -7,3 +7,4 @@ pyftdi
 pyroute2
 pandas
 pygal
+graphviz
