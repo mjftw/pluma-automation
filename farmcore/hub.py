@@ -207,7 +207,18 @@ class Hub(Farmclass, USB):
 
         return self._filter_devinfo(devinfo, key, index)
 
-    #TODO: Add a get_usbether() method
+    def get_ethernet(self, key=None, index=0):
+        vendors = ['ASIX_Elec._Corp.']
+
+        for vendor in vendors:
+            devinfo = self.filter_downstream({
+                'subsystem': 'net',
+                'vendor': vendor
+            })
+            if devinfo:
+                break
+
+        return self._filter_devinfo(devinfo, key, index)
 
     def get_parent(self):
         dev = self.get_device()

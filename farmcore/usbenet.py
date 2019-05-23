@@ -14,7 +14,10 @@ class USBEnet(Farmclass, Interface, USB):
     @property
     def interface(self):
         net_path = os.path.join(
-            self.device_path, self.usb_device, 'net')
+            self.device_path,
+            self.usb_device,
+            f'{self.usb_device}:1.0',
+            'net')
         iface_dirs = os.listdir(net_path)
 
         return None if not iface_dirs else iface_dirs[0]
