@@ -29,18 +29,20 @@ class Hub(Farmclass, USB):
 
     def _pack_devinfo(self, device):
         devinfo = {}
-        if device.device_node is None:
-            return devinfo
-        else:
-            devinfo['devnode'] = device.device_node
 
         pattern = re.compile(self.usb_device + r'[0-9.-]*')
         devinfo['usbpath'] = pattern.findall(device.device_path)[-1]
 
+        devinfo['devnode'] = device.device_node
         devinfo['subsystem'] = device.subsystem
         devinfo['vendor'] = device.get('ID_VENDOR')
+        devinfo['vendor_long'] = device.get('ID_VENDOR_FROM_DATABASE')
         devinfo['major'] = device.get('MAJOR')
         devinfo['minor'] = device.get('MINOR')
+        devinfo['serial'] = device.get('ID_SERIAL_SHORT')
+        devinfo['model'] = device.get('ID_MODEL')
+        devinfo['pid'] = device.get('ID_MODEL_ID')
+        devinfo['vid'] = device.get('ID_VENDOR_ID')
 
         devinfo['devtype'] = device.get('DEVTYPE')
         if(devinfo['devtype'] == 'disk' or
