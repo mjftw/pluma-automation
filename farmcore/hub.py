@@ -79,7 +79,26 @@ class Hub(Farmclass, USB):
 
         return match_vals
 
-    def get_serial(self, key=None):
+    def _filter_devinfo(self, devinfo, key, index):
+        if not devinfo:
+            return None
+        else:
+            if len(devinfo) > 1:
+                # Sort devinfo list by USB path, this corresponds to
+                #   USB port number on hub
+                devinfo.sort(key=lambda x:x['usbpath'])
+            if key:
+                if index is None:
+                    return [info[key] for info in devinfo]
+                else:
+                    return devinfo[index][key]
+            else:
+                if index is None:
+                    return devinfo
+                else:
+                    return devinfo[index]
+
+    def get_serial(self, key=None, index=0):
         ttyUSB_major = '188'
         serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
 
@@ -97,15 +116,9 @@ class Hub(Farmclass, USB):
             if devinfo:
                 break
 
-        if not devinfo:
-            return None
-        else:
-            if key:
-                return devinfo[0][key]
-            else:
-                return devinfo[0]
+        return self._filter_devinfo(devinfo, key, index)
 
-    def get_relay(self, key=None):
+    def get_relay(self, key=None, index=0):
         devinfo = self.filter_downstream({
             'subsystem': 'tty',
             'vendor': 'DLP_Design'
@@ -115,15 +128,9 @@ class Hub(Farmclass, USB):
                 'vendor': 'DLP_Design'
             })
 
-        if not devinfo:
-            return None
-        else:
-            if key:
-                return devinfo[0][key]
-            else:
-                return devinfo[0]
+        return self._filter_devinfo(devinfo, key, index)
 
-    def get_block(self, key=None):
+    def get_block(self, key=None, index=0):
         devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'disk'
@@ -135,20 +142,15 @@ class Hub(Farmclass, USB):
         else:
             return devinfo[0]
 
-    def get_part(self, key=None):
+    def get_part(self, key=None, index=0):
         devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'partition'
         }, {
             'size': 0
         })
-        if not devinfo:
-            return None
-        else:
-            if key:
-                return devinfo[0][key]
-            else:
-                return devinfo[0]
+
+        return self._filter_devinfo(devinfo, key, index)
 
     #TODO: Add a get_usbether() method
 
