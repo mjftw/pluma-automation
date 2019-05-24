@@ -30,7 +30,7 @@ class PDUReqestsBase():
         assert hasattr(self, 'log')
 
     def _make_request(self, endpoint, params=None, method=None,
-            timeout=3, max_tries=5):
+            timeout=10, max_tries=1):
         if isinstance(params, list):
             params = '&'.join(params)
 
@@ -102,13 +102,13 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
 
     def get_info(self):
         json_info = self._make_request(
-            endpoint=self.endpoint, method='GET', timeout=30)
+            endpoint=self.endpoint, timeout=30)
         return json.loads(json_info)
 
     def on(self):
         on = None
         for i in range(0, self._retries):
-            self._make_request(endpoint=f'{self.endpoint}/on', method='GET')
+            self._make_request(endpoint=f'{self.endpoint}/on')
             on = self.is_on()
             if on:
                 break
@@ -121,7 +121,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
     def off(self):
         on = None
         for i in range(0, self._retries):
-            self._make_request(endpoint=f'{self.endpoint}/off', method='GET')
+            self._make_request(endpoint=f'{self.endpoint}/off')
             on = self.is_on()
             if not on:
                 break
