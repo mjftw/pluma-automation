@@ -29,9 +29,21 @@ class PDUReqestsBase():
         assert hasattr(self, 'netport')
         assert hasattr(self, 'log')
 
-    def _make_request(self, endpoint, params=None, timeout=3, max_tries=5):
+    def _make_request(self, endpoint, params=None, method=None,
+            timeout=3, max_tries=5):
         if isinstance(params, list):
             params = '&'.join(params)
+
+        method = method or 'GET'
+
+        if method == 'GET':
+            request_method = requests.get
+        elif method == 'POST':
+            request_method = requests.post
+        else:
+            raise PDURequestError(
+                'Unsupported request method [{}]. Supported: {}'.format(
+                    method, ['GET', 'POST']))
 
         url = 'http://{}{}{}{}'.format(
             self.host,
@@ -46,7 +58,7 @@ class PDUReqestsBase():
             if success:
                 break
             try:
-                r = requests.get(url, timeout=timeout)
+                r = request_method(url, timeout=timeout)
                 success = True
             except requests.exceptions.Timeout as e:
                 exception = e
@@ -89,13 +101,14 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
         return f'socket/{self.socket}'
 
     def get_info(self):
-        json_info = self._make_request(endpoint=self.endpoint, timeout=10)
+        json_info = self._make_request(
+            endpoint=self.endpoint, method='GET', timeout=30)
         return json.loads(json_info)
 
     def on(self):
         on = None
         for i in range(0, self._retries):
-            self._make_request(endpoint=f'{self.endpoint}/on')
+            self._make_request(endpoint=f'{self.endpoint}/on', method='POST')
             on = self.is_on()
             if on:
                 break
@@ -108,7 +121,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
     def off(self):
         on = None
         for i in range(0, self._retries):
-            self._make_request(endpoint=f'{self.endpoint}/off')
+            self._make_request(endpoint=f'{self.endpoint}/off', method='POST')
             on = self.is_on()
             if not on:
                 break
