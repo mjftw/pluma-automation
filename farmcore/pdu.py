@@ -108,7 +108,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
     def on(self):
         on = None
         for i in range(0, self._retries):
-            self._make_request(endpoint=f'{self.endpoint}/on', method='POST')
+            self._make_request(endpoint=f'{self.endpoint}/on', method='GET')
             on = self.is_on()
             if on:
                 break
@@ -121,7 +121,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
     def off(self):
         on = None
         for i in range(0, self._retries):
-            self._make_request(endpoint=f'{self.endpoint}/off', method='POST')
+            self._make_request(endpoint=f'{self.endpoint}/off', method='GET')
             on = self.is_on()
             if not on:
                 break
