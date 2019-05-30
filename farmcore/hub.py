@@ -30,8 +30,20 @@ class Hub(Farmclass, USB):
     def _pack_devinfo(self, device):
         devinfo = {}
 
-        pattern = re.compile(self.usb_device + r'[0-9.-]*')
-        devinfo['usbpath'] = pattern.findall(device.device_path)[-1]
+        path = device.device_path.split('/')
+        if self.usb_device not in path:
+            return {}
+
+        devinfo['usbpath'] = None
+        for p in path[path.index(self.usb_device):]:
+            devpath = re.match(pattern='[0-9\-\.]{'+f'{len(p)}'+'}', string=p)
+            if devpath:
+                devinfo['usbpath'] = devpath.string
+            elif devinfo['usbpath']:
+                break
+
+        if not devinfo['usbpath']:
+            return {}
 
         devinfo['devnode'] = device.device_node
         devinfo['subsystem'] = device.subsystem
