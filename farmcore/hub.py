@@ -290,6 +290,30 @@ class Hub(Farmclass, USB):
 
         return self._filter_devinfo(hubs, key, index)
 
+    def get_misc_devices(self, key=None, index=0):
+        get_funcs = [
+            'get_serial',
+            'get_relay',
+            'get_block',
+            'get_part',
+            'get_sdwire',
+            'get_ethernet',
+            'get_hub'
+        ]
+
+        categorised = []
+        for func_name in get_funcs:
+            func = getattr(self, func_name, None)
+            if func:
+                categorised.extend(func(index=None))
+
+        uncategorised = [d for d in self.downstream if d not in categorised]
+
+        devinfo = self._filter_dictarr(
+            filters={'devtype': 'usb_device'}, dictarr=uncategorised)
+
+        return self._filter_devinfo(devinfo, key, index)
+
     def get_parent(self):
         dev = self.get_device()
         pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
