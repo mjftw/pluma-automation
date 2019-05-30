@@ -131,7 +131,6 @@ class Hub(Farmclass, USB):
             dot.node(node['devname'], node['devlabel'])
 
             parent = None
-            print(node)
 
             # Connect partitions to block devices
             if not parent and node['devtype'] == 'Partition':
@@ -164,7 +163,6 @@ class Hub(Farmclass, USB):
                 if filtered_nodes:
                     # Find parent hub (hub with longest matching path)
                     filtered_nodes.sort(key=lambda x: len(x['devpathlist']), reverse=True)
-                    print(filtered_nodes)
                     parent = filtered_nodes[0]['devname']
 
             if parent:
