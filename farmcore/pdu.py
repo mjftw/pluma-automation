@@ -23,7 +23,7 @@ class IPPowerPDU(PowerBase):
     ''' IP Power 9258 is a PDU which can respond to http requests '''
     def __init__(self, port,
             host=None, netport=None, username=None, password=None,
-            interface=None, interface_ip=None):
+            interface=None, interface_ip=None, reboot_delay=None):
         if 1 <= port <= 4:
             self.port = port
         else:
@@ -36,7 +36,7 @@ class IPPowerPDU(PowerBase):
         self.interface = interface
         self.interface_ip = interface_ip or '192.168.1.110'
 
-        self.reboot_delay = 5
+        PowerBase.__init__(self, reboot_delay)
 
     def on(self):
         self._make_request('cmd=setpower+p6{}=1'.format(self.port))
@@ -106,7 +106,7 @@ class IPPowerPDU(PowerBase):
 class APCPDU(PowerBase):
     """ The APC is a switched rack PDU which controls whether a board is powered """
 
-    def __init__(self, host, username, password, port):
+    def __init__(self, host, username, password, port, reboot_delay=None):
         self.host = host
         self.username = username
         self.password = password
@@ -117,6 +117,9 @@ class APCPDU(PowerBase):
             raise PDUInvalidPort("Invalid port[{}]").format(port)
 
         self.console = TelnetConsole(self.host)
+
+        PowerBase.__init__(self, reboot_delay)
+
 
     def _login(self):
         e = None

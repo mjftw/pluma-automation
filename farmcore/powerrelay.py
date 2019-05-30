@@ -3,13 +3,15 @@ import time
 from .baseclasses import PowerBase, RelayBase
 
 class PowerRelay(PowerBase):
-    def __init__(self, relay, on_seq, off_seq):
+    def __init__(self, relay, on_seq, off_seq, reboot_delay=None):
         if not isinstance(relay, RelayBase):
             raise TypeError('relay must be an instance of RelayBase')
 
         self.relay = relay
         self.on_seq = on_seq
         self.off_seq = off_seq
+
+        PowerBase.__init__(self, reboot_delay)
 
     def _do_sequence(self, seq):
         for action in seq:
@@ -26,7 +28,3 @@ class PowerRelay(PowerBase):
 
     def off(self):
         self._do_sequence(self.off_seq)
-
-    def reboot(self):
-        self.off()
-        self.on()

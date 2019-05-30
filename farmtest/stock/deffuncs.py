@@ -74,7 +74,7 @@ def write_global_data(TestController, output_file, log_func=print):
 # ====== TestController Run Condition Functions ======
 
 @deferred_function
-def sleep_and_notify(duration, unit, mode, log_func=print):
+def sleep_and_notify(duration, unit, log_func=print):
     log_func("Now waiting {} {}...".format(
         duration, unit))
     for duration in reversed(range(1, duration+1)):

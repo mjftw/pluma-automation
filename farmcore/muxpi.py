@@ -119,8 +119,11 @@ class MuxPi(Farmclass):
 
 
 class MuxPiPower(PowerBase):
-    def __init__(self, muxpi):
+    def __init__(self, muxpi, reboot_delay=None):
         self.muxpi = muxpi
+
+        PowerBase.__init__(self, reboot_delay)
+
 
     def __repr__(self):
         return 'MuxPiPower'
@@ -131,10 +134,6 @@ class MuxPiPower(PowerBase):
     def off(self):
         self.muxpi.stm_cmd('power off')
 
-    def reboot(self):
-        self.off()
-        time.sleep(0.25)
-        self.on()
 
 class MuxPiDyper(RelayBase):
     def __init__(self, muxpi):
@@ -154,17 +153,13 @@ class MuxPiDyper(RelayBase):
         self.muxpi.stm_cmd('dyper {} {}'.format(port, throw))
 
 class MuxPiPowerDyper(PowerRelay):
-    def __init__(self, muxpi, on_seq, off_seq):
+    def __init__(self, muxpi, on_seq, off_seq, reboot_delay=None):
         self.muxpi = muxpi
         PowerRelay.__init__(self, relay=MuxPiDyper(self.muxpi),
-            on_seq=on_seq, off_seq=off_seq)
+            on_seq=on_seq, off_seq=off_seq, reboot_delay=reboot_delay)
 
     def __repr__(self):
         return 'MuxPiPowerDyper'
-
-    def reboot(self):
-        self.off()
-        self.on()
 
 
 class MuxPiStorage(StorageBase):
