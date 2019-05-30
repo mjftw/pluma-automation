@@ -104,6 +104,7 @@ class Hub(Farmclass, USB):
             comment=f'Hub[{self.usb_device}] downstream devices')
         dot.node('H1', f'Hub[{self.usb_device}]')
 
+        # Build device info
         nodes = []
         for devtype in devices:
             for i, device in enumerate(
@@ -112,9 +113,11 @@ class Hub(Farmclass, USB):
                 info = {}
                 vendor = device["vendor_long"] or device["vendor"]
                 info['devpath'] = device['usbpath']
+                info['devpathlist'] = device['usbpath'].split('.')
                 info['port'] = info['devpath'][info['devpath'].find(hubpath) + len(hubpath) + 1:]
                 info['prefix'] = devtype
                 info['devname'] = f'{info["prefix"]}{i}'
+                info['devtype'] = devtype
                 info['devlabel'] = f'{devtype}{i}'
                 if device['devnode'] and device['devnode'].startswith('/dev'):
                     info['devlabel'] += f' - {device["devnode"]}'
@@ -122,10 +125,35 @@ class Hub(Farmclass, USB):
 
                 nodes.append(info)
 
+        # Build tree from device info
         nodes.sort(key=lambda x: x['port'])
         for node in nodes:
             dot.node(node['devname'], node['devlabel'])
-            dot.edge('H1', node['devname'], label=f'Port[{node["port"]}]')
+
+            parent = None
+            # Connect partitions to block devices
+            if node['devtype'] == 'Partition':
+                filtered_nodes = [n for n in nodes
+                    if n['devtype'] == 'Block' and n['port'] == node['port']]
+
+                if filtered_nodes:
+                    parent = filtered_nodes[0]['devname']
+
+
+            # Connect block devices to SDWires
+            if node['devtype'] == 'Block':
+                filtered_nodes = [n for n in nodes
+                    if n['devtype'] == 'SD-Wire' and
+                        n['devpathlist'][:-1] == node['devpathlist'][:-1]]
+
+                if filtered_nodes:
+                    parent = filtered_nodes[0]['devname']
+
+            # If no parent assigned, connect to hub
+            if not parent:
+                parent = 'H1'
+
+            dot.edge(parent, node['devname'], label=f'Port[{node["port"]}]')
 
         dot.render(image_file)
 
