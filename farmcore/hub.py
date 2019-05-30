@@ -103,7 +103,6 @@ class Hub(Farmclass, USB):
         dot = Digraph(
             format=image_format,
             comment=f'Root Hub[{self.usb_device}] downstream devices')
-        dot.node('H1', f'Root Hub[{self.usb_device}]')
 
         # Build device info
         nodes = []
@@ -156,19 +155,20 @@ class Hub(Farmclass, USB):
 
             # Connect devices to parent hubs
             if not parent:
+                # Find upstream hubs
                 filtered_nodes = [n for n in nodes
                     if n != node and
                         n['devtype'] == 'Hub' and
                         node['devpath'].startswith(n['devpath'])]
 
                 if filtered_nodes:
+                    # Find parent hub (hub with longest matching path)
+                    filtered_nodes.sort(key=lambda x: len(x['devpathlist']), reverse=True)
+                    print(filtered_nodes)
                     parent = filtered_nodes[0]['devname']
 
-            # If no parent assigned, connect to root hub
-            if not parent:
-                parent = 'H1'
-
-            dot.edge(parent, node['devname'], label=f'Port[{node["port"]}]')
+            if parent:
+                dot.edge(parent, node['devname'], label=f'Port[{node["port"]}]')
 
         dot.render(image_file)
 
