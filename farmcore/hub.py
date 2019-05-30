@@ -91,6 +91,7 @@ class Hub(Farmclass, USB):
                 f'Must supply image_file if format is not one of {fileless_formats}')
 
         devices = {
+            'Hub': self.get_hub(index=None),
             'Serial': self.get_serial(index=None),
             'Relay': self.get_relay(index=None),
             'Block': self.get_block(index=None),
@@ -101,8 +102,8 @@ class Hub(Farmclass, USB):
 
         dot = Digraph(
             format=image_format,
-            comment=f'Hub[{self.usb_device}] downstream devices')
-        dot.node('H1', f'Hub[{self.usb_device}]')
+            comment=f'Root Hub[{self.usb_device}] downstream devices')
+        dot.node('H1', f'Root Hub[{self.usb_device}]')
 
         # Build device info
         nodes = []
@@ -131,25 +132,39 @@ class Hub(Farmclass, USB):
             dot.node(node['devname'], node['devlabel'])
 
             parent = None
+            print(node)
+
             # Connect partitions to block devices
-            if node['devtype'] == 'Partition':
+            if not parent and node['devtype'] == 'Partition':
                 filtered_nodes = [n for n in nodes
-                    if n['devtype'] == 'Block' and n['port'] == node['port']]
+                    if n != node and
+                        n['devtype'] == 'Block' and
+                        n['port'] == node['port']]
 
                 if filtered_nodes:
                     parent = filtered_nodes[0]['devname']
 
-
             # Connect block devices to SDWires
-            if node['devtype'] == 'Block':
+            if not parent and node['devtype'] == 'Block':
                 filtered_nodes = [n for n in nodes
-                    if n['devtype'] == 'SD-Wire' and
+                    if n != node and
+                        n['devtype'] == 'SD-Wire' and
                         n['devpathlist'][:-1] == node['devpathlist'][:-1]]
 
                 if filtered_nodes:
                     parent = filtered_nodes[0]['devname']
 
-            # If no parent assigned, connect to hub
+            # Connect devices to parent hubs
+            if not parent:
+                filtered_nodes = [n for n in nodes
+                    if n != node and
+                        n['devtype'] == 'Hub' and
+                        node['devpath'].startswith(n['devpath'])]
+
+                if filtered_nodes:
+                    parent = filtered_nodes[0]['devname']
+
+            # If no parent assigned, connect to root hub
             if not parent:
                 parent = 'H1'
 
