@@ -131,7 +131,7 @@ class Hub(Farmclass, USB):
                 info['prefix'] = devtype
                 info['devname'] = f'{info["prefix"]}{i}'
                 info['devtype'] = devtype
-                info['devlabel'] = f'{devtype}{i}'
+                info['devlabel'] = f'[{info["devpath"]}]\n{devtype}{i}'
                 if device['devnode'] and device['devnode'].startswith('/dev'):
                     info['devlabel'] += f' - {device["devnode"]}'
                 info['devlabel'] += f'\n{vendor}\n{device["model"]}'
