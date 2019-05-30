@@ -272,15 +272,13 @@ class Hub(Farmclass, USB):
     def get_hub(self, key=None, index=0):
         devinfo = self.filter_downstream({
                 'devtype': 'usb_device',
-                'model': 'USB2.0_Hub'
             })
-        if not devinfo:
-            devinfo = self.filter_downstream({
-                    'devtype': 'usb_device',
-                    'model': 'USB3.0_Hub'
-                })
+        hubs = []
+        for d in devinfo:
+            if 'USB' in d['model'] and 'Hub' in d['model']:
+                hubs.append(d)
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(hubs, key, index)
 
     def get_parent(self):
         dev = self.get_device()
