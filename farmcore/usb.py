@@ -49,7 +49,7 @@ class USB():
 
     def get_device(self):
         for d in puctx.list_devices(subsystem='usb'):
-            if d.device_path.endswith(self.usb_device):
+            if d.device_path.split('/')[-1] == self.usb_device:
                 return d
 
         raise USBNoDevice("No device for [{}]".format(self.usb_device))
