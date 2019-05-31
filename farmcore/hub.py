@@ -139,71 +139,98 @@ class Hub(Farmclass, USB):
             comment=f'Root Hub[{self.usb_device}] downstream devices',
             graph_attr=graph_attrs)
 
+        class DeviceNode():
+            def __init__(self, device, devtype, index, hubpath):
+                self.device = device
+                self.devtype = devtype
+                self.index = index
+
+                self.hubpath = hubpath
+
+            @property
+            def vendor(self):
+                return self.device["vendor_long"] or self.device["vendor"]
+
+            @property
+            def devpath(self):
+                return self.device['usbpath']
+
+            @property
+            def devpathlist(self):
+                return self.devpath.split('.')
+
+            @property
+            def port(self):
+                return self.devpath[self.devpath.find(self.hubpath) + len(self.hubpath) + 1:]
+
+            @property
+            def prefix(self):
+                return self.devtype
+
+            @property
+            def devname(self):
+                return f'{self.prefix}{self.index}'
+
+            @property
+            def devlabel(self):
+                devlabel = f'[{self.devpath}]\n{self.devtype}{self.index}'
+                if self.device['devnode'] and self.device['devnode'].startswith('/dev'):
+                    devlabel += f' - {self.device["devnode"]}'
+                devlabel += f'\n{self.vendor}\n{self.device["model"]}'
+                return devlabel
+
         # Build device info
         nodes = []
         for devtype in devices:
             for i, device in enumerate(
                     [d for d in devices[devtype] if devices[devtype]]):
-                hubpath = self.usb_device
-                info = {}
-                vendor = device["vendor_long"] or device["vendor"]
-                info['devpath'] = device['usbpath']
-                info['devpathlist'] = device['usbpath'].split('.')
-                info['port'] = info['devpath'][info['devpath'].find(hubpath) + len(hubpath) + 1:]
-                info['prefix'] = devtype
-                info['devname'] = f'{info["prefix"]}{i}'
-                info['devtype'] = devtype
-                info['devlabel'] = f'[{info["devpath"]}]\n{devtype}{i}'
-                if device['devnode'] and device['devnode'].startswith('/dev'):
-                    info['devlabel'] += f' - {device["devnode"]}'
-                info['devlabel'] += f'\n{vendor}\n{device["model"]}'
 
-                nodes.append(info)
+                nodes.append(DeviceNode(device, devtype, i, self.usb_device))
 
         # Build tree from device info
-        nodes.sort(key=lambda x: x['port'])
+        nodes.sort(key=lambda x: x.port)
         for node in nodes:
-            dot.node(node['devname'], node['devlabel'],
-                {**node_default_attrs, **node_attrs.get(node['devtype'], {})})
+            dot.node(node.devname, node.devlabel,
+                {**node_default_attrs, **node_attrs.get(node.devtype, {})})
 
             parent = None
 
             # Connect partitions to block devices
-            if not parent and node['devtype'] == 'Partition':
+            if not parent and node.devtype == 'Partition':
                 filtered_nodes = [n for n in nodes
                     if n != node and
-                        n['devtype'] == 'Block' and
-                        n['port'] == node['port']]
+                        n.devtype == 'Block' and
+                        n.port == node.port]
 
                 if filtered_nodes:
-                    parent = filtered_nodes[0]['devname']
+                    parent = filtered_nodes[0]
 
             # Connect block devices to SDWires
-            if not parent and node['devtype'] == 'Block':
+            if not parent and node.devtype == 'Block':
                 filtered_nodes = [n for n in nodes
                     if n != node and
-                        n['devtype'] == 'SD-Wire' and
-                        n['devpathlist'][:-1] == node['devpathlist'][:-1]]
+                        n.devtype == 'SD-Wire' and
+                        n.devpathlist[:-1] == node.devpathlist[:-1]]
 
                 if filtered_nodes:
-                    parent = filtered_nodes[0]['devname']
+                    parent = filtered_nodes[0]
 
             # Connect devices to parent hubs
             if not parent:
                 # Find upstream hubs
                 filtered_nodes = [n for n in nodes
                     if n != node and
-                        n['devtype'] == 'Hub' and
-                        node['devpath'].startswith(n['devpath'])]
+                        n.devtype == 'Hub' and
+                        node.devpath.startswith(n.devpath)]
 
                 if filtered_nodes:
                     # Find parent hub (hub with longest matching path)
-                    filtered_nodes.sort(key=lambda x: len(x['devpathlist']), reverse=True)
-                    parent = filtered_nodes[0]['devname']
+                    filtered_nodes.sort(key=lambda x: len(x.devpathlist), reverse=True)
+                    parent = filtered_nodes[0]
 
             if parent:
-                dot.edge(parent, node['devname'],
-                    label=f'Port[{node["port"]}]', **edge_attrs)
+                dot.edge(parent.devname, node.devname,
+                    label=f'Port[{node.port}]', **edge_attrs)
 
         dot.render(image_file)
 
