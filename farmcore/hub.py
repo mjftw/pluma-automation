@@ -140,12 +140,12 @@ class Hub(Farmclass, USB):
             graph_attr=graph_attrs)
 
         class DeviceNode():
-            def __init__(self, device, devtype, index, hubpath):
+            def __init__(self, device, devtype, index, parent=None, linelabel=None):
                 self.device = device
                 self.devtype = devtype
                 self.index = index
-
-                self.hubpath = hubpath
+                self.parent = parent
+                self.linelabel = linelabel
 
             @property
             def vendor(self):
@@ -158,10 +158,6 @@ class Hub(Farmclass, USB):
             @property
             def devpathlist(self):
                 return self.devpath.split('.')
-
-            @property
-            def port(self):
-                return self.devpath[self.devpath.find(self.hubpath) + len(self.hubpath) + 1:]
 
             @property
             def prefix(self):
@@ -188,35 +184,40 @@ class Hub(Farmclass, USB):
                 nodes.append(DeviceNode(device, devtype, i, self.usb_device))
 
         # Build tree from device info
-        nodes.sort(key=lambda x: x.port)
+        nodes.sort(key=lambda x: x.devpath)
         for node in nodes:
             dot.node(node.devname, node.devlabel,
                 {**node_default_attrs, **node_attrs.get(node.devtype, {})})
 
-            parent = None
-
+            node.parent = None
             # Connect partitions to block devices
-            if not parent and node.devtype == 'Partition':
+            if not node.parent and node.devtype == 'Partition':
                 filtered_nodes = [n for n in nodes
                     if n != node and
                         n.devtype == 'Block' and
-                        n.port == node.port]
+                        n.devpath == node.devpath]
 
                 if filtered_nodes:
-                    parent = filtered_nodes[0]
+                    node.parent = filtered_nodes[0]
+
+                    devnode = node.device['devnode']
+                    pdevnode = node.parent.device['devnode']
+                    part_num = devnode[pdevnode.find(devnode):]
+      
+                    node.linelabel = f'Partition {part_num}'
 
             # Connect block devices to SDWires
-            if not parent and node.devtype == 'Block':
+            if not node.parent and node.devtype == 'Block':
                 filtered_nodes = [n for n in nodes
                     if n != node and
                         n.devtype == 'SD-Wire' and
                         n.devpathlist[:-1] == node.devpathlist[:-1]]
 
                 if filtered_nodes:
-                    parent = filtered_nodes[0]
+                    node.parent = filtered_nodes[0]
 
-            # Connect devices to parent hubs
-            if not parent:
+            # Connect device nodes to parent hubs
+            if not node.parent:
                 # Find upstream hubs
                 filtered_nodes = [n for n in nodes
                     if n != node and
@@ -224,13 +225,20 @@ class Hub(Farmclass, USB):
                         node.devpath.startswith(n.devpath)]
 
                 if filtered_nodes:
-                    # Find parent hub (hub with longest matching path)
+                    # Find node.parent hub (hub with longest matching path)
                     filtered_nodes.sort(key=lambda x: len(x.devpathlist), reverse=True)
-                    parent = filtered_nodes[0]
+                    node.parent = filtered_nodes[0]
 
-            if parent:
-                dot.edge(parent.devname, node.devname,
-                    label=f'Port[{node.port}]', **edge_attrs)
+                    path = node.devpath
+                    ppath = node.parent.devpath
+                    port = path[ppath.find(path):]
+
+                    node.linelabel = f'Port {port}'
+
+
+            if node.parent:
+                dot.edge(node.parent.devname, node.devname,
+                    label=node.linelabel, **edge_attrs)
 
         dot.render(image_file)
 
