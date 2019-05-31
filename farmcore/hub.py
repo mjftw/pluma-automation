@@ -118,18 +118,20 @@ class Hub(Farmclass, USB):
         # Colour names:
         #   https://www.graphviz.org/doc/info/colors.html
         node_attrs = {
-            'Hub': {},
-            'Serial': {},
-            'Relay': {},
-            'Block': {},
-            'Partition': {},
-            'Ethernet': {},
-            'SD-Wire': {},
+            'Hub': {'fillcolor': 'deepskyblue'},
+            'Serial': {'fillcolor': 'darkseagreen'},
+            'Relay': {'fillcolor': 'cadetblue'},
+            'Block': {'fillcolor': 'darkorange'},
+            'Partition': {'fillcolor': 'firebrick1'},
+            'Ethernet': {'fillcolor': 'chartreuse3'},
+            'SD-Wire': {'fillcolor': 'gold'},
             'Unknown-Device': {}
         }
-        node_default_attrs = {}
+        node_default_attrs = {'style': 'filled,solid'}
 
-        graph_attrs = {}
+        graph_attrs = {
+            'splines': 'curved'
+        }
         edge_attrs = {}
 
         dot = Digraph(
