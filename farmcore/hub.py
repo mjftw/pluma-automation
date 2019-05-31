@@ -162,7 +162,7 @@ class Hub(Farmclass, USB):
         nodes.sort(key=lambda x: x['port'])
         for node in nodes:
             dot.node(node['devname'], node['devlabel'],
-                **node_attrs.get(node['devtype'], node_default_attrs))
+                {**node_default_attrs, **node_attrs.get(node['devtype'], {})})
 
             parent = None
 
