@@ -113,9 +113,29 @@ class Hub(Farmclass, USB):
             'Unknown-Device': self.get_misc_devices(index=None)
         }
 
+        # Graphivz attributes can be found at:
+        #   https://www.graphviz.org/doc/info/attrs.html
+        # Colour names:
+        #   https://www.graphviz.org/doc/info/colors.html
+        node_attrs = {
+            'Hub': {},
+            'Serial': {},
+            'Relay': {},
+            'Block': {},
+            'Partition': {},
+            'Ethernet': {},
+            'SD-Wire': {},
+            'Unknown-Device': {}
+        }
+        node_default_attrs = {}
+
+        graph_attrs = {}
+        edge_attrs = {}
+
         dot = Digraph(
             format=image_format,
-            comment=f'Root Hub[{self.usb_device}] downstream devices')
+            comment=f'Root Hub[{self.usb_device}] downstream devices',
+            graph_attr=graph_attrs)
 
         # Build device info
         nodes = []
@@ -141,7 +161,8 @@ class Hub(Farmclass, USB):
         # Build tree from device info
         nodes.sort(key=lambda x: x['port'])
         for node in nodes:
-            dot.node(node['devname'], node['devlabel'])
+            dot.node(node['devname'], node['devlabel'],
+                **node_attrs.get(node['devtype'], node_default_attrs))
 
             parent = None
 
@@ -179,7 +200,8 @@ class Hub(Farmclass, USB):
                     parent = filtered_nodes[0]['devname']
 
             if parent:
-                dot.edge(parent, node['devname'], label=f'Port[{node["port"]}]')
+                dot.edge(parent, node['devname'],
+                    label=f'Port[{node["port"]}]', **edge_attrs)
 
         dot.render(image_file)
 
