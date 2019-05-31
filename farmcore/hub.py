@@ -140,12 +140,14 @@ class Hub(Farmclass, USB):
             graph_attr=graph_attrs)
 
         class DeviceNode():
-            def __init__(self, device, devtype, index, parent=None, linelabel=None):
+            def __init__(self, device, devtype, index,
+                    parent=None, linelabel=None, extra_info=None):
                 self.device = device
                 self.devtype = devtype
                 self.index = index
                 self.parent = parent
                 self.linelabel = linelabel
+                self.extra_info = extra_info
 
             @property
             def vendor(self):
@@ -170,9 +172,14 @@ class Hub(Farmclass, USB):
             @property
             def devlabel(self):
                 devlabel = f'[{self.devpath}]\n{self.devtype}{self.index}'
+
                 if self.device['devnode'] and self.device['devnode'].startswith('/dev'):
                     devlabel += f' - {self.device["devnode"]}'
+
                 devlabel += f'\n{self.vendor}\n{self.device["model"]}'
+
+                if self.extra_info:
+                    devlabel += f'\n{self.extra_info}'
                 return devlabel
 
         # Build device info
@@ -181,7 +188,12 @@ class Hub(Farmclass, USB):
             for i, device in enumerate(
                     [d for d in devices[devtype] if devices[devtype]]):
 
-                nodes.append(DeviceNode(device, devtype, i, self.usb_device))
+                node = DeviceNode(device, devtype, i, self.usb_device)
+
+                if devtype == 'Block' or devtype == 'Partition':
+                    node.extra_info = f'Size: {node.device["size"]}B'
+
+                nodes.append(node)
 
         # Build tree from device info
         nodes.sort(key=lambda x: x.devpath)
@@ -203,7 +215,7 @@ class Hub(Farmclass, USB):
                     devnode = node.device['devnode']
                     pdevnode = node.parent.device['devnode']
                     part_num = devnode[pdevnode.find(devnode):]
-      
+
                     node.linelabel = f'Partition {part_num}'
 
             # Connect block devices to SDWires
