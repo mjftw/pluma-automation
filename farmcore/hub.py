@@ -332,7 +332,14 @@ class Hub(Farmclass, USB):
             if func:
                 categorised.extend(func(index=None))
 
-        uncategorised = [d for d in self.downstream if d not in categorised]
+        # Filter out known devices
+        uncategorised = []
+        for device in self.downstream:
+            if device not in categorised:
+                matching = [c for c in categorised
+                    if c['usbpath'] == device['usbpath'] and c['serial'] == device['serial']]
+                if not matching:
+                    uncategorised.append(device)
 
         devinfo = self._filter_dictarr(
             filters={'devtype': 'usb_device'}, dictarr=uncategorised)
