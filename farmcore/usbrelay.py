@@ -2,6 +2,7 @@
 from .usb import USB
 from .serialconsole import SerialConsole
 from .baseclasses import RelayBase
+from .hub import Hub
 
 
 class USBRelay(RelayBase, USB):
@@ -15,25 +16,21 @@ class USBRelay(RelayBase, USB):
         dict(a=b'4', b=b'r'),
     ]
 
-    def __init__(self, hub):
-        self.hub = hub
+    def __init__(self, usb_device):
+        self.usb_device = usb_device
         self._console = None
 
         USB.__init__(self, None)
+
+    @property
+    def devnode(self):
+        return Hub(self.usb_device).get_relay('devnode')
 
     @property
     def console(self):
         if self._console is None:
             self._console = SerialConsole(self.devnode, 9600)
         return self._console
-
-    @property
-    def devnode(self):
-        return self.hub.get_relay()['devnode']
-
-    @property
-    def usb_device(self):
-        return self.hub.get_relay()['usbpath']
 
     def unbind(self):
         self.console.close()
@@ -45,10 +42,10 @@ class USBRelay(RelayBase, USB):
         self.console.open()
 
     def toggle(self, port, throw):
-        if port not in range(1, 4):
-            self.error("Port must be 1, 2, 3, or 4")
+        if port not in [1, 2, 3, 4]:
+            self.error(f"Port must be 1, 2, 3, or 4, not [{port}]")
         if throw not in ['A', 'a', 'B', 'b']:
-            self.error("Throw direction must be A or B")
+            self.error(f"Throw direction must be A or B, not [{throw}]")
 
         if throw in ['A', 'a']:
             self.console.send(self.port_map[port-1]['a'])
