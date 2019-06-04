@@ -140,7 +140,8 @@ class TestController():
 
             # Calculate statistical data
             for data_key in results_summary[test]:
-                if isinstance(data_value, int) or isinstance(data_value, float):
+                if all(isinstance(d, int) or isinstance(d, float)
+                        for d in results_summary[test][data_key]['values']):
                     results_summary[test][data_key]['max'] = max(
                         results_summary[test][data_key]['values'])
 
