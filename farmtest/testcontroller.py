@@ -2,7 +2,8 @@ import time
 import json
 from datetime import datetime
 from copy import deepcopy
-from statistics import mean, median_grouped, mode, stdev, variance
+from statistics import mean, median_grouped, mode, stdev, variance,\
+    StatisticsError
 
 from farmutils import send_exception_email, datetime_to_timestamp
 
@@ -33,7 +34,8 @@ class TestController():
             'TestController': {
                 'settings': {},
                 'stats': {},
-                'results': {}
+                'results': {},
+                'results_summary': {}
             }
         }
 
@@ -56,8 +58,6 @@ class TestController():
         self.stats['num_tests_total'] = 0
 
         self.results = []
-
-        self.data['results_summary'] = self.results_summary
 
 
     @property
@@ -111,8 +111,25 @@ class TestController():
     def log(self, message):
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
-    @property
-    def results_summary(self):
+    def get_results_summary(self):
+        def chunks(l, n):
+            '''Yield successive n-sized chunks from l'''
+            for i in range(0, len(l), n):
+                yield l[i:i + n]
+
+        def chunked_mean(l, n, sigfig=2):
+            '''Chunk the list l into n equal chunks, and calculate the mean of
+            each chunk. If n > length of l, then the length of l is used instead.
+            This gives the mean for first x values, then next x values etc.'''
+            chunked_list = chunks(l, min(round(len(l)/n) or 1, len(l)))
+            chunked_mean_list =  list(map(
+                lambda x: round(mean(x), sigfig),
+                chunked_list
+            ))
+            if len(chunked_mean_list) > n:
+                chunked_mean_list = chunked_mean_list[0: n]
+            return chunked_mean_list
+
         results_summary = {}
         for test in [str(t) for t in self.testrunner.tests]:
             # Collect data
@@ -140,16 +157,24 @@ class TestController():
 
             # Calculate statistical data
             for data_key in results_summary[test]:
-                if all(isinstance(d, int) or isinstance(d, float)
-                        for d in results_summary[test][data_key]['values']):
+                n_values = len(results_summary[test][data_key]['values'])
+                # Check if we have at least 2 values, and all values are numbers
+                if (n_values >= 2 and
+                        all((isinstance(x, int) or isinstance(x, float))
+                            and not isinstance(x, bool)
+                            for d in results_summary[test][data_key]['values'])):
                     results_summary[test][data_key]['max'] = max(
                         results_summary[test][data_key]['values'])
 
                     results_summary[test][data_key]['min'] = min(
                         results_summary[test][data_key]['values'])
 
-                    results_summary[test][data_key]['mode'] = mode(
-                        results_summary[test][data_key]['values'])
+                    try:
+                        results_summary[test][data_key]['mode'] = mode(
+                            results_summary[test][data_key]['values'])
+                    except StatisticsError:
+                        # This happens when there is no unique mode
+                        results_summary[test][data_key]['mode'] = None
 
                     results_summary[test][data_key]['mean'] = round(mean(
                         results_summary[test][data_key]['values']), 2)
@@ -163,6 +188,11 @@ class TestController():
                     results_summary[test][data_key]['variance'] = round(variance(
                         results_summary[test][data_key]['values']), 2)
 
+                    # Chunk the data into equal chunks, and calculate the chunks mean
+                    # This gives the mean for first x values, then next x values etc.
+                    # Number of chunks is lowest of 10 and the length of the dataset
+                    results_summary[test][data_key]['chunked_mean'] = chunked_mean(
+                        results_summary[test][data_key]['values'], 10)
                 # We do not want all the data duplicated in the summary
                 del(results_summary[test][data_key]['values'])
 
@@ -303,3 +333,5 @@ class TestController():
         self.stats['num_tests_total'] += self.testrunner.num_tests
 
         self.stats['num_iterations_run'] += 1
+
+        self.data['results_summary'] = self.get_results_summary()
