@@ -158,41 +158,46 @@ class TestController():
             # Calculate statistical data
             for data_key in results_summary[test]:
                 n_values = len(results_summary[test][data_key]['values'])
-                # Check if we have at least 2 values, and all values are numbers
-                if (n_values >= 2 and
-                        all((isinstance(x, int) or isinstance(x, float))
+                # Can't generate statistics from a single data point
+                if n_values >= 2:
+                    # Statistics calculated for numbers only
+                    if all((isinstance(x, int) or isinstance(x, float))
                             and not isinstance(x, bool)
-                            for d in results_summary[test][data_key]['values'])):
-                    results_summary[test][data_key]['max'] = max(
-                        results_summary[test][data_key]['values'])
-
-                    results_summary[test][data_key]['min'] = min(
-                        results_summary[test][data_key]['values'])
-
-                    try:
-                        results_summary[test][data_key]['mode'] = mode(
+                            for d in results_summary[test][data_key]['values']):
+                        results_summary[test][data_key]['max'] = max(
                             results_summary[test][data_key]['values'])
-                    except StatisticsError:
-                        # This happens when there is no unique mode
-                        results_summary[test][data_key]['mode'] = None
 
-                    results_summary[test][data_key]['mean'] = round(mean(
-                        results_summary[test][data_key]['values']), 2)
+                        results_summary[test][data_key]['min'] = min(
+                            results_summary[test][data_key]['values'])
 
-                    results_summary[test][data_key]['median'] = round(median_grouped(
-                        results_summary[test][data_key]['values']), 2)
+                        try:
+                            results_summary[test][data_key]['mode'] = mode(
+                                results_summary[test][data_key]['values'])
+                        except StatisticsError:
+                            # This happens when there is no unique mode
+                            results_summary[test][data_key]['mode'] = None
 
-                    results_summary[test][data_key]['stdev'] = round(stdev(
-                        results_summary[test][data_key]['values']), 2)
+                        results_summary[test][data_key]['mean'] = round(mean(
+                            results_summary[test][data_key]['values']), 2)
 
-                    results_summary[test][data_key]['variance'] = round(variance(
-                        results_summary[test][data_key]['values']), 2)
+                        results_summary[test][data_key]['median'] = round(median_grouped(
+                            results_summary[test][data_key]['values']), 2)
 
-                    # Chunk the data into equal chunks, and calculate the chunks mean
-                    # This gives the mean for first x values, then next x values etc.
-                    # Number of chunks is lowest of 10 and the length of the dataset
-                    results_summary[test][data_key]['chunked_mean'] = chunked_mean(
-                        results_summary[test][data_key]['values'], 10)
+                        results_summary[test][data_key]['stdev'] = round(stdev(
+                            results_summary[test][data_key]['values']), 2)
+
+                        results_summary[test][data_key]['variance'] = round(variance(
+                            results_summary[test][data_key]['values']), 2)
+
+                    # Statistics calculated for numbers or booleans
+                    if all(isinstance(x, int) or isinstance(x, float)
+                            or isinstance(x, bool)
+                            for d in results_summary[test][data_key]['values']):
+                        # Chunk the data into equal chunks, and calculate the chunks mean
+                        # This gives the mean for first x values, then next x values etc.
+                        # Number of chunks is lowest of 10 and the length of the dataset
+                        results_summary[test][data_key]['chunked_mean'] = chunked_mean(
+                            results_summary[test][data_key]['values'], 10)
                 # We do not want all the data duplicated in the summary
                 del(results_summary[test][data_key]['values'])
 
