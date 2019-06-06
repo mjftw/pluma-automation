@@ -210,17 +210,17 @@ class ConsoleBase(Farmclass):
              log_recieved=False,
              timeout=-1,
              sleep_time=-1,
-             quiet_time=-1
+             quiet_time=-1,
+             flush_buffer=True
              ):
         if not self.is_open:
             self.open()
         if not self.is_open:
             raise ConsoleCannotOpen
 
+        cmd = cmd or ''
         if log_verbose:
             self.log("Sending command:\n{}".format(cmd), force_log_file=None)
-
-        cmd = cmd or ''
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
@@ -250,6 +250,9 @@ class ConsoleBase(Farmclass):
 
         self._pex.linesep = self.encode(self.linesep)
 
+        if flush_buffer:
+            self.flush(True)
+
         if not recieve and not watches:
             if send_newline:
                 self._pex.sendline(cmd)
@@ -260,7 +263,6 @@ class ConsoleBase(Farmclass):
 
             return (None, None)
         else:
-            self.flush(True)
             if send_newline:
                 self._pex.sendline(cmd)
             else:
