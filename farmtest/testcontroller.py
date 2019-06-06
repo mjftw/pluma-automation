@@ -161,8 +161,8 @@ class TestController():
                 # Can't generate statistics from a single data point
                 if n_values >= 2:
                     # Statistics calculated for numbers only
-                    if all((isinstance(x, int) or isinstance(x, float))
-                            and not isinstance(x, bool)
+                    if all((isinstance(d, int) or isinstance(d, float))
+                            and not isinstance(d, bool)
                             for d in results_summary[test][data_key]['values']):
                         results_summary[test][data_key]['max'] = max(
                             results_summary[test][data_key]['values'])
@@ -190,8 +190,8 @@ class TestController():
                             results_summary[test][data_key]['values']), 2)
 
                     # Statistics calculated for numbers or booleans
-                    if all(isinstance(x, int) or isinstance(x, float)
-                            or isinstance(x, bool)
+                    if all(isinstance(d, int) or isinstance(d, float)
+                            or isinstance(d, bool)
                             for d in results_summary[test][data_key]['values']):
                         # Chunk the data into equal chunks, and calculate the chunks mean
                         # This gives the mean for first x values, then next x values etc.
