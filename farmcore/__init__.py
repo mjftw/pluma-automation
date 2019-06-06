@@ -1,5 +1,5 @@
 from .exceptions import *
-from .board import Board
+from .board import Board, get_board_by_name
 from .usbrelay import USBRelay
 from .usbenet import USBEnet
 from .interface import Interface
