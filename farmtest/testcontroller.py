@@ -35,9 +35,11 @@ class TestController():
                 'settings': {},
                 'stats': {},
                 'results': {},
-                'results_summary': {}
+                'results_summary': {},
+                'test_settings': {}
             }
         }
+        self.tc_data = self.data['TestController']
 
         # Runtime settings
         self.settings = {}
@@ -62,27 +64,43 @@ class TestController():
 
     @property
     def settings(self):
-        return self.data['TestController']['settings']
+        return self.tc_data['settings']
 
     @settings.setter
     def settings(self, settings):
-        self.data['TestController']['settings'] = settings
+        self.tc_data['settings'] = settings
 
     @property
     def stats(self):
-        return self.data['TestController']['stats']
+        return self.tc_data['stats']
 
     @stats.setter
     def stats(self, stats):
-        self.data['TestController']['stats'] = stats
+        self.tc_data['stats'] = stats
 
     @property
     def results(self):
-        return self.data['TestController']['results']
+        return self.tc_data['results']
 
     @results.setter
     def results(self, results):
-        self.data['TestController']['results'] = results
+        self.tc_data['results'] = results
+
+    @property
+    def results_summary(self):
+        return self.tc_data['results_summary']
+
+    @results_summary.setter
+    def results_summary(self, results_summary):
+        self.tc_data['results_summary'] = results_summary
+
+    @property
+    def test_settings(self):
+        return self.tc_data['test_settings']
+
+    @test_settings.setter
+    def test_settings(self, test_settings):
+        self.tc_data['test_settings'] = test_settings
 
     @property
     def setup(self):
@@ -203,6 +221,19 @@ class TestController():
 
         return results_summary
 
+    def collect_test_settings(self):
+        settings = {}
+        for test in self.testrunner.tests:
+            if (not self.results or
+                    str(test) not in self.results[0]['TestRunner']):
+                # Test has not run, cannot get settings
+                break
+            if str(test) not in settings:
+                # NOTE: Assuming test settings never change between iterations
+                settings[str(test)] = self.results[0]['TestRunner'][str(test)]['settings']
+
+        return settings
+
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
@@ -253,6 +284,9 @@ class TestController():
 
         self.log("Starting TestController with settings: {}".format(
             self.settings))
+
+        self.log("Test settings: {}".format(
+            self.test_settings))
 
         if self.setup and not self.settings['setup_every_iteration']:
             self.log("Running setup function: {}".format(self.setup))
@@ -339,4 +373,5 @@ class TestController():
 
         self.stats['num_iterations_run'] += 1
 
-        self.data['results_summary'] = self.get_results_summary()
+        self.results_summary = self.get_results_summary()
+        self.test_settings = self.collect_test_settings()

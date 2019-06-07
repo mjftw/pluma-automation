@@ -62,7 +62,12 @@ class AbortTestingAndReport(AbortTesting):
 
 
 class TestBase():
+    #FIXME: These structs are shared between all instances of class!
+    #  They shouldn't be.
+    #  We're currently getting around this by having TestRunner set
+    #  initilise the structs, but this is not ideal. FIX THIS.
     data = {}
+    settings = {}
 
     def __init__(self, board):
         self.board = board
@@ -216,6 +221,7 @@ class TestRunner():
         return len(self.tests)
 
     def _init_test_data(self, test):
+        test.settings = {}
         test.data = {}
         self.data[str(test)] = {
             'tasks': {
@@ -223,6 +229,7 @@ class TestRunner():
                 'failed': []
             },
             'data': test.data,
+            'settings': test.settings,
             'order': self.tests.index(test)
         }
 
@@ -232,12 +239,14 @@ class TestRunner():
         # Init data
         self.data = {}
 
-        for test in self.tests:
-            self._init_test_data(test)
-
+        # Add TestCore to run standard testing sequence of boots & mounts etc.
         if (self.use_testcore and "TestCore" not in
                 (str(t) for t in self.tests)):
             self.add_test(TestCore(self.board), 0)
+
+        # Init test data
+        for test in self.tests:
+            self._init_test_data(test)
 
         self.board.log("Running tests: {}".format(
             list(map(lambda t: t.__class__.__name__, self.tests))))
@@ -266,8 +275,6 @@ class TestRunner():
             self.board.log("Inserting test at position {}: {} ".format(
                 index, str(test)))
             self.tests.insert(index, test)
-
-        self._init_test_data(test)
 
     def rm_test(self, test):
         if test in self.tests:
