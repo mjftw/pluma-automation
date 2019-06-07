@@ -1,6 +1,11 @@
 class Hierachy():
     """ This class is inherited in order add hierachy to a class """
 
+    def __init__(self):
+        if type(self) is Hierachy:
+            raise AttributeError(
+                'This is a base class, and must be inherited')
+
     @property
     def _reccurse_hier(self):
         if hasattr(self, "__reccurse_hier"):

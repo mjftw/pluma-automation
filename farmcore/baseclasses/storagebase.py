@@ -18,6 +18,10 @@ class StorageBase(Farmclass):
     '''
 
     host_mountpoint = None
+    def __init__(self):
+        if type(self) is StorageBase:
+            raise AttributeError(
+                'This is a base class, and must be inherited')
 
     def __bool__(self):
         ''' Base class is falsey. Must inherit'''

@@ -2,6 +2,11 @@ from .farmclass import Farmclass
 
 
 class RelayBase(Farmclass):
+    def __init__(self):
+        if type(self) is RelayBase:
+            raise AttributeError(
+                'This is a base class, and must be inherited')
+
     def toggle(self, port, throw):
         raise NotImplimentedError(
             'This method must be implimented by inheriting class')

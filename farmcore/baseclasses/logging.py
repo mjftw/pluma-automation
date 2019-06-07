@@ -40,6 +40,11 @@ ascii_colmap = {
 
 
 class Logging():
+    def __init__(self):
+        if type(self) is Logging:
+            raise AttributeError(
+                'This is a base class, and must be inherited')
+
     @property
     def log_on(self):
         if hasattr(self, "_log_on"):

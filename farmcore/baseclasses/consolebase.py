@@ -50,8 +50,9 @@ class ConsoleBase(Farmclass):
 
     def __init__(self, encoding='ascii', linesep='\r\n', raw_logfile=None):
         if type(self) is ConsoleBase:
-            raise ConsoleSubclassException(
-                "Class is a base class and must be inherited")
+            raise AttributeError(
+                "This is a base class and must be inherited")
+
         self._check_attr('_pex')
         self.linesep = linesep
         self.encoding = encoding
@@ -88,7 +89,6 @@ class ConsoleBase(Farmclass):
     def open(f):
         def wrap(self):
             f(self)
-            print(self.raw_logfile)
             if self.raw_logfile:
                 # Create raw_logfile dir if it does not already exist
                 os.makedirs(os.path.dirname(self.raw_logfile), exist_ok=True)
