@@ -1,5 +1,5 @@
 
-from .usb import USB
+from .usb import USB, USBNoDevice
 from .serialconsole import SerialConsole
 from .baseclasses import RelayBase
 from .hub import Hub
@@ -20,10 +20,13 @@ class USBRelay(RelayBase, USB):
         self.usb_device = usb_device
         self._console = None
 
-        USB.__init__(self, None)
+        USB.__init__(self, self.usb_device)
 
     @property
     def devnode(self):
+        devnode = Hub(self.usb_device).get_relay('devnode')
+        if not devnode:
+            raise USBNoDevice('Cannot find device devnode')
         return Hub(self.usb_device).get_relay('devnode')
 
     @property
