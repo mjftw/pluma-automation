@@ -2,6 +2,10 @@ import time
 import pexpect
 import pexpect.fdpexpect
 import json
+import os
+from datetime import datetime
+
+from farmutils import datetime_to_timestamp
 
 from .farmclass import Farmclass
 
@@ -43,8 +47,6 @@ class ConsoleInvalidJSONRecieved(ConsoleError):
 
 class ConsoleBase(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
-    raw_logfile = None
-    _raw_logfile_fd = None
 
     def __init__(self, encoding='ascii', linesep='\r\n', raw_logfile=None):
         if type(self) is ConsoleBase:
@@ -53,9 +55,16 @@ class ConsoleBase(Farmclass):
         self._check_attr('_pex')
         self.linesep = linesep
         self.encoding = encoding
-        self.raw_logfile = raw_logfile
+
+        default_raw_logfile = os.path.join('/tmp', 'lab', '{}_raw_{}.log'.format(
+                self.__class__.__name__, datetime_to_timestamp(datetime.now())
+        ))
+
+        self.raw_logfile = raw_logfile or default_raw_logfile
+
         self._buffer = ''
         self._last_recieved = ''
+        self._raw_logfile_fd = None
 
     def __bool__(self):
         ''' Base class is falsey. Must inherit'''
@@ -79,7 +88,11 @@ class ConsoleBase(Farmclass):
     def open(f):
         def wrap(self):
             f(self)
+            print(self.raw_logfile)
             if self.raw_logfile:
+                # Create raw_logfile dir if it does not already exist
+                os.makedirs(os.path.dirname(self.raw_logfile), exist_ok=True)
+
                 self._raw_logfile_fd = open(self.raw_logfile, 'ab')
                 self._pex.logfile=self._raw_logfile_fd
         return wrap

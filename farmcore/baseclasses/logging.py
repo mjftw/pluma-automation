@@ -1,6 +1,8 @@
 import datetime
 import os
 
+from farmutils import datetime_to_timestamp
+
 from .hierachy import hier_setter
 
 
@@ -21,9 +23,6 @@ DEFAULT_LOG_TIME = False
 
 """ Add log name to logs """
 DEFAULT_LOG_NAME = None
-
-""" Log file to write to """
-DEFAULT_LOG_FILE = None
 
 
 ascii_colmap = {
@@ -91,10 +90,11 @@ class Logging():
 
     @property
     def log_file(self):
-        if hasattr(self, "_log_file"):
-            return self._log_file
-        else:
-            return DEFAULT_LOG_FILE
+        if not hasattr(self, "_log_file"):
+            # Default logfile for all farmclasses lives in /tmp
+            self._log_file = os.path.join('/tmp', 'lab', '{}_{}.log'.format(
+                self.__class__.__name__, datetime_to_timestamp(datetime.datetime.now())))
+        return self._log_file
 
     @log_file.setter
     @hier_setter
