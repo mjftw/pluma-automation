@@ -128,9 +128,11 @@ class MuxPiPower(PowerBase):
     def __repr__(self):
         return 'MuxPiPower'
 
+    @PowerBase.on
     def on(self):
         self.muxpi.stm_cmd('power on')
 
+    @PowerBase.off
     def off(self):
         self.muxpi.stm_cmd('power off')
 

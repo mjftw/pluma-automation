@@ -2,6 +2,8 @@ import time
 import json
 from datetime import datetime
 from copy import deepcopy
+from statistics import mean, median_grouped, mode, stdev, variance,\
+    StatisticsError
 
 from farmutils import send_exception_email, datetime_to_timestamp
 
@@ -26,6 +28,19 @@ class TestController():
 
         self.name = name
 
+        # Global data to be used by tests
+        # Save TestController data here too
+        self.data = {
+            'TestController': {
+                'settings': {},
+                'stats': {},
+                'results': {},
+                'results_summary': {},
+                'test_settings': {}
+            }
+        }
+        self.tc_data = self.data['TestController']
+
         # Runtime settings
         self.settings = {}
         self.settings['run_forever'] = run_forever
@@ -46,16 +61,46 @@ class TestController():
 
         self.results = []
 
-        # Global data to be used by tests
-        # Save TestController data here too
-        self.data = {
-            'TestController': {
-                'settings': self.settings,
-                'stats': self.stats,
-                'results': self.results
-            }
-        }
 
+    @property
+    def settings(self):
+        return self.tc_data['settings']
+
+    @settings.setter
+    def settings(self, settings):
+        self.tc_data['settings'] = settings
+
+    @property
+    def stats(self):
+        return self.tc_data['stats']
+
+    @stats.setter
+    def stats(self, stats):
+        self.tc_data['stats'] = stats
+
+    @property
+    def results(self):
+        return self.tc_data['results']
+
+    @results.setter
+    def results(self, results):
+        self.tc_data['results'] = results
+
+    @property
+    def results_summary(self):
+        return self.tc_data['results_summary']
+
+    @results_summary.setter
+    def results_summary(self, results_summary):
+        self.tc_data['results_summary'] = results_summary
+
+    @property
+    def test_settings(self):
+        return self.tc_data['test_settings']
+
+    @test_settings.setter
+    def test_settings(self, test_settings):
+        self.tc_data['test_settings'] = test_settings
 
     @property
     def setup(self):
@@ -84,10 +129,111 @@ class TestController():
     def log(self, message):
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
+    def get_results_summary(self):
+        def chunks(l, n):
+            '''Yield successive n-sized chunks from l'''
+            for i in range(0, len(l), n):
+                yield l[i:i + n]
 
-    #FIXME: Currently the same test object is used for each test iterration,
-    #   meaning that it maintains state. This causes many unexpected issues!
-    #   This needs to be fixed so that each iteraction gets a clean test object.
+        def chunked_mean(l, n, sigfig=2):
+            '''Chunk the list l into n equal chunks, and calculate the mean of
+            each chunk. If n > length of l, then the length of l is used instead.
+            This gives the mean for first x values, then next x values etc.'''
+            chunked_list = chunks(l, min(round(len(l)/n) or 1, len(l)))
+            chunked_mean_list =  list(map(
+                lambda x: round(mean(x), sigfig),
+                chunked_list
+            ))
+            if len(chunked_mean_list) > n:
+                chunked_mean_list = chunked_mean_list[0: n]
+            return chunked_mean_list
+
+        results_summary = {}
+        for test in [str(t) for t in self.testrunner.tests]:
+            # Collect data
+            if test not in results_summary:
+                results_summary[test] = {}
+
+            for iteration, result in enumerate(self.results):
+                for data_key in self.results[iteration]['TestRunner'][test]['data']:
+                    if data_key not in results_summary[test]:
+                        results_summary[test][data_key] = {}
+                    data_value = self.results[iteration]['TestRunner'][test]['data'][data_key]
+
+                    # Collect values in list
+                    if 'values' not in results_summary[test][data_key]:
+                        results_summary[test][data_key]['values'] = []
+                    results_summary[test][data_key]['values'].append(
+                        data_value)
+
+                    # Count of data value
+                    if 'count' not in results_summary[test][data_key]:
+                        results_summary[test][data_key]['count'] = {}
+                    if str(data_value) not in results_summary[test][data_key]['count']:
+                        results_summary[test][data_key]['count'][str(data_value)] = 0
+                    results_summary[test][data_key]['count'][str(data_value)] += 1
+
+            # Calculate statistical data
+            for data_key in results_summary[test]:
+                n_values = len(results_summary[test][data_key]['values'])
+                # Can't generate statistics from a single data point
+                if n_values >= 2:
+                    # Statistics calculated for numbers only
+                    if all((isinstance(d, int) or isinstance(d, float))
+                            and not isinstance(d, bool)
+                            for d in results_summary[test][data_key]['values']):
+                        results_summary[test][data_key]['max'] = max(
+                            results_summary[test][data_key]['values'])
+
+                        results_summary[test][data_key]['min'] = min(
+                            results_summary[test][data_key]['values'])
+
+                        try:
+                            results_summary[test][data_key]['mode'] = mode(
+                                results_summary[test][data_key]['values'])
+                        except StatisticsError:
+                            # This happens when there is no unique mode
+                            results_summary[test][data_key]['mode'] = None
+
+                        results_summary[test][data_key]['mean'] = round(mean(
+                            results_summary[test][data_key]['values']), 2)
+
+                        results_summary[test][data_key]['median'] = round(median_grouped(
+                            results_summary[test][data_key]['values']), 2)
+
+                        results_summary[test][data_key]['stdev'] = round(stdev(
+                            results_summary[test][data_key]['values']), 2)
+
+                        results_summary[test][data_key]['variance'] = round(variance(
+                            results_summary[test][data_key]['values']), 2)
+
+                    # Statistics calculated for numbers or booleans
+                    if all(isinstance(d, int) or isinstance(d, float)
+                            or isinstance(d, bool)
+                            for d in results_summary[test][data_key]['values']):
+                        # Chunk the data into equal chunks, and calculate the chunks mean
+                        # This gives the mean for first x values, then next x values etc.
+                        # Number of chunks is lowest of 10 and the length of the dataset
+                        results_summary[test][data_key]['chunked_mean'] = chunked_mean(
+                            results_summary[test][data_key]['values'], 10)
+                # We do not want all the data duplicated in the summary
+                del(results_summary[test][data_key]['values'])
+
+        return results_summary
+
+    def collect_test_settings(self):
+        settings = {}
+        for test in self.testrunner.tests:
+            if (not self.results or
+                    str(test) not in self.results[0]['TestRunner']):
+                # Test has not run, cannot get settings
+                break
+            if str(test) not in settings:
+                # NOTE: Assuming test settings never change between iterations
+                settings[str(test)] = self.results[0]['TestRunner'][str(test)]['settings']
+
+        return settings
+
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
@@ -139,6 +285,9 @@ class TestController():
         self.log("Starting TestController with settings: {}".format(
             self.settings))
 
+        self.log("Test settings: {}".format(
+            self.test_settings))
+
         if self.setup and not self.settings['setup_every_iteration']:
             self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
@@ -183,7 +332,8 @@ class TestController():
                         self.settings['condition_check_interval_s']))
                     time.sleep(self.settings['condition_check_interval_s'])
             else:
-                self.log("UnitTestSuite finished")
+                self.log("==== TestController Results ====")
+                self.log(self.results)
                 return
 
     def _init_iteration(self):
@@ -222,3 +372,6 @@ class TestController():
         self.stats['num_tests_total'] += self.testrunner.num_tests
 
         self.stats['num_iterations_run'] += 1
+
+        self.results_summary = self.get_results_summary()
+        self.test_settings = self.collect_test_settings()

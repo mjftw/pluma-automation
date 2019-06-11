@@ -1,6 +1,6 @@
 import subprocess
 import json
-from datetime import datetime as dt
+from datetime import datetime
 
 def run_host_cmd(command, stdin=None, *args, **kwargs):
     ''' Wrapper for subprocess.Popen
@@ -45,8 +45,8 @@ def format_json_tinydb(db_file, db_output_file):
 
 
 def timestamp_to_datetime(timestamp):
-    return dt.strptime(timestamp,'%Y-%m-%d-%H-%M-%S')
+    return datetime.strptime(timestamp,'%Y-%m-%d-%H-%M-%S')
 
 
-def datetime_to_timestamp(datetime):
-    return datetime.strftime('%Y-%m-%d-%H-%M-%S')
+def datetime_to_timestamp(dt):
+    return dt.strftime('%Y-%m-%d-%H-%M-%S')

@@ -108,3 +108,18 @@ class Board(Farmclass):
             password_match=self.login_pass_match,
             success_match=self.prompt
         )
+
+
+def get_board_by_name(boards, name):
+    invalid_boards = [b for b in boards if not isinstance(b, Board)]
+    if invalid_boards:
+        raise RuntimeError(f'All boards must be of type Board! Invalid: {invalid_boards}')
+
+    filtered_boards = [b for b in boards if b.name == name]
+    if len(filtered_boards) <= 0:
+        raise RuntimeError(
+            f'No boards found with name [{name}]. Avialable: {[b.name for b in boards]}')
+    if len(filtered_boards) > 1:
+        raise RuntimeError(f'Multiple boards found with name [{name}]')
+
+    return filtered_boards[0]

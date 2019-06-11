@@ -38,10 +38,13 @@ class IPPowerPDU(PowerBase):
 
         PowerBase.__init__(self, reboot_delay)
 
+    @PowerBase.on
     def on(self):
         self._make_request('cmd=setpower+p6{}=1'.format(self.port))
 
+    @PowerBase.off
     def off(self):
+        self.log(f'{str(self)}: Power off...')
         self._make_request('cmd=setpower+p6{}=0'.format(self.port))
 
     def is_on(self):
@@ -177,8 +180,10 @@ class APCPDU(PowerBase):
         self._disconnect()
         self.console.close()
 
+    @PowerBase.on
     def on(self, dummy=None):
         self._switch('on')
 
+    @PowerBase.off
     def off(self, dummy=None):
         self._switch('off')
