@@ -71,9 +71,10 @@ class TestBase():
 
     def __init__(self, board):
         self.board = board
+        self._test_name = self.__class__.__name__
 
     def __repr__(self):
-        return self.__class__.__name__
+        return self._test_name
 
 class BootTestBase(TestBase):
     boot_success = None
@@ -249,7 +250,7 @@ class TestRunner():
             self._init_test_data(test)
 
         self.board.log("Running tests: {}".format(
-            list(map(lambda t: t.__class__.__name__, self.tests))))
+            list(map(lambda t: str(t), self.tests))))
 
         try:
             for task in self.tasks:
@@ -265,8 +266,19 @@ class TestRunner():
             return True
 
     def add_test(self, test, index=None):
-        if self._get_tests_by_name(str(test)):
-            self.board.error(f'Test [{str(test)}] already added', RuntimeError)
+        # Rename test if an test with the same name already added
+        # Default name is the class name, new names are <classname>_1,2,3 etc.
+        if not hasattr(test, '_test_name'):
+            setattr(test, '_test_name', test.__class__.__name__)
+        i = 1
+        original_name = test._test_name
+        while self._get_tests_by_name(str(test)):
+            old_name = test._test_name
+            test._test_name = f'{original_name}_{i}'
+            self.board.log(
+                'Test [{}] already added. Renaming to [{}]'.format(
+                    old_name, test._test_name))
+            i += 1
 
         if index is None:
             self.board.log("Appending test: {}".format(str(test)))
