@@ -266,7 +266,7 @@ class TestRunner():
             return True
 
     def add_test(self, test, index=None):
-        # Rename test if an test with the same name already added
+        # Rename test if a test with the same name already added
         # Default name is the class name, new names are <classname>_1,2,3 etc.
         if not hasattr(test, '_test_name'):
             setattr(test, '_test_name', test.__class__.__name__)
