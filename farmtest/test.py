@@ -371,9 +371,6 @@ class TestRunner():
             raise AbortTesting(str(exception))
 
     def send_fail_email(self, exception, test_failed, task_failed):
-        #TODO: Move to a config file
-        lab_maintainers = ['mwebster@witekio.com']
-
         subject = 'TestRunner Exception Occured: [{}: {}] [{}]'.format(
             str(test_failed), task_failed, self.board.name)
         body = '''
@@ -387,7 +384,6 @@ class TestRunner():
 
         send_exception_email(
             exception=exception,
-            recipients=lab_maintainers,
             board=self.board,
             subject=subject,
             prepend_body=body
