@@ -268,9 +268,9 @@ class APCPDU(PowerBase):
         self.console.close()
 
     @PowerBase.on
-    def on(self, dummy=None):
+    def on(self):
         self._switch('on')
 
     @PowerBase.off
-    def off(self, dummy=None):
+    def off(self):
         self._switch('off')
