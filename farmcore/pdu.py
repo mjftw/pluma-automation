@@ -105,6 +105,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
             endpoint=self.endpoint, timeout=30)
         return json.loads(json_info)
 
+    @PowerBase.on
     def on(self):
         on = None
         for i in range(0, self._retries):
@@ -118,6 +119,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
         if not on:
             self.error('Failed to turn on', PDUError)
 
+    @PowerBase.off
     def off(self):
         on = None
         for i in range(0, self._retries):
@@ -138,6 +140,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
             raise PDURequestError('Reqest json text returned does not include "state"')
 
         return True if info['state'] else False
+
 
 class IPPowerPDU(PowerBase, PDUReqestsBase):
     ''' IP Power 9258 is a PDU which can respond to http requests '''
@@ -166,9 +169,11 @@ class IPPowerPDU(PowerBase, PDUReqestsBase):
         ])
         self._make_request(endpoint='set.cmd', params=params_str)
 
+    @PowerBase.on
     def on(self):
         self.make_request('cmd=setpower+p6{}=1'.format(self.port))
 
+    @PowerBase.off
     def off(self):
         self.make_request('cmd=setpower+p6{}=0'.format(self.port))
 
