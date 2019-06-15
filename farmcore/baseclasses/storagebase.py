@@ -23,10 +23,6 @@ class StorageBase(Farmclass):
             raise AttributeError(
                 'This is a base class, and must be inherited')
 
-    def __bool__(self):
-        ''' Base class is falsey. Must inherit'''
-        return True if type(self) is not StorageBase else False
-
     def to_host(self):
         ''' Switch storage to the host '''
         raise NotImplemented('This method must be implimented by inheriting class')

@@ -13,7 +13,3 @@ class RelayBase(Farmclass):
                 str(self), port, throw))
             f(self, port, throw, *args, **kwargs)
         return wrap
-
-    def __bool__(self):
-        ''' Base class is falsey. Must inherit'''
-        return True if type(self) is not RelayBase else False

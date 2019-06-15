@@ -58,10 +58,6 @@ class ConsoleBase(Farmclass):
         self._last_recieved = ''
         self._raw_logfile_fd = None
 
-    def __bool__(self):
-        ''' Base class is falsey. Must inherit'''
-        return True if type(self) is not ConsoleBase else False
-
     @property
     def is_open(self):
         """ Check if the transport layer is ready to send and recieve"""
