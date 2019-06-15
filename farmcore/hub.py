@@ -406,15 +406,3 @@ class Hub(Farmclass, USB):
         dev = self.get_device()
         pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
         return None if not pdev else pdev.sys_name
-
-    def show_ancestry(self):
-        dev = self.get_device()
-        if dev is None:
-            return None
-
-        while dev.parent:
-            p = dev.parent
-            print(dir(p))
-            print(p.driver, p.subsystem, p.sys_name, p.device_path, p.sys_path)
-            subprocess.run(['ls', "{}/driver".format(p.sys_path)])
-            dev = p
