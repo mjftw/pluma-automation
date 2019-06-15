@@ -6,6 +6,7 @@ import tempfile
 from .farmclass import Farmclass
 from farmutils import run_host_cmd
 
+#FIXME: This class is unfinished, and does not conform with other base classes.
 
 class StorageError(Exception):
     pass
