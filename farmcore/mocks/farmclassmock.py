@@ -1,7 +1,7 @@
 from ..baseclasses import Farmclass
 
 
-class FarmobjMock(Farmclass):
+class FarmclassMock(Farmclass):
     def __init__(self, children=None):
         self.num_children = 0
         if isinstance(children, list):
