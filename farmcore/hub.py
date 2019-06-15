@@ -94,7 +94,7 @@ class Hub(Farmclass, USB):
 
         return match_vals
 
-    def plot_downstream(self, image_file=None, image_format=None):
+    def plot(self, image_file=None, image_format=None):
         image_format = image_format or 'x11'
         fileless_formats = ['xlib', 'x11']
 
