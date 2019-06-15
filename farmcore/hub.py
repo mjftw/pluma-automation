@@ -405,7 +405,7 @@ class Hub(Farmclass, USB):
     def get_parent(self):
         dev = self.get_device()
         pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
-        return pdev.sys_name
+        return None if not pdev else pdev.sys_name
 
     def show_ancestry(self):
         dev = self.get_device()
