@@ -1,4 +1,8 @@
 import os
+import json
+import traceback
+import platform
+from datetime import datetime
 import smtplib
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
@@ -7,10 +11,8 @@ from email.mime.text import MIMEText
 from email import encoders
 
 
-DEFAULT_SMTP_AUTHFILE = os.path.join(
-    os.path.dirname(os.path.realpath(__file__)), os.pardir, 'smtp.auth')
-if not os.path.isfile(DEFAULT_SMTP_AUTHFILE):
-    DEFAULT_SMTP_AUTHFILE = None
+DEFAULT_SETTINGS_FILE = os.path.join(
+    os.path.dirname(os.path.realpath(__file__)), os.pardir, 'email_settings.json')
 
 
 class EmailError(Exception):
@@ -24,7 +26,6 @@ class EmailInvalidSettings(EmailError):
 class Email():
     """ Create and send emails """
     def __init__(self,
-                 sender=None,
                  to=[],
                  cc=[],
                  bcc=[],
@@ -34,14 +35,13 @@ class Email():
                  files=[],
                  images=[],
                  images_inline=False,
-                 smtp_server='smtp.office365.com',
-                 smtp_timeout=587,
-                 smtp_authfile=DEFAULT_SMTP_AUTHFILE,
+                 smtp_server=None,
+                 smtp_timeout=None,
+                 settings_file=None,
                  smtp_password=None,
                  smtp_username=None
                  ):
 
-        self.sender = sender
         self.to = to
         self.cc = cc
         self.bcc = bcc
@@ -52,11 +52,53 @@ class Email():
         self.images = images
         self.images_inline = images_inline
 
-        self.smtp_server = smtp_server
-        self.smtp_timeout = smtp_timeout
-        self.smtp_authfile = smtp_authfile
-        self.smtp_password = smtp_password
-        self.smtp_username = smtp_username
+        self.smtp_password = None
+        self.smtp_username = None
+        self.smtp_server = None
+        self.smtp_timeout = None
+
+        if settings_file and not os.path.isfile(settings_file):
+            self.error(f'Cannot open settings file {settings_file}')
+
+        if not settings_file and os.path.isfile(DEFAULT_SETTINGS_FILE):
+            settings_file = DEFAULT_SETTINGS_FILE
+
+        if settings_file:
+            self.load_settings_file(settings_file)
+
+        # Priorities are: Arguments, file options
+        if smtp_password:
+            self.smtp_password = smtp_password
+        if smtp_username:
+            self.smtp_username = smtp_username
+
+        # SMTP Username is also used as send sender email address
+
+        # Priorities are: Arguments, file options, default options
+        self.smtp_server = smtp_server or self.smtp_server or 'smtp.office365.com'
+        self.smtp_timeout = smtp_timeout or self.smtp_timeout or 587
+
+    def load_settings_file(self, file):
+        self.log(f"Attempting to load email settings from file {file}")
+        with open(file, 'r') as f:
+            settings = json.load(f)
+
+        # Required settings
+        if 'smtp' not in settings:
+            raise EmailInvalidSettings(f'No SMTP settings in file: {file}')
+        if 'email' not in settings['smtp']:
+            raise EmailInvalidSettings(f'No SMTP email in settings file: {file}')
+        if 'password' not in settings['smtp']:
+            raise EmailInvalidSettings(f'No SMTP password in settings file: {file}')
+
+        self.smtp_username = settings['smtp']['email']
+        self.smtp_password = settings['smtp']['password']
+
+        # Optional settings
+        if 'server' in settings['smtp']:
+            self.smtp_server = settings['smtp']['server']
+        if 'timeout' in settings['smtp']:
+            self.smtp_timeout = settings['smtp']['timeout']
 
     # Property setters for data sanitation
     @property
@@ -97,19 +139,6 @@ class Email():
             if isinstance(to, str):
                 to = [to]
             self._to = list(map(str, to))
-
-    @property
-    def sender(self):
-        return self._sender
-
-    @sender.setter
-    def sender(self, sender):
-        if sender is None:
-            self._sender = None
-        else:
-            if not isinstance(sender, str):
-                sender = str(sender)
-            self._sender = sender
 
     @property
     def body(self):
@@ -206,8 +235,6 @@ class Email():
     def smtp_username(self):
         if self._smtp_username:
             return self._smtp_username
-        else:
-            return self._sender
 
     @smtp_username.setter
     def smtp_username(self, smtp_username):
@@ -222,32 +249,29 @@ class Email():
         """ Very basic logging function. Should change in future """
         print(message)
 
-    def error(self, message):
+    def error(self, message, exception=None):
         """ Very basic error function. Should change in future """
         self.log('ERROR: {}'.format(message))
+        if exception:
+            raise exception(message)
 
     def send(self):
         """ Validate settings, compose message, and send """
-        if self._validate():
-            msg = self._compose()
-            try:
-                self._send(msg)
-            except smtplib.SMTPException as e:
-                self.error(str(e))
-                raise(e)
-        else:
-            self.error("Send failed. Invalid settings.")
+        self._validate()
+
+        msg = self._compose()
+        try:
+            self._send(msg)
+        except smtplib.SMTPException as e:
+            self.error(str(e))
+            raise(e)
+
 
     def _send(self, msg):
         """ Send email with current settings """
         with smtplib.SMTP(self.smtp_server, self.smtp_timeout) as smtp:
             smtp.starttls()
-            if self.smtp_authfile:
-                (username, password) = self._read_authfile()
-            else:
-                username = self.smtp_username
-                password = self.smtp_password
-            smtp.login(username, password)
+            smtp.login(self.smtp_username, self.smtp_password)
             text = msg.as_string()
 
             recipients = self.to
@@ -256,7 +280,7 @@ class Email():
             if self.bcc:
                 recipients.extend(self.bcc)
 
-            smtp.sendmail(self.sender, recipients, text)
+            smtp.sendmail(self.smtp_username, recipients, text)
 
     def _compose(self):
         """ Combine saved settings into a MIME multipart message """
@@ -271,7 +295,7 @@ class Email():
         if self.bcc:
             msg['Bcc'] = ', '.join(self.bcc)
 
-        msg['From'] = self.sender
+        msg['From'] = self.smtp_username
         msg['Subject'] = self.subject
 
         msg.attach(MIMEText(self.body, self.body_type))
@@ -285,64 +309,23 @@ class Email():
 
     def _validate(self):
         """ Check email has all required settings """
-        valid = True
 
-        # Check email settings
         if not self.to:
-            self.error("To address is not set")
-            valid = False
-        if not self.sender:
-            self.error("From address is not set")
-            valid = False
-
-        if self.smtp_authfile:
-            try:
-                if not self._read_authfile():
-                    self.error('Invalid smtp authfile {}'.format(
-                        self.smtp_authfile))
-            except IOError as e:
-                self.error("{}".format(str(e)))
-                valid = False
-        else:
-            if not self.smtp_username:
-                self.error("smtp username not set, and no auth file")
-                valid = False
-            if not self.smtp_password:
-                self.error("smtp password not set, and no auth file")
-                valid = False
-
+            self.error("To address is not set", EmailInvalidSettings)
+        if not self.smtp_username:
+            self.error("smtp username not set", EmailInvalidSettings)
+        if not self.smtp_password:
+            self.error("smtp password not set", EmailInvalidSettings)
         if not self.smtp_server:
-            self.error("smtp server not set")
-            valid = False
+            self.error("smtp server not set", EmailInvalidSettings)
         if not self.smtp_timeout:
-            self.error("smtp timeout not set")
-            valid = False
+            self.error("smtp timeout not set", EmailInvalidSettings)
 
         # Check all attachments exist
         for a in self.files + self.images:
             if not os.path.isfile(a):
-                self.error("Cannot find file to attach: {}".format(a))
-                valid = False
+                self.error(f"Cannot find file to attach: {a}", EmailInvalidSettings)
 
-        if not valid:
-            raise EmailInvalidSettings
-
-        return valid
-
-    def _read_authfile(self):
-        """ Check smtp authfile has exactly 2 lines.
-            Expected authfile format:
-                [smtp_username]
-                [smtp_password]
-        """
-        with open(self.smtp_authfile, 'r') as fd:
-            auth = fd.read().splitlines()
-        if len(auth) != 2 or not auth[0] or not auth[1]:
-            return None
-        else:
-            username = auth[0]
-            password = auth[1]
-            return (username, password)
 
     def _make_attachments(self):
         """ Create attachment parts for files and images
@@ -390,3 +373,72 @@ class Email():
                     'html', 'utf-8')
                 )
         return attachments
+
+
+def send_exception_email(exception, recipients=None, board=None,
+        subject=None, prepend_body=None, settings_file=None):
+    settings_file = settings_file or DEFAULT_SETTINGS_FILE
+    if not recipients:
+        with open(settings_file, 'r') as f:
+            settings = json.load(f)
+            if 'maintainers' not in settings:
+                raise EmailInvalidSettings(
+                    'recipents not given and "maintainers" not in settings file: {}'.format(
+                        settings_file))
+            recipients = settings['maintainers']
+
+    email = Email(
+        to=recipients,
+        files=[],
+        body='',
+        body_type='html'
+    )
+
+    error_info = {
+        'exception': exception.__class__.__name__,
+        'cause': str(exception),
+        'time': datetime.now().strftime('%d-%m-%y %H:%M:%S'),
+        'trace': traceback.format_exc()
+        }
+
+    if prepend_body:
+        email.body += '{}<br><hr><br>'.format(prepend_body)
+
+    email.body += '''
+        <b>Exception:</b> {}<br>
+        <b>Cause:</b> {}<br>
+        <b>Time:</b> {}<br>
+        <b>Trace:</b> {}<br>
+        <hr>
+        '''.format(
+            error_info['exception'],
+            error_info['cause'],
+            error_info['time'],
+            '<br>'.join(error_info['trace'].split('\n')))
+
+    email.body += '''
+        <b>Platform: </b>{}<br><hr>
+        '''.format('<br>'.join(list(str(platform.uname()).split(','))))
+
+    if subject:
+        email.subject = subject
+    else:
+        email.subject = 'Unhandled Exception Occured: [{}]'.format(
+            error_info['exception'])
+        if board:
+            email.subject =('{} [{}]'.format(email.subject, board.name))
+
+    if board:
+        email.body += '<b>Board Info:</b><br>'
+        email.body += '<br>'.join(board.show_hier().split('\n'))
+        email.body += '<hr><br>'
+
+        email.files.append(board.log_file)
+        if board.console and board.console.log_file:
+            email.files.append(board.console.log_file)
+
+        board.log(email.subject, colour='red', bold=True)
+        board.log(str(error_info), colour='red', bold=True)
+        board.log('Informing lab maintainers via email')
+
+    email.send()
