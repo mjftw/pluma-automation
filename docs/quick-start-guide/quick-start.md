@@ -11,7 +11,7 @@ In order to facilitate this, any code that could be reused in any project is fou
 For customer specific modifications, a second reposiory should be created, following the naming format "farm-\<customer>".
 An example of this is [farm-plexus][farm-plexus].
 
-You will likely create one such repository for your project, using it as your working directory, and including content from farm-core in order to controll hardware, run tests, and more.
+You will likely create one such repository for your project, using it as your working directory, and including content from farm-core in order to control hardware, run tests, and more.
 Expect to modify your "farm-\<customer>" repisitory frequently, whilst leaving [farm-core][farm-core] unchanged unless really needed.
 
 ## Core Codebase (farm-core)
