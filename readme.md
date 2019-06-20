@@ -16,8 +16,8 @@ This file should be json formatted as shown in the example file below:
 {
     "smtp": {
         "email": "lab@witekio.com",
-        "password": "reallybadpassword"
-        "server": "smtp.office365.com"
+        "password": "reallybadpassword",
+        "server": "smtp.office365.com",
         "delay": 587
     },
     "maintainers": [
