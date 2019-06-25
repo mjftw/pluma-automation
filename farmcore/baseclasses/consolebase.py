@@ -17,18 +17,6 @@ class ConsoleError(Exception):
     pass
 
 
-class ConsoleTimeoutNoRecieve(ConsoleError):
-    pass
-
-
-class ConsoleTimeoutNoRecieveStop(ConsoleError):
-    pass
-
-
-class ConsoleSubclassException(ConsoleError):
-    pass
-
-
 class ConsoleCannotOpen(ConsoleError):
     pass
 
@@ -53,7 +41,10 @@ class ConsoleBase(Farmclass):
             raise AttributeError(
                 "This is a base class and must be inherited")
 
-        self._check_attr('_pex')
+        if not hasattr(self, '_pex'):
+            raise AttributeError(
+                "Variable '_pex' must be created by inheriting class")
+
         self.linesep = linesep
         self.encoding = encoding
 
@@ -67,24 +58,11 @@ class ConsoleBase(Farmclass):
         self._last_recieved = ''
         self._raw_logfile_fd = None
 
-    def __bool__(self):
-        ''' Base class is falsey. Must inherit'''
-        return True if type(self) is not ConsoleBase else False
-
-    def _check_attr(self, attr):
-        if not hasattr(self, attr):
-            raise ConsoleSubclassException(
-                "Variable '{}' must be created by inheriting class".format(
-                    attr))
-
-    def _err_must_override(self):
-        raise ConsoleSubclassException(
-            "This function must be overridden by an inheriting class")
-
     @property
     def is_open(self):
         """ Check if the transport layer is ready to send and recieve"""
-        self._err_must_override()
+        raise AttributeError(
+            "This function must be overridden by an inheriting class")
 
     def open(f):
         def wrap(self):
@@ -217,10 +195,7 @@ class ConsoleBase(Farmclass):
              match=None,
              excepts=None,
              send_newline=True,
-             log_recieved_on_pass=False,
-             log_recieved_on_fail=False,
              log_verbose=True,
-             log_recieved=False,
              timeout=-1,
              sleep_time=-1,
              quiet_time=-1,
@@ -322,17 +297,6 @@ class ConsoleBase(Farmclass):
         else:
             self.log("No response from: {}".format(self))
         return alive
-
-    def bash_change_prompt(self, prompt):
-        self.send("export PS1='{}'".format(prompt))
-        self.wait_for_quiet()
-        self.flush(True)
-
-    def bash_set_echo(self, echo):
-        if echo:
-            self.send('stty echo')
-        else:
-            self.send('stty -echo')
 
     def login(self, username, username_match,
               password=None, password_match=None, success_match=None):

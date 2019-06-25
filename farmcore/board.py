@@ -6,9 +6,6 @@ from .baseclasses import Farmclass
 from .exceptions import ConsoleExceptionKeywordRecieved
 
 
-DEFAULT_LOGFILE = object()
-
-
 class BoardError(Exception):
     pass
 
@@ -20,9 +17,9 @@ class BoardBootValidationError(BoardError):
 class Board(Farmclass):
     def __init__(self, name, power=None, hub=None, muxpi=None,
             storage=None, console=None,
-            login_user='root', login_pass=None,
+            login_user=None, login_pass=None,
             bootstr=None, boot_max_s=None,
-            prompt=None, logfile=DEFAULT_LOGFILE):
+            prompt=None, logfile=None):
         self.name = name
 
         self.power = power
@@ -35,7 +32,7 @@ class Board(Farmclass):
             self.muxpi.attach_board(self)
 
         self.prompt = prompt
-        self.login_user = login_user
+        self.login_user = login_user or 'root'
         self.login_pass = login_pass
         self.login_user_match = 'login:'
         self.login_pass_match = 'Password:'
@@ -46,11 +43,6 @@ class Board(Farmclass):
         self.booted_to_prompt = False
 
         self.log_reccurse = True
-
-        if logfile is DEFAULT_LOGFILE:
-            self.log_file = "/tmp/board_{}.log".format(self.name)
-        else:
-            self.log_file = logfile
 
     def __repr__(self):
         return 'Board[{}]'.format(self.name)

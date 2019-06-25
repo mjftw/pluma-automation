@@ -6,6 +6,7 @@ import tempfile
 from .farmclass import Farmclass
 from farmutils import run_host_cmd
 
+#FIXME: This class is unfinished, and does not conform with other base classes.
 
 class StorageError(Exception):
     pass
@@ -22,10 +23,6 @@ class StorageBase(Farmclass):
         if type(self) is StorageBase:
             raise AttributeError(
                 'This is a base class, and must be inherited')
-
-    def __bool__(self):
-        ''' Base class is falsey. Must inherit'''
-        return True if type(self) is not StorageBase else False
 
     def to_host(self):
         ''' Switch storage to the host '''

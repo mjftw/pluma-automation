@@ -12,6 +12,3 @@ class Farmclass(Hierachy, Logging):
 
     def __repr__(self):
         return f'[{self.__class__.__name__}]'
-
-    def __bool__(self):
-        return True if type(self) is not Farmclass else False

@@ -1,6 +1,5 @@
-from .baseclasses.consolebase import ConsoleError, ConsoleTimeoutNoRecieve,\
-    ConsoleTimeoutNoRecieveStop, ConsoleSubclassException, ConsoleCannotOpen,\
-    ConsoleLoginFailed, ConsoleExceptionKeywordRecieved,\
+from .baseclasses.consolebase import ConsoleError,\
+    ConsoleCannotOpen, ConsoleLoginFailed, ConsoleExceptionKeywordRecieved,\
     ConsoleInvalidJSONRecieved
 from .baseclasses.storagebase import StorageError
 from .board import BoardError, BoardBootValidationError

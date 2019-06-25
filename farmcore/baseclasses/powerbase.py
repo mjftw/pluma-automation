@@ -27,7 +27,3 @@ class PowerBase(Farmclass):
         self.log(f'{str(self)}: Waiting {self.reboot_delay}s to power on...')
         time.sleep(self.reboot_delay)
         self.on()
-
-    def __bool__(self):
-        ''' Base class is falsey. Must inherit'''
-        return True if type(self) is not PowerBase else False

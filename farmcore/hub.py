@@ -94,7 +94,7 @@ class Hub(Farmclass, USB):
 
         return match_vals
 
-    def plot_downstream(self, image_file=None, image_format=None):
+    def plot(self, image_file=None, image_format=None):
         image_format = image_format or 'x11'
         fileless_formats = ['xlib', 'x11']
 
@@ -103,14 +103,14 @@ class Hub(Farmclass, USB):
                 f'Must supply image_file if format is not one of {fileless_formats}')
 
         devices = {
-            'Hub': self.get_hub(index=None),
-            'Serial': self.get_serial(index=None),
-            'Relay': self.get_relay(index=None),
-            'Block': self.get_block(index=None),
-            'Partition': self.get_part(index=None),
-            'Ethernet': self.get_ethernet(index=None),
-            'SD-Wire': self.get_sdwire(index=None),
-            'Unknown-Device': self.get_misc_devices(index=None)
+            'Hub': self.get_hub(get_all=True),
+            'Serial': self.get_serial(get_all=True),
+            'Relay': self.get_relay(get_all=True),
+            'Block': self.get_block(get_all=True),
+            'Partition': self.get_part(get_all=True),
+            'Ethernet': self.get_ethernet(get_all=True),
+            'SD-Wire': self.get_sdwire(get_all=True),
+            'Unknown-Device': self.get_misc_devices(get_all=True)
         }
 
         # Graphivz attributes can be found at:
@@ -251,13 +251,11 @@ class Hub(Farmclass, USB):
 
                         node.linelabel = f'Port {port}'
 
-
                 if node.parent:
                     dot.edge(node.parent.devname, node.devname,
                         label=node.linelabel, **edge_attrs)
 
             return dot
-
 
         nodes = build_device_nodes(devices)
         dot = plot_device_nodes(nodes)
@@ -265,31 +263,31 @@ class Hub(Farmclass, USB):
 
         return dot.source
 
-    def _filter_devinfo(self, devinfo, key, index):
+    def _filter_devinfo(self, devinfo, key, get_all):
         filtered = None
 
         if devinfo:
             if len(devinfo) > 1:
                 # Sort devinfo list by USB path, this corresponds to
                 #   USB port number on hub
-                devinfo.sort(key=lambda x:x['usbpath'])
+                devinfo.sort(key=lambda x: x['usbpath'])
             if key:
-                if index is None:
+                if get_all:
                     filtered = [info[key] for info in devinfo]
                 else:
-                    filtered = devinfo[index][key]
+                    filtered = devinfo[0][key]
             else:
-                if index is None:
+                if get_all:
                     filtered = devinfo
                 else:
-                    filtered = devinfo[index]
+                    filtered = devinfo[0]
         else:
-            if index is None:
+            if get_all:
                 filtered = []
 
         return filtered
 
-    def get_serial(self, key=None, index=0):
+    def get_serial(self, key=None, get_all=None):
         ttyUSB_major = '188'
         serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
 
@@ -307,9 +305,9 @@ class Hub(Farmclass, USB):
             if devinfo:
                 break
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
-    def get_relay(self, key=None, index=0):
+    def get_relay(self, key=None, get_all=None):
         devinfo = self.filter_downstream({
             'subsystem': 'tty',
             'vendor': 'DLP_Design'
@@ -319,18 +317,18 @@ class Hub(Farmclass, USB):
                 'vendor': 'DLP_Design'
             })
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
-    def get_block(self, key=None, index=0):
+    def get_block(self, key=None, get_all=None):
         devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'disk'
         }, {
             'size': 0
         })
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
-    def get_part(self, key=None, index=0):
+    def get_part(self, key=None, get_all=None):
         devinfo = self.filter_downstream({
             'subsystem': 'block',
             'devtype': 'partition'
@@ -338,16 +336,16 @@ class Hub(Farmclass, USB):
             'size': 0
         })
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
-    def get_sdwire(self, key=None, index=0):
+    def get_sdwire(self, key=None, get_all=None):
         devinfo = self.filter_downstream({
             'model': 'sd-wire'
         })
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
-    def get_ethernet(self, key=None, index=0):
+    def get_ethernet(self, key=None, get_all=None):
         vendors = ['ASIX_Elec._Corp.']
 
         for vendor in vendors:
@@ -358,9 +356,9 @@ class Hub(Farmclass, USB):
             if devinfo:
                 break
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
-    def get_hub(self, key=None, index=0):
+    def get_hub(self, key=None, get_all=None):
         devinfo = self.filter_downstream({
                 'devtype': 'usb_device',
             })
@@ -369,9 +367,9 @@ class Hub(Farmclass, USB):
             if 'USB' in d['model'] and 'Hub' in d['model']:
                 hubs.append(d)
 
-        return self._filter_devinfo(hubs, key, index)
+        return self._filter_devinfo(hubs, key, get_all)
 
-    def get_misc_devices(self, key=None, index=0):
+    def get_misc_devices(self, key=None, get_all=None):
         get_funcs = [
             'get_serial',
             'get_relay',
@@ -386,7 +384,7 @@ class Hub(Farmclass, USB):
         for func_name in get_funcs:
             func = getattr(self, func_name, None)
             if func:
-                categorised.extend(func(index=None))
+                categorised.extend(func(get_all=True))
 
         # Filter out known devices
         uncategorised = []
@@ -400,21 +398,9 @@ class Hub(Farmclass, USB):
         devinfo = self._filter_dictarr(
             filters={'devtype': 'usb_device'}, dictarr=uncategorised)
 
-        return self._filter_devinfo(devinfo, key, index)
+        return self._filter_devinfo(devinfo, key, get_all)
 
     def get_parent(self):
         dev = self.get_device()
         pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
-        return pdev.sys_name
-
-    def show_ancestry(self):
-        dev = self.get_device()
-        if dev is None:
-            return None
-
-        while dev.parent:
-            p = dev.parent
-            print(dir(p))
-            print(p.driver, p.subsystem, p.sys_name, p.device_path, p.sys_path)
-            subprocess.run(['ls', "{}/driver".format(p.sys_path)])
-            dev = p
+        return None if not pdev else pdev.sys_name
