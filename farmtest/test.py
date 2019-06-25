@@ -69,9 +69,12 @@ class TestBase():
     data = {}
     settings = {}
 
-    def __init__(self, board):
+    def __init__(self, board, test_name_suffix=None):
         self.board = board
         self._test_name = self.__class__.__name__
+        if test_name_suffix:
+            assert isinstance(test_name_suffix, str)
+            self._test_name += f'_{test_name_suffix}'
 
     def __repr__(self):
         return self._test_name

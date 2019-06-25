@@ -12,17 +12,17 @@ from .test import TestRunner
 
 
 class TestController():
-    def __init__(self, testrunner, setup_func=None, report_func=None,
-            run_condition_func=None, name=None, report_n_iterations=None,
+    def __init__(self, testrunner, setup=None, report=None,
+            run_condition=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
             setup_every_iteration=False, force_initial_run=False, email_on_except=True,
             log_func=print):
         assert isinstance(testrunner, TestRunner)
 
         self.testrunner = testrunner
-        self.setup = setup_func
-        self.report = report_func
-        self.run_condition = run_condition_func
+        self.setup = setup
+        self.report = report
+        self.run_condition = run_condition
 
         self.log_func = log_func or print
 
