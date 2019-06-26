@@ -37,3 +37,16 @@ The basic structure of [farm-core][farm-core] is shown below:
 
 [farm-core]: https://bitbucket.org/adeneo-embedded/farm-core
 [farm-plexus]: https://bitbucket.org/adeneo-embedded/farm-plexus
+
+## Environment Setup
+
+1. Clone farm-core
+1. Clone farm-\<your project here\>
+1. Add the following to your `.bashrc` file:
+    ```
+    export LAB_INSTALL_DIR="/full/path/to/farm-core"
+    ```
+1. Logout and login or run:
+    ```
+    source ~/.bashrc
+    ```
