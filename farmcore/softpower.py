@@ -3,14 +3,15 @@ from .exceptions import PDUError
 
 
 class SoftPower(PowerBase):
-    def __init__(self, console, on_cmd=None, off_cmd=None):
+    def __init__(self, console, on_cmd=None, off_cmd=None,
+            reboot_delay=None):
         assert isinstance(console, ConsoleBase)
 
         self.console = console
         self.on_cmd = on_cmd
         self.off_cmd = off_cmd
 
-        PowerBase.__init__(self)
+        PowerBase.__init__(self, reboot_delay)
 
     @PowerBase.on
     def on(self):
