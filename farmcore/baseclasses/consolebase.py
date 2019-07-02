@@ -309,7 +309,8 @@ class ConsoleBase(Farmclass):
         fail_message = "ERROR: Failed to log in: U={} P={}".format(
             username, password)
 
-        (__, matched) = self.send(log_verbose=True, match=matches)
+        (__, matched) = self.send(log_verbose=True, match=matches,
+            flush_buffer=False)
         if not matched:
             self.log(fail_message)
             raise ConsoleLoginFailed(fail_message)
