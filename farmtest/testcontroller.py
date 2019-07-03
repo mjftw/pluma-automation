@@ -247,10 +247,10 @@ class TestController():
                 as shown: field1_data = list(returned)[iteration_number]['field1']
         '''
         data = (
-            {field: val} for result in self.results
-                if test_name in result['TestRunner']
-                    for field, val in result['TestRunner'][test_name]['data'].items() if
-                        'data' in result['TestRunner'][test_name]
+            {field: val} for result in self.results if test_name in result['TestRunner']
+            for field, val in result['TestRunner'][test_name]['data'].items()
+                if 'data' in result['TestRunner'][test_name] and
+                    not fields or field in fields
         )
         if format == 'json':
             raise NotImplementedError
