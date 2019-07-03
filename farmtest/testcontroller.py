@@ -246,18 +246,19 @@ class TestController():
             None -> return data is a generator to create a list of dicts
                 as shown: field1_data = list(returned)[iteration_number]['field1']
         '''
-        data = (
-            {field: val} for result in self.results if test_name in result['TestRunner']
-            for field, val in result['TestRunner'][test_name]['data'].items()
-                if 'data' in result['TestRunner'][test_name] and
-                    not fields or field in fields
-        )
+        def data_gen():
+            for r in (result['TestRunner'] for result in self.results if test_name in result['TestRunner']):
+                yield {
+                    f: v for f, v in r[test_name]['data'].items() if 'data' in r[test_name] and
+                    not fields or f in fields
+                }
+
         if format == 'json':
-            return json.dumps({test_name: list(data)}, indent=4)
+            return json.dumps({test_name: list(data_gen())}, indent=4)
         elif format == 'csv':
             raise NotImplementedError
         elif not format:
-            return data
+            return data_gen()
         else:
             raise RuntimeError(
                 f'Invalid format: {format}. Options: "json", "csv", None')
