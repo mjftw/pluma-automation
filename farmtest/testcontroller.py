@@ -234,7 +234,7 @@ class TestController():
 
         return settings
 
-    def get_test_results(test_name, fields=None, format=None):
+    def get_test_results(self, test_name, fields=None, format=None):
         '''
         Get test data from the global data dictionary.
         @test_name is the name of the test to get data for.
@@ -243,10 +243,24 @@ class TestController():
         @format can be set to the following:
             'json' -> return data is a json formatted string
             'csv' -> return data is CSV formatted
-            None -> return data is a list of dicts, with data accessed
-                as below: field1_data = returned[iteration_number]['field1']
+            None -> return data is a generator to create a list of dicts
+                as shown: field1_data = list(returned)[iteration_number]['field1']
         '''
-        raise NotImplementedError
+        data = (
+            {field: val} for result in self.results
+                if test_name in result['TestRunner']
+                    for field, val in result['TestRunner'][test_name]['data'].items() if
+                        'data' in result['TestRunner'][test_name]
+        )
+        if format == 'json':
+            raise NotImplementedError
+        elif format == 'csv':
+            raise NotImplementedError
+        elif not format:
+            return data
+        else:
+            raise RuntimeError(
+                f'Invalid format: {format}. Options: "json", "csv", None')
 
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
