@@ -253,7 +253,7 @@ class TestController():
                     not fields or field in fields
         )
         if format == 'json':
-            raise NotImplementedError
+            return json.dumps({test_name: list(data)}, indent=4)
         elif format == 'csv':
             raise NotImplementedError
         elif not format:
