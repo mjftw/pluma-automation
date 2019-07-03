@@ -234,6 +234,20 @@ class TestController():
 
         return settings
 
+    def get_test_results(test_name, fields=None, format=None):
+        '''
+        Get test data from the global data dictionary.
+        @test_name is the name of the test to get data for.
+        @fields is a list of the names of data fields to extract.
+        If @fields is None all fields are returned.
+        @format can be set to the following:
+            'json' -> return data is a json formatted string
+            'csv' -> return data is CSV formatted
+            None -> return data is a list of dicts, with data accessed
+                as below: field1_data = returned[iteration_number]['field1']
+        '''
+        raise NotImplementedError
+
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
