@@ -40,7 +40,7 @@ import platform
 import datetime
 import time
 import re
-from copy import copy, deepcopy
+from copy import copy
 
 from farmutils import Email, send_exception_email
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
@@ -311,7 +311,7 @@ class TestRunner():
                     'Maximum number [{}] of tests with name [{}] reached!'.format(
                         max_duplicate_tests, original_name))
 
-        test = deepcopy(test)
+        test = copy(test)
 
         if index is None:
             self.board.log("Appending test: {}".format(str(test)))
