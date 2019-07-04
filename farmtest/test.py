@@ -188,7 +188,8 @@ class TestCore(TestBase):
 
 class TestRunner():
     def __init__(self, board, tests=None, boot_test=None,
-            skip_tasks=None, email_on_fail=True, use_testcore=True):
+            skip_tasks=None, email_on_fail=True, use_testcore=True,
+            sequential=False):
         self.board = board
         self.email_on_fail = email_on_fail
         self.skip_tasks = skip_tasks or []
@@ -204,6 +205,7 @@ class TestRunner():
 
         self.tasks = TestCore.tasks
         self.use_testcore = use_testcore
+        self.sequential = sequential
 
         # General purpose data for use globally between tests
         self.data = {}
@@ -244,7 +246,7 @@ class TestRunner():
         self.data = {}
 
         # Add TestCore to run standard testing sequence of boots & mounts etc.
-        if (self.use_testcore and "TestCore" not in
+        if (self.use_testcore and str(TestCore) not in
                 (str(t) for t in self.tests)):
             self.add_test(TestCore(self.board), 0)
 
@@ -255,12 +257,23 @@ class TestRunner():
         self.board.log("Running tests: {}".format(
             list(map(lambda t: str(t), self.tests))))
 
-        try:
-            for task in self.tasks:
-                self._run_task(task)
-            self.board.log("\n== ALL TESTS COMPLETED ==", colour='blue', bold=True)
-        except AbortTesting as e:
-            self.board.log("\n== TESTING ABORTED EARLY ==", colour='red', bold=True)
+        if self.sequential:
+            self.board.log('== TESTING MODE: SEQUENTIAL ==',
+                colour='blue', bold=True)
+            for test_name in (str(test) for test in self.tests
+                    if test_name != str(TestCore)):
+                for task_name in self.tasks:
+                    # Run TestCore tasks for every test
+                    tests_to_run = []
+                    if self.use_testcore:
+                        tests_to_run.append(str(TestCore))
+                    tests_to_run.append(test_name)
+
+                    self._run_tasks(task_name, tests_to_run)
+        else:
+            self.board.log('== TESTING MODE: PARALLEL ==',
+                colour='blue', bold=True)
+            self._run_tasks()
 
         # Check if any tasks failed
         if self.test_fails:
@@ -275,7 +288,7 @@ class TestRunner():
             setattr(test, '_test_name', test.__class__.__name__)
         i = 1
         original_name = test._test_name
-        while self._get_tests_by_name(str(test)):
+        while self._get_test_by_name(str(test)):
             old_name = test._test_name
             test._test_name = f'{original_name}_{i}'
             self.board.log(
@@ -296,75 +309,103 @@ class TestRunner():
             self.board.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
-    def _get_tests_by_name(self, test_name):
+    def _get_test_by_name(self, test_name):
         tests = [t for t in self.tests if str(t) == test_name]
+        if len(tests) > 1:
+            raise TestingException('Found multiple tests with name {}'.format(
+                test_name))
+
         return None if not tests else tests
 
-    def _run_task(self, task_name, test_name=None):
+    def _run_tasks(self, task_names=None, test_names=None):
+        # If task_names not specified, run all tasks
+        if not task_names:
+            task_names = self.tasks
+        if not isinstance(task_names, list):
+            task_names = [task_names]
+
+        # If test_names not specified, run tasks for all tests
+        if not test_names:
+            test_names = [str(test) for test in self.tests]
+        if not isinstance(test_names, list):
+            test_names = [test_names]
+
+        self.board.log(f'Running tasks {task_names}\n\nFrom tests {test_names}\n',
+            colour='green', bold=True)
+
+        try:
+            for task_name in task_names:
+                for test_name in test_names:
+                    extra_info = '' if not test_name else f'FOR TEST [{test_name}] '
+                    self._run_task(task_name, test_name)
+                self.board.log(f"\n== TESTS COMPLETED {extra_info}==",
+                    colour='blue', bold=True)
+        except AbortTesting as e:
+            self.board.log(f"\n== TESTING ABORTED EARLY {extra_info}==",
+                colour='red', bold=True)
+
+    def _run_task(self, task_name, test_name):
+        # Check if task should not be run
+        skip_message = f'Skipping task: {task_name} for test {test_name}'
         if "mount" in task_name and not self.board.storage:
-            self.board.log("Board does not have storage. Skipping task: {}".format(task_name))
+            self.board.log(skip_message + '. Board does not have storage')
             return
         if task_name in self.skip_tasks:
-            self.board.log("Skipping task: {}".format(task_name),
-                colour='green', bold=True)
+            self.board.log(skip_message, colour='green', bold=True)
             return
 
-        # Run all task for all tests unless one is specified
-        if test_name:
-            tests_to_run = self._get_tests_by_name(test_name)
-            if not tests_to_run:
-                self.board.error(
-                    'Cannot run specified test {} as it is not in test list. Running all'.format(
-                    test_name))
-                tests_to_run = self.tests
-            self.board.log('Running {} for test [{}] only'.format(
-                task_name, test_name))
-        else:
-            tests_to_run = self.tests
+        test = self._get_test_by_name(test_name)
+        if not test:
+            self.board.error(
+                'Cannot run specified test {} as it is not in test list'.format(
+                test_name, TestingException))
 
-        for test in tests_to_run:
-            if (task_name == "_board_on_and_validate" and
+        if (task_name == "_board_on_and_validate" and
                 self.boot_test):
-                # Initialise boot test result to success
-                self.boot_test.boot_success = True
-            task_func = getattr(test, task_name, None)
-            if task_func:
-                self.data[str(test)]['tasks']['ran'].append(task_name)
+            # Initialise boot test result to success
+            self.boot_test.boot_success = True
 
-                if test.__class__ != TestCore:
-                    self.board.log("Running: {} - {}".format(
-                        str(test), task_name), colour='green')
-                try:
-                    task_func()
-                # If exception is one we deliberately caused, don't handle it
-                except KeyboardInterrupt as e:
-                    raise e
-                except InterruptedError as e:
-                    raise e
-                except Exception as e:
-                    self.data[str(test)]['tasks']['failed'].append(task_name)
+        task_func = getattr(test, task_name, None)
+        if not task_func:
+            # If test does not have this task, then skip
+            return
 
-                    # If request to abort testing, do so
-                    if isinstance(e, AbortTesting):
-                        self.board.log('Testing aborted by task {} - {}: {}'.format(
-                            str(test), task_name, str(e)))
-                        if (isinstance(e, AbortTestingAndReport) and
-                                'report' in self.tasks):
-                            self._run_task('report')
-                        raise e
-                    # If failed boot, and we have a specific boot test,
-                    #   run it's report function
-                    if (isinstance(e, BoardBootValidationError) and
-                            self.boot_test):
-                            self.board.log('Boot test failed, running {}.report()'.format(
-                                str(self.boot_test)))
+        self.data[str(test)]['tasks']['ran'].append(task_name)
 
-                            self.boot_test.boot_success = False
-                            self._run_task('report', str(self.boot_test))
-                            self._handle_failed_task(test, task_name, e)
-                    # For all other exceptions, we want to know about it
-                    else:
-                        self._handle_failed_task(test, task_name, e)
+        if test.__class__ != TestCore:
+            self.board.log("Running: {} - {}".format(
+                str(test), task_name), colour='green')
+        try:
+            task_func()
+        # If exception is one we deliberately caused, don't handle it
+        except KeyboardInterrupt as e:
+            raise e
+        except InterruptedError as e:
+            raise e
+        except Exception as e:
+            self.data[str(test)]['tasks']['failed'].append(task_name)
+
+            # If request to abort testing, do so
+            if isinstance(e, AbortTesting):
+                self.board.log('Testing aborted by task {} - {}: {}'.format(
+                    str(test), task_name, str(e)))
+                if (isinstance(e, AbortTestingAndReport) and
+                        'report' in self.tasks):
+                    self._run_task('report')
+                raise e
+            # If failed boot, and we have a specific boot test,
+            #   run it's report function
+            if (isinstance(e, BoardBootValidationError) and
+                    self.boot_test):
+                    self.board.log('Boot test failed, running {}.report()'.format(
+                        str(self.boot_test)))
+
+                    self.boot_test.boot_success = False
+                    self._run_task('report', str(self.boot_test))
+                    self._handle_failed_task(test, task_name, e)
+            # For all other exceptions, we want to know about it
+            else:
+                self._handle_failed_task(test, task_name, e)
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {
