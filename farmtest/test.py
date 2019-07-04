@@ -352,11 +352,25 @@ class TestRunner():
         if not isinstance(test_names, list):
             test_names = [test_names]
 
-        self.board.log(f'Running tasks {task_names} for tests {test_names}',
-            colour='green', bold=True)
 
         try:
             for task_name in task_names:
+                tests_with_task = self.get_tests_with_task(task_name)
+
+                # If no tests have this task, do not attempt to run it
+                if not tests_with_task:
+                    continue
+
+                tests_names_with_task = [str(t) for t in tests_with_task]
+
+                # If only TestCore has task, and it is not an action
+                #   (starts with '_'), do not run this task
+                if ('TestCore' in tests_names_with_task and
+                        not task_name.startswith('_')):
+                    tests_names_with_task.remove('TestCore')
+                if not tests_names_with_task:
+                    continue
+
                 # Check if task should not be run
                 skip_message = f'Skipping task: {task_name}'
                 if "mount" in task_name and not self.board.storage:
@@ -392,15 +406,7 @@ class TestRunner():
 
         self.data[str(test)]['tasks']['ran'].append(task_name)
 
-        if test.__class__ == TestCore:
-            # If only TestCore has task, and it is not an action
-            #   (starts with '_'), do not run this task
-            tests_with_task = [str(t) for t in self.get_tests_with_task(task_name)]
-            if 'TestCore' in tests_with_task:
-                tests_with_task.remove('TestCore')
-            if not tests_with_task:
-                return
-        else:
+        if test.__class__ != TestCore:
             self.board.log("Running: {} - {}".format(
                 str(test), task_name), colour='green')
         try:
