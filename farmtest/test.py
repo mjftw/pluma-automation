@@ -334,6 +334,11 @@ class TestRunner():
 
         return None if not tests else tests[0]
 
+    def get_tests_with_task(self, task_name):
+        tests = [t for t in self.tests if hasattr(t, task_name)]
+
+        return None if not tests else tests
+
     def _run_tasks(self, task_names=None, test_names=None):
         # If task_names not specified, run all tasks
         if not task_names:
@@ -387,7 +392,15 @@ class TestRunner():
 
         self.data[str(test)]['tasks']['ran'].append(task_name)
 
-        if test.__class__ != TestCore:
+        if test.__class__ == TestCore:
+            # If only TestCore has task, and it is not an action
+            #   (starts with '_'), do not run this task
+            tests_with_task = [str(t) for t in self.get_tests_with_task(task_name)]
+            if 'TestCore' in tests_with_task:
+                tests_with_task.remove('TestCore')
+            if not tests_with_task:
+                return
+        else:
             self.board.log("Running: {} - {}".format(
                 str(test), task_name), colour='green')
         try:
