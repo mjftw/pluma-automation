@@ -381,6 +381,7 @@ class TestController():
             'start': datetime_to_timestamp(datetime.now()),
             'end': None,
             'success': None,
+            'test_order': None,
             'TestRunner': self.testrunner.data
             }
         self.results.append(skeleton)
@@ -395,6 +396,10 @@ class TestController():
         self.results[-1]['end'] = datetime_to_timestamp(datetime.now())
         self.results[-1]['success'] = success
         self.results[-1]['ran'] = True
+        if self.testrunner.sequential:
+            self.results[-1]['test_order'] = 'sequential'
+        else:
+            self.results[-1]['test_order'] = 'parallel'
 
         num_tests_run = len([
             k for k, v in self.testrunner.data.items()
