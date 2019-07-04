@@ -262,7 +262,7 @@ class TestRunner():
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
                 colour='blue', bold=True)
             for test_name in (str(test) for test in self.tests
-                    if test_name != "TestCore"):
+                    if str(test) != "TestCore"):
                 for task_name in self.tasks:
                     # Run TestCore tasks for every test
                     tests_to_run = []
@@ -275,6 +275,9 @@ class TestRunner():
             self.board.log('== TESTING MODE: PARALLEL ==',
                 colour='blue', bold=True)
             self._run_tasks()
+
+        self.board.log(f"\n== ALL TESTS COMPLETED ==",
+            colour='blue', bold=True)
 
         # Check if any tasks failed
         if self.test_fails:
@@ -325,7 +328,6 @@ class TestRunner():
 
     def _get_test_by_name(self, test_name):
         tests = [t for t in self.tests if str(t) == test_name]
-        print(tests)
         if len(tests) > 1:
             raise TestingException('Found multiple tests with name {}'.format(
                 test_name))
@@ -345,31 +347,28 @@ class TestRunner():
         if not isinstance(test_names, list):
             test_names = [test_names]
 
-        self.board.log(f'Running tasks {task_names}\nFor tests {test_names}\n',
+        self.board.log(f'Running tasks {task_names} for tests {test_names}',
             colour='green', bold=True)
 
         try:
             for task_name in task_names:
+                # Check if task should not be run
+                skip_message = f'Skipping task: {task_name}'
+                if "mount" in task_name and not self.board.storage:
+                    self.board.log(skip_message + '. Board does not have storage',
+                        colour='green', bold=True)
+                    continue
+                if task_name in self.skip_tasks:
+                    self.board.log(skip_message, colour='green', bold=True)
+                    continue
+
                 for test_name in test_names:
                     self._run_task(task_name, test_name)
         except AbortTesting as e:
             self.board.log(f"\n== TESTING ABORTED EARLY ==",
                 colour='red', bold=True)
 
-        self.board.log(f"\n== ALL TESTS COMPLETED ==",
-            colour='blue', bold=True)
-
     def _run_task(self, task_name, test_name):
-        # Check if task should not be run
-        skip_message = f'Skipping task: {task_name} for test {test_name}'
-        if "mount" in task_name and not self.board.storage:
-            self.board.log(skip_message + '. Board does not have storage',
-                colour='green', bold=True)
-            return
-        if task_name in self.skip_tasks:
-            self.board.log(skip_message, colour='green', bold=True)
-            return
-
         test = self._get_test_by_name(test_name)
         if not test:
             self.board.error(
