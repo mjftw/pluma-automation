@@ -39,7 +39,8 @@ import traceback
 import platform
 import datetime
 import time
-from copy import copy
+import re
+from copy import copy, deepcopy
 
 from farmutils import Email, send_exception_email
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
@@ -246,7 +247,7 @@ class TestRunner():
         self.data = {}
 
         # Add TestCore to run standard testing sequence of boots & mounts etc.
-        if (self.use_testcore and str(TestCore) not in
+        if (self.use_testcore and "TestCore" not in
                 (str(t) for t in self.tests)):
             self.add_test(TestCore(self.board), 0)
 
@@ -261,12 +262,12 @@ class TestRunner():
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
                 colour='blue', bold=True)
             for test_name in (str(test) for test in self.tests
-                    if test_name != str(TestCore)):
+                    if test_name != "TestCore"):
                 for task_name in self.tasks:
                     # Run TestCore tasks for every test
                     tests_to_run = []
                     if self.use_testcore:
-                        tests_to_run.append(str(TestCore))
+                        tests_to_run.append("TestCore")
                     tests_to_run.append(test_name)
 
                     self._run_tasks(task_name, tests_to_run)
@@ -286,15 +287,28 @@ class TestRunner():
         # Default name is the class name, new names are <classname>_1,2,3 etc.
         if not hasattr(test, '_test_name'):
             setattr(test, '_test_name', test.__class__.__name__)
-        i = 1
+
+        max_duplicate_tests = 500
         original_name = test._test_name
-        while self._get_test_by_name(str(test)):
+        stripped_name = re.sub(r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
+
+        for i in range(1, max_duplicate_tests+1):
+            if not self._get_test_by_name(str(test._test_name)):
+                break
+
             old_name = test._test_name
-            test._test_name = f'{original_name}_{i}'
+            test._test_name = f'{stripped_name}_{i}'
+
             self.board.log(
                 'Test [{}] already added. Renaming to [{}]'.format(
                     old_name, test._test_name))
-            i += 1
+
+            if i >= max_duplicate_tests:
+                raise TestingException(
+                    'Maximum number [{}] of tests with name [{}] reached!'.format(
+                        max_duplicate_tests, original_name))
+
+        test = deepcopy(test)
 
         if index is None:
             self.board.log("Appending test: {}".format(str(test)))
@@ -311,11 +325,12 @@ class TestRunner():
 
     def _get_test_by_name(self, test_name):
         tests = [t for t in self.tests if str(t) == test_name]
+        print(tests)
         if len(tests) > 1:
             raise TestingException('Found multiple tests with name {}'.format(
                 test_name))
 
-        return None if not tests else tests
+        return None if not tests else tests[0]
 
     def _run_tasks(self, task_names=None, test_names=None):
         # If task_names not specified, run all tasks
@@ -330,25 +345,26 @@ class TestRunner():
         if not isinstance(test_names, list):
             test_names = [test_names]
 
-        self.board.log(f'Running tasks {task_names}\n\nFrom tests {test_names}\n',
+        self.board.log(f'Running tasks {task_names}\nFor tests {test_names}\n',
             colour='green', bold=True)
 
         try:
             for task_name in task_names:
                 for test_name in test_names:
-                    extra_info = '' if not test_name else f'FOR TEST [{test_name}] '
                     self._run_task(task_name, test_name)
-                self.board.log(f"\n== TESTS COMPLETED {extra_info}==",
-                    colour='blue', bold=True)
         except AbortTesting as e:
-            self.board.log(f"\n== TESTING ABORTED EARLY {extra_info}==",
+            self.board.log(f"\n== TESTING ABORTED EARLY ==",
                 colour='red', bold=True)
+
+        self.board.log(f"\n== ALL TESTS COMPLETED ==",
+            colour='blue', bold=True)
 
     def _run_task(self, task_name, test_name):
         # Check if task should not be run
         skip_message = f'Skipping task: {task_name} for test {test_name}'
         if "mount" in task_name and not self.board.storage:
-            self.board.log(skip_message + '. Board does not have storage')
+            self.board.log(skip_message + '. Board does not have storage',
+                colour='green', bold=True)
             return
         if task_name in self.skip_tasks:
             self.board.log(skip_message, colour='green', bold=True)
