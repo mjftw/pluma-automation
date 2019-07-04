@@ -234,6 +234,45 @@ class TestController():
 
         return settings
 
+    def get_test_results(self, test_name, fields=None, format=None):
+        '''
+        Get test data from the global data dictionary.
+        @test_name is the name of the test to get data for.
+        @fields is a list of the names of data fields to extract.
+        If @fields is None all fields are returned.
+        @format can be set to the following:
+            'json' -> return data is a json formatted string
+            'csv' -> return data is CSV formatted
+            None -> return data is a generator to create a list of dicts
+                as shown: field1_data = list(returned)[iteration_number]['field1']
+        '''
+        def data_gen():
+            for r in (result['TestRunner'] for result in self.results if test_name in result['TestRunner']):
+                yield {
+                    f: v for f, v in r[test_name]['data'].items() if 'data' in r[test_name] and
+                    not fields or f in fields
+                }
+
+        if format == 'json':
+            return json.dumps({test_name: list(data_gen())}, indent=4)
+        elif format == 'csv':
+            newline = '\n'
+            header = sorted(list(set(key for it_data in data_gen() for key in it_data)))
+            csv_str = 'iteration,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
+            for iteration, data in enumerate(data_gen()):
+                csv_str += f'{iteration}'
+                for h in header:
+                    csv_str += ','
+                    if h in data:
+                        csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
+                csv_str += newline
+            return csv_str
+        elif not format:
+            return data_gen()
+        else:
+            raise RuntimeError(
+                f'Invalid format: {format}. Options: "json", "csv", None')
+
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
