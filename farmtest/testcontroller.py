@@ -257,15 +257,14 @@ class TestController():
             return json.dumps({test_name: list(data_gen())}, indent=4)
         elif format == 'csv':
             newline = '\n'
-            header = sorted(list(set(key.replace('\n', ' ').replace('\r', '')
-                for it_data in data_gen() for key in it_data)))
-            csv_str = 'iteration,' + ','.join(header) + newline
+            header = sorted(list(set(key for it_data in data_gen() for key in it_data)))
+            csv_str = 'iteration,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
             for iteration, data in enumerate(data_gen()):
                 csv_str += f'{iteration}'
                 for h in header:
                     csv_str += ','
                     if h in data:
-                        csv_str += f'{data[h]}'
+                        csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
                 csv_str += newline
             return csv_str
         elif not format:
