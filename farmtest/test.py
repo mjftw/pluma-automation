@@ -39,6 +39,7 @@ import traceback
 import platform
 import datetime
 import time
+import re
 from copy import copy
 
 from farmutils import Email, send_exception_email
@@ -188,7 +189,8 @@ class TestCore(TestBase):
 
 class TestRunner():
     def __init__(self, board, tests=None, boot_test=None,
-            skip_tasks=None, email_on_fail=True, use_testcore=True):
+            skip_tasks=None, email_on_fail=True, use_testcore=True,
+            sequential=False):
         self.board = board
         self.email_on_fail = email_on_fail
         self.skip_tasks = skip_tasks or []
@@ -204,6 +206,7 @@ class TestRunner():
 
         self.tasks = TestCore.tasks
         self.use_testcore = use_testcore
+        self.sequential = sequential
 
         # General purpose data for use globally between tests
         self.data = {}
@@ -255,12 +258,26 @@ class TestRunner():
         self.board.log("Running tests: {}".format(
             list(map(lambda t: str(t), self.tests))))
 
-        try:
-            for task in self.tasks:
-                self._run_task(task)
-            self.board.log("\n== ALL TESTS COMPLETED ==", colour='blue', bold=True)
-        except AbortTesting as e:
-            self.board.log("\n== TESTING ABORTED EARLY ==", colour='red', bold=True)
+        if self.sequential:
+            self.board.log('== TESTING MODE: SEQUENTIAL ==',
+                colour='blue', bold=True)
+            for test_name in (str(test) for test in self.tests
+                    if str(test) != "TestCore"):
+                for task_name in self.tasks:
+                    # Run TestCore tasks for every test
+                    tests_to_run = []
+                    if self.use_testcore:
+                        tests_to_run.append("TestCore")
+                    tests_to_run.append(test_name)
+
+                    self._run_tasks(task_name, tests_to_run)
+        else:
+            self.board.log('== TESTING MODE: PARALLEL ==',
+                colour='blue', bold=True)
+            self._run_tasks()
+
+        self.board.log(f"\n== ALL TESTS COMPLETED ==",
+            colour='blue', bold=True)
 
         # Check if any tasks failed
         if self.test_fails:
@@ -273,15 +290,28 @@ class TestRunner():
         # Default name is the class name, new names are <classname>_1,2,3 etc.
         if not hasattr(test, '_test_name'):
             setattr(test, '_test_name', test.__class__.__name__)
-        i = 1
+
+        max_duplicate_tests = 500
         original_name = test._test_name
-        while self._get_tests_by_name(str(test)):
+        stripped_name = re.sub(r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
+
+        for i in range(1, max_duplicate_tests+1):
+            if not self._get_test_by_name(str(test._test_name)):
+                break
+
             old_name = test._test_name
-            test._test_name = f'{original_name}_{i}'
+            test._test_name = f'{stripped_name}_{i}'
+
             self.board.log(
                 'Test [{}] already added. Renaming to [{}]'.format(
                     old_name, test._test_name))
-            i += 1
+
+            if i >= max_duplicate_tests:
+                raise TestingException(
+                    'Maximum number [{}] of tests with name [{}] reached!'.format(
+                        max_duplicate_tests, original_name))
+
+        test = copy(test)
 
         if index is None:
             self.board.log("Appending test: {}".format(str(test)))
@@ -296,75 +326,120 @@ class TestRunner():
             self.board.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
-    def _get_tests_by_name(self, test_name):
+    def _get_test_by_name(self, test_name):
         tests = [t for t in self.tests if str(t) == test_name]
+        if len(tests) > 1:
+            raise TestingException('Found multiple tests with name {}'.format(
+                test_name))
+
+        return None if not tests else tests[0]
+
+    def get_tests_with_task(self, task_name):
+        tests = [t for t in self.tests if hasattr(t, task_name)]
+
         return None if not tests else tests
 
-    def _run_task(self, task_name, test_name=None):
-        if "mount" in task_name and not self.board.storage:
-            self.board.log("Board does not have storage. Skipping task: {}".format(task_name))
-            return
-        if task_name in self.skip_tasks:
-            self.board.log("Skipping task: {}".format(task_name),
-                colour='green', bold=True)
-            return
+    def _run_tasks(self, task_names=None, test_names=None):
+        # If task_names not specified, run all tasks
+        if not task_names:
+            task_names = self.tasks
+        if not isinstance(task_names, list):
+            task_names = [task_names]
 
-        # Run all task for all tests unless one is specified
-        if test_name:
-            tests_to_run = self._get_tests_by_name(test_name)
-            if not tests_to_run:
-                self.board.error(
-                    'Cannot run specified test {} as it is not in test list. Running all'.format(
-                    test_name))
-                tests_to_run = self.tests
-            self.board.log('Running {} for test [{}] only'.format(
-                task_name, test_name))
-        else:
-            tests_to_run = self.tests
+        # If test_names not specified, run tasks for all tests
+        if not test_names:
+            test_names = [str(test) for test in self.tests]
+        if not isinstance(test_names, list):
+            test_names = [test_names]
 
-        for test in tests_to_run:
-            if (task_name == "_board_on_and_validate" and
+
+        try:
+            for task_name in task_names:
+                tests_with_task = self.get_tests_with_task(task_name)
+
+                # If no tests have this task, do not attempt to run it
+                if not tests_with_task:
+                    continue
+
+                tests_names_with_task = [str(t) for t in tests_with_task]
+
+                # If only TestCore has task, and it is not an action
+                #   (starts with '_'), do not run this task
+                if ('TestCore' in tests_names_with_task and
+                        not task_name.startswith('_')):
+                    tests_names_with_task.remove('TestCore')
+                if not tests_names_with_task:
+                    continue
+
+                # Check if task should not be run
+                skip_message = f'Skipping task: {task_name}'
+                if "mount" in task_name and not self.board.storage:
+                    self.board.log(skip_message + '. Board does not have storage',
+                        colour='green', bold=True)
+                    continue
+                if task_name in self.skip_tasks:
+                    self.board.log(skip_message, colour='green', bold=True)
+                    continue
+
+                for test_name in test_names:
+                    self._run_task(task_name, test_name)
+        except AbortTesting as e:
+            self.board.log(f"\n== TESTING ABORTED EARLY ==",
+                colour='red', bold=True)
+
+    def _run_task(self, task_name, test_name):
+        test = self._get_test_by_name(test_name)
+        if not test:
+            self.board.error(
+                'Cannot run specified test {} as it is not in test list'.format(
+                test_name, TestingException))
+
+        if (task_name == "_board_on_and_validate" and
                 self.boot_test):
-                # Initialise boot test result to success
-                self.boot_test.boot_success = True
-            task_func = getattr(test, task_name, None)
-            if task_func:
-                self.data[str(test)]['tasks']['ran'].append(task_name)
+            # Initialise boot test result to success
+            self.boot_test.boot_success = True
 
-                if test.__class__ != TestCore:
-                    self.board.log("Running: {} - {}".format(
-                        str(test), task_name), colour='green')
-                try:
-                    task_func()
-                # If exception is one we deliberately caused, don't handle it
-                except KeyboardInterrupt as e:
-                    raise e
-                except InterruptedError as e:
-                    raise e
-                except Exception as e:
-                    self.data[str(test)]['tasks']['failed'].append(task_name)
+        task_func = getattr(test, task_name, None)
+        if not task_func:
+            # If test does not have this task, then skip
+            return
 
-                    # If request to abort testing, do so
-                    if isinstance(e, AbortTesting):
-                        self.board.log('Testing aborted by task {} - {}: {}'.format(
-                            str(test), task_name, str(e)))
-                        if (isinstance(e, AbortTestingAndReport) and
-                                'report' in self.tasks):
-                            self._run_task('report')
-                        raise e
-                    # If failed boot, and we have a specific boot test,
-                    #   run it's report function
-                    if (isinstance(e, BoardBootValidationError) and
-                            self.boot_test):
-                            self.board.log('Boot test failed, running {}.report()'.format(
-                                str(self.boot_test)))
+        self.data[str(test)]['tasks']['ran'].append(task_name)
 
-                            self.boot_test.boot_success = False
-                            self._run_task('report', str(self.boot_test))
-                            self._handle_failed_task(test, task_name, e)
-                    # For all other exceptions, we want to know about it
-                    else:
-                        self._handle_failed_task(test, task_name, e)
+        if test.__class__ != TestCore:
+            self.board.log("Running: {} - {}".format(
+                str(test), task_name), colour='green')
+        try:
+            task_func()
+        # If exception is one we deliberately caused, don't handle it
+        except KeyboardInterrupt as e:
+            raise e
+        except InterruptedError as e:
+            raise e
+        except Exception as e:
+            self.data[str(test)]['tasks']['failed'].append(task_name)
+
+            # If request to abort testing, do so
+            if isinstance(e, AbortTesting):
+                self.board.log('Testing aborted by task {} - {}: {}'.format(
+                    str(test), task_name, str(e)))
+                if (isinstance(e, AbortTestingAndReport) and
+                        'report' in self.tasks):
+                    self._run_task('report')
+                raise e
+            # If failed boot, and we have a specific boot test,
+            #   run it's report function
+            if (isinstance(e, BoardBootValidationError) and
+                    self.boot_test):
+                    self.board.log('Boot test failed, running {}.report()'.format(
+                        str(self.boot_test)))
+
+                    self.boot_test.boot_success = False
+                    self._run_task('report', str(self.boot_test))
+                    self._handle_failed_task(test, task_name, e)
+            # For all other exceptions, we want to know about it
+            else:
+                self._handle_failed_task(test, task_name, e)
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {
