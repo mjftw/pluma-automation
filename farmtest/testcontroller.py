@@ -39,7 +39,6 @@ class TestController():
                 'test_settings': {}
             }
         }
-        self.tc_data = self.data['TestController']
 
         # Runtime settings
         self.settings = {}
@@ -64,43 +63,43 @@ class TestController():
 
     @property
     def settings(self):
-        return self.tc_data['settings']
+        return self.data['TestController']['settings']
 
     @settings.setter
     def settings(self, settings):
-        self.tc_data['settings'] = settings
+        self.data['TestController']['settings'] = settings
 
     @property
     def stats(self):
-        return self.tc_data['stats']
+        return self.data['TestController']['stats']
 
     @stats.setter
     def stats(self, stats):
-        self.tc_data['stats'] = stats
+        self.data['TestController']['stats'] = stats
 
     @property
     def results(self):
-        return self.tc_data['results']
+        return self.data['TestController']['results']
 
     @results.setter
     def results(self, results):
-        self.tc_data['results'] = results
+        self.data['TestController']['results'] = results
 
     @property
     def results_summary(self):
-        return self.tc_data['results_summary']
+        return self.data['TestController']['results_summary']
 
     @results_summary.setter
     def results_summary(self, results_summary):
-        self.tc_data['results_summary'] = results_summary
+        self.data['TestController']['results_summary'] = results_summary
 
     @property
     def test_settings(self):
-        return self.tc_data['test_settings']
+        return self.data['TestController']['test_settings']
 
     @test_settings.setter
     def test_settings(self, test_settings):
-        self.tc_data['test_settings'] = test_settings
+        self.data['TestController']['test_settings'] = test_settings
 
     @property
     def setup(self):
