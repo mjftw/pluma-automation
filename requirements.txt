@@ -8,3 +8,4 @@ pyroute2
 pandas
 pygal
 graphviz
+nanocom

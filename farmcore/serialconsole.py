@@ -1,7 +1,5 @@
 from serial import Serial
-import sys
-import os
-import select
+from nanocom import Nanocom
 
 import pexpect.fdpexpect
 
@@ -58,39 +56,23 @@ class SerialConsole(ConsoleBase):
         else:
             self.log("Cannot close serial as it is not open")
 
-    def interact(self, echo=False):
+    def interact(self, exit_char=None):
         if not self.is_open:
             self.open()
 
-        self.log('Starting interactive console\nPress Ctrl-C to exit')
+        exit_char = exit_char or '¬'
 
+        self.log('Starting interactive console\nPress {} to exit'.format(
+            exit_char))
+
+        com = Nanocom(self._ser, exit_character=exit_char)
+
+        com.start()
         try:
-            # Disable echo
-            os.system("stty -echo")
-
-            self._ser.reset_input_buffer()
-            self._ser.reset_output_buffer()
-            while True:
-                # Send
-                # Check if stdin chars are waiting & read until clear
-                tx_buf = ''
-                if sys.stdin in select.select([sys.stdin], [], [], 0)[0]:
-                    tx_buf += sys.stdin.read(1)
-                if tx_buf:
-                    tx_str = self.encode(tx_buf)
-                    self._pex.write(tx_str)
-
-                # Recieve
-                rx_buf = b''
-                if self._ser.in_waiting:
-                    rx_buf += self._pex.read(self._ser.in_waiting)
-                if rx_buf:
-                    rx_str = self.decode(rx_buf)
-                    sys.stdout.write(rx_str)
-
+            com.join()
         except KeyboardInterrupt:
-            self.log('Exiting interactive console')
+            pass
         finally:
-            # Enable echo
-            os.system("stty echo")
+            self.log('Exiting interactive console...')
+            com.close()
 
