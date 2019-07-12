@@ -71,7 +71,8 @@ class SerialConsole(ConsoleBase):
         self.log('Starting interactive console\nPress {} to exit'.format(
             exit_char))
 
-        com = Nanocom(self._ser, exit_character=exit_char)
+        com = self._logging_Nanocom(self.raw_logfile, self._ser,
+            exit_character=exit_char)
 
         com.start()
         try:
@@ -82,3 +83,28 @@ class SerialConsole(ConsoleBase):
             self.log('Exiting interactive console...')
             com.close()
 
+
+    class _logging_Nanocom(Nanocom):
+        '''
+        This class just slightly modifies Nanocom to get it to log
+        recieved data to a file.
+        This is done so that the text from the interactive session
+        is written to the raw logfile, along with everything else.
+        The reader() method is copy-pasted from Nanocom and modified.
+        '''
+        def __init__(self, logfile, *args, **kwargs):
+            self.logfile = logfile
+            Nanocom.__init__(self, *args, **kwargs)
+
+        def reader(self):
+            try:
+                while self.alive:
+                    data = self.serial.read(self.serial.in_waiting or 1)
+                    if data:
+                        self.console.write_bytes(data)
+                        with open(self.logfile, 'ab') as f:
+                            f.write(data)
+            except Exception:
+                self.alive = False
+                self.console.cancel()
+                raise
