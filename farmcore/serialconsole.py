@@ -57,6 +57,12 @@ class SerialConsole(ConsoleBase):
             self.log("Cannot close serial as it is not open")
 
     def interact(self, exit_char=None):
+        '''
+        Take interactive control of a SerialConsole.
+        The initention is that this be used from the command line.
+        To exit the terminal press the exit character.
+        You can set the exit charater with @exit_char, default is "¬".
+        '''
         if not self.is_open:
             self.open()
 
