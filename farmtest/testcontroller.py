@@ -234,7 +234,7 @@ class TestController():
 
         return settings
 
-    def get_test_results(self, test_names, fields=None, format=None):
+    def get_test_results(self, test_names=None, fields=None, format=None):
         '''
         Get test data from the global data dictionary.
         @test_names is the name of the test(s) to get data for, this can be a
@@ -251,6 +251,8 @@ class TestController():
             None -> return data is a generator to create a list of dicts
                 as shown: field1_data = list(returned)[iteration_number]['field1']
         '''
+
+        test_names = test_names or '.*'
         if not isinstance(test_names, list):
             test_names = [test_names]
 
