@@ -243,6 +243,7 @@ class TestController():
         regex specified being returned.
         E.g. Things like test_names=[MyTest.*, Test2] are allowed.
         If @test_names is None, match all test names.
+        Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
         @fields is a list of the names of data fields to extract.
         If @fields is None all fields are returned.
         @format can be set to the following:
