@@ -1,5 +1,6 @@
 import time
 import json
+import re
 from datetime import datetime
 from copy import deepcopy
 from statistics import mean, median_grouped, mode, stdev, variance,\
@@ -233,10 +234,15 @@ class TestController():
 
         return settings
 
-    def get_test_results(self, test_name, fields=None, format=None):
+    def get_test_results(self, test_names, fields=None, format=None):
         '''
         Get test data from the global data dictionary.
-        @test_name is the name of the test to get data for.
+        @test_names is the name of the test(s) to get data for, this can be a
+        single test or a list of test names. These names are actually checked
+        as regular expressions, with data from any test name matching any
+        regex specified being returned.
+        E.g. Things like test_names=[MyTest.*, Test2] are allowed.
+        If @test_names is None, match all test names.
         @fields is a list of the names of data fields to extract.
         If @fields is None all fields are returned.
         @format can be set to the following:
@@ -245,26 +251,32 @@ class TestController():
             None -> return data is a generator to create a list of dicts
                 as shown: field1_data = list(returned)[iteration_number]['field1']
         '''
+        if not isinstance(test_names, list):
+            test_names = [test_names]
+
         def data_gen():
-            for r in (result['TestRunner'] for result in self.results if test_name in result['TestRunner']):
+            for r in (result['TestRunner'] for result in self.results):
                 yield {
-                    f: v for f, v in r[test_name]['data'].items() if 'data' in r[test_name] and
-                    not fields or f in fields
+                    name: {
+                        f: v for f, v in r[name]['data'].items() if 'data' in r[name] and
+                        not fields or f in fields
+                    } for name in set(t for p, t in filter(lambda pt: re.match(*pt), ((p, t) for t in r for p in test_names)))
                 }
 
         if format == 'json':
-            return json.dumps({test_name: list(data_gen())}, indent=4)
+            return json.dumps(list(data_gen()), indent=4)
         elif format == 'csv':
             newline = '\n'
-            header = sorted(list(set(key for it_data in data_gen() for key in it_data)))
-            csv_str = 'iteration,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
-            for iteration, data in enumerate(data_gen()):
-                csv_str += f'{iteration}'
-                for h in header:
-                    csv_str += ','
-                    if h in data:
-                        csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
-                csv_str += newline
+            header = sorted(list(set(key for it_data in data_gen() for test, data in it_data.items() for key in data)))
+            csv_str = 'iteration,test_name,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
+            for iteration, tests_data in enumerate(data_gen()):
+                for test_name, data in tests_data.items():
+                    csv_str += f'{iteration},{test_name}'
+                    for h in header:
+                        csv_str += ','
+                        if h in data:
+                            csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
+                    csv_str += newline
             return csv_str
         elif not format:
             return data_gen()
