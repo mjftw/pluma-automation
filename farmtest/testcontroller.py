@@ -257,6 +257,9 @@ class TestController():
         if not isinstance(test_names, list):
             test_names = [test_names]
 
+        # Add a $ to the end of every regex to make it less greedy
+        test_names = [f'{t}$' for t in test_names]
+
         def data_gen():
             for r in (result['TestRunner'] for result in self.results):
                 yield {
