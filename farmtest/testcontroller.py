@@ -266,7 +266,7 @@ class TestController():
                     name: {
                         f: v for f, v in r[name]['data'].items() if 'data' in r[name] and
                         not fields or f in fields
-                    } for name in set(t for p, t in filter(lambda pt: re.match(*pt), ((p, t) for t in r for p in test_names)))
+                    } for name in sorted(set(t for p, t in filter(lambda pt: re.match(*pt), ((p, t) for t in r for p in test_names))))
                 }
 
         if format == 'json':
