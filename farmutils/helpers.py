@@ -1,5 +1,6 @@
 import subprocess
 import json
+import re
 from datetime import datetime
 
 def run_host_cmd(command, stdin=None, *args, **kwargs):
@@ -50,3 +51,17 @@ def timestamp_to_datetime(timestamp):
 
 def datetime_to_timestamp(dt):
     return dt.strftime('%Y-%m-%d-%H-%M-%S')
+
+
+def regex_filter_list(patterns, items, unique=None):
+    '''
+    Get a list of items from @items that match any of the regular
+    expressions @patterns.
+    Returned list is alphanumerically sorted.
+    If @unique, duplicates are removed.
+    '''
+    gen = (i for p, i in filter(lambda pi: re.match(*pi),
+        (((p, i) for i in items for p in patterns))))
+    if unique:
+        gen = set(gen)
+    return sorted(gen)

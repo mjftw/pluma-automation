@@ -6,7 +6,8 @@ from copy import deepcopy
 from statistics import mean, median_grouped, mode, stdev, variance,\
     StatisticsError
 
-from farmutils import send_exception_email, datetime_to_timestamp
+from farmutils import send_exception_email, datetime_to_timestamp, \
+    regex_filter_list
 
 from .unittest import UnitTest, deferred_function
 from .test import TestRunner
@@ -266,7 +267,7 @@ class TestController():
                     name: {
                         f: v for f, v in r[name]['data'].items() if 'data' in r[name] and
                         not fields or f in fields
-                    } for name in sorted(set(t for p, t in filter(lambda pt: re.match(*pt), ((p, t) for t in r for p in test_names))))
+                    } for name in regex_filter_list(test_names, r, unique=True)
                 }
 
         if format == 'json':
