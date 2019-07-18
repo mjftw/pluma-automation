@@ -1,10 +1,9 @@
 import time
-import sys
 
 from ..board import Board
 from ..baseclasses import PowerBase
 from .serialconsolemock import SerialConsoleMock
-from .powermock import PowerMock
+
 
 class BoardMock(Board):
     class BoardMockPower(PowerBase):
@@ -31,6 +30,7 @@ class BoardMock(Board):
                 board=self
             )
         )
+
 
 def _console_child_function(*args):
     boot_text = '''
