@@ -1,8 +1,8 @@
 import pexpect
 import pty
 import os
-import time
 import atexit
+import sys
 
 from ..baseclasses import ConsoleBase
 
@@ -43,6 +43,7 @@ class SerialConsoleMock(ConsoleBase):
             else:
                 # In child process
                 self.child_function()
+                sys.exit()
 
             self._pex = pexpect.fdpexpect.fdspawn(
                 fd=self._child_fd, timeout=0.001)
