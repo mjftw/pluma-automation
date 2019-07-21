@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name = "farm-core",
     version = "0.1",
-    packages=["farm-core"],
+    packages=["farmcore", "farmtest", "farmutils"],
     author="Merlin Webster",
     author_email = "mwebster@witekio.com",
     description = "farm-core package for the Automation Lab.",
