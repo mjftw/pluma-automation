@@ -257,7 +257,8 @@ class TestController():
             'json' -> return data is a json formatted string
             'csv' -> return data is CSV formatted
             None -> return data is a generator to create a list of dicts
-                as shown: field1_data = list(returned)[iteration_number]['field1']
+                as shown: field1_data =
+                    list(returned)[iteration_number]['test_name']['field1']
         '''
 
         test_names = test_names or '.*'
