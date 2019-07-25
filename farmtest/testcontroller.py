@@ -249,8 +249,9 @@ class TestController():
         @fields is a list of the names of data fields to extract.
         If @fields is None all fields are returned.
         If @settings is not None, then it should be a dict containing
-        key values pairs that must be present in the tests settings for them
-        to be included in the returned results.
+        key values pairs. These represent the name and values of settings
+        that must be present in the test's settings in order for it to be
+        included in the returned results.
         E.g. settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
         @format can be set to the following:
             'json' -> return data is a json formatted string
