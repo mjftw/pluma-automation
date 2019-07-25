@@ -235,7 +235,8 @@ class TestController():
 
         return settings
 
-    def get_test_results(self, test_names=None, fields=None, format=None):
+    def get_test_results(self, test_names=None, fields=None, format=None,
+            settings=None):
         '''
         Get test data from the global data dictionary.
         @test_names is the name of the test(s) to get data for, this can be a
@@ -247,6 +248,10 @@ class TestController():
         Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
         @fields is a list of the names of data fields to extract.
         If @fields is None all fields are returned.
+        If @settings is not None, then it should be a dict containing
+        key values pairs that must be present in the tests settings for them
+        to be included in the returned results.
+        E.g. settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
         @format can be set to the following:
             'json' -> return data is a json formatted string
             'csv' -> return data is CSV formatted
@@ -268,6 +273,10 @@ class TestController():
                         f: v for f, v in r[name]['data'].items() if 'data' in r[name] and
                         not fields or f in fields
                     } for name in regex_filter_list(test_names, r, unique=True)
+                        if not settings or
+                        all(key in r[name]['settings'] and
+                            r[name]['settings'][key] == val
+                            for key, val in settings.items())
                 }
 
         if format == 'json':
