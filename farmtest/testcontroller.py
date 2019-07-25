@@ -285,15 +285,17 @@ class TestController():
             newline = '\n'
             header = sorted(list(set(key for it_data in data_gen() for test, data in it_data.items() for key in data)))
             csv_str = 'iteration,test_name,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
+            empty_csv = True
             for iteration, tests_data in enumerate(data_gen()):
                 for test_name, data in tests_data.items():
+                    empty_csv = False
                     csv_str += f'{iteration},{test_name}'
                     for h in header:
                         csv_str += ','
                         if h in data:
                             csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
                     csv_str += newline
-            return csv_str
+            return csv_str if not empty_csv else ''
         elif not format:
             return data_gen()
         else:
