@@ -6,9 +6,11 @@ class PowerBase(Farmclass):
     def __init__(self, reboot_delay=None):
         self.reboot_delay = reboot_delay or 0.5
 
-        if type(self) is PowerBase:
-            raise AttributeError(
-                'This is a base class, and must be inherited')
+    def __init__(self, reboot_delay=None):
+        self.reboot_delay = reboot_delay or self.reboot_delay
+
+    def on(self):
+        raise NotImplemented('This method must be implimented by inheriting class')
 
     def on(f):
         def wrap(self, *args, **kwargs):
