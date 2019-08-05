@@ -40,9 +40,11 @@ import platform
 import datetime
 import time
 import re
+import shutil
+import os
 from copy import copy
 
-from farmutils import Email, send_exception_email
+from farmutils import Email, send_exception_email, datetime_to_timestamp
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
 
 
@@ -80,11 +82,10 @@ class TestBase():
     def __repr__(self):
         return self._test_name
 
-class BootTestBase(TestBase):
-    boot_success = None
 
 class TestCore(TestBase):
     tasks = [
+        '_init_test_state',
         'pre_host_mount', '_host_mount', 'prepare', '_host_unmount',
         'pre_board_on', '_board_on_and_validate',
         'pre_board_login', '_board_login',
@@ -94,6 +95,16 @@ class TestCore(TestBase):
         '_board_off', 'post_board_off',
         '_host_mount', 'report'
     ]
+
+    def __init__(self, board, failed_bootlogs_dir):
+        TestBase.__init__(self, board)
+
+        self.failed_bootlogs_dir = failed_bootlogs_dir
+
+    def _init_test_state(self):
+        self.board.log("\n=!= INIT TEST STATE =!=", bold=True)
+
+        self.settings['failed_bootlogs_dir'] = self.failed_bootlogs_dir
 
     def pre_host_mount(self):
         self.board.log("\n=== PRE HOST MOUNT ===", colour='blue', bold=True)
@@ -140,10 +151,32 @@ class TestCore(TestBase):
 
     def _board_on_and_validate(self):
         self.board.log("\n=!= BOARD ON AND VALIDATE =!=", bold=True)
+
         try:
-            self.board.reboot_and_validate()
+            boot_time = self.board.reboot_and_validate()
         except BoardBootValidationError as e:
+            # If boot failed, save this info and backup logfile
+            self.data['boot_success'] = False
+            self.data['boot_log'] = os.path.join(
+                self.settings['failed_bootlogs_dir'],
+                '{}_failed_boot_{}.log'.format(self.board.name,
+                    datetime_to_timestamp(datetime.datetime.now())))
+
+            try:
+                if not os.path.exists(self.settings['failed_bootlogs_dir']):
+                    os.makedirs(self.settings['failed_bootlogs_dir'])
+                shutil.copy2(self.board.console.log_file, self.data['boot_log'])
+            except Exception as ex:
+                self.data['boot_log'] = None
+                raise ex
+
+            self.board.error('Boot failed! Saving console log to {}'.format(
+                self.data['boot_log']))
             raise e
+
+        # If boot succeeded save this info
+        self.data['boot_success'] = True
+        self.data['boot_time'] = boot_time
 
     def pre_board_login(self):
         self.board.log("\n=== PRE BOARD LOGIN ===", colour='blue', bold=True)
@@ -188,16 +221,15 @@ class TestCore(TestBase):
 
 
 class TestRunner():
-    def __init__(self, board, tests=None, boot_test=None,
+    def __init__(self, board, tests=None,
             skip_tasks=None, email_on_fail=True, use_testcore=True,
-            sequential=False):
+            sequential=False, failed_bootlogs_dir=None):
         self.board = board
         self.email_on_fail = email_on_fail
+        self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/lab'
+        self.skip_tasks = skip_tasks or []
         self.skip_tasks = skip_tasks or []
         self.tests = []
-        if boot_test and not isinstance(boot_test, BootTestBase):
-            raise AttributeError('Invalid boot test. Must inherit BootTestBase')
-        self.boot_test = boot_test
 
         self.test_fails = []
         tests = tests or []
@@ -210,9 +242,6 @@ class TestRunner():
 
         # General purpose data for use globally between tests
         self.data = {}
-
-        if self.boot_test:
-            self.add_test(self.boot_test)
 
         for test in tests:
             self.add_test(test)
@@ -249,7 +278,7 @@ class TestRunner():
         # Add TestCore to run standard testing sequence of boots & mounts etc.
         if (self.use_testcore and "TestCore" not in
                 (str(t) for t in self.tests)):
-            self.add_test(TestCore(self.board), 0)
+            self.add_test(TestCore(self.board, self.failed_bootlogs_dir), 0)
 
         # Init test data
         for test in self.tests:
@@ -394,11 +423,6 @@ class TestRunner():
                 'Cannot run specified test {} as it is not in test list'.format(
                 test_name, TestingException))
 
-        if (task_name == "_board_on_and_validate" and
-                self.boot_test):
-            # Initialise boot test result to success
-            self.boot_test.boot_success = True
-
         task_func = getattr(test, task_name, None)
         if not task_func:
             # If test does not have this task, then skip
@@ -427,19 +451,8 @@ class TestRunner():
                         'report' in self.tasks):
                     self._run_task('report')
                 raise e
-            # If failed boot, and we have a specific boot test,
-            #   run it's report function
-            if (isinstance(e, BoardBootValidationError) and
-                    self.boot_test):
-                    self.board.log('Boot test failed, running {}.report()'.format(
-                        str(self.boot_test)))
 
-                    self.boot_test.boot_success = False
-                    self._run_task('report', str(self.boot_test))
-                    self._handle_failed_task(test, task_name, e)
-            # For all other exceptions, we want to know about it
-            else:
-                self._handle_failed_task(test, task_name, e)
+            self._handle_failed_task(test, task_name, e)
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {

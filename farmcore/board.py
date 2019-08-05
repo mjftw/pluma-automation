@@ -88,6 +88,8 @@ class Board(Farmclass):
         if self.prompt and matched == self.prompt:
             self.booted_to_prompt = True
 
+        return self.last_boot_len
+
     def login(self):
         if self.booted_to_prompt:
             self.log('Booted to prompt. Not need to log in')
