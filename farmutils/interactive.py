@@ -1,3 +1,9 @@
+'''
+This file contains misc blocking functions intended for
+use in an interactive interpereter session.
+'''
+
+
 def getch():
     '''
     Get a single character from stdin and return it.
