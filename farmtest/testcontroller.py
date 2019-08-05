@@ -235,7 +235,8 @@ class TestController():
 
         return settings
 
-    def get_test_results(self, test_names=None, fields=None, format=None):
+    def get_test_results(self, test_names=None, fields=None, format=None,
+            settings=None):
         '''
         Get test data from the global data dictionary.
         @test_names is the name of the test(s) to get data for, this can be a
@@ -247,11 +248,17 @@ class TestController():
         Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
         @fields is a list of the names of data fields to extract.
         If @fields is None all fields are returned.
+        If @settings is not None, then it should be a dict containing
+        key values pairs. These represent the name and values of settings
+        that must be present in the test's settings in order for it to be
+        included in the returned results.
+        E.g. settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
         @format can be set to the following:
             'json' -> return data is a json formatted string
             'csv' -> return data is CSV formatted
             None -> return data is a generator to create a list of dicts
-                as shown: field1_data = list(returned)[iteration_number]['field1']
+                as shown: field1_data =
+                    list(returned)[iteration_number]['test_name']['field1']
         '''
 
         test_names = test_names or '.*'
@@ -268,6 +275,10 @@ class TestController():
                         f: v for f, v in r[name]['data'].items() if 'data' in r[name] and
                         not fields or f in fields
                     } for name in regex_filter_list(test_names, r, unique=True)
+                        if not settings or
+                        all(key in r[name]['settings'] and
+                            r[name]['settings'][key] == val
+                            for key, val in settings.items())
                 }
 
         if format == 'json':
@@ -276,15 +287,17 @@ class TestController():
             newline = '\n'
             header = sorted(list(set(key for it_data in data_gen() for test, data in it_data.items() for key in data)))
             csv_str = 'iteration,test_name,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
+            empty_csv = True
             for iteration, tests_data in enumerate(data_gen()):
                 for test_name, data in tests_data.items():
+                    empty_csv = False
                     csv_str += f'{iteration},{test_name}'
                     for h in header:
                         csv_str += ','
                         if h in data:
                             csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
                     csv_str += newline
-            return csv_str
+            return csv_str if not empty_csv else ''
         elif not format:
             return data_gen()
         else:
