@@ -65,19 +65,18 @@ class AbortTestingAndReport(AbortTesting):
 
 
 class TestBase():
-    #FIXME: These structs are shared between all instances of class!
-    #  They shouldn't be.
-    #  We're currently getting around this by having TestRunner set
-    #  initilise the structs, but this is not ideal. FIX THIS.
-    data = {}
-    settings = {}
-
     def __init__(self, board, test_name_suffix=None):
         self.board = board
         self._test_name = self.__class__.__name__
         if test_name_suffix:
             assert isinstance(test_name_suffix, str)
             self._test_name += f'_{test_name_suffix}'
+
+        # Settings to control this test instance
+        self.settings = {}
+
+        # Output data to be saved during the test
+        self.data = {}
 
     def __repr__(self):
         return self._test_name
