@@ -1,5 +1,7 @@
 # Automation Lab Design Core Values
 
+This document describes the core values that should be kept in mind when adding new code and feature to the Automation Lab.
+
 ## Language
 All core code should be written in Python3.
 
