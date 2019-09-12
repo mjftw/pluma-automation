@@ -9,6 +9,7 @@ Advantages of fully Python codebase:
 * Python is a well used modern language which is easy to learn
 * Python runs almost everywhere these days, offering great portability
 * A Python project is easy to set up, with no compilation required
+* Development is faster, more efficient and flexible when no the same code can be run on the development machine and target hardware without modification or compilation
 * A fully Python codebase means that all classes may be used in an interactive manner via the interactive Python interperator, giving a command line interface for free
 * The entire project can be easily debugged using the Python debugger
   * Having parts of the core functionality written in a different language would break the debugger's ability to fully trace the source tree
@@ -32,7 +33,6 @@ This script will install all required packages via the Python Package Index [pip
 
 The code base should be written in such a way that it remains modular.
 
-This means reducing internal dependancies between parts of the codebase.  
-Wherever possible, each class should be usable without dependancy on any other.  
-This means that a user only needs import the project elements that they actually want to use, keeping code simple and readable.  
-Classes with no dependancies are also easy to use in an interactive Python session, giving the lab a command line interface for free.
+This means reducing the coupling between different parts of the codebase, allowing each class to be usable without dependancy on any other.  
+This way a user only needs import the project elements that they actually want to use, keeping code simple and readable.  
+Classes with low coupling are also easy to use in an interactive Python session, giving the lab a command line interface for free.
