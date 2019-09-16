@@ -1,6 +1,7 @@
 import time
 import json
 import re
+import pygal
 from datetime import datetime
 from copy import deepcopy
 from statistics import mean, median_grouped, mode, stdev, variance,\
@@ -303,6 +304,32 @@ class TestController():
         else:
             raise RuntimeError(
                 f'Invalid format: {format}. Options: "json", "csv", None')
+
+    def graph_test_results(self, file, test_name, fields):
+        results = list(self.get_test_results(
+            test_names=test_name, fields=fields))
+
+        chart = pygal.Line()
+        chart.title = '{} vs iteration'.format(', '.join(fields))
+
+        y_vals = {}
+        x_vals = []
+        if results:
+            y_vals = {k: [] for k in results[0][test_name]}
+            for i, r in enumerate(results):
+                x_vals.append(i)
+                for k, v in r[test_name].items():
+                    y_vals[k].append(v)
+        else:
+            raise RuntimeError(
+                'No results found for test[{}], fields[{}]'.format(
+                    test_name, fields))
+
+        chart.x_labels = x_vals
+        for k, v in y_vals.items():
+            chart.add(k, v)
+
+        chart.render_to_file(file)
 
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
