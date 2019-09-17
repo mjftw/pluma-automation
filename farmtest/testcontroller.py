@@ -305,9 +305,24 @@ class TestController():
             raise RuntimeError(
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
-    def graph_test_results(self, file, test_name, fields=None):
+    def graph_test_results(self, file, test_name, fields=None, vs_type=None):
+        vs_type = vs_type or 'iteration'
+
+        if fields and not isinstance(fields, list):
+            fields = [fields]
+
+        vs_types = ['iteration', 'fields']
+        if vs_type not in vs_types:
+            raise AttributeError('vs_type must be in {}'.format(vs_types))
+        elif (vs_type == 'fields' and
+                (not isinstance(fields, list) or len(fields) != 2)):
+            raise AttributeError(
+                'fields must be a list of exactly 2 fields for "fields" vs_type')
+
         results = list(self.get_test_results(
             test_names=test_name, fields=fields))
+
+        print(results)
 
         if not results or test_name not in results[0]:
             raise RuntimeError(
@@ -315,13 +330,25 @@ class TestController():
                     test_name, fields))
 
         chart = pygal.XY()
-        chart.title = '{} vs iteration'.format(', '.join(results[0]))
+        if vs_type == 'iteration':
+            chart.title = '{} vs iteration'.format(
+                ', '.join(results[0][test_name]))
 
-        # Build list of points with dataset labels
-        points = {k: [] for k in results[0][test_name]}
-        for i, r in enumerate(results):
-            for k, v in r[test_name].items():
-                points[k].append((i, v))
+            # Build list of points with dataset labels
+            points = {k: [] for k in results[0][test_name]}
+            for i, r in enumerate(results):
+                for k, v in r[test_name].items():
+                    points[k].append((i, v))
+        elif vs_type == 'fields':
+            chart.title = '{} vs {}'.format(fields[0], fields[1])
+            points = {
+                '': [(r[test_name][fields[0]], r[test_name][fields[1]])
+                    for r in results]}
+
+        if not points:
+            raise RuntimeError(
+                'No results found for test[{}], fields[{}]'.format(
+                    test_name, fields))
 
         # Add points to chart
         for k, v in points.items():
