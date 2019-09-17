@@ -309,24 +309,21 @@ class TestController():
         results = list(self.get_test_results(
             test_names=test_name, fields=fields))
 
-        chart = pygal.Line()
+        chart = pygal.XY()
         chart.title = '{} vs iteration'.format(', '.join(fields))
 
-        y_vals = {}
-        x_vals = []
+        points = {}
         if results:
-            y_vals = {k: [] for k in results[0][test_name]}
+            points = {k: [] for k in results[0][test_name]}
             for i, r in enumerate(results):
-                x_vals.append(i)
                 for k, v in r[test_name].items():
-                    y_vals[k].append(v)
+                    points[k].append((i, v))
         else:
             raise RuntimeError(
                 'No results found for test[{}], fields[{}]'.format(
                     test_name, fields))
 
-        chart.x_labels = x_vals
-        for k, v in y_vals.items():
+        for k, v in points.items():
             chart.add(k, v)
 
         chart.render_to_file(file)
