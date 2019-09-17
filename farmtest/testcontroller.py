@@ -306,6 +306,19 @@ class TestController():
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
     def graph_test_results(self, file, test_name, fields=None, vs_type=None):
+        '''
+        Create an svg formatted graph of data fields from the test results data.
+        @file: Output file path.
+        @test_name: Name of Test to read data from.
+        @fields: List of data fields to plot from Test.data
+            if fields == None all fields are plotted'
+        @vs_type: Str specifying what to graph on axis:
+            "iteration": graph data values over test iterations
+            "fields": graph the fields in @fields vs each other.
+                If this option is selected, @fileds must be exactly 2 fields.
+            Default: "iteration"
+        '''
+
         vs_type = vs_type or 'iteration'
 
         if fields and not isinstance(fields, list):
