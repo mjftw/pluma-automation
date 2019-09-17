@@ -305,24 +305,25 @@ class TestController():
             raise RuntimeError(
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
-    def graph_test_results(self, file, test_name, fields):
+    def graph_test_results(self, file, test_name, fields=None):
         results = list(self.get_test_results(
             test_names=test_name, fields=fields))
 
-        chart = pygal.XY()
-        chart.title = '{} vs iteration'.format(', '.join(fields))
-
-        points = {}
-        if results and test_name in results[0]:
-            points = {k: [] for k in results[0][test_name]}
-            for i, r in enumerate(results):
-                for k, v in r[test_name].items():
-                    points[k].append((i, v))
-        else:
+        if not results or test_name not in results[0]:
             raise RuntimeError(
                 'No results found for test[{}], fields[{}]'.format(
                     test_name, fields))
 
+        chart = pygal.XY()
+        chart.title = '{} vs iteration'.format(', '.join(results[0]))
+
+        # Build list of points with dataset labels
+        points = {k: [] for k in results[0][test_name]}
+        for i, r in enumerate(results):
+            for k, v in r[test_name].items():
+                points[k].append((i, v))
+
+        # Add points to chart
         for k, v in points.items():
             chart.add(k, v)
 
