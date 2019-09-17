@@ -335,8 +335,6 @@ class TestController():
         results = list(self.get_test_results(
             test_names=test_name, fields=fields))
 
-        print(results)
-
         if not results or test_name not in results[0]:
             raise RuntimeError(
                 'No results found for test[{}], fields[{}]'.format(
