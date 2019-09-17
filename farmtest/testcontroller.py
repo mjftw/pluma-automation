@@ -305,7 +305,8 @@ class TestController():
             raise RuntimeError(
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
-    def graph_test_results(self, file, test_name, fields=None, vs_type=None):
+    def graph_test_results(self, file, test_name, fields=None, vs_type=None,
+            title=None):
         '''
         Create an svg formatted graph of data fields from the test results data.
         @file: Output file path.
@@ -317,6 +318,7 @@ class TestController():
             "fields": graph the fields in @fields vs each other.
                 If this option is selected, @fileds must be exactly 2 fields.
             Default: "iteration"
+        @title: Optionally a title can be supplied for the chart
         '''
 
         vs_type = vs_type or 'iteration'
@@ -341,8 +343,9 @@ class TestController():
                     test_name, fields))
 
         chart = pygal.XY()
+        chart.title = title
         if vs_type == 'iteration':
-            chart.title = '{} vs iteration'.format(
+            chart.title = chart.title or '{} vs iteration'.format(
                 ', '.join(results[0][test_name]))
 
             # Build list of points with dataset labels
@@ -351,7 +354,8 @@ class TestController():
                 for k, v in r[test_name].items():
                     points[k].append((i, v))
         elif vs_type == 'fields':
-            chart.title = '{} vs {}'.format(fields[0], fields[1])
+            chart.title = chart.title or '{} vs {}'.format(
+                fields[0], fields[1])
             points = {
                 '': [(r[test_name][fields[0]], r[test_name][fields[1]])
                     for r in results]}
