@@ -313,7 +313,7 @@ class TestController():
         chart.title = '{} vs iteration'.format(', '.join(fields))
 
         points = {}
-        if results:
+        if results and test_name in results[0]:
             points = {k: [] for k in results[0][test_name]}
             for i, r in enumerate(results):
                 for k, v in r[test_name].items():
