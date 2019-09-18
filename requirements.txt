@@ -7,5 +7,6 @@ pyftdi
 pyroute2
 pandas
 pygal
+cairosvg
 graphviz
 nanocom

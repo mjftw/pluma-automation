@@ -306,9 +306,9 @@ class TestController():
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
     def graph_test_results(self, file, test_name, fields=None, vs_type=None,
-            title=None):
+            title=None, format=None):
         '''
-        Create an svg formatted graph of data fields from the test results data.
+        Create a graph of data fields from the test results data.
         @file: Output file path.
         @test_name: Name of Test to read data from.
         @fields: List of data fields to plot from Test.data
@@ -319,9 +319,12 @@ class TestController():
                 If this option is selected, @fileds must be exactly 2 fields.
             Default: "iteration"
         @title: Optionally a title can be supplied for the chart
+        @format: Str specifying output format. Options: "svg" or "png"
+            Default: "svg"
         '''
 
         vs_type = vs_type or 'iteration'
+        format = format or 'svg'
 
         if fields and not isinstance(fields, list):
             fields = [fields]
@@ -333,6 +336,9 @@ class TestController():
                 (not isinstance(fields, list) or len(fields) != 2)):
             raise AttributeError(
                 'fields must be a list of exactly 2 fields for "fields" vs_type')
+        formats = ['svg', 'png']
+        if format not in formats:
+            raise AttributeError('Format must be one of {}'.format(formats))
 
         results = list(self.get_test_results(
             test_names=test_name, fields=fields))
@@ -369,7 +375,10 @@ class TestController():
         for k, v in points.items():
             chart.add(k, v)
 
-        chart.render_to_file(file)
+        if format == 'svg':
+            chart.render_to_file(file)
+        elif format == 'png':
+            chart.render_to_png(file)
 
     def run_iteration(self):
         self.log("Starting iteration: {}".format(
