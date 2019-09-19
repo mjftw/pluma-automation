@@ -1,45 +1,54 @@
 from multiprocessing.pool import ThreadPool
-from threading import Thread
 import time
 
 
 class nonblocking:
-    def __init__(self, fn):
-        self.fn = fn
-        self.pool = ThreadPool(processes=1)
-        self.async_result = None
+    def __init__(self):
+        self._thread_pool = ThreadPool(processes=1)
 
-    @property
-    def retval(self):
-        if self.async_result:
-            return self.async_result.get()
+    class method:
+        def __init__(self, fn):
+            self.fn = fn
+            self.async_result = None
 
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
+            self.parent = None
 
-        d = self
-        # use a lambda to produce a bound method
-        mfactory = lambda self, *args, **kw: d(self, *args, **kw)
-        mfactory.__name__ = self.fn.__name__
-        mfactory.retval = self.retval
+        @property
+        def retval(self):
+            if self.async_result:
+                return self.async_result.get()
 
-        return mfactory.__get__(instance, owner)
+        def __get__(self, instance, owner):
+            if instance is None:
+                return self
 
-    def __call__(self, *args, **kwargs):
-        def wrap(*args, **kwargs):
-            self.async_result = self.pool.apply_async(
-                func=self.fn, args=args, kwds=kwargs)
+            d = self
+            # use a lambda to produce a bound method
+            mfactory = lambda self, *args, **kw: d(self, *args, **kw)
+            mfactory.__name__ = self.fn.__name__
+            mfactory.retval = self.retval
 
-        return wrap(*args, **kwargs)
+            # Make link to parent class
+            self.parent = instance
+
+            return mfactory.__get__(instance, owner)
+
+        def __call__(self, *args, **kwargs):
+            def wrap(*args, **kwargs):
+                self.async_result = self.parent._thread_pool.apply_async(
+                    func=self.fn, args=args, kwds=kwargs)
+
+            return wrap(*args, **kwargs)
 
 
-class Foo:
+class Foo(nonblocking):
     def __init__(self):
         self.data = []
         self.last_data = None
 
-    @nonblocking
+        nonblocking.__init__(self)
+
+    @nonblocking.method
     def slow_method(self, arg1):
         print("slow method started")
 
@@ -50,10 +59,10 @@ class Foo:
 
         print("slow method finished")
 
-        # How to get return value out?
         return 'Hello world!'
 
     def save_last_data(self, i):
         self.last_data = self.data[-1]
+
 
 f = Foo()
