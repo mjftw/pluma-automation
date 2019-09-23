@@ -64,8 +64,8 @@ class AsyncSampler():
 
 
 class Nonblocking:
-    def __init__(self):
-        self._thread_pool = ThreadPool(processes=1)
+    def __init__(self, threads=1):
+        self._thread_pool = ThreadPool(processes=threads)
         self._thread_ident = threading.get_ident()
 
     class method:
