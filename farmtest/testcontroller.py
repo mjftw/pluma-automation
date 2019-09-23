@@ -306,7 +306,7 @@ class TestController():
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
     def graph_test_results(self, file, test_name, fields=None, vs_type=None,
-            title=None, format=None):
+            title=None, format=None, config=None):
         '''
         Create a graph of data fields from the test results data.
         @file: Output file path.
@@ -321,6 +321,8 @@ class TestController():
         @title: Optionally a title can be supplied for the chart
         @format: Str specifying output format. Options: "svg" or "png"
             Default: "svg"
+        @config: Optionally supply a pygal.Config option. This allows
+            rendering with custom configuration and styles.
         '''
 
         vs_type = vs_type or 'iteration'
@@ -350,6 +352,18 @@ class TestController():
 
         chart = pygal.XY()
         chart.title = title
+
+        # Default style to fix svg black background rendering issue
+        chart.config.style = pygal.style.Style(
+            background='#FFFFFF',
+            plot_background='#FFFFFF'
+        )
+
+        if config:
+            if not isinstance(config, pygal.Config):
+                raise AttributeError('config must be of type pygal.Config')
+            chart.config = config
+
         if vs_type == 'iteration':
             chart.title = chart.title or '{} vs iteration'.format(
                 ', '.join(results[0][test_name]))
