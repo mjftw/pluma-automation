@@ -73,11 +73,18 @@ class Nonblocking:
     <instance>.<method_name>.await_return() class method. This will cause the
     client thread to block until the nonblocking method has finished, at which
     point the return value is read.
+
+    The immedate return value of a nonblocking method is a reference to the
+    nonblocking method itself.
+    This can be used to make nonblocking methods block like a normal method:
+    E.g. return_value = myNonblockingMethod(...).await_return()
+
     If a method marked as nonblocking calls another nonblocking method (from
     its worker thread), a new worker thread will not be spawned, and the
     function call will happen in the usual blocking manner in the worker
     thread. This is to prevent an unbounded number of thread from being
     created.
+
     Optionally multiple worker threads can be created, but the default
     number of worker threads is one per Nonblocking class.
     If the client calls a nonblocking method while all (usually only one) the
@@ -93,6 +100,9 @@ class Nonblocking:
         self._thread_ident = threading.get_ident()
 
     class method:
+        '''
+        Decorates class methods in order to make then nonblocking.
+        '''
         def __init__(self, fn):
             self.fn = fn
             self.async_result = None
@@ -100,6 +110,10 @@ class Nonblocking:
             self.parent = None
 
         def await_return(self):
+            '''
+            Block until nonblocking method has finished, then
+            return its return value.
+            '''
             if self.async_result:
                 return self.async_result.get()
 
@@ -120,6 +134,9 @@ class Nonblocking:
             return mfactory.__get__(instance, owner)
 
         def __call__(self, *args, **kwargs):
+            '''
+            Intercept function calls and queue them in worker threads.
+            '''
             thread_ident = threading.get_ident()
 
             if thread_ident != self.parent._thread_ident:
