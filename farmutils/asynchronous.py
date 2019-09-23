@@ -66,7 +66,7 @@ class AsyncSampler():
 class Nonblocking:
     def __init__(self):
         self._thread_pool = ThreadPool(processes=1)
-        self._running_async = False
+        self._thread_ident = threading.get_ident()
 
     class method:
         def __init__(self, fn):
@@ -96,14 +96,16 @@ class Nonblocking:
             return mfactory.__get__(instance, owner)
 
         def __call__(self, *args, **kwargs):
-            if self.parent._running_async:
+            thread_ident = threading.get_ident()
+
+            if thread_ident != self.parent._thread_ident:
                 return self.fn(*args, **kwargs)
 
             def wrap_outer(fn):
                 def wrap_inner(*args, **kwargs):
-                    self.parent._running_async = True
+                    print('=== Starting worker thread === ')
                     retval = fn(*args, **kwargs)
-                    self.parent._running_async = False
+                    print('=== Finished worker thread === ')
 
                     return retval
                 return wrap_inner
