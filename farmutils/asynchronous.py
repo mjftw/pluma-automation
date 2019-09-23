@@ -70,7 +70,7 @@ class Nonblocking:
     If a method marked as nonblocking is called, it is run in a separate
     thread, and the calling thread continues execution while the method runs.
     In order to get the return value of this method, the client can call the
-    <instance>.<method_name>.get_return() class method. This will cause the
+    <instance>.<method_name>.await_return() class method. This will cause the
     client thread to block until the nonblocking method has finished, at which
     point the return value is read.
     If a method marked as nonblocking calls another nonblocking method (from
@@ -99,7 +99,7 @@ class Nonblocking:
 
             self.parent = None
 
-        def get_return(self):
+        def await_return(self):
             if self.async_result:
                 return self.async_result.get()
 
@@ -111,7 +111,7 @@ class Nonblocking:
             # use a lambda to produce a bound method
             mfactory = lambda self, *args, **kw: d(self, *args, **kw)
             mfactory.__name__ = self.fn.__name__
-            mfactory.get_return = self.get_return
+            mfactory.await_return = self.await_return
 
             if not self.parent:
                 # Make link to parent class
@@ -125,18 +125,7 @@ class Nonblocking:
             if thread_ident != self.parent._thread_ident:
                 return self.fn(*args, **kwargs)
 
-            def wrap_outer(fn):
-                def wrap_inner(*args, **kwargs):
-                    print('=== Starting worker thread === ')
-                    retval = fn(*args, **kwargs)
-                    print('=== Finished worker thread === ')
-
-                    return retval
-                return wrap_inner
-
-            fn = wrap_outer(self.fn)
-
             self.async_result = self.parent._thread_pool.apply_async(
-                func=fn, args=args, kwds=kwargs)
+                func=self.fn, args=args, kwds=kwargs)
 
             return self
