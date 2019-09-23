@@ -14,8 +14,7 @@ class nonblocking:
 
             self.parent = None
 
-        @property
-        def retval(self):
+        def get_return(self):
             if self.async_result:
                 return self.async_result.get()
 
@@ -27,7 +26,7 @@ class nonblocking:
             # use a lambda to produce a bound method
             mfactory = lambda self, *args, **kw: d(self, *args, **kw)
             mfactory.__name__ = self.fn.__name__
-            mfactory.retval = self.retval
+            mfactory.get_return = self.get_return
 
             if not self.parent:
                 # Make link to parent class
@@ -57,7 +56,7 @@ class nonblocking:
             self.async_result = self.parent._thread_pool.apply_async(
                 func=fn, args=args, kwds=kwargs)
 
-
+            return self
 
 
 class Foo(nonblocking):
