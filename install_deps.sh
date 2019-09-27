@@ -13,4 +13,4 @@ fi
 $SUDO apt install -y libusb-1.0 python3 python3-pip graphviz
 
 # Install Python libraries
-pip3 install -r requirements.txt
+pip3 install --user -r requirements.txt
