@@ -9,3 +9,4 @@ pandas
 pygal
 graphviz
 nanocom
+requests
