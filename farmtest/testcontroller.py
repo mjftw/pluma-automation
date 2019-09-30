@@ -305,12 +305,14 @@ class TestController():
             raise RuntimeError(
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
-    def graph_test_results(self, file, test_name, fields=None, vs_type=None,
+    def graph_test_results(self, file, test_names=None, fields=None, vs_type=None,
             title=None, format=None, config=None):
         '''
         Create a graph of data fields from the test results data.
         @file: Output file path.
-        @test_name: Name of Test to read data from.
+        @test_names: Name of Tests to read data from.
+            Can specify a one test (str) or a list of tests, (list of str)
+            All tests are selected if set to None
         @fields: List of data fields to plot from Test.data
             if fields == None all fields are plotted'
         @vs_type: Str specifying what to graph on axis:
@@ -331,6 +333,9 @@ class TestController():
         if fields and not isinstance(fields, list):
             fields = [fields]
 
+        if test_names and not isinstance(test_names, list):
+            test_names = [test_names]
+
         vs_types = ['iteration', 'fields']
         if vs_type not in vs_types:
             raise AttributeError('vs_type must be in {}'.format(vs_types))
@@ -343,12 +348,30 @@ class TestController():
             raise AttributeError('Format must be one of {}'.format(formats))
 
         results = list(self.get_test_results(
-            test_names=test_name, fields=fields))
+            test_names=test_names, fields=fields))
 
-        if not results or test_name not in results[0]:
+        # Find any tests that do not have any data for fields specified
+        empty_tests = set([test for r in results for test, data in r.items() if not data])
+
+        if results:
+            # Get a list of test names whose tests have data
+            tests_found = list(set(test for r in results for test in r if test not in empty_tests))
+        else:
+            tests_found = []
+
+        if tests_found:
+            # Get a list of all fields accross all test data found
+            fields_found = list(set(key for r in results for test, data in r.items() for key in data))
+        else:
+            fields_found = []
+
+        # If no results match, or all test names missing from from first result
+        if not fields_found:
             raise RuntimeError(
-                'No results found for test[{}], fields[{}]'.format(
-                    test_name, fields))
+                'No results found for test{}{}, fields{}'.format(
+                    's' if len(tests_found) > 1 else '',
+                    test_names,
+                    fields))
 
         chart = pygal.XY()
         chart.title = title
@@ -364,29 +387,49 @@ class TestController():
                 raise AttributeError('config must be of type pygal.Config')
             chart.config = config
 
+        points = {}
+
         if vs_type == 'iteration':
-            chart.title = chart.title or '{} vs iteration'.format(
-                ', '.join(results[0][test_name]))
+            vs_str = '{} vs iteration'.format(', '.join(fields_found))
 
             # Build list of points with dataset labels
-            points = {k: [] for k in results[0][test_name]}
-            for i, r in enumerate(results):
-                for k, v in r[test_name].items():
-                    points[k].append((i, v))
+            for tf in tests_found:
+                points[tf] = {f'{tf}: {k}': [] for k in results[0][tf]}
+                for i, r in enumerate(results):
+                    for k, v in r[tf].items():
+                        points[tf][f'{tf}: {k}'].append((i, v))
         elif vs_type == 'fields':
-            chart.title = chart.title or '{} vs {}'.format(
+            tests_with_fields = [
+                tf for tf in tests_found for r in results
+                if fields[0] in r[tf] and fields[1] in r[tf]
+            ]
+            vs_str = '{} vs {}'.format(
                 fields[0], fields[1])
-            points = {
-                '': [(r[test_name][fields[0]], r[test_name][fields[1]])
-                    for r in results]}
+
+            for tf in tests_with_fields:
+                points[tf] = {
+                    tf: [(r[tf][fields[0]], r[tf][fields[1]]) for r in results]}
+
+        chart.title = chart.title or '{} for{} {}'.format(
+            vs_str,
+            ' tests:' if len(tests_found) > 1 else '',
+            ', '.join(tests_found))
 
         if not points:
             raise RuntimeError(
-                'No results found for test[{}], fields[{}]'.format(
-                    test_name, fields))
+                'No results found for test{}{}, fields{}'.format(
+                    's' if len(tests_found) > 1 else '',
+                    test_names,
+                    fields))
+
+        # Combine points for each test into one set
+        points_combined = {}
+        for points_k, points_v in points.items():
+            for k, v in points_v.items():
+                points_combined[k] = v
 
         # Add points to chart
-        for k, v in points.items():
+        for k, v in points_combined.items():
             chart.add(k, v)
 
         if format == 'svg':
