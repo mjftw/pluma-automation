@@ -18,7 +18,7 @@ class TestController():
     def __init__(self, testrunner, setup=None, report=None,
             run_condition=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
-            setup_every_iteration=False, force_initial_run=False, email_on_except=True,
+            setup_n_iterations=None, force_initial_run=False, email_on_except=True,
             log_func=print):
         assert isinstance(testrunner, TestRunner)
 
@@ -49,7 +49,7 @@ class TestController():
         self.settings['report_n_iterations'] = report_n_iterations
         self.settings['continue_on_fail'] = continue_on_fail
         self.settings['condition_check_interval_s'] = condition_check_interval_s
-        self.settings['setup_every_iteration'] = setup_every_iteration
+        self.settings['setup_n_iterations'] = setup_n_iterations
         self.settings['force_initial_run'] = force_initial_run
         self.settings['email_on_except'] = email_on_except
 
@@ -445,10 +445,6 @@ class TestController():
             self.stats['num_tests_pass'], self.stats['num_tests_run'],
             self.stats['num_tests_total']))
 
-        if self.setup and self.settings['setup_every_iteration']:
-            self.log("Running setup function: {}".format(self.setup))
-            self.setup.run(self)
-
         self._init_iteration()
 
         self.log("Running TestRunner: {}".format(self.testrunner))
@@ -491,7 +487,7 @@ class TestController():
         self.log("Test settings: {}".format(
             self.test_settings))
 
-        if self.setup and not self.settings['setup_every_iteration']:
+        if self.setup and not self.settings['setup_n_iterations']:
             self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
 
@@ -507,6 +503,11 @@ class TestController():
                     run_now = self.run_condition.run(self)
 
                 while run_now:
+                    if (self.settings['setup_n_iterations'] and
+                            self.stats['num_iterations_run'] % self.settings['setup_n_iterations'] == 0):
+                        if self.setup:
+                            self.log("Running setup function: {}".format(self.report))
+                            self.setup.run(self)
                     success = self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
                         if self.report:
@@ -514,7 +515,7 @@ class TestController():
                             self.report.run(self)
                         return
                     if (self.settings['report_n_iterations'] and
-                        self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
+                            self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
                             self.log("Running report function: {}".format(self.report))
                             self.report.run(self)
@@ -525,7 +526,7 @@ class TestController():
             else:
                 self.run_iteration()
 
-            if self.report:
+            if self.report and not self.settings['report_n_iterations']:
                 self.log("Running report function: {}".format(self.report))
                 self.report.run(self)
 
