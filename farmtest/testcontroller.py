@@ -241,27 +241,27 @@ class TestController():
         '''Get test data from the global data dictionary.
     
         Args:
-            test_names (None, str, list(str)): The name of the test(s) to get data for.
+            test_names (str, list(str)): The name of the test(s) to get data for.
                 This can be a single test or a list of test names.
                 These names are checked as regular expressions, with data from
                 any test name matching any of the regex specified being returned.
                 E.g. 
                     >>> test_names=[MyTest.*, Test2]
-                If test_names is None, match all test names.
+                Default: match all test names.
                 Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
-            fields (None, list(str)): A list of the names of data fields to extract.
-                If fields is None all fields are returned.
-            settings (None, dict): If not None, then this should be a dict of
-                key values pairs, each representing the name and values of
+            fields (list(str)): A list of the names of data fields to extract.
+                Default: all fields are returned.
+            settings (dict): Optional. Specifyt a dict of
+                key, value pairs, each representing the name and values of
                 settings that must be present in the test's settings in order
                 for it to be included in the returned results.
                 E.g
                     >>> settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
-            format (None, str): Output format of returned data.
+            format (str): Output format of returned data.
                 Can be set to the following:
                     'json' -> return data is a json formatted string
                     'csv' -> return data is CSV formatted
-                    None -> return data is a generator to create a list of dicts
+                    Default: return data is a generator to create a list of dicts
                     E.g.
                         >>> field1_data = list(returned)[iteration_number]['test_name']['field1']
         '''
@@ -319,11 +319,11 @@ class TestController():
                 Can specify a one test name or a list of test names.
                 All tests are selected if set to None.
             fields (str, list(str): List of data fields to plot from Test data.
-                if fields == None all fields are plotted.
+                Default: all fields are plotted.
             vs_type (str): Specifies what should be on graph axis:
                 "iteration": graph data values over test iterations.
-                "fields": graph the fields in @fields vs each other.
-                    If this option is selected, @fileds must be exactly 2 fields.
+                "fields": Graph the fields in fields argument with one on each axis.
+                    If this option is selected, fileds must be exactly 2 fields.
                 Default: "iteration"
             title (str): Optionally a title can be supplied for the chart.
                 If a tile is not specified, one will be generated according to
