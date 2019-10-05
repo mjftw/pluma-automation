@@ -311,25 +311,28 @@ class TestController():
 
     def graph_test_results(self, file, test_names=None, fields=None, vs_type=None,
             title=None, format=None, config=None):
-        '''
-        Create a graph of data fields from the test results data.
-        @file: Output file path.
-        @test_names: Name of Tests to read data from.
-            Can specify a one test (str) or a list of tests, (list of str)
-            All tests are selected if set to None
-        @fields: List of data fields to plot from Test.data
-            if fields == None all fields are plotted'
-        @vs_type: Str specifying what to graph on axis:
-            "iteration": graph data values over test iterations
-            "cumulative": graph cumulative data values over iterations
-            "fields": graph the fields in @fields vs each other.
-                If this option is selected, @fileds must be exactly 2 fields.
-            Default: "iteration"
-        @title: Optionally a title can be supplied for the chart
-        @format: Str specifying output format. Options: "svg" or "png"
-            Default: "svg"
-        @config: Optionally supply a pygal.Config option. This allows
-            rendering with custom configuration and styles.
+        '''Create a graph of data fields from the test results data.
+
+        Args:
+            file (str): Output file path.
+            test_names (str, list(str)): Name of Tests to read data from.
+                Can specify a one test name or a list of test names.
+                All tests are selected if set to None.
+            fields (str, list(str): List of data fields to plot from Test data.
+                if fields == None all fields are plotted.
+            vs_type (str): Specifies what should be on graph axis:
+                "iteration": graph data values over test iterations.
+                "fields": graph the fields in @fields vs each other.
+                    If this option is selected, @fileds must be exactly 2 fields.
+                Default: "iteration"
+            title (str): Optionally a title can be supplied for the chart.
+                If a tile is not specified, one will be generated according to
+                the test data.
+            format (str): Specifies output format.
+                Options: "svg" or "png"
+                Default: "svg"
+            config (pygal.Config): Optionally supply a option.
+                This allows rendering with custom configuration and styles.
         '''
 
         vs_type = vs_type or 'iteration'
