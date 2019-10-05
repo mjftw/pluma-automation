@@ -238,28 +238,32 @@ class TestController():
 
     def get_test_results(self, test_names=None, fields=None, format=None,
             settings=None):
-        '''
-        Get test data from the global data dictionary.
-        @test_names is the name of the test(s) to get data for, this can be a
-        single test or a list of test names. These names are actually checked
-        as regular expressions, with data from any test name matching any
-        regex specified being returned.
-        E.g. Things like test_names=[MyTest.*, Test2] are allowed.
-        If @test_names is None, match all test names.
-        Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
-        @fields is a list of the names of data fields to extract.
-        If @fields is None all fields are returned.
-        If @settings is not None, then it should be a dict containing
-        key values pairs. These represent the name and values of settings
-        that must be present in the test's settings in order for it to be
-        included in the returned results.
-        E.g. settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
-        @format can be set to the following:
-            'json' -> return data is a json formatted string
-            'csv' -> return data is CSV formatted
-            None -> return data is a generator to create a list of dicts
-                as shown: field1_data =
-                    list(returned)[iteration_number]['test_name']['field1']
+        '''Get test data from the global data dictionary.
+    
+        Args:
+            test_names (None, str, list(str)): The name of the test(s) to get data for.
+                This can be a single test or a list of test names.
+                These names are checked as regular expressions, with data from
+                any test name matching any of the regex specified being returned.
+                E.g. 
+                    >>> test_names=[MyTest.*, Test2]
+                If test_names is None, match all test names.
+                Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
+            fields (None, list(str)): A list of the names of data fields to extract.
+                If fields is None all fields are returned.
+            settings (None, dict): If not None, then this should be a dict of
+                key values pairs, each representing the name and values of
+                settings that must be present in the test's settings in order
+                for it to be included in the returned results.
+                E.g
+                    >>> settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
+            format (None, str): Output format of returned data.
+                Can be set to the following:
+                    'json' -> return data is a json formatted string
+                    'csv' -> return data is CSV formatted
+                    None -> return data is a generator to create a list of dicts
+                    E.g.
+                        >>> field1_data = list(returned)[iteration_number]['test_name']['field1']
         '''
 
         test_names = test_names or '.*'
