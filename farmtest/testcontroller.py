@@ -15,10 +15,93 @@ from .test import TestRunner
 
 
 class TestController():
-    ''' TODO: Add documentation
+    ''' Runs a TestRunner over multiple iterations and processes test data.
+
+    The TestController is the top level test object, and takes a TestRunner
+    to run each iteration.
+    All data saved by tests run by the TestRunner on each iteration are saved
+    to the "data" dict.
+    This data is readily filtered, accessed and graphed using the
+    :meth:`get_test_results` and :meth:`graph_test_results` functions.
+    The TestController's behaviour is defined by the settings stored in the
+    "settings" dict, which is populated with the arguments below.
+
+    Example:
+        >>> tc = TestController(my_testrunner)
+        >>> tc.run()
+        >>> my_data = tc.get_test_results(format='csv')
+        >>> with open('mydata.csv', 'w') as f:
+                f.write(my_data)
+        >>> tc.graph_test_results('mygraph.svg')
 
     Args:
-        ...
+        testrunner: TestRunner object to be run each iteration.
+            See :class:`~farmtest.test.TestRunner`
+        setup (deffered_function): Setup function.
+            Default: None, no setup function.
+            See :meth:`setup`
+        report (deffered_function): Report function.
+            Default: None, no report function.
+            See :meth:`report`
+        run_condition (deffered_function): Run condition function.
+            Default: None, no run condition function.
+            See :meth:`run_condition`
+        name (str): Name of TestController. **DEPRECIATED**
+        report_n_iterations (int): Run :meth:`report` function every N iterations.
+            Saved to :attr:`settings`
+            Default: None, only run at end of last test iteration.
+        continue_on fail (bool): Continue running test iterations even if a
+            test fails by raising an exception.
+            Saved to :attr:`settings`
+            Default: True
+        run_forever (bool): Prevent TestController from exiting after a
+            the :meth:`run_condition` function returns False.
+            Saved to :attr:`settings`
+            Default: False
+        condition_check_interval_s (int): Number of seconds to wait before
+            rechecking the :meth:`run_condition` function.
+            Saved to :attr:`settings`
+            Default: 0 seconds, retry immediately
+        setup_n_iterations (int): Run setup function every N iterations.
+            Default: None, only run :meth:`setup` the at start the of first iteration.
+            Saved to :attr:`settings`
+        force_initial_run (bool): Run an initial test iteration regardless of
+            whether :meth:`run_condition` function returns True.
+            Saved to :attr:`settings`
+            Default: False
+        email_on_except (bool): Send an error report email if an exception
+            occurs during testing.
+            Saved to :attr:`settings`
+            Default: True
+            See :func:`~farmutils.email.send_exception_email`
+        log_func (function): Log function to use.
+            Default: print
+
+    Attributes:
+        settings (dict): Controls the behaviour of the TestController.
+            Settings are populated from args above.
+            Items:
+                run_forever, report_n_iterations, continue_on_fail,
+                condition_check_interval_s, setup_n_iterations, force_initial_run,
+                email_on_except
+        stats (dict): Contains TestController's runtime statistics.
+            num_iterations_run: Total number of iterations run.
+            num_iterations_pass: Number of iterations with no test failures.
+            num_tests_run: Number of tests run over all iterations.
+            num_tests_pass: Number of tests that succeded.
+            num_tests_total: Total number of passed and failed tests.
+        data (dict): Data dict containing data TestRunner runs and
+            various other info.
+            Initialised as:
+                >>> self.data = {
+                        'TestController': {
+                            'settings': {},
+                            'stats': {},
+                            'results': {},
+                            'results_summary': {},
+                            'test_settings': {}
+                        }
+                    }
     '''
     def __init__(self, testrunner, setup=None, report=None,
             run_condition=None, name=None, report_n_iterations=None,
@@ -176,8 +259,9 @@ class TestController():
     def log(self, message):
         ''' Basic logging function wraper
 
-        Calls the class method "log_func" (default is print) with a message,
-        with the format "[TestController] <message>"
+        Calls the class method "log_func" (default is print) with a message.
+            >>> my_testcontroller.log('Hello World!')
+                '[TestController] Hello World!'
         '''
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
