@@ -15,6 +15,11 @@ from .test import TestRunner
 
 
 class TestController():
+    ''' TODO: Add documentation
+
+    Args:
+        ...
+    '''
     def __init__(self, testrunner, setup=None, report=None,
             run_condition=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
@@ -66,6 +71,7 @@ class TestController():
 
     @property
     def settings(self):
+        ''' The Testcontroller settings control control its behaviour. '''
         return self.data['TestController']['settings']
 
     @settings.setter
@@ -74,6 +80,7 @@ class TestController():
 
     @property
     def stats(self):
+        ''' Testcontroller runtime statistics '''
         return self.data['TestController']['stats']
 
     @stats.setter
@@ -82,6 +89,11 @@ class TestController():
 
     @property
     def results(self):
+        ''' Saved test runtime results.
+
+        ll the data values saved to the "data" dicts of
+        the tests in the TestRunner, over all iterations that have been run.
+        '''
         return self.data['TestController']['results']
 
     @results.setter
@@ -90,6 +102,11 @@ class TestController():
 
     @property
     def results_summary(self):
+        ''' Summary of saved test results.
+
+        A summary of all the data values saved to the "data" dicts of
+        the tests in the TestRunner, over all iterations that have been run.
+        '''
         return self.data['TestController']['results_summary']
 
     @results_summary.setter
@@ -98,6 +115,11 @@ class TestController():
 
     @property
     def test_settings(self):
+        ''' Dictionary summarising the test settings.
+
+        A summary of all the settings saved to the "settings" dicts of
+        the tests in the TestRunner.
+        '''
         return self.data['TestController']['test_settings']
 
     @test_settings.setter
@@ -106,6 +128,12 @@ class TestController():
 
     @property
     def setup(self):
+        ''' Setup function, converted to a deffered_function if not already.
+
+        If set, the setup function is run at the start of the first test
+        iteration, and every N iterations if the "setup_every_n_iterations"
+        setting is used.
+        '''
         return self._setup
 
     @setup.setter
@@ -114,6 +142,12 @@ class TestController():
 
     @property
     def report(self):
+        ''' Report function, converted to a deffered_function if not already.
+
+        If set, the setup function is run at the end of the last test
+        iteration, and every N iterations if the "report_every_n_iterations"
+        setting is used.
+        '''
         return self._report
 
     @report.setter
@@ -122,6 +156,17 @@ class TestController():
 
     @property
     def run_condition(self):
+        ''' Run condition function, converted to a deffered_function if not already.
+
+        If set, the run condition function is run before every test iteration, and
+        it is used to determine whether another test iteration should be run.
+        If if it returns True, another iteration is run, and False causes the
+        TestController to exit.
+        The TestController will not exit if the "run_forever" setting is set. If so
+        the TestController will sleep for a number of seconds (as determined by the
+        "condition_check_interval_s" setting) and the run condition function will
+        be checked again. And so on.
+        '''
         return self._run_condition
 
     @run_condition.setter
@@ -129,9 +174,16 @@ class TestController():
         self._run_condition = None if f is None else deferred_function(f)
 
     def log(self, message):
+        ''' Basic logging function wraper
+
+        Calls the class method "log_func" (default is print) with a message,
+        with the format "[TestController] <message>"
+        '''
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
     def get_results_summary(self):
+        ''' Get a summary of test results data values,
+            with some numerical analysis '''
         def chunks(l, n):
             '''Yield successive n-sized chunks from l'''
             for i in range(0, len(l), n):
@@ -224,6 +276,7 @@ class TestController():
         return results_summary
 
     def collect_test_settings(self):
+        ''' Get a summary of the settings for tests in the TestRunner '''
         settings = {}
         for test in self.testrunner.tests:
             if (not self.results or
@@ -239,13 +292,13 @@ class TestController():
     def get_test_results(self, test_names=None, fields=None, format=None,
             settings=None):
         '''Get test data from the global data dictionary.
-    
+
         Args:
             test_names (str, list(str)): The name of the test(s) to get data for.
                 This can be a single test or a list of test names.
                 These names are checked as regular expressions, with data from
                 any test name matching any of the regex specified being returned.
-                E.g. 
+                E.g.
                     >>> test_names=[MyTest.*, Test2]
                 Default: match all test names.
                 Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
@@ -457,6 +510,7 @@ class TestController():
             chart.render_to_png(file)
 
     def run_iteration(self):
+        ''' Run all tests in TestRunner '''
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
         self.log("Current stats:\n\tIterations passed/total: {}/{} , Tests pass/run/total: {}/{}/{} ".format(
@@ -479,6 +533,7 @@ class TestController():
         return success
 
     def run(self):
+        ''' Run the test suite with saved settings '''
         if self.settings['email_on_except']:
             try:
                 self._run()
