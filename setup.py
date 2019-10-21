@@ -2,6 +2,8 @@ import setuptools
 
 
 readme_file = "readme.md"
+long_description = None
+long_description_content_type = None
 try:
     with open(readme_file, "r") as fh:
         long_description = fh.read()
@@ -9,8 +11,6 @@ try:
 except FileNotFoundError:
     print('Cannot find readme {}. Omitting long package description'.format(
         readme_file))
-    long_description = None
-    long_description_content_type = None
 
 setuptools.setup(
     name="farm-core",
