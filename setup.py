@@ -22,6 +22,20 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://bitbucket.org/adeneo-embedded/farm-core",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'pyserial',
+        'setuptools',
+        'pyudev',
+        'pexpect>=4.6',
+        'pyftdi',
+        'pyroute2',
+        'pandas',
+        'pygal',
+        'cairosvg',
+        'graphviz',
+        'nanocom',
+        'requests'
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
