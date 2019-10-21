@@ -19,7 +19,7 @@ setuptools.setup(
     author_email="mwebster@witekio.com",
     description="Automation Lab: farm-core",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    long_description_content_type=long_description_content_type,
     url="https://bitbucket.org/adeneo-embedded/farm-core",
     packages=setuptools.find_packages(),
     install_requires=[
