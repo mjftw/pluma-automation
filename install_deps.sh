@@ -17,7 +17,7 @@ pip3 install --user -r requirements.txt
 
 # Install farm-core packages (farmcore, farmtest, farmutils)
 if [ "$1" == "-d" -o "$1" == "--dev" ]; then
-    echo "=== Installing farm-core packages (farmcore, farmtest, farmutils) as editable (dev mode) ==="
+    echo "=== Installing farm-core packages (farmcore, farmtest, farmutils), editable from $PWD (dev mode) ==="
     pip3 uninstall -y farm-core
     pip3 install --user --editable .
 else
