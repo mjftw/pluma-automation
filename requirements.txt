@@ -11,3 +11,7 @@ cairosvg
 graphviz
 nanocom
 requests
+
+# Module pip package creation
+setuptools
+wheel

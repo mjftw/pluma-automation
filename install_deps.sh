@@ -15,7 +15,13 @@ $SUDO apt install -y libusb-1.0 python3 python3-pip graphviz
 # Install Python libraries
 pip3 install --user -r requirements.txt
 
-# build the farm-core packages (farmcore, farmtest, farmutils)
-python3 setup.py build
-# install the farm-core packages
-sudo python3 setup.py install
+# Install farm-core packages (farmcore, farmtest, farmutils)
+if [ "$1" == "-d" -o "$1" == "--dev" ]; then
+    echo "=== Installing farm-core packages (farmcore, farmtest, farmutils) as editable (dev mode) ==="
+    pip3 uninstall -y farm-core
+    pip3 install --user --editable .
+else
+    echo "=== Installing farm-core packages (farmcore, farmtest, farmutils) ==="
+    pip3 uninstall -y farm-core
+    pip3 install --user .
+fi
