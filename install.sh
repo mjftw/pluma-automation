@@ -9,7 +9,7 @@ if [ ! -z "$(which sudo)" -a "$UID" != "0" ]; then
     SUDO="sudo"
 fi
 
-PROJECT_ROOT="$(dirname "$0")"
+PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
 # LibUSB required for PyFTDI library used by SDWire
 $SUDO apt install -y libusb-1.0 python3 python3-pip graphviz
