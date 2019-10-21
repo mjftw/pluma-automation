@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Dependency installer script for Debian based Linux distributions
+# Installer script for Debian based Linux distributions
 #
 
 # Install as sudo if sudo command installed, and user is not root
