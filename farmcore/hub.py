@@ -346,7 +346,7 @@ class Hub(Farmclass, USB):
         return self._filter_devinfo(devinfo, key, get_all)
 
     def get_ethernet(self, key=None, get_all=None):
-        vendors = ['ASIX_Elec._Corp.']
+        vendors = ['ASIX Elec. Corp.', 'ASIX_Elec._Corp.']
 
         for vendor in vendors:
             devinfo = self.filter_downstream({
