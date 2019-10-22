@@ -42,6 +42,7 @@ import time
 import re
 import shutil
 import os
+import inspect
 from copy import copy
 
 from farmutils import Email, send_exception_email, datetime_to_timestamp
@@ -314,6 +315,22 @@ class TestRunner():
             return True
 
     def add_test(self, test, index=None):
+        # Check if user accidentally passed in a class inheriting
+        # TestBase, instead of an instance of that class.
+        if inspect.isclass(test) and (test is TestBase or issubclass(test, TestBase)):
+            raise AttributeError(
+                'test passed in is TestBase class or a subclass of it.  '
+                'It should be an object instance of either TestBase or '
+                'a subclass.  Possible cause: tests list passed to TestRunner'
+                ' contains <testClassName> instead of <testClassName>().'
+            )
+        # Verify that test is an instance of class TestBase.
+        if not isinstance(test, TestBase):
+            raise AttributeError(
+                'test should be an object instance of class TestBase'
+                ' or one of its subclasses.'
+            )
+
         # Rename test if a test with the same name already added
         # Default name is the class name, new names are <classname>_1,2,3 etc.
         if not hasattr(test, '_test_name'):
