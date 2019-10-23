@@ -41,7 +41,7 @@ rankdir=BT
 "37" [fontcolor="red", label="{MultimeterInvalidKeyPress|\l|}", shape="record"];
 "38" [fontcolor="red", label="{MultimeterMeasurementError|\l|}", shape="record"];
 "39" [label="{MultimeterTTI1604|button_map : dict\lchar_map : dict\lis_ready\llast_unit : NoneType\lserial : Serial\lunit_bitfield_map : dict\l|measure()\lpower_on()\lpress_button()\lset_unit()\l}", shape="record"];
-"40" [label="{MuxPi|board : NoneType\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
+"40" [label="{MuxPi|board : Board\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
 "41" [label="{MuxPiDyper|muxpi\l|toggle()\l}", shape="record"];
 "42" [fontcolor="red", label="{MuxPiError|\l|}", shape="record"];
 "43" [label="{MuxPiPower|muxpi\l|off()\lon()\l}", shape="record"];
@@ -151,10 +151,22 @@ rankdir=BT
 "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="current_sampler", style="solid"];
 "28" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="internal_hub", style="solid"];
 "43" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="dut_power", style="solid"];
+"40" -> "43" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
+"40" -> "41" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
+"40" -> "44" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
 "45" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="dut_storage", style="solid"];
+"40" -> "45" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
 "60" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
 "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="stm_console", style="solid"];
 "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="dut_console", style="solid"];
 "60" -> "79" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="_console", style="solid"];
 "68" -> "0" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+"28" -> "4" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="hub", style="solid"];
+"64" -> "4" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="storage", style="solid"];
+"52" -> "4" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="power", style="solid"];
+"9" -> "4" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+"9" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+"4" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="board", style="solid"];
+"9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+"79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
 }
