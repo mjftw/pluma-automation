@@ -15,6 +15,94 @@ from .test import TestRunner
 
 
 class TestController():
+    ''' Runs a TestRunner over multiple iterations and processes test data.
+
+    The TestController is the top level test object, and takes a TestRunner
+    to run each iteration.
+    All data saved by tests run by the TestRunner on each iteration are saved
+    to the "data" dict.
+    This data is readily filtered, accessed and graphed using the
+    :meth:`get_test_results` and :meth:`graph_test_results` functions.
+    The TestController's behaviour is defined by the settings stored in the
+    "settings" dict, which is populated with the arguments below.
+
+    Example:
+        >>> tc = TestController(my_testrunner)
+        >>> tc.run()
+        >>> my_data = tc.get_test_results(format='csv')
+        >>> with open('mydata.csv', 'w') as f:
+                f.write(my_data)
+        >>> tc.graph_test_results('mygraph.svg')
+
+    Args:
+        testrunner: TestRunner object to be run each iteration.
+            See :class:`~farmtest.test.TestRunner`
+        setup (deffered_function): Setup function.
+            Default: None, no setup function.
+            See :meth:`setup`
+        report (deffered_function): Report function.
+            Default: None, no report function.
+            See :meth:`report`
+        run_condition (deffered_function): Run condition function.
+            Default: None, no run condition function.
+            See :meth:`run_condition`
+        name (str): Name of TestController. **DEPRECIATED**
+        report_n_iterations (int): Run :meth:`report` function every N iterations.
+            Saved to :attr:`settings`
+            Default: None, only run at end of last test iteration.
+        continue_on fail (bool): Continue running test iterations even if a
+            test fails by raising an exception.
+            Saved to :attr:`settings`
+            Default: True
+        run_forever (bool): Prevent TestController from exiting after a
+            the :meth:`run_condition` function returns False.
+            Saved to :attr:`settings`
+            Default: False
+        condition_check_interval_s (int): Number of seconds to wait before
+            rechecking the :meth:`run_condition` function.
+            Saved to :attr:`settings`
+            Default: 0 seconds, retry immediately
+        setup_n_iterations (int): Run setup function every N iterations.
+            Default: None, only run :meth:`setup` the at start the of first iteration.
+            Saved to :attr:`settings`
+        force_initial_run (bool): Run an initial test iteration regardless of
+            whether :meth:`run_condition` function returns True.
+            Saved to :attr:`settings`
+            Default: False
+        email_on_except (bool): Send an error report email if an exception
+            occurs during testing.
+            Saved to :attr:`settings`
+            Default: True
+            See :func:`~farmutils.email.send_exception_email`
+        log_func (function): Log function to use.
+            Default: print
+
+    Attributes:
+        settings (dict): Controls the behaviour of the TestController.
+            Settings are populated from args above.
+            Items:
+                run_forever, report_n_iterations, continue_on_fail,
+                condition_check_interval_s, setup_n_iterations, force_initial_run,
+                email_on_except
+        stats (dict): Contains TestController's runtime statistics.
+            num_iterations_run: Total number of iterations run.
+            num_iterations_pass: Number of iterations with no test failures.
+            num_tests_run: Number of tests run over all iterations.
+            num_tests_pass: Number of tests that succeded.
+            num_tests_total: Total number of passed and failed tests.
+        data (dict): Data dict containing data TestRunner runs and
+            various other info.
+            Initialised as:
+                >>> self.data = {
+                        'TestController': {
+                            'settings': {},
+                            'stats': {},
+                            'results': {},
+                            'results_summary': {},
+                            'test_settings': {}
+                        }
+                    }
+    '''
     def __init__(self, testrunner, setup=None, report=None,
             run_condition=None, name=None, report_n_iterations=None,
             continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
@@ -66,6 +154,7 @@ class TestController():
 
     @property
     def settings(self):
+        ''' The Testcontroller settings control control its behaviour. '''
         return self.data['TestController']['settings']
 
     @settings.setter
@@ -74,6 +163,7 @@ class TestController():
 
     @property
     def stats(self):
+        ''' Testcontroller runtime statistics '''
         return self.data['TestController']['stats']
 
     @stats.setter
@@ -82,6 +172,11 @@ class TestController():
 
     @property
     def results(self):
+        ''' Saved test runtime results.
+
+        ll the data values saved to the "data" dicts of
+        the tests in the TestRunner, over all iterations that have been run.
+        '''
         return self.data['TestController']['results']
 
     @results.setter
@@ -90,6 +185,11 @@ class TestController():
 
     @property
     def results_summary(self):
+        ''' Summary of saved test results.
+
+        A summary of all the data values saved to the "data" dicts of
+        the tests in the TestRunner, over all iterations that have been run.
+        '''
         return self.data['TestController']['results_summary']
 
     @results_summary.setter
@@ -98,6 +198,11 @@ class TestController():
 
     @property
     def test_settings(self):
+        ''' Dictionary summarising the test settings.
+
+        A summary of all the settings saved to the "settings" dicts of
+        the tests in the TestRunner.
+        '''
         return self.data['TestController']['test_settings']
 
     @test_settings.setter
@@ -106,6 +211,12 @@ class TestController():
 
     @property
     def setup(self):
+        ''' Setup function, converted to a deffered_function if not already.
+
+        If set, the setup function is run at the start of the first test
+        iteration, and every N iterations if the "setup_every_n_iterations"
+        setting is used.
+        '''
         return self._setup
 
     @setup.setter
@@ -114,6 +225,12 @@ class TestController():
 
     @property
     def report(self):
+        ''' Report function, converted to a deffered_function if not already.
+
+        If set, the setup function is run at the end of the last test
+        iteration, and every N iterations if the "report_every_n_iterations"
+        setting is used.
+        '''
         return self._report
 
     @report.setter
@@ -122,6 +239,17 @@ class TestController():
 
     @property
     def run_condition(self):
+        ''' Run condition function, converted to a deffered_function if not already.
+
+        If set, the run condition function is run before every test iteration, and
+        it is used to determine whether another test iteration should be run.
+        If if it returns True, another iteration is run, and False causes the
+        TestController to exit.
+        The TestController will not exit if the "run_forever" setting is set. If so
+        the TestController will sleep for a number of seconds (as determined by the
+        "condition_check_interval_s" setting) and the run condition function will
+        be checked again. And so on.
+        '''
         return self._run_condition
 
     @run_condition.setter
@@ -129,9 +257,17 @@ class TestController():
         self._run_condition = None if f is None else deferred_function(f)
 
     def log(self, message):
+        ''' Basic logging function wraper
+
+        Calls the class method "log_func" (default is print) with a message.
+            >>> my_testcontroller.log('Hello World!')
+                '[TestController] Hello World!'
+        '''
         self.log_func('[{}] {}'.format(self.__class__.__name__, message))
 
     def get_results_summary(self):
+        ''' Get a summary of test results data values,
+            with some numerical analysis '''
         def chunks(l, n):
             '''Yield successive n-sized chunks from l'''
             for i in range(0, len(l), n):
@@ -224,6 +360,7 @@ class TestController():
         return results_summary
 
     def collect_test_settings(self):
+        ''' Get a summary of the settings for tests in the TestRunner '''
         settings = {}
         for test in self.testrunner.tests:
             if (not self.results or
@@ -238,28 +375,32 @@ class TestController():
 
     def get_test_results(self, test_names=None, fields=None, format=None,
             settings=None):
-        '''
-        Get test data from the global data dictionary.
-        @test_names is the name of the test(s) to get data for, this can be a
-        single test or a list of test names. These names are actually checked
-        as regular expressions, with data from any test name matching any
-        regex specified being returned.
-        E.g. Things like test_names=[MyTest.*, Test2] are allowed.
-        If @test_names is None, match all test names.
-        Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
-        @fields is a list of the names of data fields to extract.
-        If @fields is None all fields are returned.
-        If @settings is not None, then it should be a dict containing
-        key values pairs. These represent the name and values of settings
-        that must be present in the test's settings in order for it to be
-        included in the returned results.
-        E.g. settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
-        @format can be set to the following:
-            'json' -> return data is a json formatted string
-            'csv' -> return data is CSV formatted
-            None -> return data is a generator to create a list of dicts
-                as shown: field1_data =
-                    list(returned)[iteration_number]['test_name']['field1']
+        '''Get test data from the global data dictionary.
+
+        Args:
+            test_names (str, list(str)): The name of the test(s) to get data for.
+                This can be a single test or a list of test names.
+                These names are checked as regular expressions, with data from
+                any test name matching any of the regex specified being returned.
+                E.g.
+                    >>> test_names=[MyTest.*, Test2]
+                Default: match all test names.
+                Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
+            fields (list(str)): A list of the names of data fields to extract.
+                Default: all fields are returned.
+            settings (dict): Optional. Specifyt a dict of
+                key, value pairs, each representing the name and values of
+                settings that must be present in the test's settings in order
+                for it to be included in the returned results.
+                E.g
+                    >>> settings = {'mysetting1': 4, 'mysetting2': 'some_value'}
+            format (str): Output format of returned data.
+                Can be set to the following:
+                    'json' -> return data is a json formatted string
+                    'csv' -> return data is CSV formatted
+                    Default: return data is a generator to create a list of dicts
+                    E.g.
+                        >>> field1_data = list(returned)[iteration_number]['test_name']['field1']
         '''
 
         test_names = test_names or '.*'
@@ -307,25 +448,28 @@ class TestController():
 
     def graph_test_results(self, file, test_names=None, fields=None, vs_type=None,
             title=None, format=None, config=None):
-        '''
-        Create a graph of data fields from the test results data.
-        @file: Output file path.
-        @test_names: Name of Tests to read data from.
-            Can specify a one test (str) or a list of tests, (list of str)
-            All tests are selected if set to None
-        @fields: List of data fields to plot from Test.data
-            if fields == None all fields are plotted'
-        @vs_type: Str specifying what to graph on axis:
-            "iteration": graph data values over test iterations
-            "cumulative": graph cumulative data values over iterations
-            "fields": graph the fields in @fields vs each other.
-                If this option is selected, @fileds must be exactly 2 fields.
-            Default: "iteration"
-        @title: Optionally a title can be supplied for the chart
-        @format: Str specifying output format. Options: "svg" or "png"
-            Default: "svg"
-        @config: Optionally supply a pygal.Config option. This allows
-            rendering with custom configuration and styles.
+        '''Create a graph of data fields from the test results data.
+
+        Args:
+            file (str): Output file path.
+            test_names (str, list(str)): Name of Tests to read data from.
+                Can specify a one test name or a list of test names.
+                All tests are selected if set to None.
+            fields (str, list(str): List of data fields to plot from Test data.
+                Default: all fields are plotted.
+            vs_type (str): Specifies what should be on graph axis:
+                "iteration": graph data values over test iterations.
+                "fields": Graph the fields in fields argument with one on each axis.
+                    If this option is selected, fileds must be exactly 2 fields.
+                Default: "iteration"
+            title (str): Optionally a title can be supplied for the chart.
+                If a tile is not specified, one will be generated according to
+                the test data.
+            format (str): Specifies output format.
+                Options: "svg" or "png"
+                Default: "svg"
+            config (pygal.Config): Optionally supply a option.
+                This allows rendering with custom configuration and styles.
         '''
 
         vs_type = vs_type or 'iteration'
@@ -450,6 +594,7 @@ class TestController():
             chart.render_to_png(file)
 
     def run_iteration(self):
+        ''' Run all tests in TestRunner '''
         self.log("Starting iteration: {}".format(
             self.stats['num_iterations_run']))
         self.log("Current stats:\n\tIterations passed/total: {}/{} , Tests pass/run/total: {}/{}/{} ".format(
@@ -472,6 +617,7 @@ class TestController():
         return success
 
     def run(self):
+        ''' Run the test suite with saved settings '''
         if self.settings['email_on_except']:
             try:
                 self._run()
