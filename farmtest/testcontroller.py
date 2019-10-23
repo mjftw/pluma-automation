@@ -317,6 +317,7 @@ class TestController():
             if fields == None all fields are plotted'
         @vs_type: Str specifying what to graph on axis:
             "iteration": graph data values over test iterations
+            "cumulative": graph cumulative data values over iterations
             "fields": graph the fields in @fields vs each other.
                 If this option is selected, @fileds must be exactly 2 fields.
             Default: "iteration"
@@ -336,7 +337,7 @@ class TestController():
         if test_names and not isinstance(test_names, list):
             test_names = [test_names]
 
-        vs_types = ['iteration', 'fields']
+        vs_types = ['iteration', 'cumulative', 'fields']
         if vs_type not in vs_types:
             raise AttributeError('vs_type must be in {}'.format(vs_types))
         elif (vs_type == 'fields' and
@@ -355,7 +356,7 @@ class TestController():
 
         if results:
             # Get a list of test names whose tests have data
-            tests_found = list(set(test for r in results for test in r if test not in empty_tests))
+            tests_found = sorted(list(set(test for r in results for test in r if test not in empty_tests)))
         else:
             tests_found = []
 
@@ -373,7 +374,7 @@ class TestController():
                     test_names,
                     fields))
 
-        chart = pygal.XY()
+        chart = pygal.XY(truncate_legend=-1)
         chart.title = title
 
         # Default style to fix svg black background rendering issue
@@ -389,15 +390,26 @@ class TestController():
 
         points = {}
 
-        if vs_type == 'iteration':
-            vs_str = '{} vs iteration'.format(', '.join(fields_found))
+        if vs_type in ['iteration', 'cumulative']:
+            vs_str = '{}{} vs iteration'.format(
+                'cumulative ' if vs_type == 'cumulative' else '',
+                ', '.join(fields_found))
 
             # Build list of points with dataset labels
             for tf in tests_found:
                 points[tf] = {f'{tf}: {k}': [] for k in results[0][tf]}
+                last_v = 0
                 for i, r in enumerate(results):
-                    for k, v in r[tf].items():
+                    # Filter out None results as these are not numbers and will break graphing.
+                    for k, v in ((k, v) for k, v in r[tf].items() if v is not None):
+                        if isinstance(v, bool):
+                            v = int(v)
+                        if vs_type == 'cumulative':
+                            v += last_v
+                            last_v = v
+
                         points[tf][f'{tf}: {k}'].append((i, v))
+
         elif vs_type == 'fields':
             tests_with_fields = [
                 tf for tf in tests_found for r in results
