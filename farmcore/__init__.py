@@ -1,3 +1,4 @@
+name = "farmcore"
 from .exceptions import *
 from .board import Board, get_board_by_name
 from .usbrelay import USBRelay

@@ -1,3 +1,4 @@
+name = "farmutils"
 from .exceptions import *
 from .email import Email, send_exception_email
 from .git import reset_repos, get_latest_tag, get_tag_list, \
