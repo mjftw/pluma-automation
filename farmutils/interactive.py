@@ -38,4 +38,6 @@ def seech(encoding='utf-8'):
     while keyhex != b'\x03':
         key = getch()
         keyhex = key.encode(encoding)
-        print(f'Pressed: {unctrl(key)} Hex: {keyhex}')
+        hex_val = f'0x{keyhex.hex()}'
+        int_val = int(hex_val, 16)
+        print(f'Pressed: {unctrl(key)} Char: {keyhex} Hex: {hex_val} Int: {int_val}')
