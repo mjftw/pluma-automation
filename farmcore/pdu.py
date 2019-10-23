@@ -160,14 +160,14 @@ class IPPowerPDU(PowerBase, PDUReqestsBase):
         PowerBase.__init__(self, reboot_delay)
         PDUReqestsBase.__init__(self, interface, interface_ip or '192.168.1.110')
 
-    def make_request(params):
+    def make_request(self, params):
         #E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
         params_str = '&'.join([
             'user=' + self.username,
             'pass=' + self.password,
             params
         ])
-        self._make_request(endpoint='set.cmd', params=params_str)
+        self._make_request(endpoint='set.cmd', params=params_str, max_tries=2)
 
     @PowerBase.on
     def on(self):
