@@ -6,13 +6,14 @@ This document describes the core values that should be kept in mind when adding 
 All core code should be written in Python3.
 
 Advantages of fully Python codebase:
-* Python is a well used modern language which is easy to learn
-* Python runs almost everywhere these days, offering great portability
-* A Python project is easy to set up, with no compilation required
-* Development is faster, more efficient and flexible when no the same code can be run on the development machine and target hardware without modification or compilation
-* A fully Python codebase means that all classes may be used in an interactive manner via the interactive Python interperator, giving a command line interface for free
-* The entire project can be easily debugged using the Python debugger
-  * Having parts of the core functionality written in a different language would break the debugger's ability to fully trace the source tree
+
+-  Python is a well used modern language which is easy to learn
+-  Python runs almost everywhere these days, offering great portability
+-  A Python project is easy to set up, with no compilation required
+-  Development is faster, more efficient and flexible when no the same code can be run on the development machine and target hardware without modification or compilation
+-  A fully Python codebase means that all classes may be used in an interactive manner via the interactive Python interperator, giving a command line interface for free
+-  The entire project can be easily debugged using the Python debugger
+  -  Having parts of the core functionality written in a different language would break the debugger's ability to fully trace the source tree  
 
 ## Self contained
 
