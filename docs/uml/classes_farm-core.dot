@@ -56,9 +56,7 @@ digraph "classes_farm-core" {
         "44" [label="{MuxPiPowerDyper|muxpi\l|}", shape="record"];
         "45" [label="{MuxPiStorage|muxpi\l|to_board()\lto_host()\l}", shape="record"];
 
-
         "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
-
         "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
 
         "30" [label="{Interface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
@@ -145,6 +143,50 @@ digraph "classes_farm-core" {
     // =======================
     // ==== Relationships ====
     // =======================
+    // == Raises Exceptions ==
+    "4" -> "5" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // MultimeterErrors
+    "39" -> "35" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "39" -> "37" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "39" -> "38" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // ConsoleErrors
+    "9" -> "10" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "9" -> "12" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "9" -> "13" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "9" -> "14" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // PDUErrors
+    "27" -> "10" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "48" -> "62" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "48" -> "20" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "51" -> "20" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "51" -> "29" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "51" -> "50" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "49" -> "0" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "49" -> "29" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // StorageErrors
+    "65" -> "64" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // USBErrors
+    "78" -> "75" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "78" -> "79" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // ModemErrors
+    "33" -> "34" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // MuxPiErrors
+    "42" -> "40" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // == Catches Exceptions ==
+    "10" -> "0" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "12" -> "4" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "14" -> "0" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "14" -> "71" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "5" -> "71" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+
     // Inheitance/Relisation
     "0" -> "52" [arrowhead="empty", arrowtail="none"];
     "1" -> "74" [arrowhead="empty", arrowtail="none"];
