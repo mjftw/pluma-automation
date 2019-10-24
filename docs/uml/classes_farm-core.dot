@@ -129,6 +129,8 @@ digraph "classes_farm-core" {
         "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
         "3" [label="{AsyncSampler|sample_func\l|start()\lstop()\l}", shape="record"];
         "47" [label="{Nonblocking|\l|}", shape="record"];
+        "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
+        "84" [label="{method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
 
         // Exceptions
         "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
@@ -136,8 +138,6 @@ digraph "classes_farm-core" {
         "23" [ label="{GitError|\l|}", fontcolor="red", shape="record"];
         "24" [ label="{GitInvalidBranch|\l|}", fontcolor="red", shape="record"];
         "25" [ label="{GitInvalidVersionSpecifier|\l|}", fontcolor="red", shape="record"];
-        "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
-        "84" [label="{method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
     }
 
     // =======================
@@ -146,6 +146,7 @@ digraph "classes_farm-core" {
     // == Raises Exceptions ==
     "4" -> "5" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
+    // = farmcore =
     // MultimeterErrors
     "39" -> "35" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "39" -> "37" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
@@ -180,12 +181,27 @@ digraph "classes_farm-core" {
     // MuxPiErrors
     "42" -> "40" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
+    // = farmtest=
+    "74" -> "40" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "72" -> "80" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "67" -> "71" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
+    // = farmutils
+    "19" -> "17" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+
     // == Catches Exceptions ==
+    // = farmcore =
     "10" -> "0" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
     "12" -> "4" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
     "14" -> "0" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
     "14" -> "71" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
     "5" -> "71" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+
+    // = farmtest =
+    "2" -> "73" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "1" -> "73" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+
+    // = farmutils =
 
     // Inheitance/Relisation
     "0" -> "52" [arrowhead="empty", arrowtail="none"];
