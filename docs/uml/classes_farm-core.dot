@@ -157,34 +157,34 @@ digraph "classes_farm-core" {
     "9" -> "12" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "9" -> "13" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "9" -> "14" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "27" -> "10" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // PDUErrors
-    "27" -> "10" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "48" -> "62" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "48" -> "20" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "51" -> "20" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "51" -> "29" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "51" -> "50" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "49" -> "0" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "49" -> "29" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "20" -> "51" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "29" -> "51" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "50" -> "51" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "62" -> "48" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "20" -> "48" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "0" -> "49" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "29" -> "49" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // StorageErrors
-    "65" -> "64" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "64" -> "65" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // USBErrors
-    "78" -> "75" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "78" -> "79" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "75" -> "78" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "79" -> "78" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // ModemErrors
-    "33" -> "34" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "34" -> "33" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // MuxPiErrors
-    "42" -> "40" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "40" -> "42" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmtest=
-    "74" -> "40" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "72" -> "80" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-    "67" -> "71" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "40" -> "74" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "80" -> "72" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "71" -> "67" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmutils
     "19" -> "17" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
