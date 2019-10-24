@@ -4,120 +4,143 @@ digraph "classes_farm-core" {
     // ==========================
     // ==== Farmcore Classes ====
     // ==========================
-    "21" [label="{Farmclass|\l|}", shape="record"];
-    "22" [label="{FarmclassMock|num_children : int\l|add_child()\l}", shape="record"];
-    "26" [label="{Hierachy|\l|show_hier()\l}", shape="record"];
-    "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
-    "32" [label="{Logging|log_echo\llog_file\llog_hier_path\llog_name\llog_on\llog_time\llog_time_format\l|error()\llog()\llog_file_clear()\l}", shape="record"];
+    subgraph cluster_farmcore {
+		label = "farmcore";
+		color=blue
 
-    "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lmuxpi : MuxPi\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
-    "7" [label="{BoardMock|\l|}", shape="record"];
-    "8" [label="{BoardMockPower|board\l|off()\lon()\l}", shape="record"];
+        "21" [label="{Farmclass|\l|}", shape="record"];
+        label="farmcore";
+        "22" [label="{FarmclassMock|num_children : int\l|add_child()\l}", shape="record"];
+        "26" [label="{Hierachy|\l|show_hier()\l}", shape="record"];
+        "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
+        "32" [label="{Logging|log_echo\llog_file\llog_hier_path\llog_name\llog_on\llog_time\llog_time_format\l|error()\llog()\llog_file_clear()\l}", shape="record"];
 
-    "9" [label="{ConsoleBase|encoding : str\lis_open\llinesep : str\lraw_logfile\l|check_alive()\lclose()\ldecode()\lencode()\lflush()\lget_json_data()\llogin()\lopen()\lraw_logfile_clear()\lsend()\lwait_for_data()\lwait_for_quiet()\l}", shape="record"];
-    "15" [label="{ConsoleMock|\l|close()\lis_open()\lopen()\l}", shape="record"];
-    "27" [label="{HostConsole|command\lis_open\l|close()\linteract()\lopen()\l}", shape="record"];
-    "68" [label="{TelnetConsole|host\l|}", shape="record"];
-    "60" [label="{SerialConsole|baud\lis_open\lport\lraw_logfile : NoneType\l|close()\linteract()\lopen()\l}", shape="record"];
-    "61" [label="{SerialConsoleMock|child_function\lis_open\l|close()\lopen()\l}", shape="record"];
-    "46" [label="{Nanocom|alive : bool\lcharacter_map : NoneType\lconsole : Console\lexit_character : str\lreceiver_thread : Thread\lrx_decoder\lserial\ltransmitter_thread : Thread\ltx_encoder\l|close()\ljoin()\lreader()\lstart()\lstop()\lwriter()\l}", shape="record"];
-    "81" [label="{_logging_Nanocom|alive : bool\llogfile\l|reader()\l}", shape="record"];
+        "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lmuxpi : MuxPi\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
+        "7" [label="{BoardMock|\l|}", shape="record"];
+        "8" [label="{BoardMockPower|board\l|off()\lon()\l}", shape="record"];
 
-    "52" [label="{PowerBase|reboot_delay : float\l|off()\lon()\lreboot()\l}", shape="record"];
-    "53" [label="{PowerMock|\l|off()\lon()\l}", shape="record"];
-    "54" [label="{PowerMulti|off_seq : list\lon_seq : list\lpower_seq : list\lreboot_delay\lreverse_off_seq : bool\l|off()\lon()\l}", shape="record"];
-    "55" [label="{PowerRelay|off_seq\lon_seq\lrelay\l|off()\lon()\l}", shape="record"];
-    "62" [label="{SoftPower|console\loff_cmd : NoneType\lon_cmd : NoneType\l|off()\lon()\l}", shape="record"];
-    "50" [label="{PDUReqestsBase|interface : NoneType\linterface_ip : NoneType\l|}", shape="record"];
-    "29" [label="{IPPowerPDU|host : str\lnetport : int\lpassword : str\lport\lusername : str\l|is_on()\lmake_request()\loff()\lon()\l}", shape="record"];
-    "20" [label="{EnergeniePDU|endpoint\lhost\lnetport : int\lsocket\l|get_info()\lis_on()\loff()\lon()\l}", shape="record"];
-    "0" [label="{APCPDU|console\lhost\lpassword\lport\lusername\l|off()\lon()\l}", shape="record"];
+        "9" [label="{ConsoleBase|encoding : str\lis_open\llinesep : str\lraw_logfile\l|check_alive()\lclose()\ldecode()\lencode()\lflush()\lget_json_data()\llogin()\lopen()\lraw_logfile_clear()\lsend()\lwait_for_data()\lwait_for_quiet()\l}", shape="record"];
+        "15" [label="{ConsoleMock|\l|close()\lis_open()\lopen()\l}", shape="record"];
+        "27" [label="{HostConsole|command\lis_open\l|close()\linteract()\lopen()\l}", shape="record"];
+        "68" [label="{TelnetConsole|host\l|}", shape="record"];
+        "60" [label="{SerialConsole|baud\lis_open\lport\lraw_logfile : NoneType\l|close()\linteract()\lopen()\l}", shape="record"];
+        "61" [label="{SerialConsoleMock|child_function\lis_open\l|close()\lopen()\l}", shape="record"];
+        "46" [label="{Nanocom|alive : bool\lcharacter_map : NoneType\lconsole : Console\lexit_character : str\lreceiver_thread : Thread\lrx_decoder\lserial\ltransmitter_thread : Thread\ltx_encoder\l|close()\ljoin()\lreader()\lstart()\lstop()\lwriter()\l}", shape="record"];
+        "81" [label="{_logging_Nanocom|alive : bool\llogfile\l|reader()\l}", shape="record"];
 
-    "56" [label="{RelayBase|\l|toggle()\l}", shape="record"];
-    "57" [label="{RelayMock|\l|toggle()\l}", shape="record"];
-    "79" [label="{USBRelay|console\ldevnode\lport_map : list\lusb_device\l|bind()\ltoggle()\lunbind()\l}", shape="record"];
+        "52" [label="{PowerBase|reboot_delay : float\l|off()\lon()\lreboot()\l}", shape="record"];
+        "53" [label="{PowerMock|\l|off()\lon()\l}", shape="record"];
+        "54" [label="{PowerMulti|off_seq : list\lon_seq : list\lpower_seq : list\lreboot_delay\lreverse_off_seq : bool\l|off()\lon()\l}", shape="record"];
+        "55" [label="{PowerRelay|off_seq\lon_seq\lrelay\l|off()\lon()\l}", shape="record"];
+        "62" [label="{SoftPower|console\loff_cmd : NoneType\lon_cmd : NoneType\l|off()\lon()\l}", shape="record"];
+        "50" [label="{PDUReqestsBase|interface : NoneType\linterface_ip : NoneType\l|}", shape="record"];
+        "29" [label="{IPPowerPDU|host : str\lnetport : int\lpassword : str\lport\lusername : str\l|is_on()\lmake_request()\loff()\lon()\l}", shape="record"];
+        "20" [label="{EnergeniePDU|endpoint\lhost\lnetport : int\lsocket\l|get_info()\lis_on()\loff()\lon()\l}", shape="record"];
+        "0" [label="{APCPDU|console\lhost\lpassword\lport\lusername\l|off()\lon()\l}", shape="record"];
 
-    "64" [label="{StorageBase|host_mountpoint\lhost_mountpoint : NoneType\l|devnode_is_mounted()\lmount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
-    "58" [label="{SDMux|index\lserialdev\lusbrelay\l|to_board()\lto_host()\l}", shape="record"];
-    "59" [label="{SDWire|ftdi : Ftdi\lproduct_id : int\lserial : NoneType\lvendor_id : int\l|to_board()\lto_host()\l}", shape="record"];
-    "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
+        "56" [label="{RelayBase|\l|toggle()\l}", shape="record"];
+        "57" [label="{RelayMock|\l|toggle()\l}", shape="record"];
+        "79" [label="{USBRelay|console\ldevnode\lport_map : list\lusb_device\l|bind()\ltoggle()\lunbind()\l}", shape="record"];
 
-    "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_parent()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
-    "16" [label="{DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
+        "64" [label="{StorageBase|host_mountpoint\lhost_mountpoint : NoneType\l|devnode_is_mounted()\lmount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
+        "58" [label="{SDMux|index\lserialdev\lusbrelay\l|to_board()\lto_host()\l}", shape="record"];
+        "59" [label="{SDWire|ftdi : Ftdi\lproduct_id : int\lserial : NoneType\lvendor_id : int\l|to_board()\lto_host()\l}", shape="record"];
+        "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
 
-    "40" [label="{MuxPi|board : Board\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
-    "41" [label="{MuxPiDyper|muxpi\l|toggle()\l}", shape="record"];
-    "43" [label="{MuxPiPower|muxpi\l|off()\lon()\l}", shape="record"];
-    "44" [label="{MuxPiPowerDyper|muxpi\l|}", shape="record"];
-    "45" [label="{MuxPiStorage|muxpi\l|to_board()\lto_host()\l}", shape="record"];
+        "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_parent()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
+        "16" [label="{DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
+
+        "40" [label="{MuxPi|board : Board\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
+        "41" [label="{MuxPiDyper|muxpi\l|toggle()\l}", shape="record"];
+        "43" [label="{MuxPiPower|muxpi\l|off()\lon()\l}", shape="record"];
+        "44" [label="{MuxPiPowerDyper|muxpi\l|}", shape="record"];
+        "45" [label="{MuxPiStorage|muxpi\l|to_board()\lto_host()\l}", shape="record"];
 
 
-    "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
+        "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
 
-    "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
+        "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
 
-    "30" [label="{Interface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
+        "30" [label="{Interface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
 
-    "34" [label="{ModemSim868|console\lhardware_reset_max_attempts : int\lhardware_reset_pin : int\lhardware_reset_wait_period : int\l|AT_send()\lanswer_call()\lcall_recording_ongoing()\lcall_recording_pause()\lcall_recording_resume()\lcall_recording_start()\lcall_recording_stop()\ldelete_sms()\lend_call()\lhardware_reset()\lincoming_call()\lmake_call()\longoing_call()\lphone_activity_status()\lread_sms()\lready()\lsend_sms()\lsms_recieved()\l}", shape="record"];
+        "34" [label="{ModemSim868|console\lhardware_reset_max_attempts : int\lhardware_reset_pin : int\lhardware_reset_wait_period : int\l|AT_send()\lanswer_call()\lcall_recording_ongoing()\lcall_recording_pause()\lcall_recording_resume()\lcall_recording_start()\lcall_recording_stop()\ldelete_sms()\lend_call()\lhardware_reset()\lincoming_call()\lmake_call()\longoing_call()\lphone_activity_status()\lread_sms()\lready()\lsend_sms()\lsms_recieved()\l}", shape="record"];
 
-    "39" [label="{MultimeterTTI1604|button_map : dict\lchar_map : dict\lis_ready\llast_unit : NoneType\lserial : Serial\lunit_bitfield_map : dict\l|measure()\lpower_on()\lpress_button()\lset_unit()\l}", shape="record"];
+        "39" [label="{MultimeterTTI1604|button_map : dict\lchar_map : dict\lis_ready\llast_unit : NoneType\lserial : Serial\lunit_bitfield_map : dict\l|measure()\lpower_on()\lpress_button()\lset_unit()\l}", shape="record"];
 
-    // Exceptions
-    "6" [ label="{BoardError|\l|}", fontcolor="red", shape="record"];
-    "5" [ label="{BoardBootValidationError|\l|}", fontcolor="red", shape="record"];
-    "11" [ label="{ConsoleError|\l|}", fontcolor="red", shape="record"];
-    "10" [ label="{ConsoleCannotOpen|\l|}", fontcolor="red", shape="record"];
-    "12" [ label="{ConsoleExceptionKeywordRecieved|\l|}", fontcolor="red", shape="record"];
-    "13" [ label="{ConsoleInvalidJSONRecieved|\l|}", fontcolor="red", shape="record"];
-    "14" [ label="{ConsoleLoginFailed|\l|}", fontcolor="red", shape="record"];
-    "36" [ label="{MultimeterError|\l|}", fontcolor="red", shape="record"];
-    "35" [ label="{MultimeterDecodeError|\l|}", fontcolor="red", shape="record"];
-    "37" [ label="{MultimeterInvalidKeyPress|\l|}", fontcolor="red", shape="record"];
-    "38" [ label="{MultimeterMeasurementError|\l|}", fontcolor="red", shape="record"];
-    "48" [ label="{PDUError|\l|}", fontcolor="red", shape="record"];
-    "51" [ label="{PDURequestError|\l|}", fontcolor="red", shape="record"];
-    "49" [ label="{PDUInvalidPort|\l|}", fontcolor="red", shape="record"];
-    "65" [ label="{StorageError|\l|}", fontcolor="red", shape="record"];
-    "77" [ label="{USBError|\l|}", fontcolor="red", shape="record"];
-    "78" [ label="{USBNoDevice|\l|}", fontcolor="red", shape="record"];
-    "33" [ label="{ModemError|\l|}", fontcolor="red", shape="record"];
-    "42" [ label="{MuxPiError|\l|}", fontcolor="red", shape="record"];
+        // Exceptions
+        "6" [ label="{BoardError|\l|}", fontcolor="red", shape="record"];
+        "5" [ label="{BoardBootValidationError|\l|}", fontcolor="red", shape="record"];
+
+        "11" [ label="{ConsoleError|\l|}", fontcolor="red", shape="record"];
+        "10" [ label="{ConsoleCannotOpen|\l|}", fontcolor="red", shape="record"];
+        "12" [ label="{ConsoleExceptionKeywordRecieved|\l|}", fontcolor="red", shape="record"];
+        "13" [ label="{ConsoleInvalidJSONRecieved|\l|}", fontcolor="red", shape="record"];
+        "14" [ label="{ConsoleLoginFailed|\l|}", fontcolor="red", shape="record"];
+
+        "36" [ label="{MultimeterError|\l|}", fontcolor="red", shape="record"];
+        "35" [ label="{MultimeterDecodeError|\l|}", fontcolor="red", shape="record"];
+        "37" [ label="{MultimeterInvalidKeyPress|\l|}", fontcolor="red", shape="record"];
+        "38" [ label="{MultimeterMeasurementError|\l|}", fontcolor="red", shape="record"];
+
+        "48" [ label="{PDUError|\l|}", fontcolor="red", shape="record"];
+        "51" [ label="{PDURequestError|\l|}", fontcolor="red", shape="record"];
+        "49" [ label="{PDUInvalidPort|\l|}", fontcolor="red", shape="record"];
+
+        "65" [ label="{StorageError|\l|}", fontcolor="red", shape="record"];
+
+        "77" [ label="{USBError|\l|}", fontcolor="red", shape="record"];
+        "78" [ label="{USBNoDevice|\l|}", fontcolor="red", shape="record"];
+
+        "33" [ label="{ModemError|\l|}", fontcolor="red", shape="record"];
+
+        "42" [ label="{MuxPiError|\l|}", fontcolor="red", shape="record"];
+    }
 
     // ==========================
     // ==== Farmtest Classes ====
     // ==========================
-    "69" [label="{TestBase|board\ldata : dict\lsettings : dict\l|}", shape="record"];
-    "71" [label="{TestCore|failed_bootlogs_dir\ltasks : list\l|post_board_off()\lpost_test_body()\lpre_board_login()\lpre_board_mount()\lpre_board_on()\lpre_host_mount()\lpre_test_body()\lprepare()\lreport()\ltest_body()\l}", shape="record"];
-    "73" [label="{TestRunner|board\ldata : dict\lemail_on_fail : bool\lfailed_bootlogs_dir : str\lnum_tests\lsequential : bool\lskip_tasks : list\ltasks : list\ltest_fails : list\ltests : list\luse_testcore : bool\l|add_test()\lget_tests_with_task()\lrm_test()\lrun()\lsend_fail_email()\l}", shape="record"];
-    "70" [label="{TestController|data : dict\llog_func\lname : NoneType\lreport\lreport : NoneType\lresults\lresults : list\lresults_summary\lresults_summary : dict\lrun_condition\lrun_condition : NoneType\lsettings\lsettings : dict\lsetup\lsetup : NoneType\lstats\lstats : dict\ltest_settings\ltest_settings : dict\ltestrunner\l|collect_test_settings()\lget_results_summary()\lget_test_results()\lgraph_test_results()\llog()\lrun()\lrun_iteration()\l}", shape="record"];
+    subgraph cluster_farmtest {
+		label = "farmtest";
+		color=blue
 
-    "82" [label="{deferred_function|args : tuple\lf\lkwargs : dict\l|run()\l}", shape="record"];
-    "80" [label="{UnitTest|body\lbody : NoneType\lsetup\lsetup : NoneType\lsuccess : bool\lteardown\lteardown : NoneType\l|run()\l}", shape="record"];
+        "69" [label="{TestBase|board\ldata : dict\lsettings : dict\l|}", shape="record"];
+        "71" [label="{TestCore|failed_bootlogs_dir\ltasks : list\l|post_board_off()\lpost_test_body()\lpre_board_login()\lpre_board_mount()\lpre_board_on()\lpre_host_mount()\lpre_test_body()\lprepare()\lreport()\ltest_body()\l}", shape="record"];
+        "73" [label="{TestRunner|board\ldata : dict\lemail_on_fail : bool\lfailed_bootlogs_dir : str\lnum_tests\lsequential : bool\lskip_tasks : list\ltasks : list\ltest_fails : list\ltests : list\luse_testcore : bool\l|add_test()\lget_tests_with_task()\lrm_test()\lrun()\lsend_fail_email()\l}", shape="record"];
+        "70" [label="{TestController|data : dict\llog_func\lname : NoneType\lreport\lreport : NoneType\lresults\lresults : list\lresults_summary\lresults_summary : dict\lrun_condition\lrun_condition : NoneType\lsettings\lsettings : dict\lsetup\lsetup : NoneType\lstats\lstats : dict\ltest_settings\ltest_settings : dict\ltestrunner\l|collect_test_settings()\lget_results_summary()\lget_test_results()\lgraph_test_results()\llog()\lrun()\lrun_iteration()\l}", shape="record"];
 
-    "63" [label="{StockSensorsTest|board\l|test_body()\l}", shape="record"];
+        "82" [label="{deferred_function|args : tuple\lf\lkwargs : dict\l|run()\l}", shape="record"];
+        "80" [label="{UnitTest|body\lbody : NoneType\lsetup\lsetup : NoneType\lsuccess : bool\lteardown\lteardown : NoneType\l|run()\l}", shape="record"];
 
-    // Exceptions
-    "74" [ label="{TestingException|\l|}", fontcolor="red", shape="record"];
-    "72" [ label="{TestFunctionNotSet|\l|}", fontcolor="red", shape="record"];
-    "67" [ label="{TaskFailed|\l|}", fontcolor="red", shape="record"];
-    "2" [ label="{AbortTestingAndReport|\l|}", fontcolor="red", shape="record"];
-    "1" [ label="{AbortTesting|\l|}", fontcolor="red", shape="record"];
+        "63" [label="{StockSensorsTest|board\l|test_body()\l}", shape="record"];
+
+        // Exceptions
+        "74" [ label="{TestingException|\l|}", fontcolor="red", shape="record"];
+        "72" [ label="{TestFunctionNotSet|\l|}", fontcolor="red", shape="record"];
+        "67" [ label="{TaskFailed|\l|}", fontcolor="red", shape="record"];
+        "2" [ label="{AbortTestingAndReport|\l|}", fontcolor="red", shape="record"];
+        "1" [ label="{AbortTesting|\l|}", fontcolor="red", shape="record"];
+    }
 
     // ===========================
     // ==== Farmutils Classes ====
     // ===========================
-    "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
-    "3" [label="{AsyncSampler|sample_func\l|start()\lstop()\l}", shape="record"];
-    "47" [label="{Nonblocking|\l|}", shape="record"];
+    subgraph cluster_farmutils {
+		label = "farmtest";
+		color=blue
 
-    // Exceptions
-    "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
-    "19" [ label="{EmailInvalidSettings|\l|}", fontcolor="red", shape="record"];
-    "23" [ label="{GitError|\l|}", fontcolor="red", shape="record"];
-    "24" [ label="{GitInvalidBranch|\l|}", fontcolor="red", shape="record"];
-    "25" [ label="{GitInvalidVersionSpecifier|\l|}", fontcolor="red", shape="record"];
-    "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
-    "84" [label="{method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
+        "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
+        "3" [label="{AsyncSampler|sample_func\l|start()\lstop()\l}", shape="record"];
+        "47" [label="{Nonblocking|\l|}", shape="record"];
+
+        // Exceptions
+        "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
+        "19" [ label="{EmailInvalidSettings|\l|}", fontcolor="red", shape="record"];
+        "23" [ label="{GitError|\l|}", fontcolor="red", shape="record"];
+        "24" [ label="{GitInvalidBranch|\l|}", fontcolor="red", shape="record"];
+        "25" [ label="{GitInvalidVersionSpecifier|\l|}", fontcolor="red", shape="record"];
+        "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
+        "84" [label="{method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
+    }
 
     // =======================
     // ==== Relationships ====
@@ -204,6 +227,7 @@ digraph "classes_farm-core" {
     "4" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="board", style="solid"];
     "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
     "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
+    "16" -> "28" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
 
     // Aggregation
     "28" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="hub", style="solid"];
