@@ -300,4 +300,5 @@ digraph "classes_farm-core" {
     "71" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
     "82" -> "80" [arrowhead="eiamond", arrowtail="none", fontcolor="green", label="setup,body,report", style="solid"];
     "82" -> "70" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="setup,report,run_condition", style="solid"];
+    "81" -> "60" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="interact()", style="solid"];
 }
