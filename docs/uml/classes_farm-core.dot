@@ -13,6 +13,7 @@ digraph "classes_farm-core" {
         "22" [label="{FarmclassMock|num_children : int\l|add_child()\l}", shape="record"];
         "26" [label="{Hierachy|\l|show_hier()\l}", shape="record"];
         "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
+        "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
         "32" [label="{Logging|log_echo\llog_file\llog_hier_path\llog_name\llog_on\llog_time\llog_time_format\l|error()\llog()\llog_file_clear()\l}", shape="record"];
 
         "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lmuxpi : MuxPi\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
@@ -129,7 +130,6 @@ digraph "classes_farm-core" {
         "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
         "3" [label="{AsyncSampler|sample_func\l|start()\lstop()\l}", shape="record"];
         "47" [label="{Nonblocking|\l|}", shape="record"];
-        "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
         "84" [label="{method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
 
         // Exceptions
@@ -187,7 +187,7 @@ digraph "classes_farm-core" {
     "71" -> "67" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmutils
-    "19" -> "17" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "17" -> "19" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // == Catches Exceptions ==
     // = farmcore =
@@ -286,10 +286,18 @@ digraph "classes_farm-core" {
     "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
     "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
     "16" -> "28" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
+    "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="board", style="solid"];
+    "73" -> "70" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
+    "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
+    "83" -> "31" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
 
     // Aggregation
     "28" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="hub", style="solid"];
     "64" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="storage", style="solid"];
     "52" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="power", style="solid"];
     "9" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+    "69" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+    "71" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
+    "82" -> "80" [arrowhead="eiamond", arrowtail="none", fontcolor="green", label="setup,body,report", style="solid"];
+    "82" -> "70" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="setup,report,run_condition", style="solid"];
 }
