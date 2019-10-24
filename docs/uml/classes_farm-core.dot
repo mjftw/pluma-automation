@@ -288,8 +288,8 @@ digraph "classes_farm-core" {
     "16" -> "28" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
     "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="board", style="solid"];
     "73" -> "70" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
-    "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
-    "83" -> "31" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
+    "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="", style="solid"];
+    "83" -> "31" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="", style="solid"];
 
     // Aggregation
     "28" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="hub", style="solid"];
