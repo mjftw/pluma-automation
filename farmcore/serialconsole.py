@@ -7,15 +7,16 @@ from .baseclasses import ConsoleBase
 
 
 class SerialConsole(ConsoleBase):
-    def __init__(self, port, baud, raw_logfile=None):
+    def __init__(self, port, baud,
+            encoding=None, linesep=None, raw_logfile=None):
         self.port = port
         self.baud = baud
-        self.raw_logfile = raw_logfile
         self._timeout = 0.001
         self._serial_logfile_fd = None
         self._ser = None
         self._pex = None
-        super().__init__()
+        super().__init__(encoding=encoding, linesep=linesep,
+            raw_logfile=raw_logfile)
 
     def __repr__(self):
         return "SerialConsole[{}]".format(self.port)
