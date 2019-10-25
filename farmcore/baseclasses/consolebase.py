@@ -36,7 +36,7 @@ class ConsoleInvalidJSONRecieved(ConsoleError):
 class ConsoleBase(Farmclass):
     """ Impliments the console functionality not specific to a given transport layer """
 
-    def __init__(self, encoding='ascii', linesep='\r\n', raw_logfile=None):
+    def __init__(self, encoding=None, linesep=None, raw_logfile=None):
         if type(self) is ConsoleBase:
             raise AttributeError(
                 "This is a base class and must be inherited")
@@ -45,13 +45,12 @@ class ConsoleBase(Farmclass):
             raise AttributeError(
                 "Variable '_pex' must be created by inheriting class")
 
-        self.linesep = linesep
-        self.encoding = encoding
-
         default_raw_logfile = os.path.join('/tmp', 'lab', '{}_raw_{}.log'.format(
                 self.__class__.__name__, datetime_to_timestamp(datetime.now())
         ))
 
+        self.encoding = encoding or 'ascii'
+        self.linesep = linesep or '\r\n'
         self.raw_logfile = raw_logfile or default_raw_logfile
 
         self._buffer = ''
@@ -273,8 +272,8 @@ class ConsoleBase(Farmclass):
                 else:
                     self._last_recieved = recieved
                     match_str = '<<not_matched expects={}>>'.format(watches)
-                self.log("<<sent>>{}<</sent>>\n<<recieved>>{}{}<</recieved>>".format(
-                    cmd, new_recieved, match_str), force_echo=False)
+                self.log("<<recieved>>{}{}<</recieved>>".format(
+                    new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
                         matched, excepts), exception=ConsoleExceptionKeywordRecieved)
@@ -309,26 +308,33 @@ class ConsoleBase(Farmclass):
         fail_message = "ERROR: Failed to log in: U={} P={}".format(
             username, password)
 
-        (__, matched) = self.send(log_verbose=True, match=matches,
-            flush_buffer=False)
+        (__, matched) = self.send(match=matches, sleep_time=1)
         if not matched:
             self.log(fail_message)
             raise ConsoleLoginFailed(fail_message)
 
         if matched == username_match:
-            matches.remove(username_match)
-            (__, matched) = self.send(log_verbose=True, cmd=username, match=matches, timeout=5)
+            (__, matched) = self.send(cmd=username, match=matches, sleep_time=1)
+            if matched == username_match:
+                self.log('Invalid username')
+                raise ConsoleLoginFailed('Invalid username')
 
         if password_match and matched == password_match:
             if not password:
                 raise ConsoleLoginFailed(fail_message)
-            (__, matched) = self.send(log_verbose=True, cmd=password,  match=matches, timeout=5)
+            (__, matched) = self.send(cmd=password,  match=matches, sleep_time=1)
+            if matched == password_match or matched == username_match:
+                self.log('Invalid username/password combination')
+                raise ConsoleLoginFailed('Invalid username/password combination')
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
                 matched == pexpect.EOF):
             self.log(fail_message)
             raise ConsoleLoginFailed(fail_message)
+
+        if (success_match and matched == success_match):
+            self.log('Login successful.')
 
     def get_json_data(self, cmd):
         ''' Execute a command @cmd on target which generates JSON data.
