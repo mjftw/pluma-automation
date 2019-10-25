@@ -19,7 +19,8 @@ class Board(Farmclass):
             storage=None, console=None,
             login_user=None, login_pass=None,
             bootstr=None, boot_max_s=None,
-            prompt=None, logfile=None):
+            prompt=None, logfile=None, 
+            login_user_match=None, login_pass_match=None):
         self.name = name
 
         self.power = power
@@ -34,8 +35,8 @@ class Board(Farmclass):
         self.prompt = prompt
         self.login_user = login_user or 'root'
         self.login_pass = login_pass
-        self.login_user_match = 'login:'
-        self.login_pass_match = 'Password:'
+        self.login_user_match = login_user_match or 'login:'
+        self.login_pass_match = login_pass_match or 'Password:'
         self.bootstr = bootstr or self.login_user_match
         self.boot_max_s = boot_max_s or 60
 
@@ -62,7 +63,7 @@ class Board(Farmclass):
                 bootstr = [bootstr, self.prompt]
 
         if not bootstr:
-            raise BoardBootValidationError("Cannot validate boot. Not bootstring given")
+            raise BoardBootValidationError("Cannot validate boot. No bootstring given")
 
         self.last_boot_len = None
         self.power.reboot()
@@ -72,7 +73,7 @@ class Board(Farmclass):
                 match=bootstr,
                 send_newline=False,
                 timeout=timeout,
-                sleep_time=1,
+                sleep_time=5,
                 excepts=exception_bootstr)
         except ConsoleExceptionKeywordRecieved as e:
             raise BoardBootValidationError('Matched exception keyword: {}'.format(
