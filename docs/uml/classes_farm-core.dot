@@ -13,7 +13,7 @@ digraph "classes_farm-core" {
         "22" [label="{FarmclassMock|num_children : int\l|add_child()\l}", shape="record"];
         "26" [label="{Hierachy|\l|show_hier()\l}", shape="record"];
         "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
-        "83" [label="{method|fn\lparent : NoneType\l|}", shape="record"];
+        "83" [label="{Locking.method|fn\lparent : NoneType\l|}", shape="record"];
         "32" [label="{Logging|log_echo\llog_file\llog_hier_path\llog_name\llog_on\llog_time\llog_time_format\l|error()\llog()\llog_file_clear()\l}", shape="record"];
 
         "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lmuxpi : MuxPi\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
@@ -49,7 +49,7 @@ digraph "classes_farm-core" {
         "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
 
         "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_parent()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
-        "16" [label="{DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
+        "16" [label="{Hub.DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
 
         "40" [label="{MuxPi|board : Board\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
         "41" [label="{MuxPiDyper|muxpi\l|toggle()\l}", shape="record"];
@@ -124,13 +124,13 @@ digraph "classes_farm-core" {
     // ==== Farmutils Classes ====
     // ===========================
     subgraph cluster_farmutils {
-		label = "farmtest";
+		label = "farmutils";
 		color=blue
 
         "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
         "3" [label="{AsyncSampler|sample_func\l|start()\lstop()\l}", shape="record"];
         "47" [label="{Nonblocking|\l|}", shape="record"];
-        "84" [label="{method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
+        "84" [label="{Nonblocking.method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
 
         // Exceptions
         "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
@@ -191,15 +191,15 @@ digraph "classes_farm-core" {
 
     // == Catches Exceptions ==
     // = farmcore =
-    "10" -> "0" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
-    "12" -> "4" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
-    "14" -> "0" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
-    "14" -> "71" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
-    "5" -> "71" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "0" -> "10" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
+    "4" -> "12" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
+    "0" -> "14" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
+    "71" -> "14" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
+    "71" -> "5" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
 
     // = farmtest =
-    "2" -> "73" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
-    "1" -> "73" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="caught by", style="dashed"];
+    "73" -> "2" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
+    "73" -> "1" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
 
     // = farmutils =
 
@@ -267,38 +267,38 @@ digraph "classes_farm-core" {
     "81" -> "46" [arrowhead="empty", arrowtail="none"];
 
     // Composition
-    "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="voltage_sampler", style="solid"];
-    "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="current_sampler", style="solid"];
-    "28" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="internal_hub", style="solid"];
-    "43" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="dut_power", style="solid"];
-    "40" -> "43" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
-    "40" -> "41" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
-    "40" -> "44" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
-    "45" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="dut_storage", style="solid"];
-    "40" -> "45" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="muxpi", style="solid"];
-    "60" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="stm_console", style="solid"];
-    "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="dut_console", style="solid"];
-    "60" -> "79" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="_console", style="solid"];
-    "68" -> "0" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "9" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "4" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="board", style="solid"];
-    "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
-    "16" -> "28" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="usbrelay", style="solid"];
-    "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="board", style="solid"];
-    "73" -> "70" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="testrunner", style="solid"];
-    "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="", style="solid"];
-    "83" -> "31" [arrowhead="diamond", arrowtail="none", fontcolor="green", label="", style="solid"];
+    "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="voltage_sampler", style="solid"];
+    "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="current_sampler", style="solid"];
+    "28" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="internal_hub", style="solid"];
+    "43" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="dut_power", style="solid"];
+    "40" -> "43" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
+    "40" -> "41" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
+    "40" -> "44" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
+    "45" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="dut_storage", style="solid"];
+    "40" -> "45" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
+    "60" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="stm_console", style="solid"];
+    "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="dut_console", style="solid"];
+    "60" -> "79" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="_console", style="solid"];
+    "68" -> "0" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "9" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "4" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="board", style="solid"];
+    "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="usbrelay", style="solid"];
+    "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="board", style="solid"];
+    "73" -> "70" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="testrunner", style="solid"];
+    "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="", style="solid"];
+    "83" -> "31" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="", style="solid"];
 
     // Aggregation
-    "28" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="hub", style="solid"];
-    "64" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="storage", style="solid"];
-    "52" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="power", style="solid"];
-    "9" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "69" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "71" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="console", style="solid"];
-    "82" -> "80" [arrowhead="eiamond", arrowtail="none", fontcolor="green", label="setup,body,report", style="solid"];
-    "82" -> "70" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="setup,report,run_condition", style="solid"];
-    "81" -> "60" [arrowhead="ediamond", arrowtail="none", fontcolor="green", label="interact()", style="solid"];
+    "28" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="hub", style="solid"];
+    "64" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="storage", style="solid"];
+    "52" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="power", style="solid"];
+    "9" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "69" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "71" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
+    "82" -> "80" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="setup,body,report", style="solid"];
+    "82" -> "70" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="setup,report,run_condition", style="solid"];
+    "81" -> "60" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="interact()", style="solid"];
+    "16" -> "28" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="plot()", style="solid"];
 }
