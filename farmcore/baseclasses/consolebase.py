@@ -352,31 +352,29 @@ class ConsoleBase(Farmclass):
 
         (__, matched) = self.send(match=matches, send_newline=False)
         if not matched:
-            self.log(fail_message)
-            raise ConsoleLoginFailed(fail_message)
+            self.error(fail_message, ConsoleLoginFailed)
 
         if matched == username_match:
-            (__, matched) = self.send(cmd=username, match=matches, sleep_time=1)
+            (__, matched) = self.send(cmd=username, match=matches)
             if matched == username_match:
-                self.log('Invalid username')
-                raise ConsoleLoginFailed('Invalid username')
+                self.error(
+                    '{}: Invalid username'.format(fail_message),
+                    ConsoleLoginFailed)
 
         if password_match and matched == password_match:
             if not password:
-                raise ConsoleLoginFailed(fail_message)
-            (__, matched) = self.send(cmd=password,  match=matches, sleep_time=1)
+                self.error(fail_message, ConsoleLoginFailed)
+            (__, matched) = self.send(cmd=password,  match=matches)
             if matched == password_match or matched == username_match:
-                self.log('Invalid username/password combination')
-                raise ConsoleLoginFailed('Invalid username/password combination')
+                self.error(fail_message, ConsoleLoginFailed)
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
                 matched == pexpect.EOF):
-            self.log(fail_message)
-            raise ConsoleLoginFailed(fail_message)
+            self.error(fail_message, ConsoleLoginFailed)
 
         if (success_match and matched == success_match):
-            self.log('Login successful.')
+            self.log('Login successful')
 
     def get_json_data(self, cmd):
         ''' Execute a command @cmd on target which generates JSON data.
