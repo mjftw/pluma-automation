@@ -184,7 +184,7 @@ class Logging():
                         message,
                         ascii_colmap['normal']
                     )
-                print(message)
+                print(message.replace('\\n', '\n'))
 
     def error(self, message, exception=None):
         message = "ERROR: {}".format(message)
