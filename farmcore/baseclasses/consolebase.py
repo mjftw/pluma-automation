@@ -118,37 +118,79 @@ class ConsoleBase(Farmclass):
     def encode(self, text):
         return text.encode(self.encoding)
 
-    def wait_for_data(self, timeout=10.0, sleep_time=0.1,
-                      match=None, start_bytes=None, verbose=True):
+    def wait_for_data(
+            self, timeout=None, sleep_time=None,
+            match=None, start_bytes=None, verbose=None):
+
+        timeout = timeout or 10.0
+        sleep_time = sleep_time or 0.1
+        verbose = verbose or True
+
+        if match:
+            return self.wait_for_match(
+                match=match,
+                timeout=timeout,
+                verbose=verbose
+            )
+        else:
+            return self.wait_for_bytes(
+                timeout=timeout,
+                sleep_time=sleep_time,
+                start_bytes=start_bytes,
+                verbose=verbose
+            )
+
+    def wait_for_match(self, match, timeout, verbose=None):
+        verbose = verbose or False
+
+        retval = False
+
+        old_timeout = self._pex.timeout
+        self._pex.timeout = timeout
+
         if not self.is_open:
             self.open()
 
-        if match:
-            if not isinstance(match, list):
-                match = [match]
-            watches = [pexpect.TIMEOUT, pexpect.EOF] + match
-        else:
-            self.flush()
-            if start_bytes is None:
-                start_bytes = self._flush_get_size()
+        if not isinstance(match, list):
+            match = [match]
+        watches = [pexpect.TIMEOUT, pexpect.EOF] + match
+
+        if verbose:
+            self.log("Waiting up to {}s for patterns: {}...".format(
+                timeout, match))
+
+        matched = watches[self._pex.expect(watches)]
+        if matched in match:
+            retval = self.decode(self._pex.after)
+
+        self._pex.timeout = old_timeout
+
+        return retval
+
+    def wait_for_bytes(
+            self, timeout=None, sleep_time=None,
+            start_bytes=None, verbose=None):
+
+        timeout = timeout or 10.0
+        sleep_time = sleep_time or 0.1
+        verbose = verbose or True
+
+        if not self.is_open:
+            self.open()
+
+        self.flush()
+        if start_bytes is None:
+            start_bytes = self._flush_get_size()
 
         elapsed = 0.0
 
         while(elapsed < timeout):
-            if match:
-                if verbose:
-                    self.log("Waiting for patterns:{} Waited[{:.1f}/{:.1f}s]...".format(
-                        match, elapsed, timeout))
-                matched = watches[self._pex.expect(watches)]
-                if matched in match:
-                    return self.decode(self._pex.after)
-            else:
-                current_bytes = self._flush_get_size()
-                if verbose:
-                    self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
-                        elapsed, timeout, current_bytes-start_bytes))
-                if current_bytes > start_bytes:
-                    return True
+            current_bytes = self._flush_get_size()
+            if verbose:
+                self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                    elapsed, timeout, current_bytes-start_bytes))
+            if current_bytes > start_bytes:
+                return True
 
             time.sleep(sleep_time)
             elapsed += sleep_time
@@ -260,7 +302,6 @@ class ConsoleBase(Farmclass):
             if watches:
                 matched = self.wait_for_data(
                     timeout=data_timeout,
-                    sleep_time=data_sleep,
                     match=watches,
                     verbose=log_verbose)
                 recieved = self.decode(self._pex.before)
@@ -291,6 +332,7 @@ class ConsoleBase(Farmclass):
         start_bytes = self._flush_get_size()
         self.send("")
         alive = self.wait_for_data(timeout=timeout, start_bytes=start_bytes)
+
         if alive:
             self.log("Got response from: {}".format(self))
         else:
@@ -308,33 +350,31 @@ class ConsoleBase(Farmclass):
         fail_message = "ERROR: Failed to log in: U={} P={}".format(
             username, password)
 
-        (__, matched) = self.send(match=matches, sleep_time=1)
+        (__, matched) = self.send(match=matches, send_newline=False)
         if not matched:
-            self.log(fail_message)
-            raise ConsoleLoginFailed(fail_message)
+            self.error(fail_message, ConsoleLoginFailed)
 
         if matched == username_match:
-            (__, matched) = self.send(cmd=username, match=matches, sleep_time=1)
+            (__, matched) = self.send(cmd=username, match=matches)
             if matched == username_match:
-                self.log('Invalid username')
-                raise ConsoleLoginFailed('Invalid username')
+                self.error(
+                    '{}: Invalid username'.format(fail_message),
+                    ConsoleLoginFailed)
 
         if password_match and matched == password_match:
             if not password:
-                raise ConsoleLoginFailed(fail_message)
-            (__, matched) = self.send(cmd=password,  match=matches, sleep_time=1)
+                self.error(fail_message, ConsoleLoginFailed)
+            (__, matched) = self.send(cmd=password,  match=matches)
             if matched == password_match or matched == username_match:
-                self.log('Invalid username/password combination')
-                raise ConsoleLoginFailed('Invalid username/password combination')
+                self.error(fail_message, ConsoleLoginFailed)
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
                 matched == pexpect.EOF):
-            self.log(fail_message)
-            raise ConsoleLoginFailed(fail_message)
+            self.error(fail_message, ConsoleLoginFailed)
 
         if (success_match and matched == success_match):
-            self.log('Login successful.')
+            self.log('Login successful')
 
     def get_json_data(self, cmd):
         ''' Execute a command @cmd on target which generates JSON data.
