@@ -15,15 +15,29 @@ class GitInvalidVersionSpecifier(GitError):
 class GitInvalidBranch(GitError):
     pass
 
+class GitCommandFailed(GitError):
+    pass
 
 def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
     for repo in repos:
         log_func('Resetting repo [{}] to tag [{}]...'.format(repo, tag))
         chdir('{}/{}'.format(base_dir, repo))
-        run_host_cmd("git fetch --all")
+
+        git_command = "git fetch --all"
+        __, git_rc = run_host_cmd(git_command)
+        if git_rc:
+            raise GitCommandFailed(git_command)
+
         try:
-            run_host_cmd("git reset --hard {}".format(tag))
-            run_host_cmd("git clean -d -f -x")
+            git_command = "git reset --hard {}".format(tag)
+            __, git_rc = run_host_cmd(git_command)
+            if git_rc:
+                raise GitCommandFailed(git_command)
+
+            git_command = "git clean -d -f -x"
+            __, git_rc = run_host_cmd(git_command)
+            if git_rc:
+                raise GitCommandFailed(git_command)
         except subprocess.CalledProcessError as e:
             if tag == default_tag or default_tag is None:
                 log_func("Failed to reset repo [{}] to tag [{}]".format(
@@ -32,20 +46,37 @@ def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
             else:
                 log_func("Failed to reset repo [{}] to [{}] - so using default [{}]".format(
                     repo, tag, default_tag))
-                run_host_cmd("git reset --hard {}".format(default_tag))
+                git_command = "git reset --hard {}".format(default_tag)
+                __, git_rc = run_host_cmd(git_command)
+                if git_rc:
+                    raise GitCommandFailed(git_command)
 
 
 def get_latest_tag(srcdir, branch):
     chdir(srcdir)
-    run_host_cmd("git fetch --all")
-    tag, rc = run_host_cmd("git describe origin/{}".format(branch))
+    git_command = "git fetch --all"
+    __, git_rc = run_host_cmd(git_command)
+    if git_rc:
+        raise GitCommandFailed(git_command)
+
+    git_command = "git describe origin/{}".format(branch)
+    tag, git_rc = run_host_cmd(git_command)
+    if git_rc:
+        raise GitCommandFailed(git_command)
     return tag.rstrip()
 
 
 def get_tag_list(srcdir):
     chdir(srcdir)
-    run_host_cmd("git fetch --all")
-    result, __ = run_host_cmd("git tag -l")
+    git_command = "git fetch --all"
+    __, git_rc = run_host_cmd(git_command)
+    if git_rc:
+        raise GitCommandFailed(git_command)
+
+    git_command = "git tag -l"
+    result, git_rc = run_host_cmd(git_command)
+    if git_rc:
+        raise GitCommandFailed(git_command)
     return None if not result else result.split('\n')
 
 
