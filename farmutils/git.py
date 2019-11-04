@@ -15,15 +15,23 @@ class GitInvalidVersionSpecifier(GitError):
 class GitInvalidBranch(GitError):
     pass
 
+class GitCommandFailed(GitError):
+    pass
+
+def run_git_cmd(git_command):
+    git_result, git_rc = run_host_cmd(git_command)
+    if git_rc:
+        raise GitCommandFailed(git_command)
+    return (git_result, git_rc)
 
 def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
     for repo in repos:
         log_func('Resetting repo [{}] to tag [{}]...'.format(repo, tag))
         chdir('{}/{}'.format(base_dir, repo))
-        run_host_cmd("git fetch --all")
+        run_git_cmd("git fetch --all")
         try:
-            run_host_cmd("git reset --hard {}".format(tag))
-            run_host_cmd("git clean -d -f -x")
+            run_git_cmd("git reset --hard {}".format(tag))
+            run_git_cmd("git clean -d -f -x")
         except subprocess.CalledProcessError as e:
             if tag == default_tag or default_tag is None:
                 log_func("Failed to reset repo [{}] to tag [{}]".format(
@@ -32,20 +40,20 @@ def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
             else:
                 log_func("Failed to reset repo [{}] to [{}] - so using default [{}]".format(
                     repo, tag, default_tag))
-                run_host_cmd("git reset --hard {}".format(default_tag))
+                run_git_cmd("git reset --hard {}".format(default_tag))
 
 
 def get_latest_tag(srcdir, branch):
     chdir(srcdir)
-    run_host_cmd("git fetch --all")
-    tag, rc = run_host_cmd("git describe origin/{}".format(branch))
+    run_git_cmd("git fetch --all")
+    tag, rc = run_git_cmd("git describe origin/{}".format(branch))
     return tag.rstrip()
 
 
 def get_tag_list(srcdir):
     chdir(srcdir)
-    run_host_cmd("git fetch --all")
-    result, __ = run_host_cmd("git tag -l")
+    run_git_cmd("git fetch --all")
+    result, __ = run_git_cmd("git tag -l")
     return None if not result else result.split('\n')
 
 
