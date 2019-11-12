@@ -350,12 +350,14 @@ class ConsoleBase(Farmclass):
         fail_message = "ERROR: Failed to log in: U={} P={}".format(
             username, password)
 
-        (__, matched) = self.send(match=matches, send_newline=False)
+        (__, matched) = self.send(
+            match=matches, send_newline=False, flush_buffer=False)
         if not matched:
             self.error(fail_message, ConsoleLoginFailed)
 
         if matched == username_match:
-            (__, matched) = self.send(cmd=username, match=matches)
+            (__, matched) = self.send(
+                cmd=username, match=matches, flush_buffer=False)
             if matched == username_match:
                 self.error(
                     '{}: Invalid username'.format(fail_message),
@@ -364,7 +366,8 @@ class ConsoleBase(Farmclass):
         if password_match and matched == password_match:
             if not password:
                 self.error(fail_message, ConsoleLoginFailed)
-            (__, matched) = self.send(cmd=password,  match=matches)
+            (__, matched) = self.send(
+                cmd=password,  match=matches, flush_buffer=False)
             if matched == password_match or matched == username_match:
                 self.error(fail_message, ConsoleLoginFailed)
 
