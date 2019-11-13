@@ -65,6 +65,7 @@ class Board(Farmclass):
         if not bootstr:
             raise BoardBootValidationError("Cannot validate boot. No bootstring given")
 
+        self.booted_to_prompt = False
         self.last_boot_len = None
         self.power.reboot()
         start_time = time.time()
