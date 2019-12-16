@@ -57,7 +57,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         self._buffer = ''
         self._last_recieved = ''
         self._raw_logfile_fd = None
-	super(ConsoleBase, self).__init__()
+        super(ConsoleBase, self).__init__()
 
     @property
     def is_open(self):
