@@ -128,11 +128,9 @@ class MuxPiPower(PowerBase):
     def __repr__(self):
         return 'MuxPiPower'
 
-    @PowerBase.on
     def on(self):
         self.muxpi.stm_cmd('power on')
 
-    @PowerBase.off
     def off(self):
         self.muxpi.stm_cmd('power off')
 
@@ -144,7 +142,6 @@ class MuxPiDyper(RelayBase):
     def __repr__(self):
         return 'MuxPiDyper'
 
-    @RelayBase.toggle
     def toggle(self, port, throw):
         if port not in [1, 2]:
             raise ValueError("Port must be 1 or 2. Given[{}]".format(

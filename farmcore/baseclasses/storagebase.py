@@ -2,6 +2,7 @@ import re
 import os
 import time
 import tempfile
+from abc import ABCMeta, abstractmethod
 
 from .farmclass import Farmclass
 from farmutils import run_host_cmd
@@ -12,7 +13,7 @@ class StorageError(Exception):
     pass
 
 
-class StorageBase(Farmclass):
+class StorageBase(Farmclass, metaclass=ABCMeta):
     '''
     Base class for storage classes that can be switched between
     the host and board.
@@ -20,17 +21,20 @@ class StorageBase(Farmclass):
 
     host_mountpoint = None
     def __init__(self):
+        super(StorageBase, self).__init__()
         if type(self) is StorageBase:
             raise AttributeError(
                 'This is a base class, and must be inherited')
 
+    @abstractmethod
     def to_host(self):
         ''' Switch storage to the host '''
-        raise NotImplemented('This method must be implimented by inheriting class')
+        pass
 
+    @abstractmethod
     def to_board(self):
         ''' Switch storage to the board '''
-        raise NotImplemented('This method must be implimented by inheriting class')
+        pass
 
     def mount_host(self, devnode, mountpoint=None, max_tries=5):
         mountpoint = mountpoint or self.host_mountpoint

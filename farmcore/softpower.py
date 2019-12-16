@@ -13,14 +13,12 @@ class SoftPower(PowerBase):
 
         PowerBase.__init__(self, reboot_delay)
 
-    @PowerBase.on
     def on(self):
         if self.on_cmd:
             self.console.send(self.on_cmd)
         else:
             self.error('No on_cmd, cannot soft power on', PDUError)
 
-    @PowerBase.off
     def off(self):
         if self.off_cmd:
             self.console.send(self.off_cmd)

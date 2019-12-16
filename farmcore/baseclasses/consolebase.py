@@ -4,6 +4,7 @@ import pexpect.fdpexpect
 import json
 import os
 from datetime import datetime
+from abc import ABCMeta, abstractmethod
 
 from farmutils import datetime_to_timestamp
 
@@ -33,7 +34,7 @@ class ConsoleInvalidJSONRecieved(ConsoleError):
     pass
 
 
-class ConsoleBase(Farmclass):
+class ConsoleBase(Farmclass, metaclass=ABCMeta):
     """ Impliments the console functionality not specific to a given transport layer """
 
     def __init__(self, encoding=None, linesep=None, raw_logfile=None):
@@ -56,6 +57,7 @@ class ConsoleBase(Farmclass):
         self._buffer = ''
         self._last_recieved = ''
         self._raw_logfile_fd = None
+	super(ConsoleBase, self).__init__()
 
     @property
     def is_open(self):
@@ -63,6 +65,7 @@ class ConsoleBase(Farmclass):
         raise AttributeError(
             "This function must be overridden by an inheriting class")
 
+    @abstractmethod
     def open(f):
         def wrap(self):
             f(self)
@@ -74,6 +77,7 @@ class ConsoleBase(Farmclass):
                 self._pex.logfile=self._raw_logfile_fd
         return wrap
 
+    @abstractmethod
     def close(f):
         def wrap(self):
             f(self)

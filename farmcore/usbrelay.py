@@ -44,7 +44,6 @@ class USBRelay(RelayBase, USB):
         USB.bind(self)
         self.console.open()
 
-    @RelayBase.toggle
     def toggle(self, port, throw):
         if port not in [1, 2, 3, 4]:
             self.error(f"Port must be 1, 2, 3, or 4, not [{port}]")
