@@ -59,10 +59,10 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         self._raw_logfile_fd = None
 
     @property
+    @abstractmethod
     def is_open(self):
         """ Check if the transport layer is ready to send and recieve"""
-        raise AttributeError(
-            "This function must be overridden by an inheriting class")
+        pass
 
     def open(f):
         def wrap(self):
