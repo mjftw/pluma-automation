@@ -25,8 +25,10 @@ class PowerRelay(PowerBase):
                 elif action.endswith('s'):
                     time.sleep(float(action[:-1]))
 
+    @PowerBase.on
     def on(self):
         self._do_sequence(self.on_seq)
 
+    @PowerBase.off
     def off(self):
         self._do_sequence(self.off_seq)

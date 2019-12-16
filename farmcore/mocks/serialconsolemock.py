@@ -25,6 +25,7 @@ class SerialConsoleMock(ConsoleBase):
     def is_open(self):
         return True if self._child_pid else False
 
+    @ConsoleBase.open
     def open(self):
         if not self.is_open:
             # Spawn child process with a pseudo tty to communicate
@@ -47,6 +48,7 @@ class SerialConsoleMock(ConsoleBase):
             self._pex = pexpect.fdpexpect.fdspawn(
                 fd=self._child_fd, timeout=0.001)
 
+    @ConsoleBase.close
     def close(self):
         # Kill child process to close pseudo terminal
         if self.is_open:

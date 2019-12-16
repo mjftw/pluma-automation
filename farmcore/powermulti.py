@@ -48,9 +48,11 @@ class PowerMulti(PowerBase):
                 elif action.endswith('s'):
                     time.sleep(float(action[:-1]))
 
+    @PowerBase.on
     def on(self):
         self._do_sequence(self.on_seq)
 
+    @PowerBase.off
     def off(self):
         if self.reverse_off_seq:
             self._do_sequence(self.off_seq[::-1])

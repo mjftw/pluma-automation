@@ -11,9 +11,11 @@ class BoardMock(Board):
             self.board = board
             PowerBase.__init__(self)
 
+        @PowerBase.on
         def on(self):
             self.board.console.open()
 
+        @PowerBase.off
         def off(self):
             self.board.console.close()
 

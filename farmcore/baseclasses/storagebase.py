@@ -21,7 +21,6 @@ class StorageBase(Farmclass, metaclass=ABCMeta):
 
     host_mountpoint = None
     def __init__(self):
-        super(StorageBase, self).__init__()
         if type(self) is StorageBase:
             raise AttributeError(
                 'This is a base class, and must be inherited')

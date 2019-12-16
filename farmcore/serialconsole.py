@@ -28,6 +28,7 @@ class SerialConsole(ConsoleBase):
         else:
             return self._ser.isOpen()
 
+    @ConsoleBase.open
     def open(self):
         self.log("Trying to open serial port {}".format(self.port))
         self._ser = Serial(
@@ -46,6 +47,7 @@ class SerialConsole(ConsoleBase):
         self.log("Init serial {} success".format(self.port))
         return
 
+    @ConsoleBase.close
     def close(self):
         if self.is_open:
             self._ser.flush()

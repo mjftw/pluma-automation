@@ -57,7 +57,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         self._buffer = ''
         self._last_recieved = ''
         self._raw_logfile_fd = None
-        super(ConsoleBase, self).__init__()
 
     @property
     def is_open(self):
@@ -65,7 +64,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         raise AttributeError(
             "This function must be overridden by an inheriting class")
 
-    @abstractmethod
     def open(f):
         def wrap(self):
             f(self)
@@ -77,7 +75,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 self._pex.logfile=self._raw_logfile_fd
         return wrap
 
-    @abstractmethod
     def close(f):
         def wrap(self):
             f(self)

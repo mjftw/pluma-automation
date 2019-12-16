@@ -18,11 +18,13 @@ class HostConsole(ConsoleBase):
         else:
             return False
 
+    @ConsoleBase.open
     def open(self):
         self._pex = pexpect.spawn(self.command, timeout=0.01)
         if not self.is_open:
             raise ConsoleCannotOpen
 
+    @ConsoleBase.close
     def close(self):
         self._pex.sendintr()
         self._pex = None
