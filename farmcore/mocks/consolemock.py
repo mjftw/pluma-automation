@@ -10,13 +10,13 @@ class ConsoleMock(ConsoleBase):
 
         ConsoleBase.__init__(self)
 
-    @ConsoleBase.open
     def is_open(self):
         self.log('Mock method called: is_open()')
 
-    @ConsoleBase.close
+    @ConsoleBase.open
     def open(self):
         self.log('Mock method called: open()')
 
+    @ConsoleBase.close
     def close(self):
         self.log('Mock method called: close()')
