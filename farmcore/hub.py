@@ -399,8 +399,3 @@ class Hub(Farmclass, USB):
             filters={'devtype': 'usb_device'}, dictarr=uncategorised)
 
         return self._filter_devinfo(devinfo, key, get_all)
-
-    def get_parent(self):
-        dev = self.get_device()
-        pdev = dev.find_parent(subsystem='usb', device_type='usb_device')
-        return None if not pdev else pdev.sys_name
