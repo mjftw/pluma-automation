@@ -63,7 +63,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def is_open(self):
         """ Check if the transport layer is ready to send and recieve"""
         pass
-
+    @abstractmethod
     def open(f):
         def wrap(self):
             f(self)
@@ -75,6 +75,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 self._pex.logfile=self._raw_logfile_fd
         return wrap
 
+    @abstractmethod
     def close(f):
         def wrap(self):
             f(self)
