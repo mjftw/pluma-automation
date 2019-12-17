@@ -1,12 +1,9 @@
 from .farmclass import Farmclass
+from abc import ABCMeta, abstractmethod
 
+class RelayBase(Farmclass, metaclass=ABCMeta):
 
-class RelayBase(Farmclass):
-    def __init__(self):
-        if type(self) is RelayBase:
-            raise AttributeError(
-                'This is a base class, and must be inherited')
-
+    @abstractmethod
     def toggle(f):
         def wrap(self, port, throw, *args, **kwargs):
             self.log('{}: Switching port {} to {}'.format(
