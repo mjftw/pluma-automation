@@ -63,6 +63,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def is_open(self):
         """ Check if the transport layer is ready to send and recieve"""
         pass
+        
     @abstractmethod
     def open(f):
         def wrap(self):
