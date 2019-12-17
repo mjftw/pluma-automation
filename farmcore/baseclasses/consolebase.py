@@ -38,10 +38,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     """ Impliments the console functionality not specific to a given transport layer """
 
     def __init__(self, encoding=None, linesep=None, raw_logfile=None):
-        if type(self) is ConsoleBase:
-            raise AttributeError(
-                "This is a base class and must be inherited")
-
         if not hasattr(self, '_pex'):
             raise AttributeError(
                 "Variable '_pex' must be created by inheriting class")
