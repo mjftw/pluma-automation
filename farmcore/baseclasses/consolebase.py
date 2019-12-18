@@ -19,19 +19,19 @@ class ConsoleError(Exception):
     pass
 
 
-class ConsoleCannotOpen(ConsoleError):
+class ConsoleCannotOpenError(ConsoleError):
     pass
 
 
-class ConsoleLoginFailed(ConsoleError):
+class ConsoleLoginFailedError(ConsoleError):
     pass
 
 
-class ConsoleExceptionKeywordRecieved(ConsoleError):
+class ConsoleExceptionKeywordRecievedError(ConsoleError):
     pass
 
 
-class ConsoleInvalidJSONRecieved(ConsoleError):
+class ConsoleInvalidJSONRecievedError(ConsoleError):
     pass
 
 
@@ -247,7 +247,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         if not self.is_open:
             self.open()
         if not self.is_open:
-            raise ConsoleCannotOpen
+            raise ConsoleCannotOpenError
 
         cmd = cmd or ''
         if log_verbose:
@@ -319,7 +319,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                     new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
-                        matched, excepts), exception=ConsoleExceptionKeywordRecieved)
+                        matched, excepts), exception=ConsoleExceptionKeywordRecievedError)
                 return (recieved, matched)
             else:
                 self.wait_for_quiet(
@@ -355,7 +355,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         (__, matched) = self.send(
             match=matches, send_newline=False, flush_buffer=False)
         if not matched:
-            self.error(fail_message, ConsoleLoginFailed)
+            self.error(fail_message, ConsoleLoginFailedError)
 
         if matched == username_match:
             (__, matched) = self.send(
@@ -363,20 +363,20 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             if matched == username_match:
                 self.error(
                     '{}: Invalid username'.format(fail_message),
-                    ConsoleLoginFailed)
+                    ConsoleLoginFailedError)
 
         if password_match and matched == password_match:
             if not password:
-                self.error(fail_message, ConsoleLoginFailed)
+                self.error(fail_message, ConsoleLoginFailedError)
             (__, matched) = self.send(
                 cmd=password,  match=matches, flush_buffer=False)
             if matched == password_match or matched == username_match:
-                self.error(fail_message, ConsoleLoginFailed)
+                self.error(fail_message, ConsoleLoginFailedError)
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
                 matched == pexpect.EOF):
-            self.error(fail_message, ConsoleLoginFailed)
+            self.error(fail_message, ConsoleLoginFailedError)
 
         if (success_match and matched == success_match):
             self.log('Login successful')
@@ -389,7 +389,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         recieved, matched = self.send(cmd, match='{((.|\n)*)\n}')
 
         if not matched:
-            raise ConsoleInvalidJSONRecieved(
+            raise ConsoleInvalidJSONRecievedError(
                 f'Received is not JSON: {recieved}')
 
         data = json.loads(matched)

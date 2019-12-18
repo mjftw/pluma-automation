@@ -2,7 +2,7 @@ import pexpect
 import pexpect.fdpexpect
 
 from .baseclasses import ConsoleBase
-from .exceptions import ConsoleCannotOpen
+from .exceptions import ConsoleCannotOpenError
 
 
 class HostConsole(ConsoleBase):
@@ -22,7 +22,7 @@ class HostConsole(ConsoleBase):
     def open(self):
         self._pex = pexpect.spawn(self.command, timeout=0.01)
         if not self.is_open:
-            raise ConsoleCannotOpen
+            raise ConsoleCannotOpenError
 
     @ConsoleBase.close
     def close(self):
