@@ -3,7 +3,7 @@ from pexpect import TIMEOUT, EOF
 
 
 from .baseclasses import Farmclass
-from .exceptions import ConsoleExceptionKeywordRecieved
+from .exceptions import ConsoleExceptionKeywordRecievedError
 
 
 class BoardError(Exception):
@@ -72,7 +72,7 @@ class Board(Farmclass):
                 timeout=timeout,
                 sleep_time=5,
                 excepts=exception_bootstr)
-        except ConsoleExceptionKeywordRecieved as e:
+        except ConsoleExceptionKeywordRecievedError as e:
             raise BoardBootValidationError('Matched exception keyword: {}'.format(
                 str(e)))
 

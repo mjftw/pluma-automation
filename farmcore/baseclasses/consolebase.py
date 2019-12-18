@@ -27,7 +27,7 @@ class ConsoleLoginFailedError(ConsoleError):
     pass
 
 
-class ConsoleExceptionKeywordRecieved(ConsoleError):
+class ConsoleExceptionKeywordRecievedError(ConsoleError):
     pass
 
 
@@ -319,7 +319,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                     new_recieved, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
-                        matched, excepts), exception=ConsoleExceptionKeywordRecieved)
+                        matched, excepts), exception=ConsoleExceptionKeywordRecievedError)
                 return (recieved, matched)
             else:
                 self.wait_for_quiet(
