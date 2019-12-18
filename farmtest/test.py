@@ -46,7 +46,7 @@ import inspect
 from copy import copy
 
 from farmutils import Email, send_exception_email, datetime_to_timestamp
-from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailed
+from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailedError
 
 
 class TestingException(Exception):
@@ -185,7 +185,7 @@ class TestCore(TestBase):
         self.board.log("\n=!= BOARD LOGIN =!=", bold=True)
         try:
             self.board.login()
-        except ConsoleLoginFailed as e:
+        except ConsoleLoginFailedError as e:
             raise TaskFailed(str(e))
 
     def pre_board_mount(self):

@@ -44,17 +44,16 @@ digraph "classes_farm-core" {
         "79" [label="{USBRelay|console\ldevnode\lport_map : list\lusb_device\l|bind()\ltoggle()\lunbind()\l}", shape="record"];
 
         "64" [label="{StorageBase|host_mountpoint\lhost_mountpoint : NoneType\l|devnode_is_mounted()\lmount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
-        "58" [label="{SDMux|index\lserialdev\lusbrelay\l|to_board()\lto_host()\l}", shape="record"];
         "59" [label="{SDWire|ftdi : Ftdi\lproduct_id : int\lserial : NoneType\lvendor_id : int\l|to_board()\lto_host()\l}", shape="record"];
         "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
 
-        "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\llget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
-        "16" [label="{Hub.DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
+        "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
+        "16" [label="{Hub.HubDeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
 
         "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
         "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
 
-        "30" [label="{Interface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
+        "30" [label="{NetInterface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
 
         "34" [label="{ModemSim868|console\lhardware_reset_max_attempts : int\lhardware_reset_pin : int\lhardware_reset_wait_period : int\l|AT_send()\lanswer_call()\lcall_recording_ongoing()\lcall_recording_pause()\lcall_recording_resume()\lcall_recording_start()\lcall_recording_stop()\ldelete_sms()\lend_call()\lhardware_reset()\lincoming_call()\lmake_call()\longoing_call()\lphone_activity_status()\lread_sms()\lready()\lsend_sms()\lsms_recieved()\l}", shape="record"];
 
@@ -65,10 +64,10 @@ digraph "classes_farm-core" {
         "5" [ label="{BoardBootValidationError|\l|}", fontcolor="red", shape="record"];
 
         "11" [ label="{ConsoleError|\l|}", fontcolor="red", shape="record"];
-        "10" [ label="{ConsoleCannotOpen|\l|}", fontcolor="red", shape="record"];
-        "12" [ label="{ConsoleExceptionKeywordRecieved|\l|}", fontcolor="red", shape="record"];
-        "13" [ label="{ConsoleInvalidJSONRecieved|\l|}", fontcolor="red", shape="record"];
-        "14" [ label="{ConsoleLoginFailed|\l|}", fontcolor="red", shape="record"];
+        "10" [ label="{ConsoleCannotOpenError|\l|}", fontcolor="red", shape="record"];
+        "12" [ label="{ConsoleExceptionKeywordRecievedError|\l|}", fontcolor="red", shape="record"];
+        "13" [ label="{ConsoleInvalidJSONRecievedError|\l|}", fontcolor="red", shape="record"];
+        "14" [ label="{ConsoleLoginFailedError|\l|}", fontcolor="red", shape="record"];
 
         "36" [ label="{MultimeterError|\l|}", fontcolor="red", shape="record"];
         "35" [ label="{MultimeterDecodeError|\l|}", fontcolor="red", shape="record"];
@@ -86,6 +85,8 @@ digraph "classes_farm-core" {
 
         "33" [ label="{ModemError|\l|}", fontcolor="red", shape="record"];
 
+        "47" [label="{Nonblocking|\l|}", shape="record"];
+        "84" [label="{Nonblocking.method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
     }
 
     // ==========================
@@ -101,13 +102,10 @@ digraph "classes_farm-core" {
         "70" [label="{TestController|data : dict\llog_func\lname : NoneType\lreport\lreport : NoneType\lresults\lresults : list\lresults_summary\lresults_summary : dict\lrun_condition\lrun_condition : NoneType\lsettings\lsettings : dict\lsetup\lsetup : NoneType\lstats\lstats : dict\ltest_settings\ltest_settings : dict\ltestrunner\l|collect_test_settings()\lget_results_summary()\lget_test_results()\lgraph_test_results()\llog()\lrun()\lrun_iteration()\l}", shape="record"];
 
         "82" [label="{deferred_function|args : tuple\lf\lkwargs : dict\l|run()\l}", shape="record"];
-        "80" [label="{UnitTest|body\lbody : NoneType\lsetup\lsetup : NoneType\lsuccess : bool\lteardown\lteardown : NoneType\l|run()\l}", shape="record"];
-
         "63" [label="{StockSensorsTest|board\l|test_body()\l}", shape="record"];
 
         // Exceptions
         "74" [ label="{TestingException|\l|}", fontcolor="red", shape="record"];
-        "72" [ label="{TestFunctionNotSet|\l|}", fontcolor="red", shape="record"];
         "67" [ label="{TaskFailed|\l|}", fontcolor="red", shape="record"];
         "2" [ label="{AbortTestingAndReport|\l|}", fontcolor="red", shape="record"];
         "1" [ label="{AbortTesting|\l|}", fontcolor="red", shape="record"];
@@ -122,14 +120,11 @@ digraph "classes_farm-core" {
 
         "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
         "3" [label="{AsyncSampler|sample_func\l|start()\lstop()\l}", shape="record"];
-        "47" [label="{Nonblocking|\l|}", shape="record"];
-        "84" [label="{Nonblocking.method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
 
         // Exceptions
         "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
         "19" [ label="{EmailInvalidSettings|\l|}", fontcolor="red", shape="record"];
         "23" [ label="{GitError|\l|}", fontcolor="red", shape="record"];
-        "24" [ label="{GitInvalidBranch|\l|}", fontcolor="red", shape="record"];
         "25" [ label="{GitInvalidVersionSpecifier|\l|}", fontcolor="red", shape="record"];
     }
 
@@ -172,7 +167,6 @@ digraph "classes_farm-core" {
     "34" -> "33" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmtest=
-    "80" -> "72" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "71" -> "67" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmutils
@@ -212,7 +206,6 @@ digraph "classes_farm-core" {
     "21" -> "26" [arrowhead="empty", arrowtail="none"];
     "21" -> "32" [arrowhead="empty", arrowtail="none"];
     "22" -> "21" [arrowhead="empty", arrowtail="none"];
-    "24" -> "23" [arrowhead="empty", arrowtail="none"];
     "25" -> "23" [arrowhead="empty", arrowtail="none"];
     "27" -> "9" [arrowhead="empty", arrowtail="none"];
     "28" -> "21" [arrowhead="empty", arrowtail="none"];
@@ -231,7 +224,6 @@ digraph "classes_farm-core" {
     "55" -> "52" [arrowhead="empty", arrowtail="none"];
     "56" -> "21" [arrowhead="empty", arrowtail="none"];
     "57" -> "56" [arrowhead="empty", arrowtail="none"];
-    "58" -> "64" [arrowhead="empty", arrowtail="none"];
     "59" -> "64" [arrowhead="empty", arrowtail="none"];
     "60" -> "9" [arrowhead="empty", arrowtail="none"];
     "61" -> "9" [arrowhead="empty", arrowtail="none"];
@@ -256,7 +248,6 @@ digraph "classes_farm-core" {
     "68" -> "0" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "9" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
-    "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="usbrelay", style="solid"];
     "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="board", style="solid"];
     "73" -> "70" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="testrunner", style="solid"];
     "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="", style="solid"];
@@ -269,7 +260,6 @@ digraph "classes_farm-core" {
     "9" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "69" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "71" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
-    "82" -> "80" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="setup,body,report", style="solid"];
     "82" -> "70" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="setup,report,run_condition", style="solid"];
     "81" -> "60" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="interact()", style="solid"];
     "16" -> "28" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="plot()", style="solid"];

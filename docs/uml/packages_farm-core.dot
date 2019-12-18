@@ -33,7 +33,6 @@ digraph "packages_farm-core" {
         "26" [label="farmcore.pdu", shape="box"];
         "27" [label="farmcore.powermulti", shape="box"];
         "28" [label="farmcore.powerrelay", shape="box"];
-        "29" [label="farmcore.sdmux", shape="box"];
         "30" [label="farmcore.sdwire", shape="box"];
         "31" [label="farmcore.serialconsole", shape="box"];
         "32" [label="farmcore.softpower", shape="box"];
@@ -78,7 +77,6 @@ digraph "packages_farm-core" {
     "0" -> "26" [arrowhead="open", color="blue", arrowtail="none"];
     "0" -> "27" [arrowhead="open", color="blue", arrowtail="none"];
     "0" -> "28" [arrowhead="open", color="blue", arrowtail="none"];
-    "0" -> "29" [arrowhead="open", color="blue", arrowtail="none"];
     "0" -> "30" [arrowhead="open", color="blue", arrowtail="none"];
     "0" -> "31" [arrowhead="open", color="blue", arrowtail="none"];
     "0" -> "32" [arrowhead="open", color="blue", arrowtail="none"];
@@ -129,7 +127,6 @@ digraph "packages_farm-core" {
     "26" -> "33" [arrowhead="open", arrowtail="none"];
     "27" -> "1" [arrowhead="open", arrowtail="none"];
     "28" -> "1" [arrowhead="open", arrowtail="none"];
-    "29" -> "1" [arrowhead="open", arrowtail="none"];
     "30" -> "1" [arrowhead="open", arrowtail="none"];
     "31" -> "1" [arrowhead="open", arrowtail="none"];
     "32" -> "1" [arrowhead="open", arrowtail="none"];

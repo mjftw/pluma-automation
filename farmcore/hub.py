@@ -139,7 +139,7 @@ class Hub(Farmclass, USB):
             comment=f'Root Hub[{self.usb_device}] downstream devices',
             graph_attr=graph_attrs)
 
-        class DeviceNode():
+        class HubDeviceNode():
             def __init__(self, device, devtype, index,
                     parent=None, linelabel=None, extra_info=None):
                 self.device = device
@@ -189,7 +189,7 @@ class Hub(Farmclass, USB):
                 for i, device in enumerate(
                         [d for d in devices[devtype] if devices[devtype]]):
 
-                    node = DeviceNode(device, devtype, i, self.usb_device)
+                    node = HubDeviceNode(device, devtype, i, self.usb_device)
 
                     if devtype == 'Block' or devtype == 'Partition':
                         node.extra_info = f'Size: {node.device["size"]}B'

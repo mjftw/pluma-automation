@@ -11,10 +11,6 @@ class GitError(Exception):
 class GitInvalidVersionSpecifier(GitError):
     pass
 
-
-class GitInvalidBranch(GitError):
-    pass
-
 class GitCommandFailed(GitError):
     pass
 
