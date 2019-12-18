@@ -1,7 +1,7 @@
 from pyroute2 import IPRoute
 
 
-class Interface():
+class NetInterface():
     def __init__(self, interface):
         self.interface = interface
 

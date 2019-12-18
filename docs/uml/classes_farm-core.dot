@@ -54,7 +54,7 @@ digraph "classes_farm-core" {
         "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
         "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
 
-        "30" [label="{Interface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
+        "30" [label="{NetInterface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
 
         "34" [label="{ModemSim868|console\lhardware_reset_max_attempts : int\lhardware_reset_pin : int\lhardware_reset_wait_period : int\l|AT_send()\lanswer_call()\lcall_recording_ongoing()\lcall_recording_pause()\lcall_recording_resume()\lcall_recording_start()\lcall_recording_stop()\ldelete_sms()\lend_call()\lhardware_reset()\lincoming_call()\lmake_call()\longoing_call()\lphone_activity_status()\lread_sms()\lready()\lsend_sms()\lsms_recieved()\l}", shape="record"];
 
