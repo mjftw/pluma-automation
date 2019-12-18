@@ -86,8 +86,8 @@ digraph "classes_farm-core" {
 
         "33" [ label="{ModemError|\l|}", fontcolor="red", shape="record"];
 
-        "47" [label="{NonblockingBase|\l|}", shape="record"];
-        "84" [label="{NonblockingBase.method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
+        "47" [label="{Nonblocking|\l|}", shape="record"];
+        "84" [label="{Nonblocking.method|async_result : NoneType\lfn\lparent : NoneType\l|await_return()\l}", shape="record"];
     }
 
     // ==========================
