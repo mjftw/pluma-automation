@@ -126,7 +126,6 @@ digraph "classes_farm-core" {
         "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
         "19" [ label="{EmailInvalidSettings|\l|}", fontcolor="red", shape="record"];
         "23" [ label="{GitError|\l|}", fontcolor="red", shape="record"];
-        "24" [ label="{GitInvalidBranch|\l|}", fontcolor="red", shape="record"];
         "25" [ label="{GitInvalidVersionSpecifier|\l|}", fontcolor="red", shape="record"];
     }
 
@@ -208,7 +207,6 @@ digraph "classes_farm-core" {
     "21" -> "26" [arrowhead="empty", arrowtail="none"];
     "21" -> "32" [arrowhead="empty", arrowtail="none"];
     "22" -> "21" [arrowhead="empty", arrowtail="none"];
-    "24" -> "23" [arrowhead="empty", arrowtail="none"];
     "25" -> "23" [arrowhead="empty", arrowtail="none"];
     "27" -> "9" [arrowhead="empty", arrowtail="none"];
     "28" -> "21" [arrowhead="empty", arrowtail="none"];
