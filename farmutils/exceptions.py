@@ -1,2 +1,2 @@
-from .git import GitError, GitInvalidVersionSpecifier, GitInvalidBranch, GitCommandFailed
+from .git import GitError, GitInvalidVersionSpecifier, GitCommandFailed
 from .email import EmailError, EmailInvalidSettings
