@@ -16,7 +16,7 @@ digraph "classes_farm-core" {
         "83" [label="{Locking.method|fn\lparent : NoneType\l|}", shape="record"];
         "32" [label="{Logging|log_echo\llog_file\llog_hier_path\llog_name\llog_on\llog_time\llog_time_format\l|error()\llog()\llog_file_clear()\l}", shape="record"];
 
-        "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lmuxpi : MuxPi\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
+        "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
         "7" [label="{BoardMock|\l|}", shape="record"];
         "8" [label="{BoardMockPower|board\l|off()\lon()\l}", shape="record"];
 
@@ -50,12 +50,6 @@ digraph "classes_farm-core" {
 
         "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_parent()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
         "16" [label="{Hub.DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
-
-        "40" [label="{MuxPi|board : Board\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
-        "41" [label="{MuxPiDyper|muxpi\l|toggle()\l}", shape="record"];
-        "43" [label="{MuxPiPower|muxpi\l|off()\lon()\l}", shape="record"];
-        "44" [label="{MuxPiPowerDyper|muxpi\l|}", shape="record"];
-        "45" [label="{MuxPiStorage|muxpi\l|to_board()\lto_host()\l}", shape="record"];
 
         "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
         "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
@@ -92,7 +86,6 @@ digraph "classes_farm-core" {
 
         "33" [ label="{ModemError|\l|}", fontcolor="red", shape="record"];
 
-        "42" [ label="{MuxPiError|\l|}", fontcolor="red", shape="record"];
     }
 
     // ==========================
@@ -178,11 +171,7 @@ digraph "classes_farm-core" {
     // ModemErrors
     "34" -> "33" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
-    // MuxPiErrors
-    "40" -> "42" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
-
     // = farmtest=
-    "40" -> "74" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "80" -> "72" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "71" -> "67" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
@@ -234,11 +223,6 @@ digraph "classes_farm-core" {
     "35" -> "36" [arrowhead="empty", arrowtail="none"];
     "37" -> "36" [arrowhead="empty", arrowtail="none"];
     "38" -> "36" [arrowhead="empty", arrowtail="none"];
-    "40" -> "21" [arrowhead="empty", arrowtail="none"];
-    "41" -> "56" [arrowhead="empty", arrowtail="none"];
-    "43" -> "52" [arrowhead="empty", arrowtail="none"];
-    "44" -> "55" [arrowhead="empty", arrowtail="none"];
-    "45" -> "64" [arrowhead="empty", arrowtail="none"];
     "49" -> "48" [arrowhead="empty", arrowtail="none"];
     "51" -> "48" [arrowhead="empty", arrowtail="none"];
     "52" -> "21" [arrowhead="empty", arrowtail="none"];
@@ -267,22 +251,10 @@ digraph "classes_farm-core" {
     "81" -> "46" [arrowhead="empty", arrowtail="none"];
 
     // Composition
-    "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="voltage_sampler", style="solid"];
-    "3" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="current_sampler", style="solid"];
-    "28" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="internal_hub", style="solid"];
-    "43" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="dut_power", style="solid"];
-    "40" -> "43" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
-    "40" -> "41" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
-    "40" -> "44" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
-    "45" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="dut_storage", style="solid"];
-    "40" -> "45" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="muxpi", style="solid"];
     "60" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
-    "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="stm_console", style="solid"];
-    "60" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="dut_console", style="solid"];
     "60" -> "79" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="_console", style="solid"];
     "68" -> "0" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "9" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
-    "4" -> "40" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="board", style="solid"];
     "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="usbrelay", style="solid"];
     "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="board", style="solid"];

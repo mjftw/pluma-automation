@@ -15,7 +15,7 @@ class BoardBootValidationError(BoardError):
 
 
 class Board(Farmclass):
-    def __init__(self, name, power=None, hub=None, muxpi=None,
+    def __init__(self, name, power=None, hub=None,
             storage=None, console=None,
             login_user=None, login_pass=None,
             bootstr=None, boot_max_s=None,
@@ -27,10 +27,6 @@ class Board(Farmclass):
         self.storage = storage
         self.console = console
         self.hub = hub
-        self.muxpi = muxpi
-
-        if self.muxpi:
-            self.muxpi.attach_board(self)
 
         self.prompt = prompt
         self.login_user = login_user or 'root'
