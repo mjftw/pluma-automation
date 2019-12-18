@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
+from functools import wraps
 
 from farmutils import datetime_to_timestamp
 
@@ -62,6 +63,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         
     @abstractmethod
     def open(f):
+        @wraps(f)
         def wrap(self):
             f(self)
             if self.raw_logfile:
@@ -74,6 +76,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
     @abstractmethod
     def close(f):
+        @wraps(f)
         def wrap(self):
             f(self)
             if self._raw_logfile_fd:

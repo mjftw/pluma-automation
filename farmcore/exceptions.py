@@ -8,4 +8,3 @@ from .multimeter import MultimeterError, MultimeterInvalidKeyPress,\
     MultimeterMeasurementError, MultimeterDecodeError
 from .pdu import PDUError, PDUInvalidPort, PDURequestError
 from .usb import USBError, USBNoDevice
-from .muxpi import MuxPiError
