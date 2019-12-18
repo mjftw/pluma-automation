@@ -4,7 +4,7 @@ import re
 import json
 
 from .telnetconsole import TelnetConsole
-from .exceptions import ConsoleCannotOpenError, ConsoleLoginFailed
+from .exceptions import ConsoleCannotOpenError, ConsoleLoginFailedError
 from .baseclasses import PowerBase
 
 
@@ -236,7 +236,7 @@ class APCPDU(PowerBase):
                     success_match='Control Console'
                 )
                 return
-            except ConsoleLoginFailed as ex:
+            except ConsoleLoginFailedError as ex:
                 e = ex
                 self.log('WARNING: Failed to log in')
                 self.log('Sleeping 1 second and retrying...')

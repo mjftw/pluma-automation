@@ -23,7 +23,7 @@ class ConsoleCannotOpenError(ConsoleError):
     pass
 
 
-class ConsoleLoginFailed(ConsoleError):
+class ConsoleLoginFailedError(ConsoleError):
     pass
 
 
@@ -355,7 +355,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         (__, matched) = self.send(
             match=matches, send_newline=False, flush_buffer=False)
         if not matched:
-            self.error(fail_message, ConsoleLoginFailed)
+            self.error(fail_message, ConsoleLoginFailedError)
 
         if matched == username_match:
             (__, matched) = self.send(
@@ -363,20 +363,20 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             if matched == username_match:
                 self.error(
                     '{}: Invalid username'.format(fail_message),
-                    ConsoleLoginFailed)
+                    ConsoleLoginFailedError)
 
         if password_match and matched == password_match:
             if not password:
-                self.error(fail_message, ConsoleLoginFailed)
+                self.error(fail_message, ConsoleLoginFailedError)
             (__, matched) = self.send(
                 cmd=password,  match=matches, flush_buffer=False)
             if matched == password_match or matched == username_match:
-                self.error(fail_message, ConsoleLoginFailed)
+                self.error(fail_message, ConsoleLoginFailedError)
 
         if ((success_match and matched != success_match) or
                 matched == pexpect.TIMEOUT or
                 matched == pexpect.EOF):
-            self.error(fail_message, ConsoleLoginFailed)
+            self.error(fail_message, ConsoleLoginFailedError)
 
         if (success_match and matched == success_match):
             self.log('Login successful')
