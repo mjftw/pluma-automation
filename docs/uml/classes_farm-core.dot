@@ -49,7 +49,7 @@ digraph "classes_farm-core" {
         "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
 
         "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_parent()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
-        "16" [label="{Hub.DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
+        "16" [label="{Hub.HubDeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
 
         "75" [label="{USB|driver_path : bytes, str\ldriver_path : str\lis_bound\lusb_device\l|bind()\lget_device()\lrebind()\lrebind_host()\lunbind()\l}", shape="record"];
         "76" [label="{USBEnet|device_path : str\linterface\l|}", shape="record"];
