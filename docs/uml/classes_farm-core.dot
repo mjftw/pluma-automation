@@ -44,7 +44,6 @@ digraph "classes_farm-core" {
         "79" [label="{USBRelay|console\ldevnode\lport_map : list\lusb_device\l|bind()\ltoggle()\lunbind()\l}", shape="record"];
 
         "64" [label="{StorageBase|host_mountpoint\lhost_mountpoint : NoneType\l|devnode_is_mounted()\lmount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
-        "58" [label="{SDMux|index\lserialdev\lusbrelay\l|to_board()\lto_host()\l}", shape="record"];
         "59" [label="{SDWire|ftdi : Ftdi\lproduct_id : int\lserial : NoneType\lvendor_id : int\l|to_board()\lto_host()\l}", shape="record"];
         "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
 
@@ -225,7 +224,6 @@ digraph "classes_farm-core" {
     "55" -> "52" [arrowhead="empty", arrowtail="none"];
     "56" -> "21" [arrowhead="empty", arrowtail="none"];
     "57" -> "56" [arrowhead="empty", arrowtail="none"];
-    "58" -> "64" [arrowhead="empty", arrowtail="none"];
     "59" -> "64" [arrowhead="empty", arrowtail="none"];
     "60" -> "9" [arrowhead="empty", arrowtail="none"];
     "61" -> "9" [arrowhead="empty", arrowtail="none"];
@@ -250,7 +248,6 @@ digraph "classes_farm-core" {
     "68" -> "0" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "9" -> "34" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "9" -> "62" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
-    "79" -> "58" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="usbrelay", style="solid"];
     "4" -> "73" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="board", style="solid"];
     "73" -> "70" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="testrunner", style="solid"];
     "84" -> "47" [arrowhead="diamond", arrowtail="none", fontcolor="darkgreen", label="", style="solid"];
