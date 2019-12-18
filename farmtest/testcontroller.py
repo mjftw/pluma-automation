@@ -10,7 +10,7 @@ from statistics import mean, median_grouped, mode, stdev, variance,\
 from farmutils import send_exception_email, datetime_to_timestamp, \
     regex_filter_list
 
-from .unittest import UnitTest, deferred_function
+from .unittest import deferred_function
 from .test import TestRunner
 
 
