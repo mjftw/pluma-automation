@@ -65,7 +65,7 @@ digraph "classes_farm-core" {
         "5" [ label="{BoardBootValidationError|\l|}", fontcolor="red", shape="record"];
 
         "11" [ label="{ConsoleError|\l|}", fontcolor="red", shape="record"];
-        "10" [ label="{ConsoleCannotOpen|\l|}", fontcolor="red", shape="record"];
+        "10" [ label="{ConsoleCannotOpenError|\l|}", fontcolor="red", shape="record"];
         "12" [ label="{ConsoleExceptionKeywordRecieved|\l|}", fontcolor="red", shape="record"];
         "13" [ label="{ConsoleInvalidJSONRecieved|\l|}", fontcolor="red", shape="record"];
         "14" [ label="{ConsoleLoginFailed|\l|}", fontcolor="red", shape="record"];

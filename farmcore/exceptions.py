@@ -1,5 +1,5 @@
 from .baseclasses.consolebase import ConsoleError,\
-    ConsoleCannotOpen, ConsoleLoginFailed, ConsoleExceptionKeywordRecieved,\
+    ConsoleCannotOpenError, ConsoleLoginFailed, ConsoleExceptionKeywordRecieved,\
     ConsoleInvalidJSONRecieved
 from .baseclasses.storagebase import StorageError
 from .board import BoardError, BoardBootValidationError

@@ -19,7 +19,7 @@ class ConsoleError(Exception):
     pass
 
 
-class ConsoleCannotOpen(ConsoleError):
+class ConsoleCannotOpenError(ConsoleError):
     pass
 
 
@@ -247,7 +247,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         if not self.is_open:
             self.open()
         if not self.is_open:
-            raise ConsoleCannotOpen
+            raise ConsoleCannotOpenError
 
         cmd = cmd or ''
         if log_verbose:

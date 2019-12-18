@@ -4,7 +4,7 @@ import re
 import json
 
 from .telnetconsole import TelnetConsole
-from .exceptions import ConsoleCannotOpen, ConsoleLoginFailed
+from .exceptions import ConsoleCannotOpenError, ConsoleLoginFailed
 from .baseclasses import PowerBase
 
 
@@ -217,7 +217,7 @@ class APCPDU(PowerBase):
             try:
                 self.console.open()
                 e = None
-            except ConsoleCannotOpen as ex:
+            except ConsoleCannotOpenError as ex:
                 e = ex
                 self.log('WARNING: Failed to gain control of APC console. Is it in use?')
                 self.log('Sleeping 1 second and retrying...')
