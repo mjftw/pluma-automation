@@ -3,7 +3,7 @@ from .exceptions import *
 from .board import Board, get_board_by_name
 from .usbrelay import USBRelay
 from .usbenet import USBEnet
-from .interface import Interface
+from .interface import NetInterface
 from .powerrelay import PowerRelay
 from .powermulti import PowerMulti
 from .softpower import SoftPower
