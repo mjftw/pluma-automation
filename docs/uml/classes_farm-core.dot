@@ -101,13 +101,10 @@ digraph "classes_farm-core" {
         "70" [label="{TestController|data : dict\llog_func\lname : NoneType\lreport\lreport : NoneType\lresults\lresults : list\lresults_summary\lresults_summary : dict\lrun_condition\lrun_condition : NoneType\lsettings\lsettings : dict\lsetup\lsetup : NoneType\lstats\lstats : dict\ltest_settings\ltest_settings : dict\ltestrunner\l|collect_test_settings()\lget_results_summary()\lget_test_results()\lgraph_test_results()\llog()\lrun()\lrun_iteration()\l}", shape="record"];
 
         "82" [label="{deferred_function|args : tuple\lf\lkwargs : dict\l|run()\l}", shape="record"];
-        "80" [label="{UnitTest|body\lbody : NoneType\lsetup\lsetup : NoneType\lsuccess : bool\lteardown\lteardown : NoneType\l|run()\l}", shape="record"];
-
         "63" [label="{StockSensorsTest|board\l|test_body()\l}", shape="record"];
 
         // Exceptions
         "74" [ label="{TestingException|\l|}", fontcolor="red", shape="record"];
-        "72" [ label="{TestFunctionNotSet|\l|}", fontcolor="red", shape="record"];
         "67" [ label="{TaskFailed|\l|}", fontcolor="red", shape="record"];
         "2" [ label="{AbortTestingAndReport|\l|}", fontcolor="red", shape="record"];
         "1" [ label="{AbortTesting|\l|}", fontcolor="red", shape="record"];
@@ -172,7 +169,6 @@ digraph "classes_farm-core" {
     "34" -> "33" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmtest=
-    "80" -> "72" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "71" -> "67" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmutils
@@ -269,7 +265,6 @@ digraph "classes_farm-core" {
     "9" -> "4" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "69" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
     "71" -> "73" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="console", style="solid"];
-    "82" -> "80" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="setup,body,report", style="solid"];
     "82" -> "70" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="setup,report,run_condition", style="solid"];
     "81" -> "60" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="interact()", style="solid"];
     "16" -> "28" [arrowhead="ediamond", arrowtail="none", fontcolor="darkgreen", label="plot()", style="solid"];
