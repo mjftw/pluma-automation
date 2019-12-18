@@ -31,7 +31,7 @@ class ConsoleExceptionKeywordRecievedError(ConsoleError):
     pass
 
 
-class ConsoleInvalidJSONRecieved(ConsoleError):
+class ConsoleInvalidJSONRecievedError(ConsoleError):
     pass
 
 
@@ -389,7 +389,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         recieved, matched = self.send(cmd, match='{((.|\n)*)\n}')
 
         if not matched:
-            raise ConsoleInvalidJSONRecieved(
+            raise ConsoleInvalidJSONRecievedError(
                 f'Received is not JSON: {recieved}')
 
         data = json.loads(matched)
