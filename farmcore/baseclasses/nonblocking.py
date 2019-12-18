@@ -36,3 +36,51 @@ class Nonblocking:
         '''
         self._thread_pool = ThreadPool(processes=threads)
         self._thread_ident = threading.get_ident()
+
+    class method:
+        '''
+        Decorates class methods in order to make then nonblocking.
+        '''
+        def __init__(self, fn):
+            self.fn = fn
+            self.async_result = None
+
+            self.parent = None
+
+        def await_return(self):
+            '''
+            Block until nonblocking method has finished, then
+            return its return value.
+            '''
+            if self.async_result:
+                return self.async_result.get()
+
+        def __get__(self, instance, owner):
+            if instance is None:
+                return self
+
+            d = self
+            # use a lambda to produce a bound method
+            mfactory = lambda self, *args, **kw: d(self, *args, **kw)
+            mfactory.__name__ = self.fn.__name__
+            mfactory.await_return = self.await_return
+
+            if not self.parent:
+                # Make link to parent class
+                self.parent = instance
+
+            return mfactory.__get__(instance, owner)
+
+        def __call__(self, *args, **kwargs):
+            '''
+            Intercept function calls and queue them in worker threads.
+            '''
+            thread_ident = threading.get_ident()
+
+            if thread_ident != self.parent._thread_ident:
+                return self.fn(*args, **kwargs)
+
+            self.async_result = self.parent._thread_pool.apply_async(
+                func=self.fn, args=args, kwds=kwargs)
+
+            return self
