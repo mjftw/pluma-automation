@@ -48,7 +48,7 @@ digraph "classes_farm-core" {
         "59" [label="{SDWire|ftdi : Ftdi\lproduct_id : int\lserial : NoneType\lvendor_id : int\l|to_board()\lto_host()\l}", shape="record"];
         "66" [label="{StorageMock|\l|mount_board()\lmount_host()\lto_board()\lto_host()\lunmount_board()\lunmount_host()\l}", shape="record"];
 
-        "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\lget_parent()\lget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
+        "28" [label="{Hub|devinfo\ldownstream\l|filter_downstream()\lget_block()\lget_ethernet()\lget_hub()\lget_misc_devices()\llget_part()\lget_relay()\lget_sdwire()\lget_serial()\lplot()\l}", shape="record"];
         "16" [label="{Hub.DeviceNode|device\ldevlabel\ldevname\ldevpath\ldevpathlist\ldevtype\lextra_info : NoneType\lindex\llinelabel : NoneType\lparent : NoneType\lprefix\lvendor\l|}", shape="record"];
 
         "40" [label="{MuxPi|board : Board\lcurrent_sampler\ldut_console\ldut_power\ldut_storage\linternal_hub\lrequired_version : str\lstm_console\lvoltage_sampler\l|attach_board()\lsample_current()\lsample_voltage()\lstm_cmd()\lstm_help()\l}", shape="record"];
