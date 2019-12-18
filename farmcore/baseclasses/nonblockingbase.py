@@ -1,10 +1,10 @@
 from multiprocessing.pool import ThreadPool
 import threading
 
-class Nonblocking:
+class NonblockingBase:
     '''
     This is a base class that allows the inheriting class to mark
-    its methods as nonblocking, by decorating them with @Nonblocking.method.
+    its methods as nonblocking, by decorating them with @NonblockingBase.method.
     If a method marked as nonblocking is called, it is run in a separate
     thread, and the calling thread continues execution while the method runs.
     In order to get the return value of this method, the client can call the
