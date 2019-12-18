@@ -13,6 +13,5 @@ from .hostconsole import HostConsole
 from .telnetconsole import TelnetConsole
 from .hub import Hub
 from .sdwire import SDWire
-from .muxpi import MuxPi, MuxPiDyper, MuxPiPowerDyper
 from .multimeter import MultimeterTTI1604
 from .modem import ModemSim868

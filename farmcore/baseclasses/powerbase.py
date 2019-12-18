@@ -1,6 +1,7 @@
 from .farmclass import Farmclass
 import time
 from abc import ABCMeta, abstractmethod
+from functools import wraps
 
 class PowerBase(Farmclass, metaclass=ABCMeta):
     def __init__(self, reboot_delay=None):
@@ -8,6 +9,7 @@ class PowerBase(Farmclass, metaclass=ABCMeta):
 
     @abstractmethod
     def on(f):
+        @wraps(f)
         def wrap(self, *args, **kwargs):
             self.log(f'{str(self)}: Power on')
             f(self, *args, **kwargs)
@@ -15,6 +17,7 @@ class PowerBase(Farmclass, metaclass=ABCMeta):
 
     @abstractmethod
     def off(f):
+        @wraps(f)
         def wrap(self, *args, **kwargs):
             self.log(f'{str(self)}: Power off')
             f(self, *args, **kwargs)
