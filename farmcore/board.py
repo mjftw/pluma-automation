@@ -9,10 +9,11 @@ from .exceptions import ConsoleExceptionKeywordRecievedError
 class BoardError(Exception):
     pass
 
-
 class BoardBootValidationError(BoardError):
     pass
 
+class BoardFieldInstanceIsNoneError(BoardError):
+    pass
 
 class Board(Farmclass):
     def __init__(self, name, power=None, hub=None,
@@ -48,6 +49,12 @@ class Board(Farmclass):
             exception_bootstr=None):
         timeout = override_timeout or self.boot_max_s
         bootstr = override_boostr or self.bootstr
+
+        if self.console is None:
+	        raise BoardFieldInstanceIsNoneError('"power" instance is not set')
+        
+        if self.console is None:
+	        raise BoardFieldInstanceIsNoneError('"console" instance is not set')
 
         # If we have set a prompt, add this to bootstr search
         if self.prompt:
@@ -89,6 +96,9 @@ class Board(Farmclass):
         return self.last_boot_len
 
     def login(self):
+        if self.console is None:
+	        raise BoardFieldInstanceIsNoneError('"console" instance is not set')
+        
         if self.booted_to_prompt:
             self.log('Booted to prompt. Not need to log in')
             return
