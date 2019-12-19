@@ -12,7 +12,7 @@ class BoardError(Exception):
 class BoardBootValidationError(BoardError):
     pass
 
-class BoardFieldInstanceIsNone(BoardError):
+class BoardFieldInstanceIsNoneError(BoardError):
     pass
 
 class Board(Farmclass):
@@ -51,10 +51,10 @@ class Board(Farmclass):
         bootstr = override_boostr or self.bootstr
 
         if self.console is None:
-	        raise BoardFieldInstanceIsNone('"power" instance is not set')
+	        raise BoardFieldInstanceIsNoneError('"power" instance is not set')
         
         if self.console is None:
-	        raise BoardFieldInstanceIsNone('"console" instance is not set')
+	        raise BoardFieldInstanceIsNoneError('"console" instance is not set')
 
         # If we have set a prompt, add this to bootstr search
         if self.prompt:
@@ -97,7 +97,7 @@ class Board(Farmclass):
 
     def login(self):
         if self.console is None:
-	        raise BoardFieldInstanceIsNone('"console" instance is not set')
+	        raise BoardFieldInstanceIsNoneError('"console" instance is not set')
         
         if self.booted_to_prompt:
             self.log('Booted to prompt. Not need to log in')

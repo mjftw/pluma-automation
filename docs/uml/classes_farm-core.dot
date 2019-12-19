@@ -62,6 +62,7 @@ digraph "classes_farm-core" {
         // Exceptions
         "6" [ label="{BoardError|\l|}", fontcolor="red", shape="record"];
         "5" [ label="{BoardBootValidationError|\l|}", fontcolor="red", shape="record"];
+        "80" [ label="{BoardFieldInstanceIsNoneError|\l|}", fontcolor="red", shape="record"];
 
         "11" [ label="{ConsoleError|\l|}", fontcolor="red", shape="record"];
         "10" [ label="{ConsoleCannotOpenError|\l|}", fontcolor="red", shape="record"];
@@ -133,6 +134,7 @@ digraph "classes_farm-core" {
     // =======================
     // == Raises Exceptions ==
     "4" -> "5" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
+    "4" -> "80" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // = farmcore =
     // MultimeterErrors
@@ -192,6 +194,7 @@ digraph "classes_farm-core" {
     "2" -> "1" [arrowhead="empty", arrowtail="none"];
     "4" -> "21" [arrowhead="empty", arrowtail="none"];
     "5" -> "6" [arrowhead="empty", arrowtail="none"];
+    "80" -> "6" [arrowhead="empty", arrowtail="none"];
     "7" -> "4" [arrowhead="empty", arrowtail="none"];
     "8" -> "52" [arrowhead="empty", arrowtail="none"];
     "9" -> "21" [arrowhead="empty", arrowtail="none"];
