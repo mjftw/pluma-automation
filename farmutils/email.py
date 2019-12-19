@@ -19,7 +19,7 @@ class EmailError(Exception):
     pass
 
 
-class EmailInvalidSettings(EmailError):
+class EmailInvalidSettingsError(EmailError):
     pass
 
 
@@ -85,11 +85,11 @@ class Email():
 
         # Required settings
         if 'smtp' not in settings:
-            raise EmailInvalidSettings(f'No SMTP settings in file: {file}')
+            raise EmailInvalidSettingsError(f'No SMTP settings in file: {file}')
         if 'email' not in settings['smtp']:
-            raise EmailInvalidSettings(f'No SMTP email in settings file: {file}')
+            raise EmailInvalidSettingsError(f'No SMTP email in settings file: {file}')
         if 'password' not in settings['smtp']:
-            raise EmailInvalidSettings(f'No SMTP password in settings file: {file}')
+            raise EmailInvalidSettingsError(f'No SMTP password in settings file: {file}')
 
         self.smtp_username = settings['smtp']['email']
         self.smtp_password = settings['smtp']['password']
@@ -311,20 +311,20 @@ class Email():
         """ Check email has all required settings """
 
         if not self.to:
-            self.error("To address is not set", EmailInvalidSettings)
+            self.error("To address is not set", EmailInvalidSettingsError)
         if not self.smtp_username:
-            self.error("smtp username not set", EmailInvalidSettings)
+            self.error("smtp username not set", EmailInvalidSettingsError)
         if not self.smtp_password:
-            self.error("smtp password not set", EmailInvalidSettings)
+            self.error("smtp password not set", EmailInvalidSettingsError)
         if not self.smtp_server:
-            self.error("smtp server not set", EmailInvalidSettings)
+            self.error("smtp server not set", EmailInvalidSettingsError)
         if not self.smtp_timeout:
-            self.error("smtp timeout not set", EmailInvalidSettings)
+            self.error("smtp timeout not set", EmailInvalidSettingsError)
 
         # Check all attachments exist
         for a in self.files + self.images:
             if not os.path.isfile(a):
-                self.error(f"Cannot find file to attach: {a}", EmailInvalidSettings)
+                self.error(f"Cannot find file to attach: {a}", EmailInvalidSettingsError)
 
 
     def _make_attachments(self):
@@ -382,7 +382,7 @@ def send_exception_email(exception, recipients=None, board=None,
         with open(settings_file, 'r') as f:
             settings = json.load(f)
             if 'maintainers' not in settings:
-                raise EmailInvalidSettings(
+                raise EmailInvalidSettingsError(
                     'recipents not given and "maintainers" not in settings file: {}'.format(
                         settings_file))
             recipients = settings['maintainers']

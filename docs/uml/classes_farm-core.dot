@@ -123,7 +123,7 @@ digraph "classes_farm-core" {
 
         // Exceptions
         "18" [ label="{EmailError|\l|}", fontcolor="red", shape="record"];
-        "19" [ label="{EmailInvalidSettings|\l|}", fontcolor="red", shape="record"];
+        "19" [ label="{EmailInvalidSettingsError|\l|}", fontcolor="red", shape="record"];
         "23" [ label="{GitError|\l|}", fontcolor="red", shape="record"];
         "25" [ label="{GitInvalidVersionSpecifier|\l|}", fontcolor="red", shape="record"];
     }
