@@ -11,13 +11,13 @@ class GitError(Exception):
 class GitInvalidVersionSpecifierError(GitError):
     pass
 
-class GitCommandFailed(GitError):
+class GitCommandFailedError(GitError):
     pass
 
 def run_git_cmd(git_command):
     git_result, git_rc = run_host_cmd(git_command)
     if git_rc:
-        raise GitCommandFailed(git_command)
+        raise GitCommandFailedError(git_command)
     return (git_result, git_rc)
 
 def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
