@@ -9,7 +9,6 @@ from .exceptions import ConsoleExceptionKeywordRecievedError
 class BoardError(Exception):
     pass
 
-
 class BoardBootValidationError(BoardError):
     pass
 
