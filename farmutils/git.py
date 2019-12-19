@@ -8,7 +8,7 @@ from .helpers import run_host_cmd
 class GitError(Exception):
     pass
 
-class GitInvalidVersionSpecifier(GitError):
+class GitInvalidVersionSpecifierError(GitError):
     pass
 
 class GitCommandFailed(GitError):
@@ -84,7 +84,7 @@ def filter_versions(versions, v_filter):
 
     invalid_versions = list(filter(lambda v: not version_is_valid(v), versions))
     if invalid_versions:
-        raise GitInvalidVersionSpecifier('Invalid versions: {}'.format(
+        raise GitInvalidVersionSpecifierError('Invalid versions: {}'.format(
             invalid_versions))
 
     # Strip spaces
@@ -116,7 +116,7 @@ def filter_versions(versions, v_filter):
         else:
             cond_pattern = '^[!\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
-                raise GitInvalidVersionSpecifier('Invalid condition [{}] in filter [{}]'.format(
+                raise GitInvalidVersionSpecifierError('Invalid condition [{}] in filter [{}]'.format(
                     v_cond, v_filter))
 
             # 'x.x.x !': match all versions except x.x.x
@@ -151,7 +151,7 @@ def filter_versions(versions, v_filter):
 
             cond_pattern = '^[\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
-                raise GitInvalidVersionSpecifier('Invalid filter [{}]'.format(
+                raise GitInvalidVersionSpecifierError('Invalid filter [{}]'.format(
                     v_filter))
 
             # '-y' : match up to the last y versions
