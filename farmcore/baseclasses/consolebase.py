@@ -58,7 +58,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     @property
     @abstractmethod
     def is_open(self):
-        """ Check if the transport layer is ready to send and recieve"""
+        """ Check if the transport layer is ready to send and receive"""
         pass
         
     @abstractmethod
