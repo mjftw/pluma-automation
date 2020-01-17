@@ -51,6 +51,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         self.linesep = linesep or '\r\n'
         self.raw_logfile = raw_logfile or default_raw_logfile
 
+        if not os.path.exists(os.path.dirname(self.raw_logfile)):
+            raise ConsoleCannotOpenError
+
         self._buffer = ''
         self._last_recieved = ''
         self._raw_logfile_fd = None
