@@ -4,7 +4,7 @@
 - [Automation Lab Supported Hardware](#automation-lab-supported-hardware)
   - [Automation Hosts](#automation-hosts)
     - [Linux PC](#linux-pc)
-    - [MuxPi](#muxpi)
+    - [Raspberry Pi 4](#raspberry-pi-4)
   - [Power](#power)
     - [IP Power](#ip-power)
     - [APC](#apc)
@@ -20,10 +20,9 @@
 
 ## Automation Hosts
 ### Linux PC
-### MuxPi
-Custom - Tizen
-
-[Documentation](https://muxpi.readthedocs.io/en/latest/)
+### Raspberry Pi 4
+Single board ARM based computer. 
+[Documentation](https://www.raspberrypi.org/products/raspberry-pi-4-model-b/specifications/)
 
 ## Power
 ### IP Power
