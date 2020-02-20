@@ -299,19 +299,14 @@ class Hub(Farmclass, USB):
             'get_relay'
         ]
 
-        special_ttyUSB_minors = []
+        # Filter out any devinfo devices with minor numbers that match a device
+        # that was found in the special USB serial devices.
         for func_name in special_serial_get_funcs:
             func = getattr(self, func_name, None)
-            if func:
-                for d in (d for d in func(get_all=True) if 'minor' in d):
-                    special_ttyUSB_minors.extend(d['minor'])
-
-        # Filter out any devinfo devices with minor numbers that match a device
-        # that was found in the special USB serial devices. Minor numbers are
-        # unique per ttyUSB character device in Linux, so can be used as an ID.
-        for d in (d for d in devinfo if ('minor' in d and
-                d['minor'] in special_ttyUSB_minors)):
-            devinfo.remove(d)
+            # Iterate all special devices found, and remove these from devinfo
+            for d in (d for d in func(get_all=True) if func):
+                if d in devinfo:
+                    devinfo.remove(d)
 
         return self._filter_devinfo(devinfo, key, get_all)
 
