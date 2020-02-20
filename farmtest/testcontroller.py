@@ -664,7 +664,7 @@ class TestController():
                     if (self.settings['setup_n_iterations'] and
                             self.stats['num_iterations_run'] % self.settings['setup_n_iterations'] == 0):
                         if self.setup:
-                            self.log("Running setup function: {}".format(self.report))
+                            self.log("Running setup function: {}".format(self.setup))
                             self.setup.run(self)
                     success = self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
@@ -694,8 +694,6 @@ class TestController():
                         self.settings['condition_check_interval_s']))
                     time.sleep(self.settings['condition_check_interval_s'])
             else:
-                self.log("==== TestController Results ====")
-                self.log(self.results)
                 return
 
     def _init_iteration(self):
