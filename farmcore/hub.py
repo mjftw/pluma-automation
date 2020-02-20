@@ -289,21 +289,29 @@ class Hub(Farmclass, USB):
 
     def get_serial(self, key=None, get_all=None):
         ttyUSB_major = '188'
-        serial_vendors = ['FTDI', 'Prolific_Technology_Inc.']
 
-        for vendor in serial_vendors:
-            devinfo = self.filter_downstream({
-                'subsystem': 'tty',
-                'major': ttyUSB_major,
-                'vendor': vendor
-            })
-            if not devinfo:
-                devinfo = self.filter_downstream({
-                    'major': ttyUSB_major,
-                    'vendor': vendor
-                })
-            if devinfo:
-                break
+        devinfo = self.filter_downstream({
+            'subsystem': 'tty',
+            'major': ttyUSB_major,
+        })
+
+        special_serial_get_funcs = [
+            'get_relay'
+        ]
+
+        special_ttyUSB_minors = []
+        for func_name in special_serial_get_funcs:
+            func = getattr(self, func_name, None)
+            if func:
+                for d in (d for d in func(get_all=True) if 'minor' in d):
+                    special_ttyUSB_minors.extend(d['minor'])
+
+        # Filter out any devinfo devices with minor numbers that match a device
+        # that was found in the special USB serial devices. Minor numbers are
+        # unique per ttyUSB character device in Linux, so can be used as an ID.
+        for d in (d for d in devinfo if ('minor' in d and
+                d['minor'] in special_ttyUSB_minors)):
+            devinfo.remove(d)
 
         return self._filter_devinfo(devinfo, key, get_all)
 
