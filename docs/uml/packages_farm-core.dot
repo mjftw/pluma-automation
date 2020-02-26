@@ -9,7 +9,7 @@ digraph "packages_farm-core" {
         "1" [label="farmcore.baseclasses", shape="box"];
         "2" [label="farmcore.baseclasses.consolebase", shape="box"];
         "3" [label="farmcore.baseclasses.farmclass", shape="box"];
-        "4" [label="farmcore.baseclasses.hierachy", shape="box"];
+        "4" [label="farmcore.baseclasses.Hierarchy", shape="box"];
         "5" [label="farmcore.baseclasses.locking", shape="box"];
         "6" [label="farmcore.baseclasses.logging", shape="box"];
         "7" [label="farmcore.baseclasses.powerbase", shape="box"];

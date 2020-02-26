@@ -3,7 +3,7 @@ from pexpect import TIMEOUT, EOF
 
 
 from .baseclasses import Farmclass
-from .exceptions import ConsoleExceptionKeywordRecievedError
+from .exceptions import ConsoleExceptionKeywordreceivedError
 
 
 class BoardError(Exception):
@@ -40,15 +40,15 @@ class Board(Farmclass):
         self.last_boot_len = None
         self.booted_to_prompt = False
 
-        self.log_reccurse = True
+        self.log_recurse = True
 
     def __repr__(self):
         return 'Board[{}]'.format(self.name)
 
-    def reboot_and_validate(self, override_boostr=None, override_timeout=None,
+    def reboot_and_validate(self, override_bootstr=None, override_timeout=None,
             exception_bootstr=None):
         timeout = override_timeout or self.boot_max_s
-        bootstr = override_boostr or self.bootstr
+        bootstr = override_bootstr or self.bootstr
 
         if self.console is None:
 	        raise BoardFieldInstanceIsNoneError('"power" instance is not set')
@@ -79,7 +79,7 @@ class Board(Farmclass):
                 timeout=timeout,
                 sleep_time=5,
                 excepts=exception_bootstr)
-        except ConsoleExceptionKeywordRecievedError as e:
+        except ConsoleExceptionKeywordreceivedError as e:
             raise BoardBootValidationError('Matched exception keyword: {}'.format(
                 str(e)))
 
@@ -120,7 +120,7 @@ def get_board_by_name(boards, name):
     filtered_boards = [b for b in boards if b.name == name]
     if len(filtered_boards) <= 0:
         raise RuntimeError(
-            f'No boards found with name [{name}]. Avialable: {[b.name for b in boards]}')
+            f'No boards found with name [{name}]. Available: {[b.name for b in boards]}')
     if len(filtered_boards) > 1:
         raise RuntimeError(f'Multiple boards found with name [{name}]')
 

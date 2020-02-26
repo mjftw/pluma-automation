@@ -68,5 +68,5 @@ class SerialConsoleMock(ConsoleBase):
     def _default_child_function(self):
         # echo stdin to stdout
         while True:
-            recieved = input()
-            print(recieved)
+            received = input()
+            print(received)

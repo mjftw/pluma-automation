@@ -60,9 +60,9 @@ class SerialConsole(ConsoleBase):
     def interact(self, exit_char=None):
         '''
         Take interactive control of a SerialConsole.
-        The initention is that this be used from the command line.
+        The intention is that this be used from the command line.
         To exit the terminal press the exit character.
-        You can set the exit charater with @exit_char, default is "¬".
+        You can set the exit character with @exit_char, default is "¬".
         '''
         if not self.is_open:
             self.open()
@@ -88,7 +88,7 @@ class SerialConsole(ConsoleBase):
     class _logging_Nanocom(Nanocom):
         '''
         This class just slightly modifies Nanocom to get it to log
-        recieved data to a file.
+        received data to a file.
         This is done so that the text from the interactive session
         is written to the raw logfile, along with everything else.
         The reader() method is copy-pasted from Nanocom and modified.

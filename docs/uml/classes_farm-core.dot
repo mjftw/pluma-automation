@@ -11,12 +11,12 @@ digraph "classes_farm-core" {
         "21" [label="{Farmclass|\l|}", shape="record"];
         label="farmcore";
         "22" [label="{FarmclassMock|num_children : int\l|add_child()\l}", shape="record"];
-        "26" [label="{Hierachy|\l|show_hier()\l}", shape="record"];
+        "26" [label="{Hierarchy|\l|show_hier()\l}", shape="record"];
         "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
         "83" [label="{Locking.method|fn\lparent : NoneType\l|}", shape="record"];
         "32" [label="{Logging|log_echo\llog_file\llog_hier_path\llog_name\llog_on\llog_time\llog_time_format\l|error()\llog()\llog_file_clear()\l}", shape="record"];
 
-        "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_reccurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
+        "4" [label="{Board|boot_max_s : int\lbooted_to_prompt : bool\lbootstr : str\lconsole : ConsoleBase\lhub : Hub\llast_boot_len : NoneType\llog_recurse : bool\llogin_pass : NoneType\llogin_pass_match : str\llogin_user : str\llogin_user_match : str\lname\lpower : PowerBase\lprompt : NoneType\lstorage : StorageBase\l|login()\lreboot_and_validate()\l}", shape="record"];
         "7" [label="{BoardMock|\l|}", shape="record"];
         "8" [label="{BoardMockPower|board\l|off()\lon()\l}", shape="record"];
 
@@ -55,7 +55,7 @@ digraph "classes_farm-core" {
 
         "30" [label="{NetInterface|interface\lip_address\l|down()\lset_ip_address()\lup()\l}", shape="record"];
 
-        "34" [label="{ModemSim868|console\lhardware_reset_max_attempts : int\lhardware_reset_pin : int\lhardware_reset_wait_period : int\l|AT_send()\lanswer_call()\lcall_recording_ongoing()\lcall_recording_pause()\lcall_recording_resume()\lcall_recording_start()\lcall_recording_stop()\ldelete_sms()\lend_call()\lhardware_reset()\lincoming_call()\lmake_call()\longoing_call()\lphone_activity_status()\lread_sms()\lready()\lsend_sms()\lsms_recieved()\l}", shape="record"];
+        "34" [label="{ModemSim868|console\lhardware_reset_max_attempts : int\lhardware_reset_pin : int\lhardware_reset_wait_period : int\l|AT_send()\lanswer_call()\lcall_recording_ongoing()\lcall_recording_pause()\lcall_recording_resume()\lcall_recording_start()\lcall_recording_stop()\ldelete_sms()\lend_call()\lhardware_reset()\lincoming_call()\lmake_call()\longoing_call()\lphone_activity_status()\lread_sms()\lready()\lsend_sms()\lsms_received()\l}", shape="record"];
 
         "39" [label="{MultimeterTTI1604|button_map : dict\lchar_map : dict\lis_ready\llast_unit : NoneType\lserial : Serial\lunit_bitfield_map : dict\l|measure()\lpower_on()\lpress_button()\lset_unit()\l}", shape="record"];
 
@@ -66,8 +66,8 @@ digraph "classes_farm-core" {
 
         "11" [ label="{ConsoleError|\l|}", fontcolor="red", shape="record"];
         "10" [ label="{ConsoleCannotOpenError|\l|}", fontcolor="red", shape="record"];
-        "12" [ label="{ConsoleExceptionKeywordRecievedError|\l|}", fontcolor="red", shape="record"];
-        "13" [ label="{ConsoleInvalidJSONRecievedError|\l|}", fontcolor="red", shape="record"];
+        "12" [ label="{ConsoleExceptionKeywordreceivedError|\l|}", fontcolor="red", shape="record"];
+        "13" [ label="{ConsoleInvalidJSONreceivedError|\l|}", fontcolor="red", shape="record"];
         "14" [ label="{ConsoleLoginFailedError|\l|}", fontcolor="red", shape="record"];
 
         "36" [ label="{MultimeterError|\l|}", fontcolor="red", shape="record"];

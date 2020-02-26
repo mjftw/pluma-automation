@@ -27,16 +27,16 @@ class ConsoleLoginFailedError(ConsoleError):
     pass
 
 
-class ConsoleExceptionKeywordRecievedError(ConsoleError):
+class ConsoleExceptionKeywordreceivedError(ConsoleError):
     pass
 
 
-class ConsoleInvalidJSONRecievedError(ConsoleError):
+class ConsoleInvalidJSONreceivedError(ConsoleError):
     pass
 
 
 class ConsoleBase(Farmclass, metaclass=ABCMeta):
-    """ Impliments the console functionality not specific to a given transport layer """
+    """ Implements the console functionality not specific to a given transport layer """
 
     def __init__(self, encoding=None, linesep=None, raw_logfile=None):
         if not hasattr(self, '_pex'):
@@ -52,7 +52,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         self.raw_logfile = raw_logfile or default_raw_logfile
 
         self._buffer = ''
-        self._last_recieved = ''
+        self._last_received = ''
         self._raw_logfile_fd = None
 
     @property
@@ -189,7 +189,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         while(elapsed < timeout):
             current_bytes = self._flush_get_size()
             if verbose:
-                self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] received[{:.0f}B]...".format(
                     elapsed, timeout, current_bytes-start_bytes))
             if current_bytes > start_bytes:
                 return True
@@ -218,7 +218,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 time_quiet = 0
 
             if verbose:
-                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Recieved[{:.0f}B]...".format(
+                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] received[{:.0f}B]...".format(
                     elapsed, timeout, time_quiet, quiet, current_bytes
                     ))
 
@@ -234,7 +234,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
     def send(self,
              cmd=None,
-             recieve=False,
+             receive=False,
              match=None,
              excepts=None,
              send_newline=True,
@@ -256,7 +256,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
 
-        recieved = None
+        received = None
         matched = False
 
         match = match or []
@@ -284,7 +284,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         if flush_buffer:
             self.flush(True)
 
-        if not recieve and not watches:
+        if not receive and not watches:
             if send_newline:
                 self._pex.sendline(cmd)
             else:
@@ -306,29 +306,29 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                     timeout=data_timeout,
                     match=watches,
                     verbose=log_verbose)
-                recieved = self.decode(self._pex.before)
-                new_recieved = recieved[len(self._last_recieved):]
+                received = self.decode(self._pex.before)
+                new_received = received[len(self._last_received):]
                 if matched:
-                    self._last_recieved = ''
+                    self._last_received = ''
                     match_str = '<<matched expects={}>>{}<</matched>>'.format(
                         watches, matched)
                 else:
-                    self._last_recieved = recieved
+                    self._last_received = received
                     match_str = '<<not_matched expects={}>>'.format(watches)
-                self.log("<<recieved>>{}{}<</recieved>>".format(
-                    new_recieved, match_str), force_echo=False)
+                self.log("<<received>>{}{}<</received>>".format(
+                    new_received, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
-                        matched, excepts), exception=ConsoleExceptionKeywordRecievedError)
-                return (recieved, matched)
+                        matched, excepts), exception=ConsoleExceptionKeywordreceivedError)
+                return (received, matched)
             else:
                 self.wait_for_quiet(
                     timeout=quiet_timeout,
                     sleep_time=quiet_sleep,
                     quiet=quiet_time,
                     verbose=log_verbose)
-                recieved = self._buffer
-                return (recieved, None)
+                received = self._buffer
+                return (received, None)
 
     def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()
@@ -386,11 +386,11 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         Parse this data, and return a dict of it.'''
 
         self.wait_for_quiet(quiet=1, sleep_time=0.5)
-        recieved, matched = self.send(cmd, match='{((.|\n)*)\n}')
+        received, matched = self.send(cmd, match='{((.|\n)*)\n}')
 
         if not matched:
-            raise ConsoleInvalidJSONRecievedError(
-                f'Received is not JSON: {recieved}')
+            raise ConsoleInvalidJSONreceivedError(
+                f'Received is not JSON: {received}')
 
         data = json.loads(matched)
         return data

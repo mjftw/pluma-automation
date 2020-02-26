@@ -1,6 +1,6 @@
 from .baseclasses.consolebase import ConsoleError,\
-    ConsoleCannotOpenError, ConsoleLoginFailedError, ConsoleExceptionKeywordRecievedError,\
-    ConsoleInvalidJSONRecievedError
+    ConsoleCannotOpenError, ConsoleLoginFailedError, ConsoleExceptionKeywordreceivedError,\
+    ConsoleInvalidJSONreceivedError
 from .baseclasses.storagebase import StorageError
 from .board import BoardError, BoardBootValidationError
 from .modem import ModemError

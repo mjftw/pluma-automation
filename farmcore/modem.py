@@ -108,11 +108,11 @@ class ModemSim868(Farmclass):
 
     def answer_call(self, timeout=30, record=False):
         '''
-        Expect a call withing the next @timeout seconds, and answer when
+        Expect a call within the next @timeout seconds, and answer when
         it comes through. If record the call if @record is set.
         If there is an ongoing call, it is ended.
-        Returns None if no call recieved in @timeout seconds.
-        Returns phone number of caller if call recieved
+        Returns None if no call received in @timeout seconds.
+        Returns phone number of caller if call received
         '''
         if self.ongoing_call():
             self.log('Ending ongoing call')
@@ -122,7 +122,7 @@ class ModemSim868(Farmclass):
             self.hardware_reset()
 
         # Enable call notification and wait for incoming
-        recieved, matched = self.AT_send(
+        received, matched = self.AT_send(
             cmd='AT+CLIP=1', match='\+CLIP: "\+{0,1}[0-9]+"', timeout=timeout)
         if not matched:
             return None
@@ -135,7 +135,7 @@ class ModemSim868(Farmclass):
         self.log('Answering incoming call from {}'.format(caller))
 
         # Answer call
-        recieved, matched = self.AT_send('ATA', match='OK')
+        received, matched = self.AT_send('ATA', match='OK')
 
         if record:
             raise NotImplementedError
@@ -173,11 +173,11 @@ class ModemSim868(Farmclass):
 
         self.log('Calling {}'.format(number))
 
-        recieved, matched = self.AT_send('ATD{};'.format(number),
+        received, matched = self.AT_send('ATD{};'.format(number),
             match=['OK', 'NO DIALTONE', 'BUSY', 'NO CARRIER', 'NO ANSWER'],
             excepts='ERROR')
         if not matched:
-            self.error('Unexpected response from modem: {}'.format(recieved),
+            self.error('Unexpected response from modem: {}'.format(received),
                 ModemError)
 
         if matched == 'OK':
@@ -206,7 +206,7 @@ class ModemSim868(Farmclass):
         '''
         Start a call recording.
         Starting a recording causes modem to stream audio data over UART.
-        Starting recording stops AT commands from being sent unil recording stops.
+        Starting recording stops AT commands from being sent until recording stops.
         Starting a recording drops any data buffered from paused recordings.
         '''
         if self.call_recording_ongoing():
@@ -328,7 +328,7 @@ class ModemSim868(Farmclass):
         # Flush serial input buffer
         self.console.flush(True)
 
-        # From this point, direcly interract with Seiral Object
+        # From this point, directly interact with Serial Object
         self._recording_lock = True
         self._recording_paused = False
 
@@ -357,7 +357,7 @@ class ModemSim868(Farmclass):
 
     def read_sms(self, sms_number=None):
         '''
-        Returns a list of all SMS messages recieved if @sms_number
+        Returns a list of all SMS messages received if @sms_number
         is None, else returns only SMS at @sms_number.
         Returns None if SMS at @sms_number does not exist.
         '''
@@ -371,9 +371,9 @@ class ModemSim868(Farmclass):
         '''
         raise NotImplementedError
 
-    def sms_recieved(self):
+    def sms_received(self):
         '''
-        Returns the number of SMS recieved
+        Returns the number of SMS received
         '''
         raise NotImplementedError
 
