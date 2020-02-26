@@ -27,11 +27,11 @@ class ConsoleLoginFailedError(ConsoleError):
     pass
 
 
-class ConsoleExceptionKeywordreceivedError(ConsoleError):
+class ConsoleExceptionKeywordReceivedError(ConsoleError):
     pass
 
 
-class ConsoleInvalidJSONreceivedError(ConsoleError):
+class ConsoleInvalidJSONReceivedError(ConsoleError):
     pass
 
 
@@ -189,7 +189,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         while(elapsed < timeout):
             current_bytes = self._flush_get_size()
             if verbose:
-                self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] received[{:.0f}B]...".format(
+                self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
                     elapsed, timeout, current_bytes-start_bytes))
             if current_bytes > start_bytes:
                 return True
@@ -218,7 +218,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 time_quiet = 0
 
             if verbose:
-                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] received[{:.0f}B]...".format(
+                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
                     elapsed, timeout, time_quiet, quiet, current_bytes
                     ))
 
@@ -319,7 +319,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                     new_received, match_str), force_echo=False)
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
-                        matched, excepts), exception=ConsoleExceptionKeywordreceivedError)
+                        matched, excepts), exception=ConsoleExceptionKeywordReceivedError)
                 return (received, matched)
             else:
                 self.wait_for_quiet(
@@ -389,7 +389,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         received, matched = self.send(cmd, match='{((.|\n)*)\n}')
 
         if not matched:
-            raise ConsoleInvalidJSONreceivedError(
+            raise ConsoleInvalidJSONReceivedError(
                 f'Received is not JSON: {received}')
 
         data = json.loads(matched)

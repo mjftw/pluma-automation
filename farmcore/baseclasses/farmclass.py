@@ -1,4 +1,4 @@
-from .Hierarchy import Hierarchy
+from .hierarchy import Hierarchy
 from .logging import Logging
 
 

@@ -3,7 +3,7 @@ import os
 
 from farmutils import datetime_to_timestamp
 
-from .Hierarchy import hier_setter
+from .hierarchy import hier_setter
 
 
 """ Enable logging """
