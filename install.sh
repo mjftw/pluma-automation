@@ -73,8 +73,22 @@ PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
 $SUDO apt install -y python3 python3-pip graphviz
 
-support_serial
-support_sdwire
+echo
+read -p 'USB Serial support required? (Y/n): ' require_serial
+if [ "$require_serial" == "n" -o "$require_serial" == "N" ]; then
+    echo "Serial support not added. Script can be rerun to enable this."
+else
+    support_serial
+fi
+
+echo
+read -p 'SD-Wire support required? (Y/n): ' require_sdwire
+if [ "$require_sdwire" == "n" -o "$require_sdwire" == "N" ]; then
+    echo "Serial support not added. Script can be rerun to enable this."
+else
+    support_sdwire
+fi
+
 install_python_packages
 
 echo
