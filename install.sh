@@ -2,6 +2,17 @@
 #
 # Installer script for Debian based Linux distributions
 #
+install_as_dev=0
+
+function display_help {
+            echo "Usage:"
+            echo "  $0 [-d] [-h]"
+            echo ""
+            echo "  -d Install as farm-core developer. This causes changes to the local"
+            echo "     farm-core directory to be imported on 'import farmcore' etc."
+            echo "     Do not enable this option unless you plan to modify farm-core."
+            echo "  -h Display this info."
+}
 
 function add_group {
     group="$1"
@@ -40,7 +51,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
 function install_python_packages {
     echo
     echo "Installing farm-core packages (farmcore, farmtest, farmutils)..."
-    if [ "$1" == "-d" -o "$1" == "--dev" ]; then
+    if [ $install_as_dev -eq 1 ]; then
         # Install packages as a farm-core package developer.
         # The current dir is used as the package root, and any edits made to python
         #   scripts here WILL be picked up by installed package.
@@ -68,6 +79,30 @@ SUDO=""
 if [ ! -z "$(which sudo)" -a "$UID" != "0" ]; then
     SUDO="sudo"
 fi
+
+# Read command line options
+while getopts ":dh" opt; do
+    case ${opt} in
+    "d" )
+        install_as_dev=1
+        ;;
+    "h" )
+        display_help
+        exit 0
+        ;;
+    \? )
+        echo "Invalid option: $OPTARG" 1>&2
+        display_help
+        exit 1
+        ;;
+    : )
+        echo "Invalid option: $OPTARG requires an argument" 1>&2
+        display_help
+        exit 1
+        ;;
+    esac
+done
+shift $((OPTIND -1))
 
 PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
