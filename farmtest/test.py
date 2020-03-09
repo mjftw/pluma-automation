@@ -422,6 +422,12 @@ class TestRunner():
                     self.board.log(skip_message + '. Board does not have storage',
                         colour='green', bold=True)
                     continue
+                if (( task_name in ['_board_on_and_validate', '_board_off'])
+                        and not self.board.power):
+                    self.board.log(skip_message + '. Board does '
+                        'not have power control', colour='green', bold=True)
+                    continue
+
                 if task_name in self.skip_tasks:
                     self.board.log(skip_message, colour='green', bold=True)
                     continue
