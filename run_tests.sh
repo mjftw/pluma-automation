@@ -1,1 +1,1 @@
-pytest $(dirname $0)
+pytest $(dirname $0) -v $@
