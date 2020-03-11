@@ -1,6 +1,6 @@
 '''
 This file contains misc blocking functions intended for
-use in an interactive interpereter session.
+use in an interactive interpreter session.
 '''
 
 from sys import stdin
@@ -12,7 +12,7 @@ from curses.ascii import unctrl
 def getch():
     '''
     Get a single character from stdin and return it.
-    Function blocks until character recieved.
+    Function blocks until character received.
     '''
 
     fd = stdin.fileno()

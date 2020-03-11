@@ -1,29 +1,29 @@
-class Hierachy():
-    """ This class is inherited in order add hierachy to a class """
+class Hierarchy():
+    """ This class is inherited in order add Hierarchy to a class """
 
     def __init__(self):
-        if type(self) is Hierachy:
+        if type(self) is Hierarchy:
             raise AttributeError(
                 'This is a base class, and must be inherited')
 
     @property
-    def _reccurse_hier(self):
-        if hasattr(self, "__reccurse_hier"):
-            return self.__reccurse_hier
+    def _recurse_hier(self):
+        if hasattr(self, "__recurse_hier"):
+            return self.__recurse_hier
         else:
             return False
 
-    @_reccurse_hier.setter
-    def _reccurse_hier(self, _reccurse_hier):
-        self.__reccurse_hier = _reccurse_hier
-        self._children_set_attr("_reccurse_hier", _reccurse_hier)
+    @_recurse_hier.setter
+    def _recurse_hier(self, _recurse_hier):
+        self.__recurse_hier = _recurse_hier
+        self._children_set_attr("_recurse_hier", _recurse_hier)
 
     def _get_hier(self):
         children = {}
         attrs = {}
         for m in dir(self):
             member = getattr(self, m)
-            if isinstance(member, Hierachy):
+            if isinstance(member, Hierarchy):
                 children[m] = member
             elif(not m.startswith("_") and
                     not callable(member)):
@@ -37,7 +37,7 @@ class Hierachy():
             setattr(child, attr, value)
             child._children_set_attr(attr, value)
 
-    def show_hier(self, indent_level=1, indent_size=4, reccurse=True,
+    def show_hier(self, indent_level=1, indent_size=4, recurse=True,
             exclude=[]):
         """ Return string containing all local vars, and get children to do the same """
         children = {}
@@ -69,11 +69,11 @@ class Hierachy():
             hier_str += ("-"*indent_level*indent_size +
                   "{}: {}\n".format(key, attrs[key]))
         for key in children:
-            if reccurse:
+            if recurse:
                 hier_str += children[key].show_hier(
                     indent_level=indent_level+1,
                     indent_size=indent_size,
-                    reccurse=reccurse,
+                    recurse=recurse,
                     exclude=exclude
                 )
             else:
@@ -87,8 +87,8 @@ def hier_setter(f):
     def wrapper(*args):
         f(*args)
         self = args[0]
-        if isinstance(self, Hierachy):
-            if self._reccurse_hier:
+        if isinstance(self, Hierarchy):
+            if self._recurse_hier:
                 self._children_set_attr(
                     f.__name__, getattr(self, f.__name__))
     return wrapper

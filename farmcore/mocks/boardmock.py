@@ -331,5 +331,5 @@ def _console_child_function(*args):
     print('Going into echo mode')
 
     while True:
-        recieved = input()
-        print(recieved)
+        received = input()
+        print(received)

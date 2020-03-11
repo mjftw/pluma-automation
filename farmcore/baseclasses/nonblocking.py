@@ -12,7 +12,7 @@ class Nonblocking:
     client thread to block until the nonblocking method has finished, at which
     point the return value is read.
 
-    The immedate return value of a nonblocking method is a reference to the
+    The immediate return value of a nonblocking method is a reference to the
     nonblocking method itself.
     This can be used to make nonblocking methods block like a normal method:
     E.g. return_value = myNonblockingMethod(...).await_return()

@@ -3,7 +3,7 @@ import os
 
 from farmutils import datetime_to_timestamp
 
-from .hierachy import hier_setter
+from .hierarchy import hier_setter
 
 
 """ Enable logging """
@@ -12,7 +12,7 @@ DEFAULT_LOG_ON = True
 """ Echo log to stdout """
 DEFAULT_LOG_ECHO = True
 
-""" Add hierachial path to logs """
+""" Add hierarchical path to logs """
 DEFAULT_LOG_HIER_PATH = False
 
 """ Time format string """
