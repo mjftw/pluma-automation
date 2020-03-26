@@ -223,9 +223,11 @@ class TestCore(TestBase):
 class TestRunner():
     def __init__(self, board, tests=None,
             skip_tasks=None, email_on_fail=True, use_testcore=True,
-            sequential=False, failed_bootlogs_dir=None):
+            sequential=False, failed_bootlogs_dir=None,
+            continue_on_fail=False):
         self.board = board
         self.email_on_fail = email_on_fail
+        self.continue_on_fail = continue_on_fail
         self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/lab'
         self.skip_tasks = skip_tasks or []
         self.skip_tasks = skip_tasks or []
@@ -474,7 +476,8 @@ class TestRunner():
                     self._run_task('report')
                 raise e
 
-            self._handle_failed_task(test, task_name, e)
+            abort_testing = not self.continue_on_fail
+            self._handle_failed_task(test, task_name, e, abort_testing)
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {
