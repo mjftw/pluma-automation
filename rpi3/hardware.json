@@ -1,0 +1,17 @@
+{
+    "board_pins" : {
+        "usb_relay": {
+            "1": {
+                "A": 11,
+                "Common": 12
+            },
+            "4": {
+                "B": 15,
+                "Common": 16
+            }
+        }
+    },
+    "usb_paths": {
+        "usb_relay": "1-1.2"
+    }
+}
