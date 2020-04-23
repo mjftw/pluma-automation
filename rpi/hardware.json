@@ -12,6 +12,9 @@
         }
     },
     "usb_paths": {
-        "usb_relay": "1-1.2"
+        "usb_relay": "1-1.2",
+        "hub": "1-1.1",
+        "hub_usb_serial": "1-1.1.2",
+        "hub_usb_relay": "1-1.1.1"
     }
 }

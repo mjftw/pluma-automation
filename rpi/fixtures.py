@@ -14,7 +14,6 @@ def usb_path_regex():
 def relay_pins():
     conf = read_config()
 
-    # Check config file has reqired settings
     check_schema(conf,
         {
             "board_pins" : {
@@ -39,7 +38,6 @@ def relay_pins():
 def usb_relay():
     conf = read_config()
 
-    # Check config file has reqired settings
     check_schema(conf,
         {
             "usb_paths": {
@@ -49,3 +47,48 @@ def usb_relay():
     )
 
     return USBRelay(conf['usb_paths']['usb_relay'])
+
+
+@fixture
+def hub():
+    conf = read_config()
+
+    check_schema(conf,
+        {
+            "usb_paths": {
+                "hub": usb_path_regex()
+            }
+        }
+    )
+
+    return Hub(conf['usb_paths']['hub'])
+
+
+@fixture
+def hub_usb_serial_path():
+    conf = read_config()
+
+    check_schema(conf,
+        {
+            "usb_paths": {
+                "hub_usb_serial": usb_path_regex()
+            }
+        }
+    )
+
+    return conf['usb_paths']['hub_usb_serial']
+
+
+@fixture
+def hub_usb_relay_path():
+    conf = read_config()
+
+    check_schema(conf,
+        {
+            "usb_paths": {
+                "hub_usb_relay": usb_path_regex()
+            }
+        }
+    )
+
+    return conf['usb_paths']['hub_usb_relay']

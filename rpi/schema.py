@@ -63,7 +63,7 @@ def check_schema(obj: dict, schema: dict):
 def _check_schema_branch(obj, schema, path):
     for key, val in schema.items():
         if key not in obj:
-            raise ValidationError(f'Missing key: "{path}.{key}""')
+            raise ValidationError(f'Missing key: "{path}.{key}"')
         elif isinstance(val, dict):
             _check_schema_branch(obj[key], val, f'{path}.{key}')
         elif isinstance(val, re.Pattern):
