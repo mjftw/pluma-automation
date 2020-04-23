@@ -1,7 +1,7 @@
 from farmcore import USBRelay, Hub
 from pytest import fixture
 
-from config import read_config, check_schema
+from config import read_config, check_schema, usb_path_regex
 
 
 @fixture
@@ -37,7 +37,7 @@ def usb_relay():
     check_schema(conf,
         {
             "usb_paths": {
-                "usb_relay": str
+                "usb_relay": usb_path_regex()
             }
         }
     )
