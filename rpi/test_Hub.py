@@ -1,5 +1,5 @@
 from fixtures import hub, hub_serial_path, hub_relay_path, hub_sdwire_path,\
-    hub_ethernet_path
+    hub_ethernet_path, hub_path
 
 
 # Serial
@@ -64,3 +64,19 @@ def test_Hub_get_ethernet_finds_correct_device(hub, hub_ethernet_path):
 def test_Hub_get_ethernet_gets_correct_parameter(hub, hub_ethernet_path):
     usbpath = hub.get_ethernet('usbpath')
     assert usbpath == hub_ethernet_path
+
+
+# Hub (finds itself)
+def test_Hub_get_hub_finds_device(hub, hub_path):
+    devinfo = hub.get_hub()
+    assert devinfo
+
+
+def test_Hub_get_hub_finds_correct_device(hub, hub_path):
+    devinfo = hub.get_hub()
+    assert devinfo['usbpath'] == hub_path
+
+
+def test_Hub_get_hub_gets_correct_parameter(hub, hub_path):
+    usbpath = hub.get_hub('usbpath')
+    assert usbpath == hub_path

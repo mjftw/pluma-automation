@@ -61,6 +61,11 @@ def hub():
 
 
 @fixture
+def hub_path():
+    return read_config_usb_path('hub')
+
+
+@fixture
 def hub_serial_path():
     return read_config_usb_path('hub_serial')
 
@@ -78,3 +83,4 @@ def hub_sdwire_path():
 @fixture
 def hub_ethernet_path():
     return read_config_usb_path('hub_ethernet')
+
