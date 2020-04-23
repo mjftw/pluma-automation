@@ -52,7 +52,7 @@ def relay_pins():
 
 @fixture
 def usb_relay():
-    return USBRelay(read_config_usb_path('usb_relay'))
+    return USBRelay(read_config_usb_path('relay'))
 
 
 @fixture
@@ -61,10 +61,10 @@ def hub():
 
 
 @fixture
-def hub_usb_serial_path():
-    return read_config_usb_path('hub_usb_serial')
+def hub_serial_path():
+    return read_config_usb_path('hub_serial')
 
 
 @fixture
-def hub_usb_relay_path():
-    return read_config_usb_path('hub_usb_relay')
+def hub_relay_path():
+    return read_config_usb_path('hub_relay')
