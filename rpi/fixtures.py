@@ -1,7 +1,13 @@
+import re
 from farmcore import USBRelay, Hub
 from pytest import fixture
 
-from config import read_config, check_schema, usb_path_regex
+from config import read_config
+from schema import check_schema
+
+
+def usb_path_regex():
+    return re.compile(r'([-.]{0,1}[1-9]+)+')
 
 
 @fixture
