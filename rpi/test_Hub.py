@@ -1,4 +1,4 @@
-from fixtures import hub, hub_serial_path, hub_relay_path
+from fixtures import hub, hub_serial_path, hub_relay_path, hub_sdwire_path
 
 
 # Serial
@@ -31,3 +31,19 @@ def test_Hub_get_relay_finds_correct_device(hub, hub_relay_path):
 def test_Hub_get_relay_gets_correct_parameter(hub, hub_relay_path):
     usbpath = hub.get_relay('usbpath')
     assert usbpath == hub_relay_path
+
+
+# SD Wire
+def test_Hub_get_sdwire_finds_device(hub, hub_sdwire_path):
+    devinfo = hub.get_sdwire()
+    assert devinfo
+
+
+def test_Hub_get_sdwire_finds_correct_device(hub, hub_sdwire_path):
+    devinfo = hub.get_sdwire()
+    assert devinfo['usbpath'].startswith(hub_sdwire_path)
+
+
+def test_Hub_get_sdwire_gets_correct_parameter(hub, hub_sdwire_path):
+    usbpath = hub.get_sdwire('usbpath')
+    assert usbpath.startswith(hub_sdwire_path)

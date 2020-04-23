@@ -68,3 +68,8 @@ def hub_serial_path():
 @fixture
 def hub_relay_path():
     return read_config_usb_path('hub_relay')
+
+
+@fixture
+def hub_sdwire_path():
+    return read_config_usb_path('hub_sdwire')
