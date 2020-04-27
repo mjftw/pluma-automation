@@ -114,5 +114,5 @@ def test_set_switches_to_b(relay_pins, usb_relay):
     # If all pins switch correctly, 4-B should connect to 1-Common
     assert_continuity(relay_pins['4']['B'], relay_pins['1']['Common'])
 
-    # End test with all GPIOs set to inputs for saftey
+    # End test with all GPIOs set to inputs for safety
     setup_gpios(outputs=[], inputs=[relay_pins['4']['B']])
