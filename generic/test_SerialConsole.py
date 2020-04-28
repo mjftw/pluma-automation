@@ -43,3 +43,18 @@ def test_SerialConsole_send_returns_tuple_length_2(serial_console_proxy):
     returned = serial_console_proxy.console.send()
 
     assert len(returned) == 2
+
+
+def test_SerialConsole_send_returns_data_when_recieve_arg_true(serial_console_proxy):
+    msg = 'Bar'
+
+    async_result = nonblocking(serial_console_proxy.console.send,
+        receive=True)
+
+    # Wait short time for function to start
+    time.sleep(0.1)
+
+    serial_console_proxy.proxy.write(msg, serial_console_proxy.console.encoding)
+
+    received, __ = async_result.get()
+    assert received == msg
