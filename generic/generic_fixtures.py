@@ -11,11 +11,12 @@ class OsFile:
     def __init__(self, fd):
         self.fd = fd
 
-    def read(self, n=None):
-        return os.read(self.fd, n or 10000)
+    def read(self, n=None, encoding='ascii'):
+        raw = os.read(self.fd, n or 10000)
+        return raw.decode(encoding)
 
-    def write(self, msg):
-        return os.write(self.fd, msg)
+    def write(self, msg, encoding='ascii'):
+        return os.write(self.fd, msg.encode(encoding))
 
 @fixture
 def soft_power():
