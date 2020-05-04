@@ -444,3 +444,17 @@ def test_SerialConsole_login_except_on_wrong_username_match(serial_console_proxy
         with pytest.raises(ConsoleLoginFailedError):
             # Wait for console.login() to finish
             async_result.get()
+
+
+def test_SerialConsole_flush_clears_buffer(serial_console_proxy):
+        # Send console a newline char
+        serial_console_proxy.proxy.write(serial_console_proxy.console.linesep)
+
+        time.sleep(0.01)
+
+        serial_console_proxy.console.flush()
+
+        data_recieved = serial_console_proxy.console.wait_for_data()
+
+        assert data_recieved is False
+
