@@ -1,4 +1,29 @@
+import os
+from select import select
 from multiprocessing.pool import ThreadPool
+
+
+def fd_has_data(fd, timeout=0):
+    r, w, e = select([fd], [], [], timeout)
+    return fd in r
+
+
+class OsFile:
+    def __init__(self, fd, encoding):
+        self.fd = fd
+        self.encoding = encoding
+
+    def read(self, n=None, timeout=None):
+        if timeout is not None and not fd_has_data(self.fd, timeout):
+            return ""
+
+        raw = os.read(self.fd, n or 10000)
+        decoded = raw.decode(self.encoding)
+        return decoded
+
+    def write(self, msg):
+        encoded = msg.encode(self.encoding)
+        return os.write(self.fd, encoded)
 
 
 def nonblocking(f, *args, **kwargs):

@@ -6,17 +6,8 @@ from unittest.mock import MagicMock
 from farmcore import SoftPower, SerialConsole
 from farmcore.mocks import ConsoleMock
 
+from utils import OsFile
 
-class OsFile:
-    def __init__(self, fd):
-        self.fd = fd
-
-    def read(self, n=None, encoding='ascii'):
-        raw = os.read(self.fd, n or 10000)
-        return raw.decode(encoding)
-
-    def write(self, msg, encoding='ascii'):
-        return os.write(self.fd, msg.encode(encoding))
 
 @fixture
 def soft_power():
@@ -41,10 +32,15 @@ def serial_console_proxy():
         baud=115200 # Baud Doesn't really matter as virtual tty
     )
 
+    proxy = OsFile(master, console.encoding)
+
+    # Clear master file just in case
+    proxy.read(timeout=0)
+
     SerialConsoleProxy = namedtuple('SerialConsoleProxy', ['proxy', 'console'])
 
     # === Return Fixture ===
-    yield SerialConsoleProxy(OsFile(master), console)
+    yield SerialConsoleProxy(proxy, console)
 
     # === Teardown ===
     console.close()
