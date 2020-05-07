@@ -1,7 +1,5 @@
 # Automation Lab Quick Start Guide
 
-**===== IN DEVELOPMENT =====**
-
 ## Introduction
 
 This guide will aim to give an introduction to the layout of the codebase, and the minimum steps that must be followed in order to start using it.
@@ -56,6 +54,10 @@ The basic structure of [farm-core][farm-core] is shown below:
 ├── install.sh          - Installation script
 └── ...
 ```
+
+___
+
+Next: [Installation](./2-installation.md) >>
 
 [sphinx]: https://www.sphinx-doc.org
 [readthedocs]: https://readthedocs.org
