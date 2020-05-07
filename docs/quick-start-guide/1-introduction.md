@@ -17,7 +17,7 @@ Expect to modify your "farm-\<customer>" repository frequently, whilst leaving [
 
 ### Examples and automated tests (farm-example)
 
-Some example test scripts can be found in the [farm-example](farm-example) repository.
+Some example test scripts can be found in the [farm-example][farm-example] repository.
 This repository also contains all of the automated tests that check that the lab code is still functioning, although these are currently in development.
 
 ### Documentation (farm-documentation)
@@ -25,11 +25,11 @@ This repository also contains all of the automated tests that check that the lab
 While all of the documentation for the project is found in this repository, it is spread throughout the code in the form of Python docstrings.
 There are a number of documents in the `docs` directory as well (including this one).
 
-The [farm-documentation](farm-documentation) does not provide any information that cannot be found in this repository, but it does format it in a much more human readable manner.  
-The documentation is built using [Sphinx](sphinx), and is presented as a [Read The Docs](readthedocs) style web page.  
+The [farm-documentation][farm-documentation] does not provide any information that cannot be found in this repository, but it does format it in a much more human readable manner.  
+The documentation is built using [Sphinx][sphinx], and is presented as a [Read The Docs][readthedocs] style web page.  
 This includes converting all docstrings into an API guide, as well as converting all of the markdown docs you find here.
 
-The [farm-documentation](farm-documentation) repository also contains all the makefiles and scripts required to run a documentation server to host these documents.
+The [farm-documentation][farm-documentation] repository also contains all the makefiles and scripts required to run a documentation server to host these documents.
 
 ### Core codebase (farm-core)
 

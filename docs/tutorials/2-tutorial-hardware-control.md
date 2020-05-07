@@ -71,7 +71,7 @@ from farmcore import HostConsole
 console = HostConsole('ssh pi@raspberrypi.local /bin/bash')
 ```
 
-This works best if you can connect to the DUT over SSH without needing to enter a password. The easiest way to do this is using the tool [ssh-copy-id](ssh-copy-id).
+This works best if you can connect to the DUT over SSH without needing to enter a password. The easiest way to do this is using the tool [ssh-copy-id][ssh-copy-id].
 
 See [Console Classes](../quick-start-guide/console-classes.md) for all the console types supported.
 
@@ -150,10 +150,10 @@ print(matched)
 # 20:24:49
 ```
 
-If you are unfamiliar with regular expressions, you can many guides online. [RegexOne](regexone) is a great place to start.
+If you are unfamiliar with regular expressions, you can many guides online. [RegexOne][regexone] is a great place to start.
 
 You should be careful using regex patterns though as they may not do exactly as you expect.
-See [Pexpect documenatation](pexpect) for more info (The search is done using the pexpect library).
+See [Pexpect documenatation][pexpect] for more info (The search is done using the pexpect library).
 
 [regexone]: https://regexone.com/
 [pexpect]:https://pexpect.readthedocs.io/en/stable/overview.html#find-the-end-of-line-cr-lf-conventions

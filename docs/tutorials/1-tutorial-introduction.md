@@ -15,7 +15,7 @@ The Lab code is developed and tested using Ubuntu 16.04 or newer, so you may hav
 #### Hardware
 
 You will also need some an embedded platform to act as your DUT board.  
-For these tutorials we will be using a Raspberry Pi 4 running [Raspian Buster](raspian) as our DUT, but you can replace this with whatever board you have on hand.  
+For these tutorials we will be using a Raspberry Pi 4 running [Raspian Buster][raspian] as our DUT, but you can replace this with whatever board you have on hand.  
 
 You will also need some way to connect to the console on the DUT.  
 We recommend a USB to UART debug cable, but could also use SSH for your console if DUT is network accessible.
@@ -43,7 +43,7 @@ code ~/lab_projects/my_lab_script.py
 ```
 
 The Python interactive shell is very useful when combined with the Lab, and can be used to control your DUT from the command line.
-While you could use the standard Python3 shell, we recommend using [iPython3](ipython) as this has a nicer interface and lots useful features such as auto-completion.  
+While you could use the standard Python3 shell, we recommend using [iPython3][ipython] as this has a nicer interface and lots useful features such as auto-completion.  
 The interactive shell is a great way to explore the Automation Lab's classes.
 
 [ipython]: https://ipython.org/install.html
