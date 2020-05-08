@@ -5,6 +5,7 @@ from farmcore.exceptions import ConsoleLoginFailedError
 
 from generic_fixtures import serial_console_proxy
 from utils import nonblocking
+from loremipsum import loremipsum
 
 
 def test_SerialConsole_send_sends_data(serial_console_proxy):
@@ -16,7 +17,7 @@ def test_SerialConsole_send_sends_data(serial_console_proxy):
 
 
 def test_SerialConsole_send_sends_correct_data(serial_console_proxy):
-    msg = 'Foo'
+    msg = loremipsum
     serial_console_proxy.console.send(msg)
 
     written = serial_console_proxy.proxy.read()
@@ -25,7 +26,7 @@ def test_SerialConsole_send_sends_correct_data(serial_console_proxy):
 
 
 def test_SerialConsole_send_doesnt_send_newline_when_send_newline_arg_false(serial_console_proxy):
-    msg = 'Foo'
+    msg = loremipsum
     serial_console_proxy.console.send(msg, send_newline=False)
 
     written = serial_console_proxy.proxy.read()
@@ -44,7 +45,7 @@ def test_SerialConsole_send_returns_tuple_length_2(serial_console_proxy):
 
     assert len(returned) == 2
 
-def test_SerialConsole_send_returns_data_when_recieve_arg_true(serial_console_proxy):
+def test_SerialConsole_send_returns_data_when_receive_arg_true(serial_console_proxy):
     msg = 'Bar'
 
     async_result = nonblocking(serial_console_proxy.console.send,
@@ -92,7 +93,7 @@ def test_SerialConsole_send_returns_received_when_match_available(serial_console
 
 
 def test_SerialConsole_send_returns_received_false_when_no_match_available(serial_console_proxy):
-    msg = 'FooBar'
+    msg = loremipsum
     wont_match = 'Baz'
 
     async_result = nonblocking(serial_console_proxy.console.send,
@@ -108,7 +109,7 @@ def test_SerialConsole_send_returns_received_false_when_no_match_available(seria
 
 
 def test_SerialConsole_send_returns_received_when_no_match_available(serial_console_proxy):
-    msg = 'FooBar'
+    msg = loremipsum
     wont_match = 'Baz'
 
     async_result = nonblocking(serial_console_proxy.console.send,
@@ -167,7 +168,7 @@ def test_SerialConsole_login_finds_user_match_sends_correct_username(serial_cons
         user_match = 'Enter username: '
         username = 'Foo'
 
-        async_result = nonblocking(
+        nonblocking(
             serial_console_proxy.console.login,
             username_match=user_match,
             username=username)
@@ -231,7 +232,7 @@ def test_SerialConsole_login_finds_pass_match_sends_correct_pass(serial_console_
         username = 'Foo'
         password = 'Bar'
 
-        async_result = nonblocking(
+        nonblocking(
             serial_console_proxy.console.login,
             username_match=user_match,
             password_match=pass_match,
@@ -454,7 +455,7 @@ def test_SerialConsole_flush_clears_buffer(serial_console_proxy):
 
         serial_console_proxy.console.flush()
 
-        data_recieved = serial_console_proxy.console.wait_for_data()
+        data_received = serial_console_proxy.console.wait_for_data()
 
-        assert data_recieved is False
+        assert data_received is False
 
