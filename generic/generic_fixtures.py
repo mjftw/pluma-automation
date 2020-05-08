@@ -3,7 +3,7 @@ import os
 from collections import namedtuple
 from pytest import fixture
 from unittest.mock import MagicMock
-from farmcore import SoftPower, SerialConsole
+from farmcore import SoftPower, SerialConsole, PowerRelay
 from farmcore.mocks import ConsoleMock
 
 from utils import OsFile
@@ -29,7 +29,8 @@ def serial_console_proxy():
 
     console = SerialConsole(
         port=slave_device,
-        baud=115200 # Baud Doesn't really matter as virtual tty
+        baud=115200, # Baud Doesn't really matter as virtual tty,
+        encoding='utf-8'
     )
 
     proxy = OsFile(master, console.encoding)
