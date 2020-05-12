@@ -4,8 +4,8 @@ from multiprocessing.pool import ThreadPool
 
 
 def fd_has_data(fd, timeout=0):
-    r, w, e = select([fd], [], [], timeout)
-    return fd in r
+    readable_fd_list, __, __ = select([fd], [], [], timeout)
+    return fd in readable_fd_list
 
 
 class OsFile:
