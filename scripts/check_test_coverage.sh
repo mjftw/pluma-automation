@@ -21,4 +21,4 @@ else
     echo "Running all tests in $test_dir"
 fi
 
-pytest --cov=$farmcore_dir --cov-report=term-missing $test_dir $@
+pytest --cov=$farmcore_dir --cov-report=term-missing $test_dir
