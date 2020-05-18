@@ -3,14 +3,17 @@
 # Installer script for Debian based Linux distributions
 #
 install_as_dev=0
+answer_all=""
 
 function display_help {
             echo "Usage:"
-            echo "  $0 [-d] [-h]"
+            echo "  $0 [-d] [-h] [-y] [-n]"
             echo ""
             echo "  -d Install as farm-core developer. This causes changes to the local"
             echo "     farm-core directory to be imported on 'import farmcore' etc."
             echo "     Do not enable this option unless you plan to modify farm-core."
+            echo "  -y Answer yes to all questions (non-interactive installer)"
+            echo "  -n Answer no to all questions (non-interactive installer)"
             echo "  -h Display this info."
 }
 
@@ -81,10 +84,16 @@ if [ ! -z "$(which sudo)" -a "$UID" != "0" ]; then
 fi
 
 # Read command line options
-while getopts ":dh" opt; do
+while getopts ":dhyn" opt; do
     case ${opt} in
     "d" )
         install_as_dev=1
+        ;;
+    "y" )
+        answer_all="y"
+        ;;
+    "n" )
+        answer_all="n"
         ;;
     "h" )
         display_help
@@ -108,20 +117,27 @@ PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
 $SUDO apt install -y python3 python3-pip graphviz
 
-echo
-read -p 'USB Serial support required? (Y/n): ' require_serial
-if [ "$require_serial" == "n" -o "$require_serial" == "N" ]; then
-    echo "Serial support not added. Script can be rerun to enable this."
-else
+if [ "$answer_all" ==  "n" ]; then
+    echo "Skipping optional config..."
+elif [ "$answer_all" ==  "y" ]; then
     support_serial
-fi
-
-echo
-read -p 'SD-Wire support required? (Y/n): ' require_sdwire
-if [ "$require_sdwire" == "n" -o "$require_sdwire" == "N" ]; then
-    echo "Serial support not added. Script can be rerun to enable this."
-else
     support_sdwire
+else
+    echo
+    read -p 'USB Serial support required? (Y/n): ' require_serial
+    if [ "$require_serial" == "n" -o "$require_serial" == "N" ]; then
+        echo "Serial support not added. Script can be rerun to enable this."
+    else
+        support_serial
+    fi
+
+    echo
+    read -p 'SD-Wire support required? (Y/n): ' require_sdwire
+    if [ "$require_sdwire" == "n" -o "$require_sdwire" == "N" ]; then
+        echo "Serial support not added. Script can be rerun to enable this."
+    else
+        support_sdwire
+    fi
 fi
 
 install_python_packages
