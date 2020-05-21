@@ -2,5 +2,5 @@
 
 ___
 
-<< Previous: [Tutorial: Hardware Control](./2-tutorial-hardware-control.md) | 
+<< Previous: [Tutorial: Adding a console controller](./2-1-tutorial-console.md) | 
 Next: []() >>
