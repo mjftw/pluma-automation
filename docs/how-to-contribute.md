@@ -19,7 +19,7 @@
 ## Pull requests
 
 - A pull request should happen whenever a bugfix or feature branch is finished, and needs to be merged back into master.
-- The reviewer is should be an Automation Lab maintainer, likely Merlin Webster <mwebster@witekio.com>.
+- The reviewer is should be an Automation Lab maintainer
 - The reviewer will add code comments with requested changes.
 - New commits can be made to the feature or bugfix branch to address the requested changes, which should update the pull request.
 - Once the reviewer has approved the changes, the developer who raised the pull request must merge it back into `master`.
