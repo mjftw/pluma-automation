@@ -65,6 +65,9 @@ Once we have this working, we can hand control of the board over to the Lab's au
   - Interact
   - Sending commands
   - Searching for matches
+
+** The rest is not yet implemented. Notes only. **
+
 - Using the Hub class
   - Understanding USB trees
   - Find usb devices
@@ -80,12 +83,16 @@ Once we have this working, we can hand control of the board over to the Lab's au
 
 #### Using the test framework
 
+** Not yet implemented. Notes only. **
+
 - Using the TestRunner
 - Writing a custom test
 - Using the TestController
   - Multiple test iterations
 
 #### Build an image and check it boots
+
+** Not yet implemented. Notes only. **
 
 - Build Raspberry Pi image using Yocto
 - Flash image to SD Card using SD Wire
@@ -94,6 +101,8 @@ Once we have this working, we can hand control of the board over to the Lab's au
 - Check target boots & measure boot time
 
 #### Monitor target performance
+
+** Not yet implemented. Notes only. **
 
 - Download application source via git (E.g. calculate prime numbers)
 
