@@ -1,5 +1,9 @@
 # Installation
 
+The Automation lab can be installed locally, or ran with a Docker container. Both approaches are described below
+
+## Local installation
+
 In order to use the packages farmcore, farmtest, and farmutils you will first need to install them all as Python packages.
 This is done using the Python package manager pip3.  
 There are also some Linux system level dependencies, which are satisfied using Debian packages.  
@@ -34,6 +38,39 @@ For additional options, check the install help with:
 ./install.sh -h
 ```
 
+## Docker container
+
+Note: The current Docker image does not support SDMux, nor the serial interface yet, due to `udev` limitations. To use those, you must install it natively.
+
+### Get or Build the image
+
+The Automation lab image should be available as `witekio/automation-lab` directly if you are registered and part of Witekio's team in Docker HUB. Otherwise, you can easily build it:
+* Clone the Automation lab repository
+* Navigate to the root and run `make docker-build`, or `make docker-build-arm` on an ARM device. If the build succeeds, you have your Docker image ready.
+
+### Run manually
+
+When running the Automation lab container manually, you have to mount the folder containing your Automation lab test script and run it with
+`docker run -it --rm -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py`
+
+### Run with GitLab CI pipeline
+
+From your test repository, you can simply use Docker HUB's image (after granting access to the registry), or push the automation lab image in the project's registry.
+
+1. Register your test device as a Docker SSH GitLab runner, with a dedicated tag (e.g. `automation-lab-tester`): https://docs.gitlab.com/runner/
+1. Push the Automation lab Docker image to your project registry: https://docs.gitlab.com/ee/user/packages/container_registry/
+1. Create a `.gitlab-ci.yml` file in your repository configured as below
+
+```
+device-test-job:
+  image: registry.gitlab.com/witekio/<your-project>/automation-lab:latest
+  tags:
+    - automation-lab-tester         # This should match your GitLab runner tag
+  script:
+    - python3 my_test_script.py     # Run your automation lab script
+```
+
+Now every time your pipeline runs, it will run your test script from your automation lab device, and report the test status.
 ___
 
 << Previous: [Introduction](./1-introduction.md) |

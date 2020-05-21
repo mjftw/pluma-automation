@@ -2,6 +2,8 @@
 #
 # Installer script for Debian based Linux distributions
 #
+set -u
+
 install_as_dev=0
 answer_all=""
 
@@ -21,7 +23,7 @@ function add_group {
     group="$1"
     if [ -z "$(groups | grep $group)" ]; then
         $SUDO groupadd $group
-        $SUDO usermod -aG $group $USER
+        $SUDO usermod -aG $group `whoami`
     fi
 }
 
