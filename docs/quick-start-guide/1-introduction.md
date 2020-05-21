@@ -10,10 +10,10 @@ The Automation Lab is designed in such a way that the core code is able to remai
 
 In order to facilitate this, any code that could be reused in any project is found in the repository named [farm-core][farm-core].
 
-For customer specific modifications, a second repository should be created, following the naming format "farm-\<customer>".
+For customer specific modifications, a second repository should be created, following the naming format `farm-<customer>`.
 
 You will likely create one such repository for your project, using it as your working directory, and including content from farm-core in order to control hardware, run tests, and more.
-Expect to modify your "farm-\<customer>" repository frequently, whilst leaving [farm-core][farm-core] unchanged unless really needed.
+Expect to modify your `farm-<customer>` repository frequently, whilst leaving [farm-core][farm-core] unchanged unless really needed.
 
 ### Examples and automated tests (farm-example)
 
