@@ -7,7 +7,7 @@ This does mean that the codebase is currently only tested to work on Debian base
 It should be possible to satisfy these dependencies on a different distribution, but no work has been done to test this.  
 
 An install scrip [install.sh](install.sh) is provided.  
-This script will install all of the required Debian package, and install farmcore, farmtest, and farmutils as pip packages.  
+This script will install all of the required Debian packages, and install farmcore, farmtest, and farmutils as pip packages.  
 
 It can be used as below:
 
@@ -19,10 +19,10 @@ By default the modules will be installed as immutable packages, and edits in thi
 This is what we would want for a normal user, who will be using these packages as a library to develop against.
 It is safe to rerun this install script to update the installed packages from local changes, but not recommended.
 
-If you are planning to develop the packages, and want your local source changes in this directory to take immediate affect, use the `--dev` flag.
+If you are planning to develop the packages, and want your local source changes in this directory to take immediate affect, use the `-d` flag.
 
 ```shell
-./install.sh --dev
+./install.sh -d
 ```
 
 When installing with this option, local changes immediately take affect, and any Python scripts importing farmcore, farmutils, or farmtest will be affected.
