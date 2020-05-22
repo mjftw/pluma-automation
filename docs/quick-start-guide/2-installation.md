@@ -27,6 +27,13 @@ If you are planning to develop the packages, and want your local source changes 
 
 When installing with this option, local changes immediately take affect, and any Python scripts importing farmcore, farmutils, or farmtest will be affected.
 It is recommended to only use this option if you are actively developing these packages, and not for a normal install!
+
+For additional options, check the install help with:
+
+```shell
+./install.sh -h
+```
+
 ___
 
 << Previous: [Introduction](./1-introduction.md) | 
