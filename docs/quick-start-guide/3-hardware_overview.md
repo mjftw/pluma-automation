@@ -2,5 +2,5 @@
 
 ___
 
-<< Previous: [Installation](./2-installation.md) | 
+<< Previous: [Installation](./2-installation.md) |
 Next: [Tutorials](../tutorials/1-tutorial-introduction.md) >>
