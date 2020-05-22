@@ -1,6 +1,5 @@
 # How to Contribute
 
-
 ## Versions
 
 - Versions of `farm-core` work on `major.minor.revision`.
@@ -12,14 +11,14 @@
 ## Branches
 
 - Bleeding edge is always `master`. `master` is not assumed to be stable.
-- Release branches exist, and are considered stable. These follow the naming convention `release/major.minor.x` e.g. `release/0.10.x`. At creation of this branch, a tag with minor revision `0` should be added to `master` at the branch point.  E.g. `v0.10.0. The release branches are updated only if they really must be, such as security fixes from master that need to be included. If a change is made to the release branch, then it gets a new tag in that branch. E.g. `v0.10.5`. These branches are not merged back into `master`.
+- Release branches exist, and are considered stable. These follow the naming convention `release/major.minor.x` e.g. `release/0.10.x`. At creation of this branch, a tag with minor revision `0` should be added to `master` at the branch point.  E.g. `v0.10.0`. The release branches are updated only if they really must be, such as security fixes from master that need to be included. If a change is made to the release branch, then it gets a new tag in that branch. E.g. `v0.10.5`. These branches are not merged back into `master`.
 - Feature branches exist, and are created as a development branch for a specific feature, or code change. For simplicity, refactors, code deletions, etc also fall under this category. The naming convention for these are `feature/short-description-of-feature`. Once the feature development is complete a pull request is raised, merging back into master after code review has been completed.
-- Bugfix branches exist, and are very similar to feature branches, but should only ever include fixes, and never new features. The naming convention for these is `bugfix/short-description-of-bug. Like feature requests, these must be code reviewed before merging to master.
+- Bugfix branches exist, and are very similar to feature branches, but should only ever include fixes, and never new features. The naming convention for these is `bugfix/short-description-of-bug`. Like feature requests, these must be code reviewed before merging to master.
 
 ## Pull requests
 
 - A pull request should happen whenever a bugfix or feature branch is finished, and needs to be merged back into master.
-- The reviewer is should be an Automation Lab maintainer, likely Merlin Webster <mwebster@witekio.com>.
+- The reviewer should be an Automation Lab maintainer.
 - The reviewer will add code comments with requested changes.
 - New commits can be made to the feature or bugfix branch to address the requested changes, which should update the pull request.
 - Once the reviewer has approved the changes, the developer who raised the pull request must merge it back into `master`.
