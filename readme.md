@@ -1,10 +1,10 @@
 # Witekio Automation Lab
 
-This all documentation, and code is currently under development, and may be subject to change, so use caution.
+This documentation, and code is currently under development, and may be subject to change, so use caution.
 
 A draft coding guide for developers can be found here: [Style Guide](./docs/style-guide.md).
 
-A good place to start for new users is the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md) Guide and [Tutorials](./docs/tutorials/1-tutorial-introduction.md)
+A good place to start for new users is the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md) and [Tutorials](./docs/tutorials/1-tutorial-introduction.md)
 
 ## Installation
 
