@@ -1,6 +1,6 @@
 # Tutorials
 
-## Welcome to the Automation Lab tutorials!
+## Welcome to the Automation Lab tutorials
 
 ### Prerequisites
 
@@ -11,14 +11,13 @@ Check out the [Installation](../quick-start-guide/2-installation.md) guide for i
 You can use your normal computer as the Lab host machine, although we recommended that you are running Linux.  
 The Lab code is developed and tested using Ubuntu 16.04 or newer, so you may have an easier time using these distributions.
 
-
 #### Hardware
 
-You will also need some an embedded platform to act as your DUT board.  
+You will also need an embedded platform to act as your DUT board.  
 For these tutorials we will be using a Raspberry Pi 4 running [Raspian Buster][raspian] as our DUT, but you can replace this with whatever board you have on hand.  
 
 You will also need some way to connect to the console on the DUT.  
-We recommend a USB to UART debug cable, but could also use SSH for your console if DUT is network accessible.
+We recommend a USB to UART debug cable, but could also use SSH for your console if the DUT is network accessible.
 See [Console Classes](../quick-start-guide/console-classes.md).
 
 It is also very useful to be able to turn the DUT on and off from Python, and a requirement for any kind of boot testing.  
@@ -35,7 +34,7 @@ You should be able to follow along using any of the [Supported Hardware](../supp
 ### Source code
 
 Once the Automation Lab software is installed, you should be able to import and use the Python packages in your scripts.  
-You can create a project directory follow along in your editor of choice.
+To work through the tutorials, you can create a project directory and follow along in your editor of choice.
 
 ```shell
 mkdir ~/lab_projects
@@ -43,7 +42,7 @@ code ~/lab_projects/my_lab_script.py
 ```
 
 The Python interactive shell is very useful when combined with the Lab, and can be used to control your DUT from the command line.
-While you could use the standard Python3 shell, we recommend using [iPython3][ipython] as this has a nicer interface and lots useful features such as auto-completion.  
+While you could use the standard Python3 shell, we recommend using [iPython3][ipython] as this has a nicer interface and lots of useful features such as auto-completion.  
 The interactive shell is a great way to explore the Automation Lab's classes.
 
 [ipython]: https://ipython.org/install.html
@@ -66,7 +65,7 @@ Once we have this working, we can hand control of the board over to the Lab's au
   - Sending commands
   - Searching for matches
 
-** The rest is not yet implemented. Notes only. **
+**The rest is not yet implemented. Notes only.**
 
 - Using the Hub class
   - Understanding USB trees
@@ -83,7 +82,7 @@ Once we have this working, we can hand control of the board over to the Lab's au
 
 #### Using the test framework
 
-** Not yet implemented. Notes only. **
+**Not yet implemented. Notes only.**
 
 - Using the TestRunner
 - Writing a custom test
@@ -92,7 +91,7 @@ Once we have this working, we can hand control of the board over to the Lab's au
 
 #### Build an image and check it boots
 
-** Not yet implemented. Notes only. **
+**Not yet implemented. Notes only.**
 
 - Build Raspberry Pi image using Yocto
 - Flash image to SD Card using SD Wire
@@ -102,7 +101,7 @@ Once we have this working, we can hand control of the board over to the Lab's au
 
 #### Monitor target performance
 
-** Not yet implemented. Notes only. **
+**Not yet implemented. Notes only.**
 
 - Download application source via git (E.g. calculate prime numbers)
 
@@ -162,5 +161,5 @@ primes_found=5000, seconds_taken=0.27
 
 ___
 
-<< Previous: [Quick Start Guide](../quick-start-guide/1-introduction.md) | 
+<< Previous: [Quick Start Guide](../quick-start-guide/1-introduction.md) |
 Next: [Tutorial: Hardware Control](./2-tutorial-hardware-control.md) >>
