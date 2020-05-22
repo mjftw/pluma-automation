@@ -38,7 +38,7 @@ Since quick start guide guide is primarily aimed at getting up and running using
 
 The basic structure of [farm-core][farm-core] is shown below:
 
-```
+```preformatted-text
 .
 ├── farmcore            - Hardware control classes
 │   ├── ...
