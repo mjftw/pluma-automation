@@ -155,7 +155,7 @@ pi@raspberry:~ $ test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"
 
 This command checks if 5 is greater than 6, and should report "5 < 6" as expected.
 
-Now lets try the same command via the console.
+Now let's try the same command via the console.
 
 ```python
 from farmcore import HostConsole
