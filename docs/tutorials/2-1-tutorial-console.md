@@ -23,9 +23,9 @@ console = SerialConsole(
 
 We may find that we cannot connect a debug UART cable to our DUT to monitor its console, but we can connect using SSH.  
 This can be achieved using the HostConsole class.
-This class runs command on the host machine, and interacts with it as if it were a console.  
+This class runs a command on the host machine, and interacts with it as if it were a console.  
 
-We could use this to run a native bash console on our host. 
+We could use this to run a native bash console on our host.  
 Try it out for yourself in an interactive Python interpreter:
 
 ```shell
@@ -117,7 +117,7 @@ The console will stop searching as soon as it finds a string that matches what i
 The strings that are used to find matches with `console.send()` are actually regular expressions.
 This lets us do some more useful things.
 
-As an example, lets use regular expressions to extract the system time from the result of running the `date` command.
+As an example, let's use regular expressions to extract the system time from the result of running the `date` command.
 
 ```shell
 dev@labhost:~$ date
@@ -134,7 +134,7 @@ print(matched)
 # 20:24:49
 ```
 
-If you are unfamiliar with regular expressions, you can many guides online. [RegexOne][regexone] is a great place to start.
+If you are unfamiliar with regular expressions, you can find many guides online. [RegexOne][regexone] is a great place to start.
 
 You should be careful using regex patterns though as they may not do exactly as you expect.
 See [Pexpect documenatation][pexpect] for more info (The search is done using the pexpect library).
@@ -185,7 +185,7 @@ Let's see what's left in the console's receive buffer from after the last match.
 By default the receive buffer is flushed before sending a command, but we can disable this with `flush_buffer=False`.  
 If we don't have anything we want to match against, but still want to see the result of the command we send we can use `receive=True`.
 This will cause the console to wait until no more data is being sent and then return everything it received.  
-Sending a command is also optional, and a newline will be send by default if not command is specified, we can prevent this with `send_newline=False`.
+Sending a command is also optional, and a newline will be sent by default if no command is specified, we can prevent this with `send_newline=False`.
 
 ```python
 received, matched = console.send(flush_buffer=False, receive=True, send_newline=False)
@@ -225,14 +225,12 @@ print(matched)
 # 5 < 6
 ```
 
-Care should be taken when doing this though, as it can cause other issues.
-
 ## Logging
 
-An easier way to diagnose what went wrong in the last example would be to, have a look at the console's log.  
+An easier way to diagnose what went wrong in the last example would be to have a look at the console's log.  
 The console has two log files, one for the console class and another for the raw sent/received data.
 
-In the console log can see everything the console has sent and received, as well as control sequences indicating everything that it has searched for, matched, and flushed.
+In the console log we can see everything the console has sent and received, as well as control sequences indicating everything that it has searched for, matched, and flushed.
 This can be very useful for diagnosing when something has gone wrong!
 The console log is only updated when an operation on the console class takes place.
 
@@ -260,7 +258,7 @@ It can be useful to have a live view of how the lab is interacting with a board 
 tail -f ./raw_console_data.log
 ```
 
-If you have many different log files in your logs directory, then you can use this will follow the newest one:
+If you have many different log files in your logs directory, then you can use this to follow the newest one:
 
 ```shell
 tail -f $(ls -t | grep '.log' | head -n 1)
@@ -305,5 +303,5 @@ Waiting for quiet... Waited[0.3/3.0s] Quiet[0.3/0.3s] Received[7B]...
 
 ___
 
-<< Previous: [Tutorial: Hardware Control](./2-tutorial-hardware-control.md) | 
+<< Previous: [Tutorial: Hardware Control](./2-tutorial-hardware-control.md) |
 Next: [Tutorial: Test framework](./3-tutorial-test-framework.md) >>
