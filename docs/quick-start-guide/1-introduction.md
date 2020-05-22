@@ -22,8 +22,9 @@ This repository also contains all of the automated tests that check that the lab
 
 ### Documentation (farm-documentation)
 
-While all of the documentation for the project is found in this repository, it is spread throughout the code in the form of Python docstrings.
-There are a number of documents in the `docs` directory as well (including this one).
+All documentation on the `farm-core` API can be found alongside the code in the form of docstrings.
+This information is useful for finding the specifics of how to use a given class or function, but does not provide any high level information about when they should be used.  
+High level documentation can be found `docs` directory, and is focused on describing the intended use cases for various classes and frameworks in the `farm-core` library.
 
 The [farm-documentation][farm-documentation] does not provide any information that cannot be found in this repository, but it does format it in a much more human readable manner.  
 The documentation is built using [Sphinx][sphinx], and is presented as a [Read The Docs][readthedocs] style web page.  
