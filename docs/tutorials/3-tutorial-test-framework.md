@@ -1,4 +1,4 @@
-# Tutorial: Test framework
+# Tutorial: Test Framework
 
 ___
 

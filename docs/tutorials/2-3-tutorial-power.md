@@ -1,4 +1,4 @@
-# Tutorial: Hardware Control - Adding a power controller
+# Tutorial: Hardware Control - Adding a Power Controller
 
 ## Rebooting a board
 

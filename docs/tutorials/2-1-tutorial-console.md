@@ -1,5 +1,5 @@
 
-# Tutorial: Hardware Control - Adding a console controller
+# Tutorial: Hardware Control - Adding a Console Controller
 
 In order to interact with a board's console, we need to create a console controller.
 

@@ -1,4 +1,4 @@
-# Tutorial: Hardware Control - Adding a storage controller
+# Tutorial: Hardware Control - Adding a Storage Controller
 
 ## Mounting an SD Card to modify files
 

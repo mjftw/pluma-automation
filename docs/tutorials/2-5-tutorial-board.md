@@ -1,4 +1,4 @@
-# Tutorial: Hardware Control - Bringing it all together
+# Tutorial: Hardware Control - Bringing it All Together
 
 The Board class is the software representation of our DUT, and our main entry point for hardware control.  
 It mostly acts as a common container for the other hardware control classes. E.g. Console, Power, Storage.
