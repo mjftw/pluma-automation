@@ -8,7 +8,7 @@ The words "USB Hub" probably make you think of an external USB splitter of sorts
 
 While the Automation Lab does have a `USB` class, this is just used for the low level system interaction and it's unlikely you'll need to look here.
 
-## View usb tree
+## View USB tree
 
 The easiest way to see what USB devices we have connected to our Lab host is to plot them.
 
@@ -46,7 +46,7 @@ For a full list of available output formats see [Graphviz Output Formats](https:
 
 ## Understanding USB trees
 
-## Find usb devices
+## Find USB devices
 
 ___
 
