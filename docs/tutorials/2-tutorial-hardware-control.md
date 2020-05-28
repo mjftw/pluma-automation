@@ -1,45 +1,26 @@
 # Tutorial: Hardware Control
 
-## Using the Board class
+In this set of tutorials we will first look at how to interact with our board's console.
 
-The Board class is the software representation of our DUT, and our main entry point for hardware control.  
-It mostly acts as a common container for the other hardware control classes. E.g. Console, Power, Storage.
+* [Adding a console controller](./2-1-tutorial-console.md)
 
-Create a board instance:
+We'll also view our USB tree and look at how the Automation Lab discovers USB devices.
 
-```python
-from farmcore import Board
+* [USB Devices](./2-2-tutorial-usb.md)
 
-board = Board(name='DUT')
-```
+Next we'll see how we can turn the board on and off without ever leaving Python.
 
-While we have created a board, it can't do much without being given some hardware controllers.
+* [Adding a power controller](./2-3-tutorial-power.md)
 
-## Using the Hub class
+We'll then learn how we can edit the contents of a board's storage to flash images.
 
-### Understanding USB trees
+* [Adding a storage controller](./2-4-tutorial-storage.md)
 
-### Find usb devices
+The final tutorial will combine all that we've learned to perform some advanced functionality using the Board class.
 
-### View usb tree
-
-## Adding a power controller
-
-### Rebooting a board
-
-## Adding a storage controller
-
-### Mounting an SD Card to modify files
-
-### Viewing modified files on the board
-
-## Advanced Board control
-
-### Login
-
-### Reboot and validate
+* [Bringing it all together](./2-5-tutorial-board.md)
 
 ___
 
-<< Previous: [Tutorial: Introduction](./1-tutorial-introduction.md) |
+<< Previous: [Tutorials introduction](./1-tutorial-introduction.md) |
 Next: [Tutorial: Adding a console controller](./2-1-tutorial-console.md) >>

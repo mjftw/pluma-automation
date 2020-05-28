@@ -303,5 +303,5 @@ Waiting for quiet... Waited[0.3/3.0s] Quiet[0.3/0.3s] Received[7B]...
 
 ___
 
-<< Previous: [Tutorial: Hardware Control](./2-tutorial-hardware-control.md) |
-Next: [Tutorial: Test framework](./3-tutorial-test-framework.md) >>
+<< Previous: [Tutorial set: Hardware Control](./2-tutorial-hardware-control.md) |
+Next: [Tutorial: USB Devices](./2-2-tutorial-usb.md) >>
