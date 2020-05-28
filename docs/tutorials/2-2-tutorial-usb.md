@@ -31,7 +31,7 @@ You can also save the plot to an image:
 usb_bus_1.plot(image_file='usb_bus_1', image_format='png')
 ```
 
-You can use this to view the USB tree of a remote machine by giving starting SSH with the X-forwarding flag (`-Y`):
+You can use this to view the USB tree of a remote machine by starting SSH with the X-forwarding flag (`-Y`):
 
 ```shell
 dev@labhost:~ $ ssh -Y pi@raspberrypi.local
