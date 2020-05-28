@@ -1,5 +1,5 @@
 
-# Tutorial: Hardware Control - Adding a console controller
+# Tutorial: Hardware Control - Adding a Console Controller
 
 In order to interact with a board's console, we need to create a console controller.
 
@@ -303,5 +303,5 @@ Waiting for quiet... Waited[0.3/3.0s] Quiet[0.3/0.3s] Received[7B]...
 
 ___
 
-<< Previous: [Tutorial: Hardware Control](./2-tutorial-hardware-control.md) |
-Next: [Tutorial: Test framework](./3-tutorial-test-framework.md) >>
+<< Previous: [Tutorial set: Hardware Control](./2-tutorial-hardware-control.md) |
+Next: [Tutorial: USB Devices](./2-2-tutorial-usb.md) >>
