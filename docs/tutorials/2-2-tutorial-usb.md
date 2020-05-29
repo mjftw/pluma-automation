@@ -148,8 +148,8 @@ Each field identifies where your device is connected within the USB tree.
 
 E.g.
 
-`1-2` means port 2 on USB bus 1
-`1-2.3` means port 3 of a USB hub connected to port 2 of USB bus 1
+`1-2` means port 2 on USB bus 1  
+`1-2.3` means port 3 of a USB hub connected to port 2 of USB bus 1  
 `1-2.3.4` means port 4 of a USB hub connected to port 3 of a USB hub connected to port 2 of USB bus 1
 
 With this pattern in mind, look again at the plot of the USB tree in the previous section.
