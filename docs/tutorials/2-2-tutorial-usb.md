@@ -187,6 +187,171 @@ We can also get the Hub class to find us the USB address (and other information)
 
 ## Find USB devices
 
+Up until this point we've only used the `plot()` method of the `Hub` class, but we can use it to find information on specific devices too.
+
+```python
+from farmcore import Hub
+
+hub = Hub('usb1')
+serial = hub.get_serial()
+
+print(serial)
+# {'usbpath': '1-1.1.2',
+#  'devnode': '/dev/ttyUSB2',
+#  'subsystem': 'tty',
+#  'vendor': 'FTDI',
+#  'vendor_long': 'Future Technology Devices International, Ltd',
+#  'major': '188',
+#  'minor': '2',
+#  'serial': 'FTWHB4XA',
+#  'model': 'C232HM-DDHSL-0',
+#  'pid': '6014',
+#  'vid': '0403',
+#  'devtype': None}
+```
+
+In this example we've searched the entire USB 1 bus for a USB -> UART adaptor and found one.
+As you can see the `Hub` class gives us all sorts of useful information about the device.
+
+If you wanted to get the USB address of the device, you'd read that key of the returned dictionary like so:
+
+```python
+usb_address = hub.get_serial()['usbpath']
+```
+
+Since this is such a common thing to do, a shorthand notation is provided:
+
+```python
+usb_address = hub.get_serial('usbpath')
+```
+
+In it's current form, this function all will only only give us information about the first device that it finds. If there are multiple USB -> UART adaptors connected to the system we'd only see the first one.
+
+Since we have 2 USB Relays connected to our test system we'll use these as an example. You'll see these in the plot from the previous section.
+
+Say we want to find the device nodes of all of the USB relays connected to our system, we might try:
+
+```python
+from farmcore import Hub
+print(
+    Hub('usb1').get_relay('devnode')
+)
+# /dev/ttyUSB1
+```
+
+This has worked, but we've only found the USB relay highest in our USB tree!
+
+### Find all matching devices
+
+To get around this issue we can use the `all` parameter:
+
+```python
+from farmcore import Hub
+print(
+    Hub('usb1').get_relay('devnode', get_all=True)
+)
+# ['/dev/ttyUSB1', '/dev/ttyUSB0']
+```
+
+That's better. We now have a list of all of the USB relay device nodes.
+
+However, if we're looking to get information on a specific USB relay this doesn't solve our problem. Is it `ttyUSB0` or `ttyUSB1` that I want?
+
+### Finding devices downstream of a USB address
+
+If we know which USB hub the device is connected to then we can do better!
+Previously we've only used the `Hub` class to query the entire USB bus (`Hub('usb1)`), but we can also look only at the devices downstream of a specific USB Hub.
+
+Lets assume that know that the USB relay we're looking for is connected to hub `1-1.1`, or a hub below that. You'd typically want find this information when setting up your Lab devices anyway.
+
+```python
+from farmcore import Hub
+print(
+    Hub('1-1.1').get_relay('devnode')
+)
+# '/dev/ttyUSB1'
+```
+
+There we go, we've found the specific device we were looking for.
+
+### Types of device
+
+So far we've seen the `get_serial()` and `get_relay()` methods used, but there are others.
+
+- get_serial() - Find USB -> UART adaptors
+- get_relay() - Find DLP-IOR4 USB relays
+- get_hub() - Find USB hubs
+- get_sdwire() - Find SD-Wire devices
+- get_block() - Find block devices
+- get_part() - Find partitions of block devices
+- get_ethernet() - Find USB -> Ethernet network adaptors
+- get_misc() - Find unsupported devices (anything else)
+
+The same arguments can be used for all of these functions, the only difference is the type of device that will be found.
+
+### Typical uses
+
+Okay, so we can find information on USB devices, but why would we want to do that?
+
+Let's look again at an example in the previous tutorial where we wanted to send data to a board's serial console.
+
+```python
+from farmcore import SerialConsole
+
+console = SerialConsole(
+    port='/dev/ttyUSB2'
+    baud=115200
+)
+
+console.send('Hello World!')
+```
+
+Sure this works, but we've had to specify to use `/dev/ttyUSB2` for our serial communications. This works find until you unplug the device and plug it back in, or reboot the machine, and "Oh no!" it's now on `/dev/ttyUSB0`!
+We're sending our message to the wrong device!
+
+The device node the kernel assigns a given device is not consistent from device to device, or even across reboots.
+You'd be wise to not hard code this value in your code, because sooner or later (probably sooner) it will break.
+
+You can use the `Hub` class to find this value, so you don't have to:
+
+```python
+from farmcore import SerialConsole, Hub
+
+usb_1_bus = Hub('usb1')
+
+console = SerialConsole(
+    port=usb_1_bus.get_serial('devnode')
+    baud=115200
+)
+
+console.send('Hello World!')
+```
+
+Problem solved. Right?
+
+Yes, unless you have more than one USB Serial adaptor connected to your system.
+Let's make make our code more stable by specifying what USB hub our USB serial adaptor is plugged into.
+
+```python
+from farmcore import SerialConsole, Hub
+
+hub = Hub('1-1.1')
+
+console = SerialConsole(
+    port=hub.get_serial('devnode')
+    baud=115200
+)
+
+console.send('Hello World!')
+```
+
+Okay problem really solved.
+
+...but what if I want to plug more than one USB serial adaptor into the same USB hub?
+
+Avoid doing this if you can, it makes it messy to find the right device.  
+If you really have to, then use `get_serial(get_all=True)` like we saw earlier. The devices returned will be in the order of the ports that their plugged into.
+
 ___
 
 << Previous: [Tutorial: Adding a console controller](./2-1-tutorial-console.md) |
