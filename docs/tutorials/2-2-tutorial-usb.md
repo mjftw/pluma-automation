@@ -22,6 +22,14 @@ usb_bus_1 = Hub('usb1')
 usb_bus_1.plot()
 ```
 
+You should have a pop up window showing something the image below.
+![USB Bus 1 Plot](./usb_bus_1.png)
+
+You can see that on our test Lab host we have 2 hubs, 2 USB Relays, 1 USB -> UART adaptor, 1 USB -> Ethernet adapter, 1 unsupported "Unknown" device, and an SD-Wire containing an SD card with 2 partitions.
+What you see will depend on your system configuration.
+
+Any device that shows up with a name that isn't "Unknown Device" can be controlled with an Automation Lab class.
+
 The above example uses X11 to display the plot, so this may not work on some systems.
 
 You can also save the plot to an image:
