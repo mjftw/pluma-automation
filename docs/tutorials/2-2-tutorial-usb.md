@@ -350,7 +350,7 @@ Okay problem really solved.
 ...but what if I want to plug more than one USB serial adaptor into the same USB hub?
 
 Avoid doing this if you can, it makes it messy to find the right device.  
-If you really have to, then use `get_serial(get_all=True)` like we saw earlier. The devices returned will be in the order of the ports that their plugged into.
+If you really have to, then use `get_serial(get_all=True)` like we saw earlier. The devices returned will be in the order of the ports that they're plugged into.
 
 ___
 
