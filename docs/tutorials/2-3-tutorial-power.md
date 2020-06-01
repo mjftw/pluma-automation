@@ -131,6 +131,123 @@ power.off()
 
 In this example a DLP-IOR4 USB relay connected to the Lab host at USB path `1-1.2`. If you're not sure what this means then check out [Tutorial: USB devices](./2-2-tutorial-usb.md).
 
+## Combining power capabilities with PowerMulti
+
+Imagine you have a system that is powered from the mains, but also has a power button that must be pressed to start it up.
+How would we go about rebooting this?
+
+Sure, we could handle the button press using a `PowerRelay`, and turn on and off the mains using an `IPPowerPDU` or `APCPDU`, but how do we use both of these together?
+
+The `PowerMulti` class is how. It's is a wrapper class which takes multiple other power classes and runs their on and off methods in a particular sequence.
+
+Let's see how we'd use it to fix our power problem.
+
+```python
+from farmcore import PowerRelay, USBRelay, IPPowerPDU, PowerMulti
+
+power_button = PowerRelay(
+    on_seq=[(1, 'A'), '200ms', (1, 'B')],
+    off_seq=[(1, 'A'), '3s', (1, 'B')]
+    relay=USBRelay(
+        usb_device='1-1.2'
+    )
+)
+
+power_socket = IPPowerPDU(
+    port=1
+    host='192.168.0.30',
+    reboot_delay=3
+)
+
+power = PowerMulti(
+    power_seq=[power_socket, '1s', power_button]
+)
+
+# Turn on power socket, wait 1s, press power button for 200ms
+power.on()
+
+# Press power button for 3s, wait 1s, turn power socket off
+power.off()
+```
+
+You'll notice that by default the power off sequence was the reversed version of power on. This is probably what you want, but if not then you can set the PowerMulti parameter `reverse_off_seq` to false, like so:
+
+```python
+...
+
+
+power = PowerMulti(
+    power_seq=[power_socket, '1s', power_button],
+    reverse_off_seq=False
+)
+
+# Turn on power socket, wait 1s, press power button for 200ms
+power.on()
+
+# Turn power socket off, wait 1s, press power button for 3s
+power.off()
+```
+
+As one final example, let's make things more complicated and say that we've made the decision that we don't want to hard power off the system any more.
+We need to run the shutdown command and wait 10s rather than holding the power button.
+
+So to recap, to turn it on we want to:
+
+1. Turn the power socket on
+1. Wait 10s
+1. Press the power button for 200ms
+
+To turn it off we want to:
+
+1. Send the console the `shutdown` command
+1. Wait 10s
+1. Turn the power socket off
+
+```python
+from farmcore import PowerRelay, USBRelay, IPPowerPDU, PowerMulti
+
+power_button = PowerRelay(
+    on_seq=[(1, 'A'), '200ms', (1, 'B')],
+    off_seq=[]
+    relay=USBRelay(
+        usb_device='1-1.2'
+    )
+    reboot_delay=5
+)
+
+power_socket = IPPowerPDU(
+    port=1
+    host='192.168.0.30',
+    reboot_delay=3
+)
+
+power_command = SoftPower(
+    console=console,
+    off_cmd='shutdown',
+    on_cmd=''
+)
+
+power = PowerMulti(
+    power_seq=[power_socket, '10s', power_button, power_command]
+)
+
+power.reboot()
+```
+
+The equivalent function call sequence for the example above would be:
+
+1. `power_command.off()` - Send "shutdown" command to board.
+1. `power_button.off()` is called, but does nothing as `off_seq` is empty.
+1. Wait 10s.
+1. `power_socket.off()` - Disconnect the mains power.
+1. Wait 5s - The largest delay of all of the `reboot_delay` properties of the power classes is used. In this case it comes from `power_relay`.
+1. `power_socket.on()` - Reconnect the mains power.
+1. Wait 10s
+1. `power_command.on()` is called, but does nothing as `on_cmd` is empty.
+1. `power_button.on()` - Simulate pressing the power button for 200ms.
+
+Using the `PowerMulti` class you can handle all sorts of complicated power scenarios.
+
 ___
 
 << Previous: [Tutorial: USB devices](./2-2-tutorial-usb.md) |
