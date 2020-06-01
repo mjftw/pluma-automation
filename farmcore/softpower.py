@@ -16,20 +16,20 @@ class SoftPower(PowerBase):
 
     @PowerBase.on
     def on(self):
-        if self.on_cmd:
+        if self.on_cmd is not None:
             self.console.send(self.on_cmd)
         else:
             self.error('No on_cmd, cannot soft power on', PDUError)
 
     @PowerBase.off
     def off(self):
-        if self.off_cmd:
+        if self.off_cmd is not None:
             self.console.send(self.off_cmd)
         else:
             self.error('No off_cmd, cannot soft power off', PDUError)
 
     def reboot(self):
-        if self.reboot_cmd:
+        if self.reboot_cmd is not None:
             self.log(f'{str(self)}: Rebooting...')
             self.console.send(self.reboot_cmd)
         elif self.off_cmd and self.on_cmd:
