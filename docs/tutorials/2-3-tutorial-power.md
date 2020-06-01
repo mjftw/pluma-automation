@@ -94,6 +94,43 @@ power.reboot()
 
 There's also an `on_cmd` option for any unusual edge cases where this might be useful.
 
+## Pressing physical buttons
+
+Imagine you have a system with a physical power button that must be pressed to turn it on or off.
+This fictitious system requires a short press to power on, and a long press to hard power off. Your PC probably behaves like this too.
+
+How do we go about handling this?
+
+We can fake these button presses using the `PowerRelay` class, and a little circuit modification. Often it's enough to just clip on or solder some wires to your power button contacts, but the modification you need to make will depend on your system.
+
+The `PowerRelay` class has `on()`, `off()`, and `reboot()` methods like any other power class, and that performs these actions by toggling the ports on a USB relay a sequence provided by the user.
+
+In this scenario we are using the relay to bridge the wires connected to the system's power button as shown below:
+
+![USB relay bridging power button](relay_bridge_button.svg)
+
+Flipping the relay to position `A` then back to `B` is effectively the same as pressing the push button.
+
+```python
+from farmcore import PowerRelay, USBRelay
+
+power = PowerRelay(
+    on_seq=[(1, 'A'), '200ms', (1, 'B')],
+    off_seq=[(1, 'A'), '3s', (1, 'B')]
+    relay=USBRelay(
+        usb_device='1-1.2'
+    )
+)
+
+# Simulate button press for 200ms
+power.on()
+
+# Simulate button press for 3s
+power.off()
+```
+
+In this example a DLP-IOR4 USB relay connected to the Lab host at USB path `1-1.2`. If you're not sure what this means then check out [Tutorial: USB devices](./2-2-tutorial-usb.md).
+
 ___
 
 << Previous: [Tutorial: USB devices](./2-2-tutorial-usb.md) |
