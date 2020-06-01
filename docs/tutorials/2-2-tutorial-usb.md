@@ -260,9 +260,9 @@ However, if we're looking to get information on a specific USB relay this doesn'
 ### Finding devices downstream of a USB address
 
 If we know which USB hub the device is connected to then we can do better!
-Previously we've only used the `Hub` class to query the entire USB bus (`Hub('usb1)`), but we can also look only at the devices downstream of a specific USB Hub.
+Previously we've only used the `Hub` class to query the entire USB bus (`Hub('usb1')`), but we can also look only at the devices downstream of a specific USB Hub.
 
-Lets assume that know that the USB relay we're looking for is connected to hub `1-1.1`, or a hub below that. You'd typically want find this information when setting up your Lab devices anyway.
+Let's assume that know that the USB relay we're looking for is connected to hub `1-1.1`, or a hub below that. You'd typically want to find this information when setting up your Lab devices anyway.
 
 ```python
 from farmcore import Hub
