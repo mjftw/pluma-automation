@@ -50,6 +50,50 @@ power = IPPowerPDU(
 power.reboot()
 ```
 
+## Send commands to power off
+
+Sometimes you may not be able to control the board's power supply directly, or perhaps you would rather just do a soft shutdown instead.
+
+The `SoftPower` class can help us here.
+
+```python
+from farmcore import SoftPower, SerialConsole
+
+console = SerialConsole(
+    port='/dev/ttyUSB2'
+    baud=115200
+)
+
+power = SoftPower(
+    console=console,
+    off_cmd='poweroff'
+)
+
+power.off()
+```
+
+This would send the command `"poweroff"` to the board's console, triggering a soft power down.
+
+We can do much the same with rebooting too:
+
+```python
+from farmcore import SoftPower, SerialConsole
+
+console = SerialConsole(
+    port='/dev/ttyUSB2'
+    baud=115200
+)
+
+power = SoftPower(
+    console=console,
+    reboot_cmd='reboot'
+)
+
+power.reboot()
+```
+
+There's also an `on_cmd` option for any unusual edge cases where this might be useful.
+
 ___
 
 << Previous: [Tutorial: USB devices](./2-2-tutorial-usb.md) |
