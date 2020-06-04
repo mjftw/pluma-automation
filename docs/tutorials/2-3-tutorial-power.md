@@ -103,7 +103,7 @@ How do we go about handling this?
 
 We can fake these button presses using the `PowerRelay` class, and a little circuit modification. Often it's enough to just clip on or solder some wires to your power button contacts, but the modification you need to make will depend on your system.
 
-The `PowerRelay` class has `on()`, `off()`, and `reboot()` methods like any other power class, and that performs these actions by toggling the ports on a USB relay a sequence provided by the user.
+The `PowerRelay` class has `on()`, `off()`, and `reboot()` methods like any other power class, and that performs these actions by toggling the ports on a USB relay based on a sequence provided by the user.
 
 In this scenario we are using the relay to bridge the wires connected to the system's power button as shown below:
 
@@ -122,14 +122,14 @@ power = PowerRelay(
     )
 )
 
-# Simulate button press for 200ms
+# Press button for 200ms
 power.on()
 
-# Simulate button press for 3s
+# Press button press for 3s
 power.off()
 ```
 
-In this example a DLP-IOR4 USB relay connected to the Lab host at USB path `1-1.2`. If you're not sure what this means then check out [Tutorial: USB devices](./2-2-tutorial-usb.md).
+In this example a DLP-IOR4 USB relay is connected to the Lab host at USB path `1-1.2`. If you're not sure what this means then check out [Tutorial: USB devices](./2-2-tutorial-usb.md).
 
 ## Combining power capabilities with PowerMulti
 
@@ -170,7 +170,8 @@ power.on()
 power.off()
 ```
 
-You'll notice that by default the power off sequence was the reversed version of power on. This is probably what you want, but if not then you can set the PowerMulti parameter `reverse_off_seq` to false, like so:
+You'll notice that by default the power off sequence is the reversed version of power on. This is probably what you want, but if not then you can set the PowerMulti parameter `reverse_off_seq` to `False`.
+The default value for `reverse_off_seq` is `True`, so the off sequence will be reversed unless the parameter is specified.
 
 ```python
 ...
@@ -204,7 +205,7 @@ To turn it off we want to:
 1. Turn the power socket off
 
 ```python
-from farmcore import PowerRelay, USBRelay, IPPowerPDU, PowerMulti
+from farmcore import PowerRelay, USBRelay, IPPowerPDU, PowerMulti, SoftPower
 
 power_button = PowerRelay(
     on_seq=[(1, 'A'), '200ms', (1, 'B')],
