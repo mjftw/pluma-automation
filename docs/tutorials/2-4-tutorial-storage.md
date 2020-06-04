@@ -2,7 +2,7 @@
 
 During testing it is often the case that a new firmware version must be loaded on the board. This can be done over the network using SSH, NFS, FTP etc in many cases, but this may not work when the device boots from the new firmware image.
 
-To get around this issue, the Automation Lab has support for the SD-Wire board from Tizen. This acts as an SD card multiplexer, able to switch the SD card from being connected to the Lab host or target board.  
+To get around this issue, the Automation Lab has support for the SD-Wire board from Tizen. This acts as an SD card multiplexer, able to switch the SD card between the Lab host and target board.  
 Using this method the SD card could be attached to the Lab host, a new boot image written to it, and passed back to the target before boot.
 
 For more information on the SD-Wire, see [Supported Hardware](../supported-hardware.md).
