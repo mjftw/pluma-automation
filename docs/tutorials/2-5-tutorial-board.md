@@ -181,6 +181,8 @@ board.login()
 
 ## Logging
 
+**Important note:** _The information below is equally applicable to all the hardware control classes, as they are able to log individually and support the logging behaviour. For example, you will see some of these options used with the `SerialConsole` class in a [Tutorial: Adding a storage controller](./2-4-tutorial-storage.md)._
+
 Top level logging is usually done via the `Board`'s `log()` method.
 By default the log message will be printed, as well as being written to a temporary file.
 
@@ -213,6 +215,111 @@ We can do this with:
 pi@raspberry:~ $ tail -f /tmp/lab/Board_2020-06-05-10-52-25.log
 Hello World!
 ```
+
+### Moving an clearing log files
+
+You'll notice that the log file in the last example is in the `/tmp/` directory.
+This means that it is only stored in memory and will not persist across reboots.
+Another thing to note is that the end of the file name is a timestamp, noting the time that the Lab's Python session started.
+As a result of this, each time you run a lab script a new log file will be created.
+
+This is often not the behaviour you want.
+Wouldn't it be nice if we could make the log file permanent, and just append new messages to the end of the log for a new session rather than having to store many log files?
+
+To achieve this you can change the log file location:
+
+```python
+from my_hardware import my_board
+
+# Change the location of the log file. Append to this file if it exists
+my_board.log_file = './my_board.log'
+
+```
+
+If you would rather your log messages aren't appended to the end of old log file, then you can clear it with the `log_file_clear()` method.
+
+```python3
+my_board.log_file = './my_board.log'
+my_board.log_file_clear()
+```
+
+### Disabling logging
+
+You may not want to every message you `log()` to be printed to the console, or maybe you don't want any logs at all?
+
+```python
+from my_hardware import my_board
+
+# Disable printing log messages to the console
+my_board.log_echo = False
+
+# Disable logging altogether
+my_board.log_on = False
+```
+
+### Improving log output
+
+So we have logging working, but it would be good to have some additional information in the logs, like timestamps for instance.
+The `Board` class has various properties and methods to change how our log messages are formatted.
+
+```python
+from my_hardware import my_board
+
+my_board.log('Hello world!')
+#Hello world!
+
+# Add a name to distinguish what object wrote a given log message
+#   You might want to set this to the name you gave when creating your Board
+my_board.log_name = 'Raspberry Pi 4b'
+my_board.log('Hello world!')
+#Raspberry Pi 4b: Hello World!
+
+# Add a timestamp each log message
+my_board.log_time = True
+my_board.log('Hello world!')
+#05-06-20 12:34:58 Raspberry Pi 4b: Hello World!
+
+# Change the timestamp format
+#   For more information on format strings see:
+#   https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+my_board.log_time_format = 'The date is %d %m, %Y and the time is %H hours, %M mins, and %S seconds'
+#The date is 05 06, 2020 and the time is 12 hours, 37 mins, and 44 seconds Raspberry Pi 4b: Hello World!
+```
+
+As you can see there are a lot of options for customising the log output, and they can all be used together if that's what you want.
+
+### Change how individual log messages are displayed
+
+It is also possible to change how an individual log message is displayed.
+The per-message options below override any global setting from the previous section.
+
+```python
+from my_hardware import my_board
+
+# Change the colour of the log message is printed to stdout
+my_board.log('Hello', colour='red')
+
+# Display the message printed to stdout in **bold**
+my_board.log('Hello', bold=True)
+
+# Force logging to console even if my_board.log_echo is set to False
+my_board.log('Hello', force_echo=True)
+
+# Force logging this individual message to a different file
+#   May be useful for logging critically important messages elsewhere
+my_board.log('Hello', force_log_file='./high_priority_messages.log')
+```
+
+For changing the colour of the log message, the following `colour` strings are supported:
+
+- black
+- blue
+- cyan
+- green
+- purple
+- red
+- white
+- yellow
 
 ___
 
