@@ -68,6 +68,20 @@ board.log('Boot success!')
 
 ```
 
+By default this boot string will be set to `login:`, but you can override this for your system when creating the `Board` instance.  
+To pick a reasonable value you should watch the console log during boot, and find a word or phrase that you are sure only occurs once the board has finished booting.
+For the example below we have chosen `Poky` as our `bootstr`. This would be a reasonable choice if booting a [Yocto](https://www.yoctoproject.org/) based Linux distribution.
+
+```python
+from farmcore import Board
+
+imx6_board = Board(
+    name='imx6_yocto',
+    bootstr='Poky'
+)
+
+```
+
 ## Login
 
 Another helper provided by the `Board` is the `login()` method. This method uses additional configuration provided to the `Board` on creation to perform an automated login using the `Board`'s `console`.  
