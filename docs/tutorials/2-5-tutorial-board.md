@@ -79,7 +79,6 @@ imx6_board = Board(
     name='imx6_yocto',
     bootstr='Poky'
 )
-
 ```
 
 ## Login
@@ -144,7 +143,6 @@ If you know in advance what the terminal prompt is for the board, then you can p
 In other words, if we see the `prompt` after we entered the password then the login has succeeded. If not, it has failed.  
 This method can be more robust, but requires additional knowledge of the board's console behaviour in advance.
 
-
 ```python
 from farmcore import Board
 
@@ -195,7 +193,7 @@ board.login()
 
 ## Logging
 
-**Important note:** _The information below is equally applicable to all the hardware control classes, as they are able to log individually and support the logging behaviour. For example, you will see some of these options used with the `SerialConsole` class in a [Tutorial: Adding a storage controller](./2-4-tutorial-storage.md)._
+**Important note:** _The information below is equally applicable to all the hardware control classes, as they are able to log individually and support the logging behaviour. For example, you will see some of these options used with the `SerialConsole` class in [Tutorial: Adding a storage controller](./2-4-tutorial-storage.md)._
 
 Top level logging is usually done via the `Board`'s `log()` method.
 By default the log message will be printed, as well as being written to a temporary file.
@@ -215,7 +213,7 @@ print(my_board.log_file)
 #/tmp/lab/Board_2020-06-05-10-52-25.log
 ```
 
-Let's check the value of that file to ensure our "Hello World!" message was saved:
+Let's check the contents of that file to ensure our "Hello World!" message was saved:
 
 ```shell
 pi@raspberry:~ $ cat /tmp/lab/Board_2020-06-05-10-52-25.log
@@ -259,7 +257,7 @@ my_board.log_file_clear()
 
 ### Disabling logging
 
-You may not want to every message you `log()` to be printed to the console, or maybe you don't want any logs at all?
+You may not want every message you `log()` to be printed to the console, or maybe you don't want any logs at all?
 
 ```python
 from my_hardware import my_board
