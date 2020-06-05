@@ -170,7 +170,7 @@ power.on()
 power.off()
 ```
 
-You'll notice that by default the power off sequence is the reversed version the given `power_seq` sequence. This is probably what you want, but if not then you can set the PowerMulti parameter `reverse_off_seq` to `False`.
+You'll notice that by default the power off sequence is the reversed version the given `power_seq` sequence. This is probably what you want, but if not then you can set the PowerMulti parameter `reverse_off_seq` to `False`, making the off sequence play in the same order as the `power_seq`.
 The default value for `reverse_off_seq` is `True`, so the power on sequence will be reversed for power off unless the parameter is specified.
 
 ```python
