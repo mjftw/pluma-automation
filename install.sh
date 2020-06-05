@@ -34,8 +34,6 @@ function support_serial {
 
 function support_sdwire {
     # LibUSB required for PyFTDI library used by SDWire
-    $SUDO apt install -y libusb-1.0
-
     echo
     echo "Adding udev rules required for FTDI devices (E.g. SD Wire)"
     echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6001", GROUP="plugdev", MODE="0666"
@@ -117,7 +115,7 @@ shift $((OPTIND -1))
 
 PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
-$SUDO apt install -y python3 python3-pip graphviz git
+$SUDO apt install -y python3 python3-pip graphviz git libusb-1.0 libftdi-dev
 
 if [ "$answer_all" ==  "n" ]; then
     echo "Skipping optional config..."
