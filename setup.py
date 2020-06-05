@@ -1,5 +1,7 @@
 import setuptools
 
+from version import get_farmcore_version
+
 
 readme_file = "readme.md"
 long_description = None
@@ -14,7 +16,7 @@ except FileNotFoundError:
 
 setuptools.setup(
     name="farm-core",
-    version="0.0.1",
+    version=get_farmcore_version(),
     author="Merlin Webster",
     author_email="mwebster@witekio.com",
     description="Automation Lab: farm-core",
