@@ -8,6 +8,17 @@ IMAGE_ARMV7_TAG = $(IMAGE_TAG)-armv7
 WORKING_DIR := $(shell pwd)
 DOCKERFILE_DIR := $(WORKING_DIR)
 
+DOCKER_RUN_CMD :=
+DOCKER_RUN_ARGS := -it --rm
+ifneq ($(PROJECT_DIR),)
+	DOCKER_RUN_ARGS += -v $(realpath $(PROJECT_DIR)):/root/project
+
+	ifneq ($(PROJECT_SCRIPT),)
+		DOCKER_RUN_CMD := python3 /root/project/$(PROJECT_SCRIPT)
+	endif
+endif
+DOCKER_RUN_PRIVILEGED_ARGS := $(DOCKER_RUN_ARGS) --privileged -v /dev:/dev
+
 .DEFAULT_GOAL := docker-build
 
 .PHONY: build push tests
@@ -26,16 +37,16 @@ docker-build-arm:: ## Build the docker image
 			-t $(IMAGE_ARMV7_TAG) -f $(DOCKERFILE_DIR)/Dockerfile-armv7 .
 
 docker-run:: ## Run the docker image
-		@docker run -it --rm $(IMAGE_TAG)
+		@docker run $(DOCKER_RUN_ARGS) $(IMAGE_TAG) $(DOCKER_RUN_CMD)
 
 docker-run-arm:: ## Run the docker image
-		@docker run -it --rm $(IMAGE_ARMV7_TAG)
+		@docker run $(DOCKER_RUN_ARGS) $(IMAGE_ARMV7_TAG) $(DOCKER_RUN_CMD)
 
-docker-run-privilidged:: ## Run the docker image in privilidged mode
-		@docker run --privileged -v /dev:/dev -it --rm $(IMAGE_TAG)
+docker-run-privileged:: ## Run the docker image in privileged mode
+		@docker run $(DOCKER_RUN_PRIVILEGED_ARGS) $(IMAGE_TAG) $(DOCKER_RUN_CMD)
 
-docker-run-arm-privilidged:: ## Run the docker image in privilidged mode
-		@docker run --privileged -v /dev:/dev -it --rm $(IMAGE_ARMV7_TAG)
+docker-run-arm-privileged:: ## Run the docker image in privileged mode
+		@docker run $(DOCKER_RUN_PRIVILEGED_ARGS) $(IMAGE_ARMV7_TAG) $(DOCKER_RUN_CMD)
 
 docker-push:: ## Push the docker image to the registry
 		@echo Pushing $(IMAGE_TAG)
