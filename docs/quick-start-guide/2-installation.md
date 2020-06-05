@@ -60,6 +60,8 @@ Note: To use the SD Wire of USB Serial adaptors you must invoke docker run with 
   docker run -it --rm --privileged -v /dev:/dev -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py
 ```
 
+**Warning:** _This will give the container access to all of your system devices. Use with caution._
+
 ### Run with GitLab CI pipeline
 
 From your test repository, you can simply use Docker HUB's image (after granting access to the registry), or push the automation lab image in the project's registry.
