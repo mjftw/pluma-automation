@@ -181,6 +181,39 @@ board.login()
 
 ## Logging
 
+Top level logging is usually done via the `Board`'s `log()` method.
+By default the log message will be printed, as well as being written to a temporary file.
+
+```python
+# Defined elsewhere for this example
+from my_hardware import my_board
+
+my_board.log('Hello World!')
+#Hello World!
+```
+
+To see where the `Board`'s current log file is we can read the `log_file` property:
+
+```python
+print(my_board.log_file)
+#/tmp/lab/Board_2020-06-05-10-52-25.log
+```
+
+Let's check the value of that file to ensure our "Hello World!" message was saved:
+
+```shell
+pi@raspberry:~ $ cat /tmp/lab/Board_2020-06-05-10-52-25.log
+Hello World!
+```
+
+Often it is useful to see the log updating in realtime as the Lab is running.  
+We can do this with:
+
+```shell
+pi@raspberry:~ $ tail -f /tmp/lab/Board_2020-06-05-10-52-25.log
+Hello World!
+```
+
 ___
 
 << Previous: [Tutorial: Adding a storage controller](./2-4-tutorial-storage.md) |
