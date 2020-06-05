@@ -117,7 +117,7 @@ shift $((OPTIND -1))
 
 PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
-$SUDO apt install -y python3 python3-pip graphviz
+$SUDO apt install -y python3 python3-pip graphviz git
 
 if [ "$answer_all" ==  "n" ]; then
     echo "Skipping optional config..."
