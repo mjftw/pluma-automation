@@ -40,8 +40,6 @@ For additional options, check the install help with:
 
 ## Docker container
 
-Note: The current Docker image does not support SDMux, nor the serial interface yet, due to `udev` limitations. To use those, you must install it natively.
-
 ### Get or Build the image
 
 The Automation lab image should be available as `witekio/automation-lab` directly if you are registered and part of Witekio's team in Docker HUB. Otherwise, you can easily build it:
@@ -50,8 +48,17 @@ The Automation lab image should be available as `witekio/automation-lab` directl
 
 ### Run manually
 
-When running the Automation lab container manually, you have to mount the folder containing your Automation lab test script and run it with
-`docker run -it --rm -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py`
+When running the Automation lab container manually, you have to mount the folder containing your Automation lab test script and run as below:
+
+```shell
+  docker run -it --rm -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py
+```
+
+Note: To use the SD Wire of USB Serial adaptors you must invoke docker run with the arguments `--privileged -v /dev:/dev`.
+
+```shell
+  docker run -it --rm --privileged -v /dev:/dev -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py
+```
 
 ### Run with GitLab CI pipeline
 
