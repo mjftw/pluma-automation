@@ -17,7 +17,7 @@ except FileNotFoundError:
 setuptools.setup(
     name="farm-core",
     version=get_farmcore_version(),
-    author="Merlin Webster",
+    author="Witekio",
     author_email="mwebster@witekio.com",
     description="Automation Lab: farm-core",
     long_description=long_description,
