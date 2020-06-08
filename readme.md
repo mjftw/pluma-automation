@@ -64,4 +64,4 @@ We also have a code style guide for you to read before you being development: [S
 
 ## Licensing
 
-The Automation Lab is released under a [GPLv3 License](LICENSE.txt)
+The Automation Lab is released under a [GPLv3 License](LICENSE.txt).
