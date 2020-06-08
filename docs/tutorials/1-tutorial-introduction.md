@@ -7,7 +7,7 @@
 #### Software
 
 In order to follow these tutorials you will need to have successfully installed the Automation Lab software.  
-Check out the [Installation](../quick-start-guide/2-installation.md) guide for instructions on how to do this.  
+Check out the [Install and Run](../quick-start-guide/2-install-and-run.md) guide for instructions on how to do this.  
 You can use your normal computer as the Lab host machine, although we recommended that you are running Linux.  
 The Lab code is developed and tested using Ubuntu 16.04 or newer, so you may have an easier time using these distributions.
 

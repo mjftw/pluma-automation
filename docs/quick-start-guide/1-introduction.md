@@ -58,7 +58,7 @@ The basic structure of [farm-core][farm-core] is shown below:
 
 ___
 
-Next: [Installation](./2-installation.md) >>
+Next: [Install and Run](./2-install-and-run.md) >>
 
 [sphinx]: https://www.sphinx-doc.org
 [readthedocs]: https://readthedocs.org

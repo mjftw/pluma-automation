@@ -8,7 +8,7 @@ A good place to start for new users is the [Quick Start Guide](./docs/quick-star
 
 ## Installation
 
-For installation instructions, see [Installation](./docs/quick-start-guide/2-installation.md) section of Quick Start Guide.
+For installation instructions, see [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
 
 ## Using the packages
 
