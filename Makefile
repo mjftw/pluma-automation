@@ -31,6 +31,12 @@ docker-run:: ## Run the docker image
 docker-run-arm:: ## Run the docker image
 		@docker run -it --rm $(IMAGE_ARMV7_TAG)
 
+docker-run-privilidged:: ## Run the docker image in privilidged mode
+		@docker run --privileged -v /dev:/dev -it --rm $(IMAGE_TAG)
+
+docker-run-arm-privilidged:: ## Run the docker image in privilidged mode
+		@docker run --privileged -v /dev:/dev -it --rm $(IMAGE_ARMV7_TAG)
+
 docker-push:: ## Push the docker image to the registry
 		@echo Pushing $(IMAGE_TAG)
 		@docker push $(IMAGE_TAG)

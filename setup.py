@@ -29,7 +29,7 @@ setuptools.setup(
         'setuptools',
         'pyudev',
         'pexpect>=4.6',
-        'pyftdi',
+        'pyftdi==0.29.3',
         'pyroute2',
         'pandas',
         'pygal',
