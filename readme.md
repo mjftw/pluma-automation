@@ -2,13 +2,13 @@
 
 The Automation Lab is a tool designed to perform black box testing of embedded hardware; designed to be as lightweight as possible!
 
-At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.  
+At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
 This package is named `farmcore`.
 
-On top of the hardware control library sits a testing framework `farmtest`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.  
+On top of the hardware control library sits a testing framework `farmtest`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
 `farmcore` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
 
-Finally we have `farmutils`, a utilities library to provide addional features such as email reporting or downloading code from `git` repositories.
+Finally we have `farmutils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
 
 Features include:
 
@@ -28,7 +28,7 @@ Features include:
 * Generate test reports with automatically formatted results and graphs
 * ... and much more!
 
-The Automation Lab is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.  
+The Automation Lab is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.
 Just be sure to raise a pull request with your shiny new feature ;).
 
 ## Getting Started
@@ -67,10 +67,10 @@ make docker-run-privileged PROJECT_DIR=/path/to/my/project PROJECT_SCRIPT=myscri
 ```
 
 Where `PROJECT_DIR` is a directory containing all python scripts needed to run, and `PROJECT_SCRIPT` is the script to run from within that directory.
-**Note:** _For ARM based systems you must use thr `docker-run-privileged-arm` target instead.
+**Note:** _For ARM based systems you must use the `docker-run-privileged-arm` target instead.
 
-For more detailed instructions, see [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
-Here you'll instructions on how to run the Automation Lab with Docker.
+For more detailed instructions, see the [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
+Here you'll find instructions on how to run the Automation Lab with Docker.
 
 ## Using the packages
 
@@ -87,7 +87,7 @@ import farmutils
 
 If you would like to contribute to developing the Automation Lab then check out our [Contributing Guide](./docs/how-to-contribute.md) to find out how.
 
-We also have a code style guide for you to read before you being development: [Style Guide](./docs/style-guide.md)
+We also have a code style guide for you to read before you begin development: [Style Guide](./docs/style-guide.md)
 
 ## Licensing
 
