@@ -42,7 +42,34 @@ Look at the [Tutorials](./docs/tutorials/1-tutorial-introduction.md) for guidanc
 
 ## Installation
 
-For installation instructions, see [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
+The Automation Lab can be run natively, or using Docker.
+
+For native installation, just run the `install.sh` script.
+This will install all the required system packages, then install the `farm-core` python packages.
+This installer assumes you are running a debian based Linux distro, such as Ubuntu or Raspian.
+
+```shell
+./install
+```
+
+To run with Docker you must first build the container.
+
+```shell
+make docker-build
+```
+
+**Note:** _For ARM based systems you must use thr `docker-build-arm` target instead.
+
+Run the container with your project:
+
+```shell
+make docker-run-privileged PROJECT_DIR=/path/to/my/project PROJECT_SCRIPT=myscript.py
+```
+
+Where `PROJECT_DIR` is a directory containing all python scripts needed to run, and `PROJECT_SCRIPT` is the script to run from within that directory.
+**Note:** _For ARM based systems you must use thr `docker-run-privileged-arm` target instead.
+
+For more detailed instructions, see [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
 Here you'll instructions on how to run the Automation Lab with Docker.
 
 ## Using the packages
