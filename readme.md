@@ -49,7 +49,7 @@ This will install all the required system packages, then install the `farm-core`
 This installer assumes you are running a debian based Linux distro, such as Ubuntu or Raspian.
 
 ```shell
-./install
+./install.sh
 ```
 
 To run with Docker you must first build the container.
