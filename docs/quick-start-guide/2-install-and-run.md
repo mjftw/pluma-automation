@@ -1,4 +1,4 @@
-# Installation
+# Install and Run
 
 The Automation Lab can be installed locally, or ran with a Docker container. Both approaches are described below
 
@@ -43,6 +43,7 @@ For additional options, check the install help with:
 ### Get or Build the image
 
 The Automation Lab image should be available as `witekio/automation-lab` directly if you are registered and part of Witekio's team in Docker HUB. Otherwise, you can easily build it:
+
 * Clone the Automation Lab repository
 * Navigate to the root and run `make docker-build`, or `make docker-build-arm` on an ARM device. If the build succeeds, you have your Docker image ready.
 
@@ -98,7 +99,7 @@ From your test repository, you can simply use Docker HUB's image (after granting
 1. Push the Automation Lab Docker image to your project registry: https://docs.gitlab.com/ee/user/packages/container_registry/
 1. Create a `.gitlab-ci.yml` file in your repository configured as below
 
-```
+```yml
 device-test-job:
   image: registry.gitlab.com/witekio/<your-project>/automation-lab:latest
   tags:
