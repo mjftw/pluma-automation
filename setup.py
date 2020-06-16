@@ -36,7 +36,9 @@ setuptools.setup(
         'cairosvg',
         'graphviz',
         'nanocom',
-        'requests'
+        'requests',
+        'pytest',
+        'pytest-cov'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
