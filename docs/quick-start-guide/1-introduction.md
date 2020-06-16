@@ -12,7 +12,7 @@ On top of the hardware control library sits a testing framework `farmtest`, whic
 
 Finally we have `farmutils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
 
-![System Diagram](automation_lab_system_diagram.pn)
+![System Diagram](automation_lab_system_diagram.png)
 
 This guide will aim to give an introduction to the layout of the codebase, and the minimum steps that must be followed in order to start using it.
 
