@@ -2,6 +2,18 @@
 
 ## Introduction
 
+The Automation Lab is a tool designed to perform black box testing of embedded hardware; designed to be as lightweight as possible!
+
+At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
+This package is named `farmcore`.
+
+On top of the hardware control library sits a testing framework `farmtest`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
+`farmcore` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
+
+Finally we have `farmutils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
+
+![System Diagram](automation_lab_system_diagram.pn)
+
 This guide will aim to give an introduction to the layout of the codebase, and the minimum steps that must be followed in order to start using it.
 
 ### Repositories
