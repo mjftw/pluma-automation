@@ -15,4 +15,4 @@ else
     echo "Running all tests in $test_dir"
 fi
 
-pytest "$test_dir" -v
+python3 -m pytest "$test_dir" -v
