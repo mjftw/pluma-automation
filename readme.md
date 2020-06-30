@@ -64,7 +64,7 @@ To run with Docker you must first build the container.
 make docker-build
 ```
 
-**Note:** _For ARM based systems you must use thr `docker-build-arm` target instead_.
+**Note:** _For ARM based systems you must use the `docker-build-arm` target instead_.
 
 Run the container with your project:
 
