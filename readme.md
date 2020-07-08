@@ -34,7 +34,7 @@ Hardware control features include:
 The Automation Lab is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.
 Just be sure to raise a pull request with your shiny new feature ;).
 
-![System Diagram](automation_lab_system_diagram.png)
+![System Diagram](docs/quick-start-guide/automation_lab_system_diagram.png)
 
 ## Getting Started
 
