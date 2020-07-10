@@ -1,3 +1,2 @@
-from .targetconfig import *
-from .testsconfig import *
-name = "farmcli"
+from .targetconfig import TargetConfig, TargetFactory
+from .testsconfig import Config, TestsConfig

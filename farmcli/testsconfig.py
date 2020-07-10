@@ -23,8 +23,8 @@ class Config:
                       '" not found in the current folder')
             exit(-1)
         except:
-            log.error('Failed to open configuration file "' +
-                      tests_config_path + '"')
+            log.error(
+                f'Failed to open configuration file "{tests_config_path}"')
             exit(-1)
 
         try:
@@ -35,8 +35,8 @@ class Config:
                       '" not found in the current folder')
             exit(-1)
         except:
-            log.error('Failed to open configuration file "' +
-                      target_config_path + '"')
+            log.error(
+                f'Failed to open configuration file "{target_config_path}"')
             exit(-1)
 
         return tests_config, target_config
@@ -60,7 +60,6 @@ class TestsConfig:
     def create_test_list(config):
         include = config.get('include') or []
         exclude = config.get('exclude') or []
-        enable_regex = config.get('enable_regex') or False
 
         # Find all tests
         all_tests = {}
@@ -73,10 +72,9 @@ class TestsConfig:
         test_objects = []
         print('--- Test list')
         for test_name in all_tests:
-            selected = TestsConfig.test_matches(
-                test_name, include, exclude, enable_regex)
+            selected = TestsConfig.test_matches(test_name, include, exclude)
             check = 'X' if selected else ' '
-            print('  {}     [{}]'.format(test_name, check))
+            print(f'  {test_name}     [{check}]')
 
             if selected:
                 test_objects.append(all_tests[test_name]())
@@ -85,19 +83,17 @@ class TestsConfig:
 
         return test_objects
 
-    @staticmethod
-    def test_matches(test_name, include, exclude, enable_regex):
-        if enable_regex:
-            for regex_string in exclude:
-                regex = re.compile(regex_string)
-                if re.match(regex, test_name):
-                    return False
+    @ staticmethod
+    def test_matches(test_name, include, exclude):
+        # Very suboptimal way of doing it.
+        for regex_string in exclude:
+            regex = re.compile(regex_string)
+            if re.match(regex, test_name):
+                return False
 
-            for regex_string in include:
-                regex = re.compile(regex_string)
-                if re.match(regex, test_name):
-                    return True
+        for regex_string in include:
+            regex = re.compile(regex_string)
+            if re.match(regex, test_name):
+                return True
 
-            return False
-        else:
-            return test_name in include and test_name not in exclude
+        return False

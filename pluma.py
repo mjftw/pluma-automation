@@ -7,10 +7,8 @@ from farmcore import Board
 from farmtest import TestController
 from farmcli import Config, TestsConfig, TargetConfig
 
-log = logging.getLogger(__name__)
 
-
-if __name__ == "__main__":
+def main():
     log = logging.getLogger(__name__)
 
     tests_config_path = 'pluma.yml'
@@ -27,4 +25,8 @@ if __name__ == "__main__":
     tests_controller = TestsConfig.create_test_controller(tests_config, board)
     tests_controller.run()
 
-    print(json.dumps(tests_controller.results, indent=4))
+    print(tests_controller.get_test_results())
+
+
+if __name__ == "__main__":
+    main()

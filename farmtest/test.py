@@ -230,7 +230,6 @@ class TestRunner():
         self.continue_on_fail = continue_on_fail
         self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/lab'
         self.skip_tasks = skip_tasks or []
-        self.skip_tasks = skip_tasks or []
         self.tests = []
 
         self.test_fails = []
@@ -248,8 +247,8 @@ class TestRunner():
         # Validate 'skip_tasks'
         for task_to_skip in self.skip_tasks:
             if task_to_skip not in self.tasks:
-                raise ValueError('The tasks "{}" in the tasks to skip is not a valid task.\nValid tasks are: {}'.format(
-                    task_to_skip, self.tasks))
+                raise ValueError(
+                    f'The tasks "{task_to_skip}" in the tasks to skip is not a valid task.\nValid tasks are: {self.tasks}')
 
     def __call__(self):
         return self.run()
