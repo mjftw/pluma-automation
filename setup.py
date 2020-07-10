@@ -38,7 +38,8 @@ setuptools.setup(
         'nanocom',
         'requests',
         'pytest',
-        'pytest-cov'
+        'pytest-cov',
+        'pyyaml>=5.1'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
