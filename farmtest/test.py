@@ -245,8 +245,11 @@ class TestRunner():
         # General purpose data for use globally between tests
         self.data = {}
 
-        for test in tests:
-            self.add_test(test)
+        # Validate 'skip_tasks'
+        for task_to_skip in self.skip_tasks:
+            if task_to_skip not in self.tasks:
+                raise ValueError('The tasks "{}" in the tasks to skip is not a valid task.\nValid tasks are: {}'.format(
+                    task_to_skip, self.tasks))
 
     def __call__(self):
         return self.run()

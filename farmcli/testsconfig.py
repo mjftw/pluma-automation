@@ -1,5 +1,8 @@
+import tests
 import logging
 import yaml
+import inspect
+import re
 
 from farmtest import TestController, TestBase, TestRunner
 
@@ -45,25 +48,56 @@ class TestsConfig:
         return TestController(
             testrunner=TestRunner(
                 board=board,
-                tests=TestsConfig.create_test_list(config),
+                tests=TestsConfig.create_test_list(config.get('tests')),
                 sequential=config.get('sequential') or True,
                 email_on_fail=config.get('email_on_fail') or False,
                 continue_on_fail=config.get('continue_on_fail') or True,
-                skip_tasks=['_board_on_and_validate',
-                            '_board_login', '_board_off'],
+                skip_tasks=config.get('skip_tasks') or [],
             )
         )
 
     @staticmethod
     def create_test_list(config):
-        return [
-            EmptyTest()
-        ]
+        include = config.get('include') or []
+        exclude = config.get('exclude') or []
+        enable_regex = config.get('enable_regex') or False
 
+        # Find all tests
+        all_tests = {}
+        for m in inspect.getmembers(tests, inspect.isclass):
+            if m[1].__module__.startswith(tests.__name__ + '.'):
+                # Dictionary with the class name as key, and class as value
+                all_tests[m[0]] = m[1]
 
-class EmptyTest(TestBase):
-    def __init__(self):
-        super().__init__(self)
+        # Instantiate tests selected
+        test_objects = []
+        print('--- Test list')
+        for test_name in all_tests:
+            selected = TestsConfig.test_matches(
+                test_name, include, exclude, enable_regex)
+            check = 'X' if selected else ' '
+            print('  {}     [{}]'.format(test_name, check))
 
-    def test_body(self):
-        pass
+            if selected:
+                test_objects.append(all_tests[test_name]())
+
+        print('')
+
+        return test_objects
+
+    @staticmethod
+    def test_matches(test_name, include, exclude, enable_regex):
+        if enable_regex:
+            for regex_string in exclude:
+                regex = re.compile(regex_string)
+                if re.match(regex, test_name):
+                    return False
+
+            for regex_string in include:
+                regex = re.compile(regex_string)
+                if re.match(regex, test_name):
+                    return True
+
+            return False
+        else:
+            return test_name in include and test_name not in exclude

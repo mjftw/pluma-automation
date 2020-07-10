@@ -19,7 +19,7 @@ class TargetConfig:
 class TargetFactory:
     @ staticmethod
     def create_serial(serial_config):
-        if (serial_config == None):
+        if not serial_config:
             return None
 
         log.debug('Serial config = ' + json.dumps(serial_config))
