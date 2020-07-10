@@ -1,2 +1,6 @@
 serial:
   port: /dev/ttyUSB0
+ssh:
+  ip: 192.168.1.21
+  login: root
+  pass: root

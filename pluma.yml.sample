@@ -1,3 +1,8 @@
 sequential: true
 email_on_fail: false
 continue_on_fail: true
+skip_tasks: [_board_on_and_validate, _board_login, _board_off]
+tests:
+  include: [TestBoot.*, EmptyTest]
+  exclude: [.*2$]
+  enable_regex: true
