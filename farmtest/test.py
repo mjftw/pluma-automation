@@ -230,12 +230,11 @@ class TestRunner():
         self.continue_on_fail = continue_on_fail
         self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/lab'
         self.skip_tasks = skip_tasks or []
-        self.tests = []
-
         self.test_fails = []
-        tests = tests or []
+
         if not isinstance(tests, list):
             tests = [tests]
+        self.tests = tests
 
         self.tasks = TestCore.tasks
         self.use_testcore = use_testcore

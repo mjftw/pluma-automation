@@ -48,7 +48,7 @@ class TestsConfig:
         return TestController(
             testrunner=TestRunner(
                 board=board,
-                tests=TestsConfig.create_test_list(config.get('tests')),
+                tests=TestsConfig.create_tests(config.get('tests'), board),
                 sequential=config.get('sequential') or True,
                 email_on_fail=config.get('email_on_fail') or False,
                 continue_on_fail=config.get('continue_on_fail') or True,
@@ -57,16 +57,17 @@ class TestsConfig:
         )
 
     @staticmethod
-    def create_test_list(config):
+    def create_tests(config, board):
         include = config.get('include') or []
         exclude = config.get('exclude') or []
+        parameters = config.get('parameters') or {}
 
         # Find all tests
         all_tests = {}
         for m in inspect.getmembers(tests, inspect.isclass):
             if m[1].__module__.startswith(tests.__name__ + '.'):
                 # Dictionary with the class name as key, and class as value
-                all_tests[m[0]] = m[1]
+                all_tests[f'{m[1].__module__}.{m[1].__name__}'] = m[1]
 
         # Instantiate tests selected
         test_objects = []
@@ -77,7 +78,8 @@ class TestsConfig:
             print(f'  {test_name}     [{check}]')
 
             if selected:
-                test_objects.append(all_tests[test_name]())
+                test_objects.append(all_tests[test_name](
+                    board, parameters.get(test_name)))
 
         print('')
 
