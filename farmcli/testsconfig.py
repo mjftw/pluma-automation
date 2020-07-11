@@ -83,7 +83,7 @@ class TestsConfig:
         # Instantiate tests selected
         test_objects = []
         print('\nTest list:')
-        for test_name in all_tests:
+        for test_name in sorted(all_tests):
             selected = TestsConfig.test_matches(test_name, include, exclude)
             test_parameters_list = parameters.get(test_name)
             check = 'x' if selected else ' '
@@ -100,16 +100,15 @@ class TestsConfig:
                     test_objects.append(
                         all_tests[test_name](board, test_parameters))
 
-        print('')
-
         return test_objects
 
     @ staticmethod
     def create_script_tests(config, board):
+        print('\nScript test list:')
         if not config:
+            print('    None\n')
             return []
 
-        print('\nScript test list:')
         test_objects = []
         for test_name in config:
             print(f'    [x] {test_name}')
