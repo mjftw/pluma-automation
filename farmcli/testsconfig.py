@@ -3,6 +3,7 @@ import logging
 import yaml
 import inspect
 import re
+import json
 
 from farmtest import TestController, TestBase, TestRunner
 
@@ -71,15 +72,23 @@ class TestsConfig:
 
         # Instantiate tests selected
         test_objects = []
-        print('--- Test list')
+        print('Test list:')
         for test_name in all_tests:
             selected = TestsConfig.test_matches(test_name, include, exclude)
-            check = 'X' if selected else ' '
-            print(f'  {test_name}     [{check}]')
+            test_parameters_list = parameters.get(test_name)
+            check = 'x' if selected else ' '
+            print(f'  [{check}] {test_name}')
 
             if selected:
-                test_objects.append(all_tests[test_name](
-                    board, parameters.get(test_name)))
+                if not isinstance(test_parameters_list, list):
+                    test_parameters_list = [test_parameters_list]
+
+                for test_parameters in test_parameters_list:
+                    if test_parameters:
+                        print(f'        {json.dumps(test_parameters)}')
+
+                    test_objects.append(
+                        all_tests[test_name](board, test_parameters))
 
         print('')
 

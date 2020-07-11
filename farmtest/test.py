@@ -43,6 +43,7 @@ import re
 import shutil
 import os
 import inspect
+import uuid
 from copy import copy
 
 from farmutils import Email, send_exception_email, datetime_to_timestamp
@@ -78,6 +79,8 @@ class TestBase():
 
         # Output data to be saved during the test
         self.data = {}
+
+        self.uuid = uuid.uuid4()
 
     def __repr__(self):
         return self._test_name

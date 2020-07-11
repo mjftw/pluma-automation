@@ -31,3 +31,19 @@ class MemoryFree(TestBase):
 
         raise TaskFailed(
             'Unexpected error running or parsing "cat proc/meminfo"')
+
+
+class MemoryReadWrite(TestBase):
+    def __init__(self, board, parameters):
+        super().__init__(self)
+        self.board = board
+
+        if not isinstance(parameters, dict):
+            raise ValueError('Missing parameters for test')
+
+        self.size = parameters.get('size')
+        if not self.size:
+            raise ValueError('Missing "size" test parameter')
+
+    def test_body(self):
+        [['?'] * 10 for _ in range(self.size)]
