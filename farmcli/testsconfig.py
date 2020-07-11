@@ -5,7 +5,7 @@ import inspect
 import re
 import json
 
-from farmtest import TestController, TestBase, TestRunner
+from farmtest import TestController, TestBase, TestRunner, ShellTest
 
 log = logging.getLogger(__name__)
 
@@ -46,10 +46,14 @@ class Config:
 class TestsConfig:
     @staticmethod
     def create_test_controller(config, board):
+        tests = TestsConfig.create_tests(config.get('tests'), board)
+        tests.extend(TestsConfig.create_script_tests(
+            config.get('script_tests'), board))
+
         return TestController(
             testrunner=TestRunner(
                 board=board,
-                tests=TestsConfig.create_tests(config.get('tests'), board),
+                tests=tests,
                 sequential=config.get('sequential') or True,
                 email_on_fail=config.get('email_on_fail') or False,
                 continue_on_fail=config.get('continue_on_fail') or True,
@@ -57,18 +61,24 @@ class TestsConfig:
             )
         )
 
-    @staticmethod
-    def create_tests(config, board):
-        include = config.get('include') or []
-        exclude = config.get('exclude') or []
-        parameters = config.get('parameters') or {}
-
+    @ staticmethod
+    def find_tests():
         # Find all tests
         all_tests = {}
         for m in inspect.getmembers(tests, inspect.isclass):
             if m[1].__module__.startswith(tests.__name__ + '.'):
                 # Dictionary with the class name as key, and class as value
                 all_tests[f'{m[1].__module__}.{m[1].__name__}'] = m[1]
+
+        return all_tests
+
+    @ staticmethod
+    def create_tests(config, board):
+        include = config.get('include') or []
+        exclude = config.get('exclude') or []
+        parameters = config.get('parameters') or {}
+
+        all_tests = TestsConfig.find_tests()
 
         # Instantiate tests selected
         test_objects = []
@@ -92,6 +102,29 @@ class TestsConfig:
 
         print('')
 
+        return test_objects
+
+    @ staticmethod
+    def create_script_tests(config, board):
+        if not config:
+            return []
+
+        print('\nScript test list:')
+        test_objects = []
+        for test_name in config:
+            print(f'    [x] {test_name}')
+
+            try:
+                test_parameters = config[test_name]
+                test_parameters['name'] = test_name
+            except:
+                raise ValueError(
+                    f'Failed to create script test "{test_name}"')
+
+            test = ShellTest(board, test_parameters)
+            test_objects.append(test)
+
+        print('')
         return test_objects
 
     @ staticmethod

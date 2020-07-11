@@ -12,3 +12,14 @@ tests:
       - size: 20
       - size: 256
       - size: 65000
+
+script_tests:
+  cat_meminfo:
+    script:
+    - cat /proc/meminfo | grep "MemFree:"
+    - free | grep "Mem:"
+    should_print: ['Masdem:', 'MemFree:']
+    should_not_print: ['error', 'unknown']
+  ls:
+    run_on_host: true
+    script: ls -l | head

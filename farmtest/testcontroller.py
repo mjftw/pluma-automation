@@ -388,7 +388,7 @@ class TestController():
                 Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
             fields (list(str)): A list of the names of data fields to extract.
                 Default: all fields are returned.
-            settings (dict): Optional. Specifyt a dict of
+            settings (dict): Optional. Specify a dict of
                 key, value pairs, each representing the name and values of
                 settings that must be present in the test's settings in order
                 for it to be included in the returned results.

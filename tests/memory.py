@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-from farmtest import TestBase, TaskFailed
+from farmtest import TestBase, TaskFailed, TestingException
 
 
 class MemoryFree(TestBase):
@@ -29,7 +29,7 @@ class MemoryFree(TestBase):
                     else:
                         return
 
-        raise TaskFailed(
+        raise TestingException(
             'Unexpected error running or parsing "cat proc/meminfo"')
 
 

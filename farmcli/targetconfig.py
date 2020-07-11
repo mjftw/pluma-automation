@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 class TargetConfig:
     @staticmethod
     def create_board(config):
-        serial = TargetFactory.create_serial(config)
+        serial = TargetFactory.create_serial(config.get('serial'))
         power = TargetFactory.create_power_control(config, serial)
 
         print('Components:')
