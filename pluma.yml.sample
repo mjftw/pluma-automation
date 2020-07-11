@@ -10,6 +10,5 @@ tests:
       minimum: 200000
     tests.memory.MemoryReadWrite:
       - size: 20
-      # Parametrized tests don't work, because TestRunner expects unique test names
-      #- size: 256
-      #- size: 65000
+      - size: 256
+      - size: 65000

@@ -45,5 +45,8 @@ class MemoryReadWrite(TestBase):
         if not self.size:
             raise ValueError('Missing "size" test parameter')
 
+    def __repr__(self):
+        return f'{self.__module__}[{self.size}]'
+
     def test_body(self):
         [['?'] * 10 for _ in range(self.size)]

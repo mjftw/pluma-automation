@@ -12,7 +12,12 @@ class TargetConfig:
     def create_board(config):
         serial = TargetFactory.create_serial(config)
         power = TargetFactory.create_power_control(config, serial)
-        board = Board('fake', console=serial, power=power)
+
+        print('Components:')
+        print(f'    Serial: {str(serial)}')
+        print(f'    Power: {str(power)}')
+
+        board = Board('Test board', console=serial, power=power)
         return board
 
 
@@ -24,9 +29,15 @@ class TargetFactory:
 
         log.debug('Serial config = ' + json.dumps(serial_config))
 
-        port = serial_config.get('port') or '/dev/ttyUSB0'
-        return SerialConsole(port, serial_config.get('baud'))
+        port = serial_config.get('port')
+        if not port:
+            return None
+
+        return SerialConsole(port, int(serial_config.get('baud') or 115200))
 
     @ staticmethod
     def create_power_control(power_config, serial):
-        return SoftPower(serial)
+        if serial:
+            return SoftPower(serial)
+        else:
+            return None

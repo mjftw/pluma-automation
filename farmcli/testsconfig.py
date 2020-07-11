@@ -72,12 +72,12 @@ class TestsConfig:
 
         # Instantiate tests selected
         test_objects = []
-        print('Test list:')
+        print('\nTest list:')
         for test_name in all_tests:
             selected = TestsConfig.test_matches(test_name, include, exclude)
             test_parameters_list = parameters.get(test_name)
             check = 'x' if selected else ' '
-            print(f'  [{check}] {test_name}')
+            print(f'    [{check}] {test_name}')
 
             if selected:
                 if not isinstance(test_parameters_list, list):
@@ -85,7 +85,7 @@ class TestsConfig:
 
                 for test_parameters in test_parameters_list:
                     if test_parameters:
-                        print(f'        {json.dumps(test_parameters)}')
+                        print(f'          {json.dumps(test_parameters)}')
 
                     test_objects.append(
                         all_tests[test_name](board, test_parameters))
