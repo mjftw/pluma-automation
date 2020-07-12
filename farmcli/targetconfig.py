@@ -23,6 +23,7 @@ class TargetConfig:
                 color='green' if ssh else 'normal')
         log.log(f'    Power control:  {str(power)}',
                 color='green' if power else 'normal')
+        log.log('')
 
         board = Board('Test board', console=main_console, power=power)
         return board

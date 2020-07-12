@@ -46,16 +46,15 @@ class Config:
 
 
 class TestsConfig:
-    @staticmethod
+    @ staticmethod
     def create_test_controller(config, board):
-        tests = TestsConfig.create_tests(config.get('tests'), board)
-        tests.extend(TestsConfig.create_script_tests(
-            config.get('script_tests'), board))
+        tests = TestsConfig.selected_tests(config)
+        test_objects = TestsConfig.create_tests(tests, board)
 
         controller = TestController(
             testrunner=TestRunner(
                 board=board,
-                tests=tests,
+                tests=test_objects,
                 sequential=config.get('sequential') or True,
                 email_on_fail=config.get('email_on_fail') or False,
                 continue_on_fail=config.get('continue_on_fail') or True,
@@ -70,7 +69,7 @@ class TestsConfig:
         return controller
 
     @ staticmethod
-    def find_tests():
+    def find_python_tests():
         # Find all tests
         all_tests = {}
         for m in inspect.getmembers(tests, inspect.isclass):
@@ -80,17 +79,24 @@ class TestsConfig:
 
         return all_tests
 
+    @staticmethod
+    def selected_tests(config):
+        tests = TestsConfig.selected_python_tests(config.get('tests'))
+        tests.extend(TestsConfig.selected_script_tests(
+            config.get('script_tests')))
+        return tests
+
     @ staticmethod
-    def create_tests(config, board):
+    def selected_python_tests(config):
         include = config.get('include') or []
         exclude = config.get('exclude') or []
         parameters = config.get('parameters') or {}
 
-        all_tests = TestsConfig.find_tests()
+        all_tests = TestsConfig.find_python_tests()
 
         # Instantiate tests selected
-        test_objects = []
-        log.log('\nCore tests:', bold=True)
+        selected_tests = []
+        log.log('Core tests:', bold=True)
         for test_name in sorted(all_tests):
             selected = TestsConfig.test_matches(test_name, include, exclude)
             test_parameters_list = parameters.get(test_name)
@@ -106,33 +112,47 @@ class TestsConfig:
                     if test_parameters:
                         log.log(f'          {json.dumps(test_parameters)}')
 
-                    test_objects.append(
-                        all_tests[test_name](board, test_parameters))
+                    selected_tests.append(
+                        {'name': test_name, 'class': all_tests[test_name], 'parameters': test_parameters})
 
-        return test_objects
+        return selected_tests
 
     @ staticmethod
-    def create_script_tests(config, board):
+    def selected_script_tests(config):
         log.log('\nInline tests (pluma.yml):', bold=True)
         if not config:
             log.log('    None\n')
             return []
 
-        test_objects = []
+        selected_tests = []
         for test_name in config:
             log.log(f'    [x] {test_name}', color='green')
 
             try:
                 test_parameters = config[test_name]
                 test_parameters['name'] = test_name
+                test = {'name': test_name, 'class': ShellTest,
+                        'parameters': test_parameters}
+                selected_tests.append(test)
             except:
                 raise ValueError(
-                    f'Failed to create script test "{test_name}"')
-
-            test = ShellTest(board, test_parameters)
-            test_objects.append(test)
+                    f'Failed to parse script test "{test_name}"')
 
         log.log('')
+        return selected_tests
+
+    @ staticmethod
+    def create_tests(tests, board):
+        test_objects = []
+        for test in tests:
+            test_name = test['name']
+            try:
+                test_object = test['class'](board, test['parameters'])
+                test_objects.append(test_object)
+            except:
+                raise ValueError(
+                    f'Failed to create test "{test_name}"')
+
         return test_objects
 
     @ staticmethod
