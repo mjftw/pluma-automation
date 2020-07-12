@@ -63,6 +63,12 @@ class TestsConfig:
             )
         )
 
+        iterations = config.get('iterations')
+        if iterations:
+            controller.run_condition = sc_run_n_iterations(int(iterations))
+
+        return controller
+
     @ staticmethod
     def find_tests():
         # Find all tests
