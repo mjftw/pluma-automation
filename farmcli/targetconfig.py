@@ -10,8 +10,9 @@ log = PlumaLogger.logger()
 class TargetConfig:
     @staticmethod
     def create_board(config):
-        serial, ssh = TargetFactory.create_consoles(config.get('console'))
-        power = TargetFactory.create_power_control(config.get('power'), serial)
+        serial, ssh = TargetFactory.create_consoles(config.take('console'))
+        power = TargetFactory.create_power_control(
+            config.take('power'), serial)
         main_console = serial or ssh
 
         log.log('Components:', bold=True)
@@ -25,6 +26,7 @@ class TargetConfig:
                 color='green' if power else 'normal')
         log.log('')
 
+        config.ensure_consumed()
         board = Board('Test board', console=main_console, power=power)
         return board
 
@@ -35,8 +37,9 @@ class TargetFactory:
         if not config:
             return None, None
 
-        serial = TargetFactory.create_serial(config.get('serial'))
-        ssh = TargetFactory.create_ssh(config.get('ssh'))
+        serial = TargetFactory.create_serial(config.take('serial'))
+        ssh = TargetFactory.create_ssh(config.take('ssh'))
+        config.ensure_consumed()
         return serial, ssh
 
     @staticmethod
@@ -44,29 +47,31 @@ class TargetFactory:
         if not serial_config:
             return None
 
-        log.debug('Serial config = ' + json.dumps(serial_config))
+        log.debug(f'Serial config: {serial_config}')
 
-        port = serial_config.get('port')
+        port = serial_config.take('port')
         if not port:
             raise ValueError(
                 'Missing "port" attributes for serial console in the configuration file')
 
-        return SerialConsole(port, int(serial_config.get('baud') or 115200))
+        serial = SerialConsole(port, int(serial_config.take('baud') or 115200))
+        serial_config.ensure_consumed()
+        return serial
 
     @staticmethod
     def create_ssh(ssh_config):
         if not ssh_config:
             return None
 
-        log.debug('SSH config = ' + json.dumps(ssh_config))
-        target = ssh_config.get('target')
-        login = ssh_config.get('login')
+        log.debug('SSH config = ' + json.dumps(ssh_config.content()))
+        target = ssh_config.take('target')
+        login = ssh_config.take('login')
 
         if not target or not login:
             raise ValueError(
                 'Missing "target" or "login" attributes for SSH console in the configuration file')
 
-        password = ssh_config.get('password')
+        password = ssh_config.take('password')
         command = ''
         if not password:
             command = f'ssh {login}@{target} -o StrictHostKeyChecking=no'
@@ -74,6 +79,7 @@ class TargetFactory:
             command = f'sshpass -p {password} ssh {login}@{target} -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no'
 
         log.debug(f'SSH connection command: {command}')
+        ssh_config.ensure_consumed()
         return HostConsole(command)
 
     @staticmethod

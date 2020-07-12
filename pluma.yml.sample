@@ -1,10 +1,12 @@
-sequential: true
-email_on_fail: false
-continue_on_fail: true
-skip_tasks: [_board_on_and_validate, _board_login, _board_off]
+settings:
+  sequential: true
+  email_on_fail: false
+  continue_on_fail: true
+  iterations: 1
+  skip_tasks: [_board_on_and_validate, _board_login, _board_off]
 
 tests:
-  include: [tests.empty.Test, tests.memory]
+  include: [tests.empty.Test, tests.memory, tests.shtest]
   exclude: []
   parameters:
     tests.memory.MemoryFree:
@@ -17,9 +19,9 @@ tests:
 script_tests:
   cat_meminfo:
     script:
-    - cat /proc/meminfo | grep "MemFree:"
-    - free | grep "Mem:"
-    should_print: ['Masdem:', 'MemFree:']
+    - cat /proc/meminfo | grep "MemFree:" > toto
+    - free | grep "Mem:" > robert
+    should_print: ['Mem:', 'MemFree:']
     should_not_print: ['error', 'unknown']
   ls:
     run_on_host: true

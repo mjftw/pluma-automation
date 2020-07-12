@@ -1,74 +1,50 @@
 import tests
 import logging
-import yaml
 import inspect
 import re
 import json
 
 from farmtest import TestController, TestBase, TestRunner, ShellTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
-from farmcli import PlumaLogger
+from farmcli import PlumaLogger, Configuration
 
 log = PlumaLogger.logger()
 
-
-class Config:
-    @staticmethod
-    def load_configuration(tests_config_path, target_config_path):
-        tests_config = None
-        target_config = None
-
-        try:
-            with open(tests_config_path, 'r') as config:
-                tests_config = yaml.load(config, Loader=yaml.FullLoader)
-        except FileNotFoundError:
-            log.error('Configuration file "' + tests_config_path +
-                      '" does not exist')
-            exit(-1)
-        except:
-            log.error(
-                f'Failed to open configuration file "{tests_config_path}"')
-            exit(-1)
-
-        try:
-            with open(target_config_path, 'r') as config:
-                target_config = yaml.load(config, Loader=yaml.FullLoader)
-        except FileNotFoundError:
-            log.error('Target file "' + target_config_path +
-                      '" does not exist')
-            exit(-1)
-        except:
-            log.error(
-                f'Failed to open target file "{target_config_path}"')
-            exit(-1)
-
-        return tests_config, target_config
+SETTINGS_SECTION = 'settings'
+PYTHON_TESTS_SECTION = 'tests'
+SCRIPT_TESTS_SECTION = 'script_tests'
 
 
 class TestsConfig:
-    @ staticmethod
+    @staticmethod
     def create_test_controller(config, board):
-        tests = TestsConfig.selected_tests(config)
+        settings = config.take(SETTINGS_SECTION)
+        tests = TestsConfig.selected_tests(
+            config.take(PYTHON_TESTS_SECTION), config.take(SCRIPT_TESTS_SECTION))
+        config.ensure_consumed()
+
         test_objects = TestsConfig.create_tests(tests, board)
 
         controller = TestController(
             testrunner=TestRunner(
                 board=board,
                 tests=test_objects,
-                sequential=config.get('sequential') or True,
-                email_on_fail=config.get('email_on_fail') or False,
-                continue_on_fail=config.get('continue_on_fail') or True,
-                skip_tasks=config.get('skip_tasks') or [],
+                sequential=settings.take('sequential') or True,
+                email_on_fail=settings.take('email_on_fail') or False,
+                continue_on_fail=settings.take('continue_on_fail') or True,
+                skip_tasks=settings.take('skip_tasks') or [],
             )
         )
 
-        iterations = config.get('iterations')
+        iterations = settings.take('iterations')
         if iterations:
             controller.run_condition = sc_run_n_iterations(int(iterations))
 
+        settings.ensure_consumed()
+
         return controller
 
-    @ staticmethod
+    @staticmethod
     def find_python_tests():
         # Find all tests
         all_tests = {}
@@ -80,27 +56,30 @@ class TestsConfig:
         return all_tests
 
     @staticmethod
-    def selected_tests(config):
-        tests_attribute = 'tests'
-        tests_config = config.get(tests_attribute)
-        if not tests_config:
+    def print_tests(config):
+        TestsConfig.selected_tests(config.take(PYTHON_TESTS_SECTION),
+                                   config.take(SCRIPT_TESTS_SECTION))
+
+    @staticmethod
+    def selected_tests(python_tests_config, script_tests_config):
+        if not python_tests_config:
             log.error(
-                f'Configuration file is invalid, missing a "{tests_attribute}" section')
+                f'Configuration file is invalid, missing a "{PYTHON_TESTS_SECTION}" section')
             exit(-2)
 
-        tests = TestsConfig.selected_python_tests(tests_config)
+        tests = TestsConfig.selected_python_tests(python_tests_config)
         tests.extend(TestsConfig.selected_script_tests(
-            config.get('script_tests')))
+            script_tests_config.content()))
         return tests
 
-    @ staticmethod
+    @staticmethod
     def selected_python_tests(config):
         if not config:
             raise ValueError('Null configuration provided')
 
-        include = config.get('include') or []
-        exclude = config.get('exclude') or []
-        parameters = config.get('parameters') or {}
+        include = config.take('include') or []
+        exclude = config.take('exclude') or []
+        parameters = config.take('parameters') or Configuration()
 
         all_tests = TestsConfig.find_python_tests()
 
@@ -109,7 +88,7 @@ class TestsConfig:
         log.log('Core tests:', bold=True)
         for test_name in sorted(all_tests):
             selected = TestsConfig.test_matches(test_name, include, exclude)
-            test_parameters_list = parameters.get(test_name)
+            test_parameters_list = parameters.take_raw(test_name)
             check = 'x' if selected else ' '
             log.log(f'    [{check}] {test_name}',
                     color='green' if selected else 'normal')
@@ -120,16 +99,24 @@ class TestsConfig:
 
                 for test_parameters in test_parameters_list:
                     if test_parameters:
-                        log.log(f'          {json.dumps(test_parameters)}')
+                        json_data = None
+                        if isinstance(test_parameters, Configuration):
+                            json_data = test_parameters
+                        else:
+                            json_data = json.dumps(test_parameters)
+
+                        log.log(f'          {json_data}')
 
                     selected_tests.append(
                         {'name': test_name, 'class': all_tests[test_name], 'parameters': test_parameters})
 
+        log.log('')
+        config.ensure_consumed()
         return selected_tests
 
-    @ staticmethod
+    @staticmethod
     def selected_script_tests(config):
-        log.log('\nInline tests (pluma.yml):', bold=True)
+        log.log('Inline tests (pluma.yml):', bold=True)
         if not config:
             log.log('    None\n')
             return []
@@ -152,7 +139,7 @@ class TestsConfig:
         log.log('')
         return selected_tests
 
-    @ staticmethod
+    @staticmethod
     def create_tests(tests, board):
         test_objects = []
         for test in tests:
@@ -166,7 +153,7 @@ class TestsConfig:
 
         return test_objects
 
-    @ staticmethod
+    @staticmethod
     def test_matches(test_name, include, exclude):
         # Very suboptimal way of doing it.
         for regex_string in exclude:

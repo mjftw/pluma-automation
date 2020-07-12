@@ -6,7 +6,7 @@ import argparse
 
 from farmcore import Board
 from farmtest import TestController
-from farmcli import Config, TestsConfig, TargetConfig, PlumaLogger
+from farmcli import PlumaConfig, TestsConfig, TargetConfig, PlumaLogger
 
 log = PlumaLogger.logger()
 
@@ -31,13 +31,13 @@ def main():
         if args.quiet:
             log.set_enabled(False)
 
-        tests_config, target_config = Config.load_configuration(
+        tests_config, target_config = PlumaConfig.load_configuration(
             tests_config_path, target_config_path)
 
         board = TargetConfig.create_board(target_config)
 
         default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
-        board.log_file = tests_config.get('log') or default_log
+        board.log_file = tests_config.take('log') or default_log
 
         tests_controller = TestsConfig.create_test_controller(
             tests_config, board)
@@ -46,12 +46,12 @@ def main():
         print(tests_controller.get_test_results())
 
     elif args.command == 'tests':
-        tests_config, target_config = Config.load_configuration(
+        tests_config, _ = PlumaConfig.load_configuration(
             tests_config_path, target_config_path)
 
         log.log(
             'List of core and script tests available, based on the current configuration.')
-        TestsConfig.selected_tests(tests_config)
+        TestsConfig.print_tests(tests_config)
 
 
 if __name__ == "__main__":

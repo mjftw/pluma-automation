@@ -49,4 +49,10 @@ class MemoryReadWrite(TestBase):
         return f'{self.__module__}[{self.size}]'
 
     def test_body(self):
-        [['?'] * 10 for _ in range(self.size)]
+        data = [None for _ in range(self.size)]
+        for i in range(self.size):
+            data[i] = i
+
+        for i in range(self.size):
+            if data[i] != i:
+                raise Exception('Inconsistency reading from memory')
