@@ -37,28 +37,34 @@ class PlumaLogger:
     def set_debug_enabled(self, enabled):
         self.debug_enabled = enabled
 
-    def debug(self, message):
-        if not self.enabled or not self.debug_enabled:
-            return
-
-        self.log(message)
-
-    def warning(self, message):
-        if not self.enabled or not self.debug_enabled:
-            return
-
-        self.log(message, color='yellow')
-
-    def error(self, message):
-        if not self.enabled or not self.debug_enabled:
-            return
-
-        self.log(message, color='red')
-
     def log(self, message, color=None, bold=False):
         if not self.enabled:
             return
 
+        self._log(message, color, bold)
+
+    def debug(self, message):
+        if not self.enabled or not self.debug_enabled:
+            return
+
+        self._log(message)
+
+    def info(self, message):
+        if not self.enabled:
+            return
+
+        self._log(message)
+
+    def warning(self, message):
+        if not self.enabled:
+            return
+
+        self._log(message, color='yellow')
+
+    def error(self, message):
+        self._log(message, color='red')
+
+    def _log(self, message, color=None, bold=False):
         if color in style_map:
             message = '{}{}{}'.format(
                 style_map[color],

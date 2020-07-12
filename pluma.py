@@ -8,7 +8,7 @@ from farmcore import Board
 from farmtest import TestController
 from farmcli import Config, TestsConfig, TargetConfig, PlumaLogger
 
-log = PlumaLogger()
+log = PlumaLogger.logger()
 
 
 def main():
@@ -16,15 +16,24 @@ def main():
         description='A lightweight automated testing tool for embedded devices. Developed and maintained by Witekio, all rights reserved.')
     parser.add_argument('command', type=str, nargs='?', choices=['run', 'tests'], default='run',
                         help='command for pluma, defaults to "run"')
-
-    tests_config_path = 'pluma.yml'
-    target_config_path = 'pluma-target.yml'
-
-    tests_config, target_config = Config.load_configuration(
-        tests_config_path, target_config_path)
+    parser.add_argument(
+        '-q', '--quiet', action='store_const', const=True, help='hide context information, such has components and tests list')
+    parser.add_argument(
+        '-c', '--config', default='pluma.yml', help='path to the tests configuration file. Default: "pluma.yml"')
+    parser.add_argument(
+        '-t', '--target', default='pluma-target.yml', help='path to the taret configuration file. Default: "pluma-target.yml"')
 
     args = parser.parse_args()
+    tests_config_path = args.config
+    target_config_path = args.target
+
     if args.command == 'run':
+        if args.quiet:
+            log.set_enabled(False)
+
+        tests_config, target_config = Config.load_configuration(
+            tests_config_path, target_config_path)
+
         board = TargetConfig.create_board(target_config)
 
         default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
@@ -37,6 +46,9 @@ def main():
         print(tests_controller.get_test_results())
 
     elif args.command == 'tests':
+        tests_config, target_config = Config.load_configuration(
+            tests_config_path, target_config_path)
+
         log.log(
             'List of core and script tests available, based on the current configuration.')
         TestsConfig.selected_tests(tests_config)

@@ -23,7 +23,7 @@ class Config:
                 tests_config = yaml.load(config, Loader=yaml.FullLoader)
         except FileNotFoundError:
             log.error('Configuration file "' + tests_config_path +
-                      '" not found in the current folder')
+                      '" does not exist')
             exit(-1)
         except:
             log.error(
@@ -34,12 +34,12 @@ class Config:
             with open(target_config_path, 'r') as config:
                 target_config = yaml.load(config, Loader=yaml.FullLoader)
         except FileNotFoundError:
-            log.error('Configuration file "' + target_config_path +
-                      '" not found in the current folder')
+            log.error('Target file "' + target_config_path +
+                      '" does not exist')
             exit(-1)
         except:
             log.error(
-                f'Failed to open configuration file "{target_config_path}"')
+                f'Failed to open target file "{target_config_path}"')
             exit(-1)
 
         return tests_config, target_config
@@ -81,13 +81,23 @@ class TestsConfig:
 
     @staticmethod
     def selected_tests(config):
-        tests = TestsConfig.selected_python_tests(config.get('tests'))
+        tests_attribute = 'tests'
+        tests_config = config.get(tests_attribute)
+        if not tests_config:
+            log.error(
+                f'Configuration file is invalid, missing a "{tests_attribute}" section')
+            exit(-2)
+
+        tests = TestsConfig.selected_python_tests(tests_config)
         tests.extend(TestsConfig.selected_script_tests(
             config.get('script_tests')))
         return tests
 
     @ staticmethod
     def selected_python_tests(config):
+        if not config:
+            raise ValueError('Null configuration provided')
+
         include = config.get('include') or []
         exclude = config.get('exclude') or []
         parameters = config.get('parameters') or {}
@@ -134,9 +144,10 @@ class TestsConfig:
                 test = {'name': test_name, 'class': ShellTest,
                         'parameters': test_parameters}
                 selected_tests.append(test)
-            except:
-                raise ValueError(
-                    f'Failed to parse script test "{test_name}"')
+            except Exception as e:
+                log.error(
+                    f'Failed to parse script test "{test_name}":\n    {e}')
+                exit(-2)
 
         log.log('')
         return selected_tests
@@ -149,9 +160,9 @@ class TestsConfig:
             try:
                 test_object = test['class'](board, test['parameters'])
                 test_objects.append(test_object)
-            except:
-                raise ValueError(
-                    f'Failed to create test "{test_name}"')
+            except Exception as e:
+                log.error(f'Failed to create test "{test_name}":\n    {e}')
+                exit(-3)
 
         return test_objects
 
