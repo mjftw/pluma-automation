@@ -6,8 +6,10 @@ import re
 import json
 
 from farmtest import TestController, TestBase, TestRunner, ShellTest
+from farmtest.stock.deffuncs import sc_run_n_iterations
+from farmcli import PlumaLogger
 
-log = logging.getLogger(__name__)
+log = PlumaLogger.logger()
 
 
 class Config:
@@ -50,7 +52,7 @@ class TestsConfig:
         tests.extend(TestsConfig.create_script_tests(
             config.get('script_tests'), board))
 
-        return TestController(
+        controller = TestController(
             testrunner=TestRunner(
                 board=board,
                 tests=tests,
@@ -82,12 +84,13 @@ class TestsConfig:
 
         # Instantiate tests selected
         test_objects = []
-        print('\nTest list:')
+        log.log('\nCore tests:', bold=True)
         for test_name in sorted(all_tests):
             selected = TestsConfig.test_matches(test_name, include, exclude)
             test_parameters_list = parameters.get(test_name)
             check = 'x' if selected else ' '
-            print(f'    [{check}] {test_name}')
+            log.log(f'    [{check}] {test_name}',
+                    color='green' if selected else 'normal')
 
             if selected:
                 if not isinstance(test_parameters_list, list):
@@ -95,7 +98,7 @@ class TestsConfig:
 
                 for test_parameters in test_parameters_list:
                     if test_parameters:
-                        print(f'          {json.dumps(test_parameters)}')
+                        log.log(f'          {json.dumps(test_parameters)}')
 
                     test_objects.append(
                         all_tests[test_name](board, test_parameters))
@@ -104,14 +107,14 @@ class TestsConfig:
 
     @ staticmethod
     def create_script_tests(config, board):
-        print('\nScript test list:')
+        log.log('\nInline tests (pluma.yml):', bold=True)
         if not config:
-            print('    None\n')
+            log.log('    None\n')
             return []
 
         test_objects = []
         for test_name in config:
-            print(f'    [x] {test_name}')
+            log.log(f'    [x] {test_name}', color='green')
 
             try:
                 test_parameters = config[test_name]
@@ -123,7 +126,7 @@ class TestsConfig:
             test = ShellTest(board, test_parameters)
             test_objects.append(test)
 
-        print('')
+        log.log('')
         return test_objects
 
     @ staticmethod

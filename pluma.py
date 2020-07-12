@@ -1,16 +1,15 @@
 import sys
 import json
-import logging
 import time
 
 from farmcore import Board
 from farmtest import TestController
-from farmcli import Config, TestsConfig, TargetConfig
+from farmcli import Config, TestsConfig, TargetConfig, PlumaLogger
+
+log = PlumaLogger()
 
 
 def main():
-    log = logging.getLogger(__name__)
-
     tests_config_path = 'pluma.yml'
     target_config_path = 'pluma-target.yml'
 

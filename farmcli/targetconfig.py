@@ -1,10 +1,10 @@
 import json
 import logging
 
-from farmcore import Board
-from farmcore import SerialConsole, HostConsole, SoftPower
+from farmcore import Board, SerialConsole, HostConsole, SoftPower
+from farmcli import PlumaLogger
 
-log = logging.getLogger(__name__)
+log = PlumaLogger.logger()
 
 
 class TargetConfig:
@@ -14,12 +14,15 @@ class TargetConfig:
         power = TargetFactory.create_power_control(config.get('power'), serial)
         main_console = serial or ssh
 
-        print('Components:')
+        log.log('Components:', bold=True)
         more_info = '- Default' if serial and main_console == serial else ''
-        print(f'    Serial: {str(serial)} {more_info}')
+        log.log(f'    Serial:         {str(serial)} {more_info}',
+                color='green' if serial else 'normal')
         more_info = '- Default' if ssh and main_console == ssh else ''
-        print(f'    SSH:    {str(ssh)} {more_info}')
-        print(f'    Power:  {str(power)}')
+        log.log(f'    SSH:            {str(ssh)} {more_info}',
+                color='green' if ssh else 'normal')
+        log.log(f'    Power control:  {str(power)}',
+                color='green' if power else 'normal')
 
         board = Board('Test board', console=main_console, power=power)
         return board
