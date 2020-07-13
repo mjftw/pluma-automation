@@ -29,7 +29,8 @@ class TestsConfig:
             testrunner=TestRunner(
                 board=board,
                 tests=test_objects,
-                sequential=settings.take('sequential') or True,
+                sequential=settings.take('sequential') if settings.take(
+                    'sequential') != None else True,
                 email_on_fail=settings.take('email_on_fail') or False,
                 continue_on_fail=settings.take('continue_on_fail') or True,
                 skip_tasks=settings.take('skip_tasks') or [],

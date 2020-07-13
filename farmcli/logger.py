@@ -1,5 +1,3 @@
-import logging
-
 style_map = {
     'black': '\033[30m',
     'red': '\033[31m',
@@ -30,12 +28,6 @@ class PlumaLogger:
     def logger():
         global logger
         return logger
-
-    def set_enabled(self, enabled):
-        self.enabled = enabled
-
-    def set_debug_enabled(self, enabled):
-        self.debug_enabled = enabled
 
     def log(self, message, color=None, bold=False):
         if not self.enabled:

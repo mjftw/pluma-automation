@@ -29,7 +29,7 @@ def main():
 
     if args.command == 'run':
         if args.quiet:
-            log.set_enabled(False)
+            log.enabled = False
 
         tests_config, target_config = PlumaConfig.load_configuration(
             tests_config_path, target_config_path)

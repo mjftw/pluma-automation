@@ -11,6 +11,13 @@ class HostConsole(ConsoleBase):
         self._pex = None
         super().__init__()
 
+    def __repr__(self):
+        command = self.command
+        if len(command) > 30:
+            command = f'{self.command[:27]}...'
+
+        return f'{self.__class__.__name__}[{command}]'
+
     @property
     def is_open(self):
         if self._pex and self._pex.isalive():
@@ -39,4 +46,3 @@ class HostConsole(ConsoleBase):
         if not self.is_open:
             self.open()
         self._pex.interact()
-
