@@ -19,8 +19,8 @@ tests:
 script_tests:
   cat_meminfo:
     script:
-    - cat /proc/meminfo | grep "MemFree:" > toto
-    - free | grep "Mem:" > robert
+    - cat /proc/meminfo | grep "MemFree:"
+    - free | grep "Mem:"
     should_print: ['Mem:', 'MemFree:']
     should_not_print: ['error', 'unknown']
   ls:

@@ -6,12 +6,12 @@ import argparse
 
 from farmcore import Board
 from farmtest import TestController
-from farmcli import PlumaConfig, TestsConfig, TargetConfig, PlumaLogger
+from farmcli import PlumaConfig, TestsConfig, TargetConfig, PlumaLogger, TestsConfigError, TargetConfigError
 
 log = PlumaLogger.logger()
 
 
-def main():
+def parse_arguments():
     parser = argparse.ArgumentParser(
         description='A lightweight automated testing tool for embedded devices. Developed and maintained by Witekio, all rights reserved.')
     parser.add_argument('command', type=str, nargs='?', choices=['run', 'tests'], default='run',
@@ -24,34 +24,55 @@ def main():
         '-t', '--target', default='pluma-target.yml', help='path to the taret configuration file. Default: "pluma-target.yml"')
 
     args = parser.parse_args()
+    return args
+
+
+def execute_run(args, tests_config_path, target_config_path):
+    if args.quiet:
+        log.enabled = False
+
+    tests_config, target_config = PlumaConfig.load_configuration(
+        tests_config_path, target_config_path)
+
+    board = TargetConfig.create_board(target_config)
+
+    default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
+    board.log_file = tests_config.take('log') or default_log
+
+    tests_controller = TestsConfig.create_test_controller(
+        tests_config, board)
+    tests_controller.run()
+
+    print(tests_controller.get_test_results())
+
+
+def execute_tests(args, tests_config_path, target_config_path):
+    tests_config, _ = PlumaConfig.load_configuration(
+        tests_config_path, target_config_path)
+
+    log.log(
+        'List of core and script tests available, based on the current configuration.')
+    TestsConfig.print_tests(tests_config)
+
+
+def main():
+    args = parse_arguments()
     tests_config_path = args.config
     target_config_path = args.target
 
-    if args.command == 'run':
-        if args.quiet:
-            log.enabled = False
-
-        tests_config, target_config = PlumaConfig.load_configuration(
-            tests_config_path, target_config_path)
-
-        board = TargetConfig.create_board(target_config)
-
-        default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
-        board.log_file = tests_config.take('log') or default_log
-
-        tests_controller = TestsConfig.create_test_controller(
-            tests_config, board)
-        tests_controller.run()
-
-        print(tests_controller.get_test_results())
-
-    elif args.command == 'tests':
-        tests_config, _ = PlumaConfig.load_configuration(
-            tests_config_path, target_config_path)
-
-        log.log(
-            'List of core and script tests available, based on the current configuration.')
-        TestsConfig.print_tests(tests_config)
+    try:
+        if args.command == 'run':
+            execute_run(args, tests_config_path, target_config_path)
+        elif args.command == 'tests':
+            execute_tests(args, tests_config_path, target_config_path)
+    except TestsConfigError as e:
+        log.error(
+            f'Error while parsing the tests configuration ({tests_config_path}):\n  {e}')
+        exit(-1)
+    except TargetConfigError as e:
+        log.error(
+            f'Error while parsing the target configuration ({target_config_path}):\n  {e}')
+        exit(-2)
 
 
 if __name__ == "__main__":

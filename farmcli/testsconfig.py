@@ -6,7 +6,7 @@ import json
 
 from farmtest import TestController, TestBase, TestRunner, ShellTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
-from farmcli import PlumaLogger, Configuration
+from farmcli import PlumaLogger, Configuration, ConfigurationError
 
 log = PlumaLogger.logger()
 
@@ -15,33 +15,40 @@ PYTHON_TESTS_SECTION = 'tests'
 SCRIPT_TESTS_SECTION = 'script_tests'
 
 
+class TestsConfigError(Exception):
+    pass
+
+
 class TestsConfig:
     @staticmethod
     def create_test_controller(config, board):
-        settings = config.take(SETTINGS_SECTION)
-        tests = TestsConfig.selected_tests(
-            config.take(PYTHON_TESTS_SECTION), config.take(SCRIPT_TESTS_SECTION))
-        config.ensure_consumed()
+        try:
+            settings = config.take(SETTINGS_SECTION)
+            tests = TestsConfig.selected_tests(
+                config.take(PYTHON_TESTS_SECTION), config.take(SCRIPT_TESTS_SECTION))
+            config.ensure_consumed()
 
-        test_objects = TestsConfig.create_tests(tests, board)
+            test_objects = TestsConfig.create_tests(tests, board)
 
-        controller = TestController(
-            testrunner=TestRunner(
-                board=board,
-                tests=test_objects,
-                sequential=settings.take('sequential') if settings.take(
-                    'sequential') != None else True,
-                email_on_fail=settings.take('email_on_fail') or False,
-                continue_on_fail=settings.take('continue_on_fail') or True,
-                skip_tasks=settings.take('skip_tasks') or [],
+            controller = TestController(
+                testrunner=TestRunner(
+                    board=board,
+                    tests=test_objects,
+                    sequential=settings.take('sequential') if settings.take(
+                        'sequential') != None else True,
+                    email_on_fail=settings.take('email_on_fail') or False,
+                    continue_on_fail=settings.take('continue_on_fail') or True,
+                    skip_tasks=settings.take('skip_tasks') or [],
+                )
             )
-        )
 
-        iterations = settings.take('iterations')
-        if iterations:
-            controller.run_condition = sc_run_n_iterations(int(iterations))
+            iterations = settings.take('iterations')
+            if iterations:
+                controller.run_condition = sc_run_n_iterations(int(iterations))
 
-        settings.ensure_consumed()
+            settings.ensure_consumed()
+        except ConfigurationError as e:
+            raise TestsConfigError(e)
 
         return controller
 
@@ -64,9 +71,8 @@ class TestsConfig:
     @staticmethod
     def selected_tests(python_tests_config, script_tests_config):
         if not python_tests_config:
-            log.error(
+            raise TestsConfigError(
                 f'Configuration file is invalid, missing a "{PYTHON_TESTS_SECTION}" section')
-            exit(-2)
 
         tests = TestsConfig.selected_python_tests(python_tests_config)
         tests.extend(TestsConfig.selected_script_tests(
@@ -133,9 +139,8 @@ class TestsConfig:
                         'parameters': test_parameters}
                 selected_tests.append(test)
             except Exception as e:
-                log.error(
+                raise TestsConfigError(
                     f'Failed to parse script test "{test_name}":\n    {e}')
-                exit(-2)
 
         log.log('')
         return selected_tests
@@ -149,8 +154,8 @@ class TestsConfig:
                 test_object = test['class'](board, test['parameters'])
                 test_objects.append(test_object)
             except Exception as e:
-                log.error(f'Failed to create test "{test_name}":\n    {e}')
-                exit(-3)
+                raise TestsConfigError(
+                    f'Failed to create test "{test_name}":\n    {e}')
 
         return test_objects
 

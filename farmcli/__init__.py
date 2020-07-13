@@ -1,4 +1,4 @@
 from .logger import PlumaLogger
-from .config import PlumaConfig, Configuration
-from .testsconfig import TestsConfig
-from .targetconfig import TargetConfig, TargetFactory
+from .config import PlumaConfig, Configuration, ConfigurationError
+from .testsconfig import TestsConfig, TestsConfigError
+from .targetconfig import TargetConfig, TargetFactory, TargetConfigError
