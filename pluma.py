@@ -41,9 +41,11 @@ def execute_run(args, tests_config_path, target_config_path):
 
     tests_controller = TestsConfig.create_test_controller(
         tests_config, board)
-    tests_controller.run()
+    success = tests_controller.run()
 
     print(tests_controller.get_test_results())
+
+    return success
 
 
 def execute_tests(args, tests_config_path, target_config_path):
@@ -62,7 +64,8 @@ def main():
 
     try:
         if args.command == 'run':
-            execute_run(args, tests_config_path, target_config_path)
+            success = execute_run(args, tests_config_path, target_config_path)
+            exit(0 if success else 1)
         elif args.command == 'tests':
             execute_tests(args, tests_config_path, target_config_path)
     except TestsConfigError as e:

@@ -251,7 +251,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         cmd = cmd or ''
         if log_verbose:
-            self.log("Sending command:\n{}".format(cmd), force_log_file=None)
+            self.log(f"Sending command:\n    {cmd}", force_log_file=None)
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)

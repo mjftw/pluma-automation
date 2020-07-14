@@ -580,7 +580,7 @@ class TestController():
 
         # Combine points for each test into one set
         points_combined = {}
-        for points_k, points_v in points.items():
+        for _, points_v in points.items():
             for k, v in points_v.items():
                 points_combined[k] = v
 
@@ -618,19 +618,17 @@ class TestController():
 
     def run(self):
         ''' Run the test suite with saved settings '''
-        if self.settings['email_on_except']:
-            try:
-                self._run()
-            # If exception is one we deliberately caused, don't handle it
-            except KeyboardInterrupt as e:
-                raise e
-            except InterruptedError as e:
-                raise e
-            except Exception as e:
+        try:
+            return self._run()
+        # If exception is one we deliberately caused, don't handle it
+        except KeyboardInterrupt as e:
+            raise e
+        except InterruptedError as e:
+            raise e
+        except Exception as e:
+            if self.settings['email_on_except']:
                 send_exception_email(e)
-                raise e
-        else:
-            self._run()
+            raise e
 
     def _run(self):
         self.stats['num_iterations_run'] = 0
@@ -649,6 +647,8 @@ class TestController():
             self.log("Running setup function: {}".format(self.setup))
             self.setup.run(self)
 
+        success = True
+
         while True:
             if self.run_condition:
                 if (self.settings['force_initial_run'] and
@@ -666,12 +666,12 @@ class TestController():
                         if self.setup:
                             self.log("Running setup function: {}".format(self.setup))
                             self.setup.run(self)
-                    success = self.run_iteration()
+                    success &= self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
                         if self.report:
                             self.log("Running report function: {}".format(self.report))
                             self.report.run(self)
-                        return
+                        return False
                     if (self.settings['report_n_iterations'] and
                             self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
@@ -694,7 +694,7 @@ class TestController():
                         self.settings['condition_check_interval_s']))
                     time.sleep(self.settings['condition_check_interval_s'])
             else:
-                return
+                return success
 
     def _init_iteration(self):
         skeleton = {

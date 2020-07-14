@@ -59,5 +59,14 @@ class ShellTest(TestBase):
                 f'Failed to run script test "{self.name}": no console available')
 
         for script in self.scripts:
-            console.send(script, match=self.should_print,
-                         excepts=self.should_not_print)
+            received, matched = console.send(script, match=self.should_print,
+                                             excepts=self.should_not_print)
+            if matched == False:
+                raise TaskFailed(
+                    f'"{self.name}": Response to command "{script}" did not match expected:\n    Expected: "{self.should_print}"\n    Actual: "{received}"')
+            elif matched == True:
+                print(
+                    f'{self.name}": Matching response to command "{script}":\n    Expected: "{self.should_print}"\n    Matching: "{received}"')
+            else:
+                print(
+                    f'{self.name}": Response to command "{script}":\n    Received: "{received}"')
