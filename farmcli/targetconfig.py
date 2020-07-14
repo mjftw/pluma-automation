@@ -15,11 +15,11 @@ class TargetConfig:
     @staticmethod
     def create_board(config):
         try:
-            serial, ssh = TargetFactory.create_consoles(config.take('console'))
+            serial, ssh = TargetFactory.create_consoles(config.pop('console'))
             main_console = serial or ssh
 
             power = TargetFactory.create_power_control(
-                config.take('power'), main_console)
+                config.pop('power'), main_console)
 
             log.log('Components:', bold=True)
             more_info = '- Default' if serial and main_console == serial else ''
@@ -46,8 +46,8 @@ class TargetFactory:
         if not config:
             return None, None
 
-        serial = TargetFactory.create_serial(config.take('serial'))
-        ssh = TargetFactory.create_ssh(config.take('ssh'))
+        serial = TargetFactory.create_serial(config.pop('serial'))
+        ssh = TargetFactory.create_ssh(config.pop('ssh'))
         config.ensure_consumed()
         return serial, ssh
 
@@ -58,12 +58,12 @@ class TargetFactory:
 
         log.debug(f'Serial config: {serial_config}')
 
-        port = serial_config.take('port')
+        port = serial_config.pop('port')
         if not port:
             raise TargetConfigError(
                 'Missing "port" attributes for serial console in the configuration file')
 
-        serial = SerialConsole(port, int(serial_config.take('baud') or 115200))
+        serial = SerialConsole(port, int(serial_config.pop('baud') or 115200))
         serial_config.ensure_consumed()
         return serial
 
@@ -73,14 +73,14 @@ class TargetFactory:
             return None
 
         log.debug('SSH config = ' + json.dumps(ssh_config.content()))
-        target = ssh_config.take('target')
-        login = ssh_config.take('login')
+        target = ssh_config.pop('target')
+        login = ssh_config.pop('login')
 
         if not target or not login:
             raise TargetConfigError(
                 'Missing "target" or "login" attributes for SSH console in the configuration file')
 
-        password = ssh_config.take('password')
+        password = ssh_config.pop('password')
         command = ''
         if not password:
             command = f'ssh {login}@{target} -o StrictHostKeyChecking=no'
@@ -99,7 +99,7 @@ class TargetFactory:
 
         if power_config.len() > 1:
             raise TargetConfigError(
-                f'Only one power control should be provided in the target configuration, but two ore more provided:\n{power_config}')
+                f'Only one power control should be provided in the target configuration, but two or more provided:\n{power_config}')
 
         control_type = POWER_SOFT
         if power_config.len() > 0:
@@ -109,7 +109,7 @@ class TargetFactory:
             raise TargetConfigError(
                 f'Unsupported power control type "{control_type}". Supported types: {POWER_LIST}')
 
-        power_config = power_config.take(control_type) or Configuration()
+        power_config = power_config.pop(control_type) or Configuration()
         power = None
         if control_type == POWER_SOFT:
             if not console:
@@ -119,15 +119,15 @@ class TargetFactory:
             power = SoftPower(console)
 
         elif control_type == POWER_IPPOWER9258:
-            host = power_config.take('host')
-            outlet = power_config.take('outlet')
+            host = power_config.pop('host')
+            outlet = power_config.pop('outlet')
             if not host or not outlet:
                 raise TargetConfigError(
-                    'IP PDU "host" and/or "outlet" attributes are missing')
+                    'IP Power PDU "host" and/or "outlet" attributes are missing')
 
-            port = power_config.take('port')
-            login = power_config.take('login')
-            password = power_config.take('password')
+            port = power_config.pop('port')
+            login = power_config.pop('login')
+            password = power_config.pop('password')
             power = IPPowerPDU(outlet, host, netport=port,
                                username=login, password=password)
         else:

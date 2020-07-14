@@ -5,16 +5,10 @@ from farmtest import TestBase, TaskFailed, TestingException
 
 
 class MemoryFree(TestBase):
-    def __init__(self, board, parameters):
+    def __init__(self, board, minimum):
         super().__init__(self)
         self.board = board
-
-        if not isinstance(parameters, dict):
-            raise ValueError('Missing parameters for test')
-
-        self.min_free_memory = parameters.get('minimum')
-        if not self.min_free_memory:
-            raise ValueError('Missing "minimum" test parameter')
+        self.min_free_memory = minimum
 
     def test_body(self):
         result = subprocess.run(['cat', '/proc/meminfo'], capture_output=True)
@@ -34,16 +28,10 @@ class MemoryFree(TestBase):
 
 
 class MemoryReadWrite(TestBase):
-    def __init__(self, board, parameters):
+    def __init__(self, board, size):
         super().__init__(self)
         self.board = board
-
-        if not isinstance(parameters, dict):
-            raise ValueError('Missing parameters for test')
-
-        self.size = parameters.get('size')
-        if not self.size:
-            raise ValueError('Missing "size" test parameter')
+        self.size = size
 
     def __repr__(self):
         return f'{self.__module__}[{self.size}]'

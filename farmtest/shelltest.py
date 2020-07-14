@@ -1,35 +1,27 @@
 import os
 
 from .test import TestBase, TaskFailed
-
-shell_test_index = 0
+from farmcore import HostConsole
 
 
 class ShellTest(TestBase):
-    def __init__(self, board, parameters):
+    shell_test_index = 0
+
+    def __init__(self, board, script, name=None, should_print=[], should_not_print=[], run_on_host=False, timeout=None):
         super().__init__(self)
         self.board = board
+        self.should_print = should_print
+        self.should_not_print = should_not_print
+        self.run_on_host = run_on_host
+        self.timeout = timeout
 
-        if not isinstance(parameters, dict):
-            raise ValueError('Missing parameters for test')
-
-        self.scripts = parameters.get('script')
-        if not self.scripts:
-            raise ValueError(
-                f'Missing "script" attribute in script test: {parameters}')
-
+        self.scripts = script
         if not isinstance(self.scripts, list):
             self.scripts = [self.scripts]
 
-        self.should_print = parameters.get('should_print')
-        self.should_not_print = parameters.get('should_not_print')
+        ShellTest.shell_test_index += 1
+        self.name = name or f'{self.__module__}[{ShellTest.shell_test_index}]'
 
-        global shell_test_index
-        shell_test_index = shell_test_index + 1
-        self.name = parameters.get(
-            'name') or f'{self.__module__}[{shell_test_index}]'
-
-        self.run_on_host = parameters.get('run_on_host') or False
         if not self.run_on_host and not self.board.console:
             raise ValueError(
                 f'Cannot run script test "{self.name}" on target: no console'
@@ -40,33 +32,37 @@ class ShellTest(TestBase):
         return self.name
 
     def test_body(self):
+        console = None
         if self.run_on_host:
-            self.run_host()
+            console = HostConsole('sh')
         else:
-            self.run_target()
-
-    def run_host(self):
-        for script in self.scripts:
-            ret = os.system(script)
-            if ret != 0:
+            console = self.board.console
+            if not console:
                 raise TaskFailed(
-                    f'Shell script command "{script}" returned a non-zero code ({ret}).')
+                    f'Failed to run script test "{self.name}": no console available')
 
-    def run_target(self):
-        console = self.board.console
-        if not console:
+        for script in self.scripts:
+            self.run_command(console, script)
+
+    def run_command(self, console, script):
+        received, matched = console.send(script, match=self.should_print,
+                                         excepts=self.should_not_print, timeout=self.timeout or -1)
+
+        prefix = f'Script test "{self.name}":'
+        if matched == False:
             raise TaskFailed(
-                f'Failed to run script test "{self.name}": no console available')
-
-        for script in self.scripts:
-            received, matched = console.send(script, match=self.should_print,
-                                             excepts=self.should_not_print)
-            if matched == False:
-                raise TaskFailed(
-                    f'"{self.name}": Response to command "{script}" did not match expected:\n    Expected: "{self.should_print}"\n    Actual: "{received}"')
-            elif matched == True:
-                print(
-                    f'{self.name}": Matching response to command "{script}":\n    Expected: "{self.should_print}"\n    Matching: "{received}"')
-            else:
-                print(
-                    f'{self.name}": Response to command "{script}":\n    Received: "{received}"')
+                f'{prefix} Response did not match expected:\n'
+                f'    Send:     {script}\n'
+                f'    Expected: "{self.should_print}"\n'
+                f'    Actual: "{received}"')
+        elif matched == True:
+            print(
+                f'{prefix} Matching response found:\n'
+                f'    Sent:     "{script}"\n'
+                f'    Expected: "{self.should_print}"\n'
+                f'    Matching: "{received}"')
+        else:
+            print(
+                f'{prefix} Response received:\n'
+                f'    Sent:     "{script}"\n'
+                f'    Received: "{received}"')

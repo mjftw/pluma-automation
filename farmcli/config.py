@@ -17,18 +17,15 @@ class Configuration:
 
         self.config = config
 
-    def take(self, attribute):
-        value = self.take_raw(attribute)
+    def pop(self, attribute, default=None):
+        value = self.pop_raw(attribute, default)
         if isinstance(value, dict):
             return Configuration(value)
 
         return value
 
-    def take_raw(self, attribute):
-        value = self.config.get(attribute)
-        self.config.pop(attribute, None)
-
-        return value
+    def pop_raw(self, attribute, default=None):
+        return self.config.pop(attribute, default)
 
     def read_and_keep(self, attribute):
         return self.config.get(attribute)

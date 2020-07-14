@@ -19,10 +19,10 @@ tests:
 script_tests:
   cat_meminfo:
     script:
-    - cat /proc/meminfo | grep "MemFree:"
-    - free | grep "Mem:"
-    should_print: ['Mem:', 'MemFree:']
+    - cat /proc/meminfo
+    should_print: ['MemFree:']
     should_not_print: ['error', 'unknown']
+    timeout: 10
   ls:
     run_on_host: true
     script: ls -l | head

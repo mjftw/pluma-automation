@@ -1,5 +1,4 @@
 import tests
-import logging
 import inspect
 import re
 import json
@@ -23,9 +22,9 @@ class TestsConfig:
     @staticmethod
     def create_test_controller(config, board):
         try:
-            settings = config.take(SETTINGS_SECTION)
+            settings = config.pop(SETTINGS_SECTION)
             tests = TestsConfig.selected_tests(
-                config.take(PYTHON_TESTS_SECTION), config.take(SCRIPT_TESTS_SECTION))
+                config.pop(PYTHON_TESTS_SECTION), config.pop(SCRIPT_TESTS_SECTION))
             config.ensure_consumed()
 
             test_objects = TestsConfig.create_tests(tests, board)
@@ -34,15 +33,15 @@ class TestsConfig:
                 testrunner=TestRunner(
                     board=board,
                     tests=test_objects,
-                    sequential=settings.take('sequential') if settings.take(
-                        'sequential') != None else True,
-                    email_on_fail=settings.take('email_on_fail') or False,
-                    continue_on_fail=settings.take('continue_on_fail') or True,
-                    skip_tasks=settings.take('skip_tasks') or [],
+                    sequential=settings.pop('sequential', default=True),
+                    email_on_fail=settings.pop('email_on_fail', default=False),
+                    continue_on_fail=settings.pop(
+                        'continue_on_fail',  default=True),
+                    skip_tasks=settings.pop('skip_tasks',  default=[]),
                 )
             )
 
-            iterations = settings.take('iterations')
+            iterations = settings.pop('iterations')
             if iterations:
                 controller.run_condition = sc_run_n_iterations(int(iterations))
 
@@ -65,8 +64,8 @@ class TestsConfig:
 
     @staticmethod
     def print_tests(config):
-        TestsConfig.selected_tests(config.take(PYTHON_TESTS_SECTION),
-                                   config.take(SCRIPT_TESTS_SECTION))
+        TestsConfig.selected_tests(config.pop(PYTHON_TESTS_SECTION),
+                                   config.pop(SCRIPT_TESTS_SECTION))
 
     @staticmethod
     def selected_tests(python_tests_config, script_tests_config):
@@ -84,9 +83,9 @@ class TestsConfig:
         if not config:
             raise ValueError('Null configuration provided')
 
-        include = config.take('include') or []
-        exclude = config.take('exclude') or []
-        parameters = config.take('parameters') or Configuration()
+        include = config.pop('include') or []
+        exclude = config.pop('exclude') or []
+        parameters = config.pop('parameters') or Configuration()
 
         all_tests = TestsConfig.find_python_tests()
 
@@ -95,7 +94,7 @@ class TestsConfig:
         log.log('Core tests:', bold=True)
         for test_name in sorted(all_tests):
             selected = TestsConfig.test_matches(test_name, include, exclude)
-            test_parameters_list = parameters.take_raw(test_name)
+            test_parameters_list = parameters.pop_raw(test_name)
             check = 'x' if selected else ' '
             log.log(f'    [{check}] {test_name}',
                     color='green' if selected else 'normal')
@@ -106,13 +105,13 @@ class TestsConfig:
 
                 for test_parameters in test_parameters_list:
                     if test_parameters:
-                        json_data = None
+                        printed_data = None
                         if isinstance(test_parameters, Configuration):
-                            json_data = test_parameters
+                            printed_data = test_parameters
                         else:
-                            json_data = json.dumps(test_parameters)
+                            printed_data = json.dumps(test_parameters)
 
-                        log.log(f'          {json_data}')
+                        log.log(f'          {printed_data}')
 
                     selected_tests.append(
                         {'name': test_name, 'class': all_tests[test_name], 'parameters': test_parameters})
@@ -151,7 +150,7 @@ class TestsConfig:
         for test in tests:
             test_name = test['name']
             try:
-                test_object = test['class'](board, test['parameters'])
+                test_object = test['class'](board, **test['parameters'])
                 test_objects.append(test_object)
             except Exception as e:
                 raise TestsConfigError(

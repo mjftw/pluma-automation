@@ -37,7 +37,7 @@ def execute_run(args, tests_config_path, target_config_path):
     board = TargetConfig.create_board(target_config)
 
     default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
-    board.log_file = tests_config.take('log') or default_log
+    board.log_file = tests_config.pop('log') or default_log
 
     tests_controller = TestsConfig.create_test_controller(
         tests_config, board)
