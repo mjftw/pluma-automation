@@ -13,7 +13,7 @@ log = PlumaLogger.logger()
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        description='A lightweight automated testing tool for embedded devices. Developed and maintained by Witekio, all rights reserved.')
+        description='A lightweight automated testing tool for embedded devices.')
     parser.add_argument('command', type=str, nargs='?', choices=['run', 'tests'], default='run',
                         help='command for pluma, defaults to "run"')
     parser.add_argument(
