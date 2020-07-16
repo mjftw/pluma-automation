@@ -14,8 +14,8 @@ log = PlumaLogger.logger()
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description='A lightweight automated testing tool for embedded devices.')
-    parser.add_argument('command', type=str, nargs='?', choices=['run', 'tests'], default='run',
-                        help='command for pluma, defaults to "run"')
+    parser.add_argument('command', type=str, nargs='?', choices=['run', 'check', 'tests'], default='run',
+                        help='command for pluma, defaults to "run". "run": Run the tests suite, "check": validate configuration files and tests, "tests": list all tests available and selected')
     parser.add_argument(
         '-q', '--quiet', action='store_const', const=True, help='hide context information, such has components and tests list')
     parser.add_argument(
@@ -29,7 +29,7 @@ def parse_arguments():
     return args
 
 
-def execute_run(args, tests_config_path, target_config_path):
+def instantiate(args, tests_config_path, target_config_path):
     if args.quiet:
         log.enabled = False
     elif args.debug:
@@ -44,13 +44,22 @@ def execute_run(args, tests_config_path, target_config_path):
     default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
     board.log_file = tests_config.pop('log') or default_log
 
-    tests_controller = TestsConfig.create_test_controller(
+    return TestsConfig.create_test_controller(
         tests_config, board)
-    success = tests_controller.run()
 
-    print(tests_controller.get_test_results(format='json'))
+
+def execute_run(args, tests_config_path, target_config_path):
+    controller = instantiate(args, tests_config_path, target_config_path)
+
+    success = controller.run()
+    print(controller.get_test_results(format='json'))
 
     return success
+
+
+def execute_check(args, tests_config_path, target_config_path):
+    instantiate(args, tests_config_path, target_config_path)
+    log.log('Configuration and tests successfully validated.')
 
 
 def execute_tests(args, tests_config_path, target_config_path):
@@ -71,6 +80,8 @@ def main():
         if args.command == 'run':
             success = execute_run(args, tests_config_path, target_config_path)
             exit(0 if success else 1)
+        elif args.command == 'check':
+            execute_check(args, tests_config_path, target_config_path)
         elif args.command == 'tests':
             execute_tests(args, tests_config_path, target_config_path)
     except TestsConfigError as e:
