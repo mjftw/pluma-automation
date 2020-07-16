@@ -11,11 +11,21 @@ class TargetConfigError(Exception):
     pass
 
 
+class Credentials:
+    def __init__(self, login=None, password=None):
+        self.login = login
+        self.password = password
+
+
 class TargetConfig:
     @staticmethod
     def create_board(config):
         try:
-            serial, ssh = TargetFactory.create_consoles(config.pop('console'))
+            credentials = TargetFactory.parse_credentials(
+                config.pop('credentials'))
+
+            serial, ssh = TargetFactory.create_consoles(
+                config.pop('console'), credentials)
             main_console = serial or ssh
 
             power = TargetFactory.create_power_control(
@@ -33,7 +43,8 @@ class TargetConfig:
             log.log('')
 
             config.ensure_consumed()
-            board = Board('Test board', console=main_console, power=power)
+            board = Board('Test board', console=main_console, power=power,
+                          login_user=credentials.login, login_pass=credentials.password)
         except ConfigurationError as e:
             raise TargetConfigError(e)
 
@@ -42,12 +53,23 @@ class TargetConfig:
 
 class TargetFactory:
     @staticmethod
-    def create_consoles(config):
+    def parse_credentials(credentials_config):
+        if not credentials_config:
+            return Credentials()
+
+        credentials = Credentials(
+            credentials_config.pop('login'),
+            credentials_config.pop('password'))
+        credentials_config.ensure_consumed()
+        return credentials
+
+    @staticmethod
+    def create_consoles(config, credentials):
         if not config:
             return None, None
 
         serial = TargetFactory.create_serial(config.pop('serial'))
-        ssh = TargetFactory.create_ssh(config.pop('ssh'))
+        ssh = TargetFactory.create_ssh(config.pop('ssh'), credentials)
         config.ensure_consumed()
         return serial, ssh
 
@@ -68,19 +90,19 @@ class TargetFactory:
         return serial
 
     @staticmethod
-    def create_ssh(ssh_config):
+    def create_ssh(ssh_config, credentials):
         if not ssh_config:
             return None
 
         log.debug('SSH config = ' + json.dumps(ssh_config.content()))
         target = ssh_config.pop('target')
-        login = ssh_config.pop('login')
+        login = ssh_config.pop('login', credentials.login)
 
         if not target or not login:
             raise TargetConfigError(
                 'Missing "target" or "login" attributes for SSH console in the configuration file')
 
-        password = ssh_config.pop('password')
+        password = ssh_config.pop('password', credentials.password)
         command = ''
         if not password:
             command = f'ssh {login}@{target} -o StrictHostKeyChecking=no'
