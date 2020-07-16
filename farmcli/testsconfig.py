@@ -38,7 +38,8 @@ class TestsConfig:
                     continue_on_fail=settings.pop(
                         'continue_on_fail',  default=True),
                     skip_tasks=settings.pop('skip_tasks',  default=[]),
-                )
+                ),
+                log_func=log.log
             )
 
             iterations = settings.pop('iterations')

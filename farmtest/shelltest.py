@@ -83,11 +83,11 @@ class ShellTest(TestBase):
                     f'{prefix} Response did not match expected:\n' +
                     sent_line + should_print_line + received_line)
             else:
-                print(
+                self.board.log(
                     f'{prefix} Matching response found:\n' +
                     sent_line + should_print_line + received_line)
         else:
-            print(
+            self.board.log(
                 f'{prefix}\n' + sent_line + received_line)
 
         retcode_received, matched = console.send(
