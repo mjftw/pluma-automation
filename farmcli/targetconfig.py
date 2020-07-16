@@ -56,7 +56,7 @@ class TargetFactory:
         if not serial_config:
             return None
 
-        log.debug(f'Serial config: {serial_config}')
+        log.debug(f'Serial config = {serial_config}')
 
         port = serial_config.pop('port')
         if not port:
@@ -87,7 +87,7 @@ class TargetFactory:
         else:
             command = f'sshpass -p {password} ssh {login}@{target} -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no'
 
-        log.debug(f'SSH connection command: {command}')
+        log.debug(f'SSH connection command = "{command}"')
         ssh_config.ensure_consumed()
         return HostConsole(command)
 

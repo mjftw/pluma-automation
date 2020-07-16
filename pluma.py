@@ -22,6 +22,8 @@ def parse_arguments():
         '-c', '--config', default='pluma.yml', help='path to the tests configuration file. Default: "pluma.yml"')
     parser.add_argument(
         '-t', '--target', default='pluma-target.yml', help='path to the taret configuration file. Default: "pluma-target.yml"')
+    parser.add_argument(
+        '--debug', action='store_const', const=True, help='enable debug information')
 
     args = parser.parse_args()
     return args
@@ -30,6 +32,8 @@ def parse_arguments():
 def execute_run(args, tests_config_path, target_config_path):
     if args.quiet:
         log.enabled = False
+    elif args.debug:
+        log.debug_enabled = True
 
     tests_config, target_config = PlumaConfig.load_configuration(
         tests_config_path, target_config_path)
