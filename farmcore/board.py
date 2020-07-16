@@ -29,7 +29,7 @@ class Board(Farmclass):
         self.console = console
         self.hub = hub
 
-        self.prompt = prompt
+        self.prompt = prompt or '\\$'
         self.login_user = login_user or 'root'
         self.login_pass = login_pass
         self.login_user_match = login_user_match or 'login:'
@@ -73,12 +73,12 @@ class Board(Farmclass):
         self.power.reboot()
         start_time = time.time()
         try:
-            (__, matched) = self.console.send(
+            (__, matched) = self.console.send_and_expect(
                 match=bootstr,
+                excepts=exception_bootstr,
                 send_newline=False,
                 timeout=timeout,
-                sleep_time=5,
-                excepts=exception_bootstr)
+                sleep_time=5)
         except ConsoleExceptionKeywordReceivedError as e:
             raise BoardBootValidationError('Matched exception keyword: {}'.format(
                 str(e)))

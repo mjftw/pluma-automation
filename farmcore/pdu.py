@@ -246,8 +246,8 @@ class APCPDU(PowerBase):
 
     def _disconnect(self):
         if self.console.is_open:
-            self.console.send('\x03', match='Control Console')
-            self.console.send('4', match='Connection Closed')
+            self.console.send_and_expect('\x03', match='Control Console')
+            self.console.send_and_expect('4', match='Connection Closed')
 
     def _switch(self, state):
         if state not in ['on', 'off']:
@@ -255,14 +255,16 @@ class APCPDU(PowerBase):
 
         self._login()
 
-        self.console.send('1', match='Device Manager')
-        self.console.send('2', match='Outlet Management')
-        self.console.send('1', match='Outlet Control/Configuration')
-        self.console.send(str(self.port), match='Outlet       : {}'.format(self.port))
-        self.console.send('1', match='Control Outlet')
-        self.console.send('1' if state == 'on' else '2', match="Enter 'YES' to continue")
-        self.console.send('YES', match='Press <ENTER> to continue')
-        self.console.send('', match='Control Outlet')
+        self.console.send_and_expect('1', match='Device Manager')
+        self.console.send_and_expect('2', match='Outlet Management')
+        self.console.send_and_expect('1', match='Outlet Control/Configuration')
+        self.console.send_and_expect(
+            str(self.port), match='Outlet       : {}'.format(self.port))
+        self.console.send_and_expect('1', match='Control Outlet')
+        self.console.send_and_expect(
+            '1' if state == 'on' else '2', match="Enter 'YES' to continue")
+        self.console.send_and_expect('YES', match='Press <ENTER> to continue')
+        self.console.send_and_expect('', match='Control Outlet')
 
         self._disconnect()
         self.console.close()

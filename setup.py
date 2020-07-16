@@ -39,7 +39,8 @@ setuptools.setup(
         'requests',
         'pytest',
         'pytest-cov',
-        'pyyaml>=5.1'
+        'pyyaml>=5.1',
+        'deprecated'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
