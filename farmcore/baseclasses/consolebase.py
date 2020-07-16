@@ -239,9 +239,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
              excepts=None,
              send_newline=True,
              log_verbose=True,
-             timeout=-1,
-             sleep_time=-1,
-             quiet_time=-1,
+             timeout=None,
+             sleep_time=None,
+             quiet_time=None,
              flush_buffer=True
              ):
         if not self.is_open:
@@ -255,9 +255,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
-
-        received = None
-        matched = False
 
         match = match or []
         excepts = excepts or []
@@ -273,17 +270,18 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         watches.extend(excepts)
 
         """ Assign default timeout and sleep values if unassigned """
-        data_timeout = timeout if timeout >= 0 else 5
-        quiet_timeout = timeout if timeout >= 0 else 3
-        data_sleep = sleep_time if sleep_time >= 0 else 0.1
-        quiet_sleep = sleep_time if sleep_time >= 0 else 0.1
-        quiet_time = quiet_time if quiet_time >= 0 else 0.3
+        data_timeout = timeout if timeout is not None else 5
+        quiet_timeout = timeout if timeout is not None else 3
+        quiet_sleep = sleep_time if sleep_time is not None else 0.1
+        quiet_time = quiet_time if quiet_time is not None else 0.3
 
         self._pex.linesep = self.encode(self.linesep)
 
         if flush_buffer:
             self.flush(True)
 
+        received = None
+        matched = None
         if not receive and not watches:
             if send_newline:
                 self._pex.sendline(cmd)
@@ -320,7 +318,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 if matched in excepts:
                     self.error('Matched [{}] is in exceptions list {}'.format(
                         matched, excepts), exception=ConsoleExceptionKeywordReceivedError)
-                return (received, matched)
             else:
                 self.wait_for_quiet(
                     timeout=quiet_timeout,
@@ -328,7 +325,8 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                     quiet=quiet_time,
                     verbose=log_verbose)
                 received = self._buffer
-                return (received, None)
+
+        return (received, matched)
 
     def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()

@@ -47,7 +47,7 @@ class ShellTest(TestBase):
 
     def run_command(self, console, script):
         received, _ = console.send(
-            script, receive=True, timeout=self.timeout or -1, log_verbose=False)
+            script, receive=True, timeout=self.timeout, log_verbose=False)
         if received.startswith(script):
             received = received[len(script):]
         received = received.strip()
