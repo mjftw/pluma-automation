@@ -90,11 +90,11 @@ class ShellTest(TestBase):
             print(
                 f'{prefix}\n' + sent_line + received_line)
 
-        received, matched = console.send(
+        retcode_received, matched = console.send(
             'echo retcode=$?', match='retcode=0', log_verbose=False)
         if matched == False:
             raise TaskFailed(
-                f'{prefix} Command "{script}" returned with a non-zero exit code: "{received}"')
+                f'{prefix} Command "{script}" returned with a non-zero exit code\n' + sent_line + received_line + '  Return code: {retcode_received}')
 
         # Be sure nothing stays in the buffer
         console.wait_for_quiet(verbose=False)
