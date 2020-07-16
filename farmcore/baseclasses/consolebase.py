@@ -126,7 +126,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         timeout = timeout or 10.0
         sleep_time = sleep_time or 0.1
-        verbose = verbose or True
+        verbose = verbose if verbose is not None else True
 
         if match:
             return self.wait_for_match(
