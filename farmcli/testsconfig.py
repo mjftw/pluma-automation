@@ -58,8 +58,9 @@ class TestsConfig:
         all_tests = {}
         for m in inspect.getmembers(tests, inspect.isclass):
             if m[1].__module__.startswith(tests.__name__ + '.'):
-                # Dictionary with the class name as key, and class as value
-                all_tests[f'{m[1].__module__}.{m[1].__name__}'] = m[1]
+                if issubclass(m[1], TestBase):
+                    # Dictionary with the class name as key, and class as value
+                    all_tests[f'{m[1].__module__}.{m[1].__name__}'] = m[1]
 
         return all_tests
 
