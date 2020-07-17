@@ -34,7 +34,7 @@ class MemoryReadWrite(TestBase):
         self.size = size
 
     def __repr__(self):
-        return f'{self.__module__}[{self.size}]'
+        return f'{self.__module__}.{self.__class__.__name__}[{self.size}]'
 
     def test_body(self):
         data = [None for _ in range(self.size)]
