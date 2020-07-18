@@ -11,6 +11,7 @@ from .pdu import APCPDU, IPPowerPDU, EnergeniePDU
 from .serialconsole import SerialConsole
 from .hostconsole import HostConsole
 from .telnetconsole import TelnetConsole
+from .sshconsole import SSHConsole
 from .hub import Hub
 from .sdwire import SDWire
 from .multimeter import MultimeterTTI1604

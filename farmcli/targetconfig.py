@@ -1,7 +1,7 @@
 import json
 import logging
 
-from farmcore import Board, SerialConsole, HostConsole, SoftPower, IPPowerPDU
+from farmcore import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
 from farmcli import PlumaLogger, Configuration, ConfigurationError
 
 log = PlumaLogger()
@@ -103,15 +103,8 @@ class TargetFactory:
                 'Missing "target" or "login" attributes for SSH console in the configuration file')
 
         password = ssh_config.pop('password', credentials.password)
-        command = ''
-        if not password:
-            command = f'ssh {login}@{target} -o StrictHostKeyChecking=no'
-        else:
-            command = f'sshpass -p {password} ssh {login}@{target} -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no'
-
-        log.debug(f'SSH connection command = "{command}"')
         ssh_config.ensure_consumed()
-        return HostConsole(command)
+        return SSHConsole(target, login, password)
 
     @staticmethod
     def create_power_control(power_config, console):
