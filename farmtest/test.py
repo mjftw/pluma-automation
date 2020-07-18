@@ -531,11 +531,14 @@ class TestRunner():
         if self.email_on_fail:
             self.send_fail_email(exception, test, task_name)
 
-        self.board.log(f'Task failed: ', level=LogLevel.ERROR,
-                       bold=True, colour='red', newline=False)
-        self.board.log(str(exception), level=LogLevel.ERROR,
-                       colour='red', newline=False)
+        error = str(exception)
+        if not error:
+            error = exception.__class__.__name__
+
+        self.board.log(f'Task failed: {error}', level=LogLevel.ERROR,
+                       bold=True, colour='red')
         self.board.log(f'Details: {failed}', colour='yellow')
+
         if abort:
             raise AbortTesting(str(exception))
 

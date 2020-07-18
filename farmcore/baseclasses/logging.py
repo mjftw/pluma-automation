@@ -86,7 +86,7 @@ class Logger(Singleton):
         self.log_buffer = ''
 
     def log(self, message, color=None, bold=False, newline=True, bypass_hold=False, level=None):
-        if not level:
+        if level is None:
             level = LogLevel.NOTICE
 
         if level < self.mode.min_level():
@@ -239,7 +239,7 @@ class Logging():
                 self._log_hier_path = '{}'.format(type(self).__name__)
             else:
                 self._log_hier_path = '{}.{}'.format(
-                        log_hier_path, type(self).__name__)
+                    log_hier_path, type(self).__name__)
         else:
             self._log_hier_path = False
 

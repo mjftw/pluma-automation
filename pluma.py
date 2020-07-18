@@ -3,9 +3,10 @@ import sys
 import json
 import time
 import argparse
+import traceback
 
 from farmcore import Board
-from farmcore.baseclasses import Logger, LogMode
+from farmcore.baseclasses import Logger, LogMode, LogLevel
 from farmtest import TestController
 from farmcli import PlumaConfig, TestsConfig, TargetConfig, TestsConfigError, TargetConfigError
 
@@ -35,17 +36,6 @@ def parse_arguments():
 
 
 def instantiate(args, tests_config_path, target_config_path):
-    if args.silent:
-        log.mode = LogMode.SILENT
-    elif args.debug:
-        log.mode = LogMode.DEBUG
-    elif args.quiet:
-        log.mode = LogMode.QUIET
-    elif args.verbose:
-        log.mode = LogMode.VERBOSE
-    else:
-        log.mode = LogMode.NORMAL
-
     tests_config, target_config = PlumaConfig.load_configuration(
         tests_config_path, target_config_path)
 
@@ -61,13 +51,20 @@ def execute_run(args, tests_config_path, target_config_path):
     controller = instantiate(args, tests_config_path, target_config_path)
 
     success = controller.run()
+    if success:
+        log.log('All tests were successful.',
+                level=LogLevel.IMPORTANT, color='green', bold=True)
+    else:
+        log.log('One of more test failed.',
+                level=LogLevel.IMPORTANT, color='red', bold=True)
 
     return success
 
 
 def execute_check(args, tests_config_path, target_config_path):
     instantiate(args, tests_config_path, target_config_path)
-    log.log('Configuration and tests successfully validated.')
+    log.log('Configuration and tests successfully validated.',
+            level=LogLevel.IMPORTANT)
 
 
 def execute_tests(args, tests_config_path, target_config_path):
@@ -81,6 +78,18 @@ def execute_tests(args, tests_config_path, target_config_path):
 
 def main():
     args = parse_arguments()
+
+    if args.silent:
+        log.mode = LogMode.SILENT
+    elif args.debug:
+        log.mode = LogMode.DEBUG
+    elif args.quiet:
+        log.mode = LogMode.QUIET
+    elif args.verbose:
+        log.mode = LogMode.VERBOSE
+    else:
+        log.mode = LogMode.NORMAL
+
     tests_config_path = args.config
     target_config_path = args.target
 
@@ -89,9 +98,17 @@ def main():
             success = execute_run(args, tests_config_path, target_config_path)
             exit(0 if success else 1)
         elif args.command == 'check':
+            # Force log mode to print the relevant information
+            mode_set = log.mode
+            log.mode = LogMode.VERBOSE
             execute_check(args, tests_config_path, target_config_path)
+            log.mode = mode_set
         elif args.command == 'tests':
+            # Force log mode to print the relevant information
+            mode_set = log.mode
+            log.mode = LogMode.VERBOSE
             execute_tests(args, tests_config_path, target_config_path)
+            log.mode = mode_set
     except TestsConfigError as e:
         log.error(
             f'Error while parsing the tests configuration ({tests_config_path}):\n  {e}')
@@ -100,6 +117,12 @@ def main():
         log.error(
             f'Error while parsing the target configuration ({target_config_path}):\n  {e}')
         exit(-2)
+    except Exception as e:
+        if log.mode in [LogMode.VERBOSE, LogMode.DEBUG]:
+            traceback.print_exc()
+
+        log.error(e)
+        exit(-3)
 
 
 if __name__ == "__main__":

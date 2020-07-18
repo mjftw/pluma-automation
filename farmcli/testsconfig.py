@@ -3,7 +3,8 @@ import inspect
 import re
 import json
 
-from farmcore.baseclasses import Logger
+from functools import partial
+from farmcore.baseclasses import Logger, LogLevel
 from farmtest import TestController, TestBase, TestRunner, ShellTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
 from farmcli import Configuration, ConfigurationError
@@ -39,9 +40,11 @@ class TestsConfig:
                     continue_on_fail=settings.pop(
                         'continue_on_fail',  default=True),
                     skip_tasks=settings.pop('skip_tasks',  default=[]),
-                    use_testcore=False
+                    use_testcore=settings.pop(
+                        'board_test_sequence', default=False)
                 ),
-                log_func=log.log
+                log_func=partial(log.log, level=LogLevel.INFO),
+                verbose_log_func=partial(log.log, level=LogLevel.NOTICE)
             )
 
             iterations = settings.pop('iterations')

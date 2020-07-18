@@ -103,11 +103,12 @@ class TestController():
                         }
                     }
     '''
+
     def __init__(self, testrunner, setup=None, report=None,
-            run_condition=None, name=None, report_n_iterations=None,
-            continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
-            setup_n_iterations=None, force_initial_run=False, email_on_except=True,
-            log_func=print):
+                 run_condition=None, name=None, report_n_iterations=None,
+                 continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
+                 setup_n_iterations=None, force_initial_run=False, email_on_except=True,
+                 log_func=None, verbose_log_func=None):
         assert isinstance(testrunner, TestRunner)
 
         self.testrunner = testrunner
@@ -116,6 +117,7 @@ class TestController():
         self.run_condition = run_condition
 
         self.log_func = log_func or print
+        self.verbose_log_func = verbose_log_func
 
         self.name = name
 
@@ -150,7 +152,6 @@ class TestController():
         self.stats['num_tests_total'] = 0
 
         self.results = []
-
 
     @property
     def settings(self):
@@ -257,13 +258,18 @@ class TestController():
         self._run_condition = None if f is None else deferred_function(f)
 
     def log(self, message):
-        ''' Basic logging function wraper
+        ''' Basic logging function wrapper
 
         Calls the class method "log_func" (default is print) with a message.
             >>> my_testcontroller.log('Hello World!')
-                '[TestController] Hello World!'
+                'Hello World!'
         '''
-        self.log_func('[{}] {}'.format(self.__class__.__name__, message))
+        self.log_func(message)
+
+    def verbose_log(self, message):
+        ''' Logging function wrapper for verbose content '''
+        if self.verbose_log_func:
+            self.verbose_log_func(message)
 
     def get_results_summary(self):
         ''' Get a summary of test results data values,
@@ -278,7 +284,7 @@ class TestController():
             each chunk. If n > length of l, then the length of l is used instead.
             This gives the mean for first x values, then next x values etc.'''
             chunked_list = chunks(l, min(round(len(l)/n) or 1, len(l)))
-            chunked_mean_list =  list(map(
+            chunked_mean_list = list(map(
                 lambda x: round(mean(x), sigfig),
                 chunked_list
             ))
@@ -374,7 +380,7 @@ class TestController():
         return settings
 
     def get_test_results(self, test_names=None, fields=None, format=None,
-            settings=None):
+                         settings=None):
         '''Get test data from the global data dictionary.
 
         Args:
@@ -417,18 +423,20 @@ class TestController():
                         f: v for f, v in r[name]['data'].items() if 'data' in r[name] and
                         not fields or f in fields
                     } for name in regex_filter_list(test_names, r, unique=True)
-                        if not settings or
-                        all(key in r[name]['settings'] and
-                            r[name]['settings'][key] == val
-                            for key, val in settings.items())
+                    if not settings or
+                    all(key in r[name]['settings'] and
+                        r[name]['settings'][key] == val
+                        for key, val in settings.items())
                 }
 
         if format == 'json':
             return json.dumps(list(data_gen()), indent=4)
         elif format == 'csv':
             newline = '\n'
-            header = sorted(list(set(key for it_data in data_gen() for test, data in it_data.items() for key in data)))
-            csv_str = 'iteration,test_name,' + ','.join(header).replace('\n', ' ').replace('\r', '') + newline
+            header = sorted(list(set(key for it_data in data_gen()
+                                     for test, data in it_data.items() for key in data)))
+            csv_str = 'iteration,test_name,' + \
+                ','.join(header).replace('\n', ' ').replace('\r', '') + newline
             empty_csv = True
             for iteration, tests_data in enumerate(data_gen()):
                 for test_name, data in tests_data.items():
@@ -437,7 +445,8 @@ class TestController():
                     for h in header:
                         csv_str += ','
                         if h in data:
-                            csv_str += str(data[h]).replace('\n', ' ').replace('\r', '')
+                            csv_str += str(data[h]).replace('\n',
+                                                            ' ').replace('\r', '')
                     csv_str += newline
             return csv_str if not empty_csv else ''
         elif not format:
@@ -447,7 +456,7 @@ class TestController():
                 f'Invalid format: {format}. Options: "json", "csv", None')
 
     def graph_test_results(self, file, test_names=None, fields=None, vs_type=None,
-            title=None, format=None, config=None):
+                           title=None, format=None, config=None):
         '''Create a graph of data fields from the test results data.
 
         Args:
@@ -483,40 +492,41 @@ class TestController():
 
         vs_types = ['iteration', 'cumulative', 'fields']
         if vs_type not in vs_types:
-            raise AttributeError('vs_type must be in {}'.format(vs_types))
+            raise AttributeError(f'vs_type must be in {vs_types}')
         elif (vs_type == 'fields' and
                 (not isinstance(fields, list) or len(fields) != 2)):
             raise AttributeError(
                 'fields must be a list of exactly 2 fields for "fields" vs_type')
         formats = ['svg', 'png']
         if format not in formats:
-            raise AttributeError('Format must be one of {}'.format(formats))
+            raise AttributeError(f'Format must be one of {formats}')
 
         results = list(self.get_test_results(
             test_names=test_names, fields=fields))
 
         # Find any tests that do not have any data for fields specified
-        empty_tests = set([test for r in results for test, data in r.items() if not data])
+        empty_tests = set([test for r in results for test,
+                           data in r.items() if not data])
 
         if results:
             # Get a list of test names whose tests have data
-            tests_found = sorted(list(set(test for r in results for test in r if test not in empty_tests)))
+            tests_found = sorted(
+                list(set(test for r in results for test in r if test not in empty_tests)))
         else:
             tests_found = []
 
         if tests_found:
             # Get a list of all fields accross all test data found
-            fields_found = list(set(key for r in results for test, data in r.items() for key in data))
+            fields_found = list(
+                set(key for r in results for test, data in r.items() for key in data))
         else:
             fields_found = []
 
         # If no results match, or all test names missing from from first result
         if not fields_found:
+            plural_or_not = 's' if len(tests_found) > 1 else ''
             raise RuntimeError(
-                'No results found for test{}{}, fields{}'.format(
-                    's' if len(tests_found) > 1 else '',
-                    test_names,
-                    fields))
+                f'No results found for test{plural_or_not}{test_names}, fields{fields}')
 
         chart = pygal.XY(truncate_legend=-1)
         chart.title = title
@@ -559,8 +569,7 @@ class TestController():
                 tf for tf in tests_found for r in results
                 if fields[0] in r[tf] and fields[1] in r[tf]
             ]
-            vs_str = '{} vs {}'.format(
-                fields[0], fields[1])
+            vs_str = f'{fields[0]} vs {fields[1]}'
 
             for tf in tests_with_fields:
                 points[tf] = {
@@ -595,16 +604,17 @@ class TestController():
 
     def run_iteration(self):
         ''' Run all tests in TestRunner '''
-        self.log("Starting iteration: {}".format(
-            self.stats['num_iterations_run']))
-        self.log("Current stats:\n\tIterations passed/total: {}/{} , Tests pass/run/total: {}/{}/{} ".format(
-            self.stats['num_iterations_pass'], self.stats['num_iterations_run'],
-            self.stats['num_tests_pass'], self.stats['num_tests_run'],
-            self.stats['num_tests_total']))
+        iteration = self.stats['num_iterations_run']
+        if iteration > 0:
+            self.log(f'Starting iteration #{iteration+1}')
+            self.log("Current stats:\n\tIterations passed/total: {}/{} , Tests pass/run/total: {}/{}/{} ".format(
+                self.stats['num_iterations_pass'], iteration,
+                self.stats['num_tests_pass'], self.stats['num_tests_run'],
+                self.stats['num_tests_total']))
 
         self._init_iteration()
 
-        self.log("Running TestRunner: {}".format(self.testrunner))
+        self.verbose_log(f'Running TestRunner: {self.testrunner}')
         success = self.testrunner.run()
 
         self._finalise_iteration(success)
@@ -637,14 +647,13 @@ class TestController():
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_total'] = 0
 
-        self.log("Starting TestController with settings: {}".format(
-            self.settings))
+        self.verbose_log(
+            f'Starting TestController with settings: {self.settings}')
 
-        self.log("Test settings: {}".format(
-            self.test_settings))
+        self.verbose_log(f'Test settings: {self.test_settings}')
 
         if self.setup and not self.settings['setup_n_iterations']:
-            self.log("Running setup function: {}".format(self.setup))
+            self.verbose_log(f"Running setup function: {self.setup}")
             self.setup.run(self)
 
         success = True
@@ -653,46 +662,49 @@ class TestController():
             if self.run_condition:
                 if (self.settings['force_initial_run'] and
                         self.stats['num_iterations_run'] == 0):
-                    self.log("Ignoring run condition for first run")
+                    self.verbose_log('Ignoring run condition for first run')
                     run_now = True
                 else:
-                    self.log("Checking run condition function: {}".format(
-                        self.run_condition))
+                    self.verbose_log(
+                        f'Checking run condition function: {self.run_condition}')
                     run_now = self.run_condition.run(self)
 
                 while run_now:
                     if (self.settings['setup_n_iterations'] and
                             self.stats['num_iterations_run'] % self.settings['setup_n_iterations'] == 0):
                         if self.setup:
-                            self.log("Running setup function: {}".format(self.setup))
+                            self.verbose_log(
+                                f'Running setup function: {self.setup}')
                             self.setup.run(self)
                     success &= self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
                         if self.report:
-                            self.log("Running report function: {}".format(self.report))
+                            self.verbose_log(
+                                f'Running report function: {self.report}')
                             self.report.run(self)
                         return False
                     if (self.settings['report_n_iterations'] and
                             self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
-                            self.log("Running report function: {}".format(self.report))
+                            self.verbose_log(
+                                f'Running report function: {self.report}')
                             self.report.run(self)
 
-                    self.log("Checking run condition function: {}".format(
-                        self.run_condition))
+                    self.verbose_log(
+                        f'Checking run condition function: {self.run_condition}')
                     run_now = self.run_condition.run(self)
             else:
                 self.run_iteration()
 
             if self.report and not self.settings['report_n_iterations']:
-                self.log("Running report function: {}".format(self.report))
+                self.verbose_log(f'Running report function: {self.report}')
                 self.report.run(self)
 
             if self.settings['run_forever']:
-                if self.settings['condition_check_interval_s']:
-                    self.log("Sleeping for {} seconds...".format(
-                        self.settings['condition_check_interval_s']))
-                    time.sleep(self.settings['condition_check_interval_s'])
+                check_interval = self.settings['condition_check_interval_s']
+                if check_interval:
+                    self.log(f'Sleeping for {check_interval} seconds...')
+                    time.sleep(check_interval)
             else:
                 return success
 
@@ -704,7 +716,7 @@ class TestController():
             'success': None,
             'test_order': None,
             'TestRunner': self.testrunner.data
-            }
+        }
         self.results.append(skeleton)
 
         return self.results[-1]

@@ -45,9 +45,10 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             raise AttributeError(
                 "Variable '_pex' must be created by inheriting class")
 
-        default_raw_logfile = os.path.join('/tmp', 'lab', '{}_raw_{}.log'.format(
-            self.__class__.__name__, datetime_to_timestamp(datetime.now())
-        ))
+        timestamp = datetime_to_timestamp(datetime.now())
+        default_raw_logfile = os.path.join(
+            '/tmp', 'lab',
+            f'{self.__class__.__name__}_raw_{timestamp}.log')
 
         self.encoding = encoding or 'ascii'
         self.linesep = linesep or '\r\n'
@@ -103,8 +104,8 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         if clear_buf:
             if self._buffer.strip():
-                self.log('<<flushed>>{}<</flushed>>'.format(self._buffer),
-                         force_echo=False)
+                self.log(
+                    f'<<flushed>>{self._buffer}<</flushed>>', force_echo=False)
             self._buffer = ''
         return self._buffer
 
@@ -422,18 +423,17 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         if matched:
             self._last_received = ''
-            match_str = '<<matched expects={}>>{}<</matched>>'.format(
-                watches, matched)
+            match_str = f'<<matched expects={watches}>>{matched}<</matched>>'
         else:
             self._last_received = received
-            match_str = '<<not_matched expects={}>>'.format(watches)
+            match_str = f'<<not_matched expects={watches}>>'
 
-        self.log("<<received>>{}{}<</received>>".format(
-            new_received, match_str), force_echo=False)
+        self.log(
+            f'<<received>>{new_received}{match_str}<</received>>', force_echo=False)
 
         if matched in excepts:
-            self.error('Matched [{}] is in exceptions list {}'.format(
-                matched, excepts), exception=ConsoleExceptionKeywordReceivedError)
+            self.error(f'Matched [{matched}] is in exceptions list {excepts}',
+                       exception=ConsoleExceptionKeywordReceivedError)
 
         return (received, matched)
 
@@ -465,7 +465,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         else:
             self._pex.send(cmd)
 
-        self.log('<<sent>>{}<</sent>>'.format(cmd), force_echo=False)
+        self.log(f'<<sent>>{cmd}<</sent>>', force_echo=False)
 
     def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()
