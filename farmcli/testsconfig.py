@@ -120,6 +120,7 @@ class TestsConfig:
 
         log.log('')
         config.ensure_consumed()
+        parameters.ensure_consumed()
         return selected_tests
 
     @staticmethod

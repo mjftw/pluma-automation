@@ -1,47 +1,49 @@
-import subprocess
-import sys
+import math
+import os
 
-from farmtest import TestBase, TaskFailed, TestingException
+from farmtest import TestBase, TaskFailed
+from farmcore.baseclasses import ConsoleBase
 
 
-class MemoryFree(TestBase):
-    def __init__(self, board, minimum):
+class MemorySize(TestBase):
+    def __init__(self, board, total_mb=None, available_mb=None):
         super().__init__(self)
         self.board = board
-        self.min_free_memory = minimum
+        self.available_mb = available_mb
+        self.total_mb = total_mb
+
+        if not total_mb and not available_mb:
+            raise ValueError(f'"total_mb" and/or "available_mb" have to be'
+                             'provided for {self}, but none was provided."')
 
     def test_body(self):
-        result = subprocess.run(
-            ['cat', '/proc/meminfo'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if result.returncode == 0:
-            for line in result.stdout.splitlines():
-                string = line.decode('ascii')
-                if string.startswith('MemFree:'):
-                    free_memory_kb = int(string.split()[1])
-                    if free_memory_kb < self.min_free_memory:
-                        raise TaskFailed(
-                            f'The system has less than {self.min_free_memory} KB or RAM available ({free_memory_kb} KB)')
-                    else:
-                        return
+        console = self.board.console
+        if not console:
+            raise TaskFailed('No console available')
 
-        raise TestingException(
-            'Unexpected error running or parsing "cat proc/meminfo"')
+        self.board.login()
+        received = console.send_and_read('cat /proc/meminfo')
+        available_mb = None
+        total_mb = None
 
+        try:
+            for line in received.splitlines():
+                if line.startswith('MemFree:'):
+                    available_mb = math.floor(int(line.split()[1]) / 1024)
+                if line.startswith('MemTotal:'):
+                    total_mb = math.floor(int(line.split()[1]) / 1024)
+        except:
+            # Handled just after
+            pass
 
-class MemoryReadWrite(TestBase):
-    def __init__(self, board, size):
-        super().__init__(self)
-        self.board = board
-        self.size = size
+        if not available_mb or not total_mb:
+            raise TaskFailed(
+                f'Unexpected output from /proc/meminfo:{os.linesep}{received}')
 
-    def __repr__(self):
-        return f'{self.__module__}.{self.__class__.__name__}[{self.size}]'
+        if self.total_mb and total_mb != self.total_mb:
+            raise TaskFailed(
+                f'The system has {total_mb} MB of RAM, but expected {self.total_mb} MB')
 
-    def test_body(self):
-        data = [None for _ in range(self.size)]
-        for i in range(self.size):
-            data[i] = i
-
-        for i in range(self.size):
-            if data[i] != i:
-                raise Exception('Inconsistency reading from memory')
+        if self.available_mb and available_mb < self.available_mb:
+            raise TaskFailed(
+                f'The system has {available_mb} MB of RAM available, but expected at least {self.available_mb} MB')
