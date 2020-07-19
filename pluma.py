@@ -14,15 +14,21 @@ from farmcli import TestsConfigError, TargetConfigError, TestsBuildError
 
 log = Logger()
 
+RUN_COMMAND = 'run'
+CHECK_COMMAND = 'check'
+TESTS_COMMAND = 'tests'
+CLEAN_COMMAND = 'clean'
+COMMANDS = [RUN_COMMAND, CHECK_COMMAND, TESTS_COMMAND, CLEAN_COMMAND]
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
         description='A lightweight automated testing tool for embedded devices.')
-    parser.add_argument('command', type=str, nargs='?', choices=['run', 'check', 'tests', 'clean'], default='run',
-                        help='command for pluma, defaults to "run". "run": Run the tests suite, '
-                        '"check": validate configuration files and tests, '
-                        '"tests": list all tests available and selected, '
-                        '"clean": remove logs, toolchains, and built executables')
+    parser.add_argument('command', type=str, nargs='?', choices=COMMANDS, default=RUN_COMMAND,
+                        help=f'command for pluma, defaults to "{RUN_COMMAND}". "{RUN_COMMAND}": Run the tests suite, '
+                        f'"{CHECK_COMMAND}": validate configuration files and tests, '
+                        f'"{TESTS_COMMAND}": list all tests available and selected, '
+                        f'"{CLEAN_COMMAND}": remove logs, toolchains, and built executables')
     parser.add_argument(
         '-v', '--verbose', action='store_const', const=True, help='prints more information related to tests and progress')
     parser.add_argument(
@@ -54,8 +60,13 @@ def instantiate(args, tests_config_path, target_config_path):
         tests_config, board)
 
 
-def execute_run(args, tests_config_path, target_config_path):
+def execute_run(args, tests_config_path, target_config_path, check_only=False):
+    '''Execute the "run" command, and allow checking only ("check" command).'''
     controller = instantiate(args, tests_config_path, target_config_path)
+    if check_only:
+        log.log('Configuration and tests successfully validated.',
+                level=LogLevel.IMPORTANT)
+        return True
 
     success = controller.run()
     if success:
@@ -68,13 +79,8 @@ def execute_run(args, tests_config_path, target_config_path):
     return success
 
 
-def execute_check(args, tests_config_path, target_config_path):
-    instantiate(args, tests_config_path, target_config_path)
-    log.log('Configuration and tests successfully validated.',
-            level=LogLevel.IMPORTANT)
-
-
 def execute_tests(args, tests_config_path, target_config_path):
+    '''Execute the "tests" command, listing all tests.'''
     tests_config, _ = PlumaConfig.load_configuration(
         tests_config_path, target_config_path)
 
@@ -84,6 +90,7 @@ def execute_tests(args, tests_config_path, target_config_path):
 
 
 def execute_clean(args):
+    '''Execute the "clean" command.'''
     log.log('Removing log files...')
     try:
         logs_folder = os.path.dirname(
@@ -117,22 +124,23 @@ def main():
     target_config_path = args.target
 
     try:
-        if args.command == 'run':
+        if args.command == RUN_COMMAND:
             success = execute_run(args, tests_config_path, target_config_path)
             exit(0 if success else 1)
-        elif args.command == 'check':
+        elif args.command == CHECK_COMMAND:
             # Force log mode to print the relevant information
             mode_set = log.mode
             log.mode = LogMode.VERBOSE
-            execute_check(args, tests_config_path, target_config_path)
+            execute_run(args, tests_config_path, target_config_path,
+                        check_only=True)
             log.mode = mode_set
-        elif args.command == 'tests':
+        elif args.command == TESTS_COMMAND:
             # Force log mode to print the relevant information
             mode_set = log.mode
             log.mode = LogMode.VERBOSE
             execute_tests(args, tests_config_path, target_config_path)
             log.mode = mode_set
-        elif args.command == 'clean':
+        elif args.command == CLEAN_COMMAND:
             execute_clean(args)
     except TestsConfigError as e:
         log.error(
