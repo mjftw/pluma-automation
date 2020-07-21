@@ -3,13 +3,9 @@ import logging
 
 from farmcore import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
 from farmcore.baseclasses import Logger
-from farmcli import Configuration, ConfigurationError
+from farmcli import Configuration, ConfigurationError, TargetConfigError
 
 log = Logger()
-
-
-class TargetConfigError(Exception):
-    pass
 
 
 class Credentials:

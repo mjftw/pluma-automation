@@ -2,12 +2,53 @@ import yaml
 import json
 
 from farmcore.baseclasses import Logger
+from abc import ABC, abstractmethod
 
 log = Logger()
 
 
 class ConfigurationError(Exception):
     pass
+
+
+class TargetConfigError(Exception):
+    pass
+
+
+class TestsConfigError(Exception):
+    pass
+
+
+class TestDefinition():
+    def __init__(self, name, testclass, parameter_sets=None, selected=False):
+        self.name = name
+        self.testclass = testclass
+        self.parameter_sets = parameter_sets or []
+        self.selected = selected
+
+        if isinstance(self.parameter_sets, dict):
+            self.parameter_sets = [self.parameter_sets]
+        elif not isinstance(self.parameter_sets, list):
+            raise ValueError(
+                f'Parameter sets for test "{name}" should be a list of dictionaries')
+
+        for parameter_set in self.parameter_sets:
+            if not isinstance(parameter_set, dict):
+                raise ConfigurationError(
+                    f'Invalid parameters format for test "{name}": {parameter_set.__class__}, {parameter_set}')
+
+
+class TestsProvider(ABC):
+    @abstractmethod
+    def configuration_key(self):
+        pass
+
+    @abstractmethod
+    def all_tests(self, config):
+        pass
+
+    def selected_tests(self, config):
+        return filter(lambda test: (test.selected), self.all_tests(config))
 
 
 class Configuration:

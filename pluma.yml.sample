@@ -4,7 +4,7 @@ settings:
   continue_on_fail: true
   iterations: 1
 
-tests:
+core_tests:
   include: [testsuite.memory]
   exclude: []
   parameters:

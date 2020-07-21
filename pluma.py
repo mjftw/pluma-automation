@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 import sys
-import json
 import time
 import argparse
 import traceback
 import os
 
-from farmcore import Board
 from farmcore.baseclasses import Logger, LogMode, LogLevel
-from farmtest import TestController
-from farmcli import PlumaConfig, TestsConfig, TargetConfig, TestsBuilder
-from farmcli import TestsConfigError, TargetConfigError, TestsBuildError
+from farmcli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
+from farmcli import TestsConfigError, TestsBuildError, TargetConfigError
+from farmcli import PythonTestsProvider, ScriptTestsProvider, CTestsProvider
 
 log = Logger()
 
@@ -48,6 +46,11 @@ def parse_arguments():
     return args
 
 
+def tests_providers():
+    return [PythonTestsProvider(), ScriptTestsProvider(),
+            CTestsProvider()]
+
+
 def instantiate(args, tests_config_path, target_config_path):
     tests_config, target_config = PlumaConfig.load_configuration(
         tests_config_path, target_config_path)
@@ -56,8 +59,8 @@ def instantiate(args, tests_config_path, target_config_path):
     default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
     board.log_file = tests_config.pop('log') or default_log
 
-    return TestsConfig.create_test_controller(
-        tests_config, board)
+    return TestsConfig.create_test_controller(tests_config,
+                                              board, tests_providers())
 
 
 def execute_run(args, tests_config_path, target_config_path, check_only=False):
@@ -86,7 +89,7 @@ def execute_tests(args, tests_config_path, target_config_path):
 
     log.log(
         'List of core and script tests available, based on the current configuration.')
-    TestsConfig.print_tests(tests_config)
+    TestsConfig.selected_tests(tests_config, tests_providers())
 
 
 def execute_clean(args):
