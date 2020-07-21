@@ -79,7 +79,7 @@ Where `PROJECT_DIR` is a directory containing all python scripts needed to run, 
 For more detailed instructions, see the [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
 Here you'll find instructions on how to run the Automation Lab with Docker.
 
-## Using the packages
+## Using the Packages
 
 Once you've installed the lab (or run the Docker container), you should be able to import and use the farmcore, farmtest, and farmutils in your Python scripts.
 
@@ -100,6 +100,43 @@ my_board.power.off()
 ```
 
 The above code is just for demonstration, for working code examples check out the [Tutorials](docs/tutorials/1-tutorial-introduction.md).
+
+## Running the Tests
+
+The project's tests are split into two groups.
+Those that do not require a specific lab hardware setup and those that do.
+
+### Generic tests
+
+You can run the project's hardware independent tests with:
+
+```shell
+make test
+```
+
+These do not require any hardware to be connected and should run on any system Linux system that supports Python3.
+
+### Hardware specific tests
+
+The rest of the tests are expected to run on a Raspberry Pi 3/4 and require lab hardware peripherals to be connected in a specific way.
+
+If you want to run the hardware tests as well, you will need to ensure that your Raspberry Pi's lab peripherals are connected as specified in the [test configuration file](./tests/rpi/hardware.json).
+You can edit this file to match the way how your lab hardware is connected if needed.
+
+You will also need to install the [RPi.GPIO](https://pypi.org/project/RPi.GPIO/) package, version 0.7.0 or newer.
+
+```shell
+pip3 install 'RPi.GPIO>=0.7.0'
+```
+
+Once you've done this you should be able to run the tests with:
+
+```shell
+make test-all
+```
+
+You will know if your hardware configuration is wrong as the relevant tests will fail.  
+If you plan on using the tests to check your changes, it is recommended that you first verify that your hardware setup is correct by ensuring that all the tests pass.
 
 ## Contributing
 
