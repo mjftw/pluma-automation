@@ -6,12 +6,12 @@ settings:
   skip_tasks: [_board_on_and_validate, _board_login, _board_off]
 
 tests:
-  include: [tests.empty.Test, tests.memory, tests.shtest]
+  include: [testsuite.empty.Test, testsuite.memory]
   exclude: []
   parameters:
-    tests.memory.MemoryFree:
+    testsuite.memory.MemoryFree:
       minimum: 200000
-    tests.memory.MemoryReadWrite:
+    testsuite.memory.MemoryReadWrite:
       - size: 20
       - size: 256
       - size: 65000

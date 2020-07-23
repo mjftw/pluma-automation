@@ -21,22 +21,20 @@ DOCKER_RUN_PRIVILEGED_ARGS := $(DOCKER_RUN_ARGS) --privileged -v /dev:/dev
 
 .DEFAULT_GOAL := docker-build
 
-.PHONY: build push tests
-
 install:: ## Install the automation lab
 		@./install.sh
 
 test:: ## Run the all Automation Lab tests that don't require hardware
-		@./tests/scripts/run_tests.sh generic
+		@./internaltests/scripts/run_tests.sh generic
 
 test-all:: ## Run all the Automation Lab tests (generic and RPi specific)
-		@./tests/scripts/run_tests.sh
+		@./internaltests/scripts/run_tests.sh
 
 test-coverage:: ## Check the code coverage for all tests that don't require hardware
-		@./tests/scripts/check_test_coverage.sh generic
+		@./internaltests/scripts/check_test_coverage.sh generic
 
 test-all-coverage:: ## Check the code coverage for all tests (generic and RPi specific)
-		@./tests/scripts/check_test_coverage.sh
+		@./internaltests/scripts/check_test_coverage.sh
 
 docker-build:: ## Build the docker image
 		@echo Building $(IMAGE_TAG)

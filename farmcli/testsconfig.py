@@ -1,4 +1,4 @@
-import tests
+import testsuite
 import inspect
 import re
 import json
@@ -56,8 +56,8 @@ class TestsConfig:
     def find_python_tests():
         # Find all tests
         all_tests = {}
-        for m in inspect.getmembers(tests, inspect.isclass):
-            if m[1].__module__.startswith(tests.__name__ + '.'):
+        for m in inspect.getmembers(testsuite, inspect.isclass):
+            if m[1].__module__.startswith(testsuite.__name__ + '.'):
                 if issubclass(m[1], TestBase):
                     # Dictionary with the class name as key, and class as value
                     all_tests[f'{m[1].__module__}.{m[1].__name__}'] = m[1]
