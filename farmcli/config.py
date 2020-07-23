@@ -1,5 +1,6 @@
 import yaml
 import json
+import os
 
 from farmcore.baseclasses import Logger
 from abc import ABC, abstractmethod
@@ -51,7 +52,7 @@ class Configuration:
             unconsumed_data = self.config
             self.config = {}
             raise ConfigurationError(
-                f'The following configuration attributes were not recognized or not used:\n{unconsumed_data}')
+                f'The following configuration attributes were not recognized or not used:{os.linesep}{unconsumed_data}')
 
     def content(self):
         return self.config

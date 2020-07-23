@@ -68,7 +68,7 @@ class TestsBuilder:
         env_file_pattern = 'environment-'
         for file in os.listdir(install_dir):
             if file.startswith(env_file_pattern):
-                return os.path.abspath(f'{install_dir}/{file}')
+                return os.path.abspath(os.path.join(install_dir, file))
 
         raise TestsBuildError(
             f'No environment file ({env_file_pattern}) found in the toolchain installation folder ({install_dir})')

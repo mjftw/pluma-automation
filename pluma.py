@@ -38,7 +38,7 @@ def parse_arguments():
     parser.add_argument(
         '-c', '--config', default='pluma.yml', help='path to the tests configuration file. Default: "pluma.yml"')
     parser.add_argument(
-        '-t', '--target', default='pluma-target.yml', help='path to the taret configuration file. Default: "pluma-target.yml"')
+        '-t', '--target', default='pluma-target.yml', help='path to the target configuration file. Default: "pluma-target.yml"')
     parser.add_argument(
         '-f', '--force', action='store_const', const=True, help='force operation instead of prompting')
     parser.add_argument(
@@ -152,11 +152,11 @@ def main():
             log.log(get_farmcore_version(), level=LogLevel.IMPORTANT)
     except TestsConfigError as e:
         log.error(
-            f'Error while parsing the tests configuration ({tests_config_path}):\n  {e}')
+            f'Error while parsing the tests configuration ({tests_config_path}):{os.linesep}  {e}')
         exit(-2)
     except TargetConfigError as e:
         log.error(
-            f'Error while parsing the target configuration ({target_config_path}):\n  {e}')
+            f'Error while parsing the target configuration ({target_config_path}):{os.linesep}  {e}')
         exit(-3)
     except TestsBuildError as e:
         log.error(

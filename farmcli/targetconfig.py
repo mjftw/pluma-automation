@@ -114,7 +114,7 @@ class TargetFactory:
 
         if power_config.len() > 1:
             raise TargetConfigError(
-                f'Only one power control should be provided in the target configuration, but two or more provided:\n{power_config}')
+                f'Only one power control should be provided in the target configuration, but two or more provided:{os.linesep}{power_config}')
 
         control_type = POWER_SOFT
         if power_config.len() > 0:

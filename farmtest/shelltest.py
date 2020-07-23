@@ -72,17 +72,17 @@ class CommandRunner():
         for line in received.splitlines():
             if not first_line:
                 formatted_received += '            '
-            formatted_received += f'{line}\n'
+            formatted_received += f'{line}{os.linesep}'
             first_line = False
 
-        sent_line = f'  Sent:     $ {command}\n'
-        should_print_line = f'  Expected: {should_print}\n'
-        should_not_print_line = f'  Errors:   {should_not_print}\n'
+        sent_line = f'  Sent:     $ {command}{os.linesep}'
+        should_print_line = f'  Expected: {should_print}{os.linesep}'
+        should_not_print_line = f'  Errors:   {should_not_print}{os.linesep}'
         received_line = f'  Received: {formatted_received}'
 
         if CommandRunner.output_matches_pattern(should_not_print, received):
             raise TaskFailed(
-                f'{prefix} Response matched error condition:\n' +
+                f'{prefix} Response matched error condition:{os.linesep}' +
                 sent_line + should_not_print_line + received_line)
 
         if len(should_print) > 0:
@@ -91,14 +91,14 @@ class CommandRunner():
 
             if not response_valid:
                 raise TaskFailed(
-                    f'{prefix} Response did not match expected:\n' +
+                    f'{prefix} Response did not match expected:{os.linesep}' +
                     sent_line + should_print_line + received_line)
             elif log_function:
                 log_function(
-                    f'{prefix} Matching response found:\n' +
+                    f'{prefix} Matching response found:{os.linesep}' +
                     sent_line + should_print_line + received_line)
         elif log_function:
-            log_function(f'{prefix}\n' + sent_line + received_line)
+            log_function(f'{prefix}{os.linesep}' + sent_line + received_line)
 
         retcode_command = 'echo retcode=$?'
         retcode_received, matched = console.send_and_expect(
@@ -108,7 +108,7 @@ class CommandRunner():
             retcode_received = retcode_received[len(retcode_command):]
 
         if not matched:
-            error = f'{prefix} Command "{command}" returned with a non-zero exit code\n' + \
+            error = f'{prefix} Command "{command}" returned with a non-zero exit code{os.linesep}' + \
                 sent_line + received_line + \
                 f'  Return code query output: {retcode_received}'
             ansi_colors_regexp = re.compile(

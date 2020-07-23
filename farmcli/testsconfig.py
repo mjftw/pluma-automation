@@ -63,7 +63,8 @@ class TestsConfig:
 
             iterations = settings.pop('iterations')
             if iterations:
-                controller.run_condition = sc_run_n_iterations(int(iterations))
+                controller.run_condition = sc_run_n_iterations(
+                    ntimes=int(iterations))
 
             settings.ensure_consumed()
         except ConfigurationError as e:
@@ -122,9 +123,9 @@ class TestsConfig:
                 if f'{e}'.startswith('__init__()'):
                     raise TestsConfigError(
                         f'The test "{test.name}" requires one or more parameters to be provided '
-                        f'in the "parameters" attribute in your "pluma.yml" file:\n    {e}')
+                        f'in the "parameters" attribute in your "pluma.yml" file:{os.linesep}    {e}')
                 else:
                     raise TestsConfigError(
-                        f'Failed to create test "{test.name}":\n    {e}')
+                        f'Failed to create test "{test.name}":{os.linesep}    {e}')
 
         return test_objects

@@ -1,3 +1,5 @@
+import os
+
 from farmcore.baseclasses import Logger
 from farmtest import ShellTest
 from farmcli import Configuration, TestsConfigError
@@ -33,6 +35,6 @@ class ShellTestsProvider(TestsProvider):
                 selected_tests.append(test)
             except Exception as e:
                 raise TestsConfigError(
-                    f'Failed to parse script test "{test_name}":\n    {e}')
+                    f'Failed to parse script test "{test_name}":{os.linesep}    {e}')
 
         return selected_tests
