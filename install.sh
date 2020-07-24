@@ -115,7 +115,7 @@ shift $((OPTIND -1))
 
 PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
-$SUDO apt install -y python3 python3-pip graphviz libusb-1.0 libftdi-dev git
+$SUDO apt install -y python3 python3-pip graphviz libusb-1.0 libftdi-dev git sshpass
 
 if [ "$answer_all" ==  "n" ]; then
     echo "Skipping optional config..."

@@ -10,8 +10,7 @@ ENV LC_ALL en_US.UTF-8
 # Copy farm core
 COPY ./ /root/farm-core
 
-RUN apt-get update && apt-get install -y python3
-
 # Install farm core
 RUN /root/farm-core/install.sh -n
 
+CMD ["/root/farm-core/pluma.py", "-c", "/etc/pluma/pluma.yml", "-t", "/etc/pluma/pluma-target.yml"]
