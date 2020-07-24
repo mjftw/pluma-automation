@@ -11,7 +11,8 @@ class MemoryFree(TestBase):
         self.min_free_memory = minimum
 
     def test_body(self):
-        result = subprocess.run(['cat', '/proc/meminfo'], capture_output=True)
+        result = subprocess.run(
+            ['cat', '/proc/meminfo'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         if result.returncode == 0:
             for line in result.stdout.splitlines():
                 string = line.decode('ascii')
