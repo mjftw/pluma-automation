@@ -20,9 +20,16 @@ class TestsConfigError(Exception):
 
 
 class TestDefinition():
-    def __init__(self, name, testclass, parameter_sets=None, selected=False):
+    def __init__(self, name: str, testclass: type, test_provider: object, parameter_sets=None, selected=False):
+        if not name or name == '':
+            raise ValueError('Test name cannot be empty')
+
+        if not testclass or not test_provider:
+            raise ValueError('Test class and test provider must be set')
+
         self.name = name
         self.testclass = testclass
+        self.provider = test_provider
         self.parameter_sets = parameter_sets or []
         self.selected = selected
 
@@ -40,6 +47,10 @@ class TestDefinition():
 
 class TestsProvider(ABC):
     @abstractmethod
+    def display_name(self):
+        pass
+
+    @abstractmethod
     def configuration_key(self):
         pass
 
@@ -48,7 +59,7 @@ class TestsProvider(ABC):
         pass
 
     def selected_tests(self, config):
-        return filter(lambda test: (test.selected), self.all_tests(config))
+        return list(filter(lambda test: (test.selected), self.all_tests(config)))
 
 
 class Configuration:

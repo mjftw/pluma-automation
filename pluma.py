@@ -59,8 +59,9 @@ def instantiate(args, tests_config_path, target_config_path):
     default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
     board.log_file = tests_config.pop('log') or default_log
 
-    return TestsConfig.create_test_controller(tests_config,
-                                              board, tests_providers())
+    testsConfig = TestsConfig(tests_config, tests_providers())
+    testsConfig.print_tests()
+    return testsConfig.create_test_controller(board)
 
 
 def execute_run(args, tests_config_path, target_config_path, check_only=False):
@@ -89,7 +90,8 @@ def execute_tests(args, tests_config_path, target_config_path):
 
     log.log(
         'List of core and script tests available, based on the current configuration.')
-    TestsConfig.selected_tests(tests_config, tests_providers())
+    testsConfig = TestsConfig(tests_config, tests_providers())
+    testsConfig.print_tests()
 
 
 def execute_clean(args):

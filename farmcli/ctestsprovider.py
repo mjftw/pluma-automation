@@ -11,13 +11,14 @@ class CTestsProvider(TestsProvider):
     def __init__(self):
         pass
 
+    def display_name(self):
+        return 'C tests'
+
     def configuration_key(self):
         return 'c_tests'
 
     def all_tests(self, config):
-        log.log('C tests:', bold=True)
         if not config:
-            log.log('    None\n')
             return []
 
         toolchain_file = config.pop('yocto_sdk')
@@ -36,8 +37,6 @@ class CTestsProvider(TestsProvider):
         all_tests = []
         tests_config = config.pop('tests', default={}).content()
         for test_name in tests_config:
-            log.log(f'    [x] {test_name}', color='green')
-
             try:
                 test_parameters = tests_config[test_name]
                 test_executable = TestsBuilder.build_c_test(
@@ -46,7 +45,7 @@ class CTestsProvider(TestsProvider):
 
                 test_parameters['executable_file'] = test_executable
 
-                test = TestDefinition(test_name, testclass=ExecutableTest,
+                test = TestDefinition(test_name, testclass=ExecutableTest, test_provider=self,
                                       parameter_sets=[test_parameters], selected=True)
                 all_tests.append(test)
             except KeyError as e:
