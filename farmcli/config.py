@@ -3,7 +3,7 @@ import json
 
 from farmcli import PlumaLogger
 
-log = PlumaLogger.logger()
+log = PlumaLogger()
 
 
 class ConfigurationError(Exception):

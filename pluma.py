@@ -8,7 +8,7 @@ from farmcore import Board
 from farmtest import TestController
 from farmcli import PlumaConfig, TestsConfig, TargetConfig, PlumaLogger, TestsConfigError, TargetConfigError
 
-log = PlumaLogger.logger()
+log = PlumaLogger()
 
 
 def parse_arguments():

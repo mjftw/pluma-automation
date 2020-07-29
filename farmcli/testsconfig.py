@@ -7,7 +7,7 @@ from farmtest import TestController, TestBase, TestRunner, ShellTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
 from farmcli import PlumaLogger, Configuration, ConfigurationError
 
-log = PlumaLogger.logger()
+log = PlumaLogger()
 
 SETTINGS_SECTION = 'settings'
 PYTHON_TESTS_SECTION = 'tests'

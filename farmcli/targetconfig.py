@@ -4,7 +4,7 @@ import logging
 from farmcore import Board, SerialConsole, HostConsole, SoftPower, IPPowerPDU
 from farmcli import PlumaLogger, Configuration, ConfigurationError
 
-log = PlumaLogger.logger()
+log = PlumaLogger()
 
 
 class TargetConfigError(Exception):

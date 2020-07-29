@@ -24,11 +24,6 @@ class PlumaLogger:
         self.enabled = True
         self.debug_enabled = False
 
-    @staticmethod
-    def logger():
-        global logger
-        return logger
-
     def log(self, message, color=None, bold=False):
         if not self.enabled:
             return
@@ -71,6 +66,3 @@ class PlumaLogger:
             )
 
         print(message)
-
-
-logger = PlumaLogger()
