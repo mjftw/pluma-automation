@@ -169,7 +169,7 @@ class Logging():
                 logdir = os.path.dirname(log_file)
                 if logdir and not os.path.exists(logdir):
                     os.makedirs(logdir)
-                with open(log_file, 'a') as logfd:
+                with open(log_file, 'a', encoding='utf-8') as logfd:
                     logfd.write(message + '\n')
             if echo:
                 if colour in ascii_colmap:

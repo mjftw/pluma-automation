@@ -179,8 +179,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def _wait_for_match(self, match, timeout, verbose=None):
         verbose = verbose or False
 
-        retval = False
-
         old_timeout = self._pex.timeout
         self._pex.timeout = timeout
 
@@ -196,12 +194,13 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 timeout, match))
 
         matched = watches[self._pex.expect(watches)]
-        if matched in match:
-            retval = self.decode(self._pex.after)
-
         self._pex.timeout = old_timeout
 
-        return retval
+        # Pexpect child `.after` is the text matched after calling `.expect`
+        if matched in match:
+            return self.decode(self._pex.after)
+
+        return False
 
     def wait_for_bytes(
             self, timeout=None, sleep_time=None,

@@ -3,6 +3,7 @@
 # Installer script for Debian based Linux distributions
 #
 set -u
+set -e
 
 install_as_dev=0
 answer_all=""
@@ -54,13 +55,14 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
 function install_python_packages {
     echo
     echo "Installing farm-core packages (farmcore, farmtest, farmutils)..."
+    pip3 uninstall -y farm-core || true
+
     if [ $install_as_dev -eq 1 ]; then
         # Install packages as a farm-core package developer.
         # The current dir is used as the package root, and any edits made to python
         #   scripts here WILL be picked up by installed package.
         # This option is to be used when developing the farm-core packages.
 
-        pip3 uninstall -y farm-core
         pip3 install --user --editable $PROJECT_ROOT
         echo
         echo "=== Installed farm-core packages (farmcore, farmtest, farmutils), editable from $PROJECT_ROOT (dev mode) ==="
@@ -70,7 +72,6 @@ function install_python_packages {
         #   package must be reinstalled using script to track these changes.
         # This is what we would want for a normal user.
 
-        pip3 uninstall -y farm-core
         pip3 install --user $PROJECT_ROOT
         echo
         echo "=== Installed farm-core packages (farmcore, farmtest, farmutils) ==="
@@ -115,7 +116,8 @@ shift $((OPTIND -1))
 
 PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
-$SUDO apt install -y python3 python3-pip graphviz libusb-1.0 libftdi-dev git sshpass
+$SUDO apt update && \
+  $SUDO apt install -y python3 python3-pip graphviz libusb-1.0 libftdi-dev git sshpass
 
 if [ "$answer_all" ==  "n" ]; then
     echo "Skipping optional config..."
