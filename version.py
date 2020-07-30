@@ -3,7 +3,7 @@ import subprocess
 
 def git_is_installed():
     try:
-        subprocess.check_call(['which', 'git'])
+        subprocess.check_call(['which', 'git'], stdout=subprocess.DEVNULL)
     except subprocess.CalledProcessError:
         return False
     else:
