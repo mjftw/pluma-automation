@@ -1,3 +1,5 @@
+from farmcore.baseclasses import Singleton
+
 style_map = {
     'black': '\033[30m',
     'red': '\033[31m',
@@ -12,14 +14,7 @@ style_map = {
 }
 
 
-class PlumaLogger:
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = object.__new__(cls)
-        return cls._instance
-
+class PlumaLogger(Singleton):
     def __init__(self):
         self.enabled = True
         self.debug_enabled = False

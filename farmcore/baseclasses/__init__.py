@@ -5,3 +5,4 @@ from .relaybase import RelayBase
 from .storagebase import StorageBase
 from .nonblocking import Nonblocking
 from .locking import Locking
+from .singleton import Singleton
