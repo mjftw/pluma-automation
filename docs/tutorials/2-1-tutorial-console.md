@@ -185,6 +185,7 @@ Let's see what's left in the console's receive buffer from after the last match.
 By default the receive buffer is flushed before sending a command, but we can disable this with `flush_before=False`.  
 If we don't have anything we want to match against, but still want to see the result of the command we send we can use `receive=True`.
 This will cause the console to wait until no more data is being sent and then return everything it received.
+
 Sending a command is also optional, and a newline will be sent by default if no command is specified, we can prevent this with `send_newline=False`.
 
 ```python
