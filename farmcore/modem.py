@@ -43,7 +43,7 @@ class ModemSim868(Farmclass):
             self.error('Cannot send AT commands while recording in progress',
                 ModemError)
 
-        return self.console.send(*args, **kwargs)
+        return self.console.send_and_expect(*args, **kwargs)
 
     def ready(self):
         # Check modem status

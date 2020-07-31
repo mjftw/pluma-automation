@@ -3,6 +3,8 @@ import pexpect
 import pexpect.fdpexpect
 import json
 import os
+
+from deprecated import deprecated
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from functools import wraps
@@ -44,7 +46,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 "Variable '_pex' must be created by inheriting class")
 
         default_raw_logfile = os.path.join('/tmp', 'lab', '{}_raw_{}.log'.format(
-                self.__class__.__name__, datetime_to_timestamp(datetime.now())
+            self.__class__.__name__, datetime_to_timestamp(datetime.now())
         ))
 
         self.encoding = encoding or 'ascii'
@@ -60,7 +62,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def is_open(self):
         """ Check if the transport layer is ready to send and receive"""
         pass
-        
+
     @abstractmethod
     def open(f):
         @wraps(f)
@@ -71,7 +73,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 os.makedirs(os.path.dirname(self.raw_logfile), exist_ok=True)
 
                 self._raw_logfile_fd = open(self.raw_logfile, 'ab')
-                self._pex.logfile=self._raw_logfile_fd
+                self._pex.logfile = self._raw_logfile_fd
         return wrap
 
     @abstractmethod
@@ -102,7 +104,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         if clear_buf:
             if self._buffer.strip():
                 self.log('<<flushed>>{}<</flushed>>'.format(self._buffer),
-                    force_echo=False)
+                         force_echo=False)
             self._buffer = ''
         return self._buffer
 
@@ -120,16 +122,17 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def encode(self, text):
         return text.encode(self.encoding)
 
+    @deprecated(version='2.0', reason='You should use "wait_for_bytes" or "wait_for_quiet" instead')
     def wait_for_data(
             self, timeout=None, sleep_time=None,
             match=None, start_bytes=None, verbose=None):
 
         timeout = timeout or 10.0
         sleep_time = sleep_time or 0.1
-        verbose = verbose if verbose is not None else True
+        verbose = verbose if verbose is not None else False
 
         if match:
-            return self.wait_for_match(
+            return self._wait_for_match(
                 match=match,
                 timeout=timeout,
                 verbose=verbose
@@ -142,7 +145,38 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                 verbose=verbose
             )
 
-    def wait_for_match(self, match, timeout, verbose=None):
+    def wait_for_match(self, match, timeout=None, verbose=None):
+        verbose = verbose or False
+        timeout = timeout or self._pex.timeout
+
+        if not self.is_open:
+            self.open()
+
+        if not isinstance(match, list):
+            match = [match]
+
+        if verbose:
+            self.log(f'Waiting up to {timeout}s for patterns: {match}...')
+
+        matched_str = None
+        try:
+            index = self._pex.expect(match, timeout)
+            matched_str = match[index]
+        except pexpect.EOF:
+            pass
+        except pexpect.TIMEOUT:
+            pass
+
+        if verbose:
+            if matched_str:
+                self.log(f'Matched {matched_str}')
+            else:
+                self.log(f'No match found before timeout or EOF')
+
+        return matched_str
+
+    @deprecated(version='2.0', reason='You should use "wait_for_match" instead')
+    def _wait_for_match(self, match, timeout, verbose=None):
         verbose = verbose or False
 
         retval = False
@@ -172,10 +206,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def wait_for_bytes(
             self, timeout=None, sleep_time=None,
             start_bytes=None, verbose=None):
-
         timeout = timeout or 10.0
         sleep_time = sleep_time or 0.1
-        verbose = verbose or True
+        verbose = verbose or False
 
         if not self.is_open:
             self.open()
@@ -199,10 +232,13 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         return False
 
-    def wait_for_quiet(self, timeout=10.0, quiet=0.3, sleep_time=0.1, verbose=True):
+    def wait_for_quiet(self, timeout=None, quiet=None, sleep_time=None, verbose=False):
         if not self.is_open:
             self.open()
 
+        timeout = timeout if timeout is not None else 10.0
+        quiet = quiet if quiet is not None else 0.3
+        sleep_time = sleep_time if sleep_time is not None else 0.1
         time_quiet = 0.0
         elapsed = 0.0
 
@@ -220,7 +256,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             if verbose:
                 self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
                     elapsed, timeout, time_quiet, quiet, current_bytes
-                    ))
+                ))
 
             if time_quiet > quiet:
                 return True
@@ -232,6 +268,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         return False
 
+    @deprecated(version='2.0', reason='You should use "send_nonblocking" instead')
     def send(self,
              cmd=None,
              receive=False,
@@ -328,63 +365,162 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         return (received, matched)
 
+    def send_and_read(self,
+                      cmd,
+                      timeout=None,
+                      sleep_time=None,
+                      quiet_time=None,
+                      send_newline=True,
+                      flush_before=True,
+                      verbose=False):
+        quiet_timeout = timeout if timeout is not None else 3
+        quiet_sleep = sleep_time if sleep_time is not None else 0.1
+        quiet_time = quiet_time if quiet_time is not None else 0.3
+
+        self.send_nonblocking(cmd, send_newline=send_newline,
+                              verbose=verbose, flush_before=flush_before)
+
+        self.wait_for_quiet(
+            timeout=quiet_timeout,
+            sleep_time=quiet_sleep,
+            quiet=quiet_time,
+            verbose=verbose)
+        received = self._buffer
+
+        return received
+
+    def send_and_expect(self,
+                        cmd,
+                        match,
+                        excepts=None,
+                        timeout=None,
+                        send_newline=True,
+                        flush_before=True,
+                        verbose=False):
+
+        match = match or []
+        excepts = excepts or []
+        timeout = timeout if timeout is not None else 5
+
+        if not isinstance(match, list):
+            match = [match]
+        if not isinstance(excepts, list):
+            excepts = [excepts]
+
+        watches = []
+        watches.extend(match)
+        watches.extend(excepts)
+
+        self.send_nonblocking(cmd, send_newline=send_newline,
+                              verbose=verbose, flush_before=flush_before)
+
+        matched = self.wait_for_match(
+            timeout=timeout,
+            match=watches,
+            verbose=verbose)
+        received = self.decode(self._pex.before)
+        new_received = received[len(self._last_received):]
+
+        if matched:
+            self._last_received = ''
+            match_str = '<<matched expects={}>>{}<</matched>>'.format(
+                watches, matched)
+        else:
+            self._last_received = received
+            match_str = '<<not_matched expects={}>>'.format(watches)
+
+        self.log("<<received>>{}{}<</received>>".format(
+            new_received, match_str), force_echo=False)
+
+        if matched in excepts:
+            self.error('Matched [{}] is in exceptions list {}'.format(
+                matched, excepts), exception=ConsoleExceptionKeywordReceivedError)
+
+        return (received, matched)
+
+    def send_nonblocking(self, cmd,
+                         send_newline=True,
+                         flush_before=True,
+                         verbose=False
+                         ):
+
+        if not self.is_open:
+            self.open()
+        if not self.is_open:
+            raise ConsoleCannotOpenError
+
+        cmd = cmd or ''
+        if verbose:
+            self.log(f'Sending command: \'{cmd}\'', force_log_file=None)
+
+        if isinstance(cmd, str):
+            cmd = self.encode(cmd)
+
+        self._pex.linesep = self.encode(self.linesep)
+
+        if flush_before:
+            self.flush(True)
+
+        if send_newline:
+            self._pex.sendline(cmd)
+        else:
+            self._pex.send(cmd)
+
+        self.log('<<sent>>{}<</sent>>'.format(cmd), force_echo=False)
+
     def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()
-        self.send("")
-        alive = self.wait_for_data(timeout=timeout, start_bytes=start_bytes)
+        self.send_and_read('')
+        alive = self.wait_for_bytes(timeout=timeout, start_bytes=start_bytes)
 
         if alive:
-            self.log("Got response from: {}".format(self))
+            self.log(f'Got response from: {self}')
         else:
-            self.log("No response from: {}".format(self))
+            self.log(f'No response from: {self}')
+
         return alive
 
     def login(self, username, username_match,
               password=None, password_match=None, success_match=None):
         matches = [username_match]
-        if password and password_match:
+        if password_match:
             matches.append(password_match)
         if success_match:
             matches.append(success_match)
 
-        fail_message = "ERROR: Failed to log in: U={} P={}".format(
-            username, password)
-
-        (__, matched) = self.send(
-            match=matches, send_newline=False, flush_buffer=False)
+        fail_message = f'ERROR: Failed to log in: U="{username}" P="{password}"'
+        (__, matched) = self.send_and_expect('', match=matches)
         if not matched:
             self.error(fail_message, ConsoleLoginFailedError)
 
         if matched == username_match:
-            (__, matched) = self.send(
-                cmd=username, match=matches, flush_buffer=False)
-            if matched == username_match:
-                self.error(
-                    '{}: Invalid username'.format(fail_message),
-                    ConsoleLoginFailedError)
+            matches.remove(username_match)
+            (__, matched) = self.send_and_expect(cmd=username,
+                                                 match=matches)
+            self.wait_for_quiet()
 
         if password_match and matched == password_match:
             if not password:
-                self.error(fail_message, ConsoleLoginFailedError)
-            (__, matched) = self.send(
-                cmd=password,  match=matches, flush_buffer=False)
-            if matched == password_match or matched == username_match:
-                self.error(fail_message, ConsoleLoginFailedError)
+                self.error(f'{fail_message}: No password set, but password prompt detected',
+                           ConsoleLoginFailedError)
+
+            matches.remove(password_match)
+            (__, matched) = self.send_and_expect(cmd=password,
+                                                 match=matches)
+            self.wait_for_quiet()
 
         if ((success_match and matched != success_match) or
-                matched == pexpect.TIMEOUT or
-                matched == pexpect.EOF):
+                matched in [pexpect.TIMEOUT, pexpect.EOF]):
             self.error(fail_message, ConsoleLoginFailedError)
 
-        if (success_match and matched == success_match):
-            self.log('Login successful')
+        self.log('Login successful')
 
     def get_json_data(self, cmd):
         ''' Execute a command @cmd on target which generates JSON data.
         Parse this data, and return a dict of it.'''
 
         self.wait_for_quiet(quiet=1, sleep_time=0.5)
-        received, matched = self.send(cmd, match='{((.|\n)*)\n}')
+        received, matched = self.send_and_expect(cmd, match='{((.|\n)*)\n}')
 
         if not matched:
             raise ConsoleInvalidJSONReceivedError(

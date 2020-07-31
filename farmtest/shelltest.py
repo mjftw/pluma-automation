@@ -46,8 +46,9 @@ class ShellTest(TestBase):
             self.run_command(console, script)
 
     def run_command(self, console, script):
-        received, _ = console.send(
-            script, receive=True, timeout=self.timeout, log_verbose=False)
+        self.board.login()
+
+        received = console.send_and_read(script, timeout=self.timeout)
         if received.startswith(script):
             received = received[len(script):]
         received = received.strip()
@@ -90,8 +91,8 @@ class ShellTest(TestBase):
             self.board.log(
                 f'{prefix}\n' + sent_line + received_line)
 
-        retcode_received, matched = console.send(
-            'echo retcode=$?', match='retcode=0', log_verbose=False)
+        retcode_received, matched = console.send_and_expect(
+            'echo retcode=$?', match='retcode=0')
         if matched == False:
             raise TaskFailed(
                 f'{prefix} Command "{script}" returned with a non-zero exit code\n' + sent_line + received_line + '  Return code: {retcode_received}')

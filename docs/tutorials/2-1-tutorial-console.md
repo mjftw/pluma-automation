@@ -95,7 +95,7 @@ from farmcore import HostConsole
 console = HostConsole('ssh dut-user@dut-host /bin/bash')
 
 machines = ['arm', 'i386', 'x86_64']
-received, matched = console.send('uname -m', match=machines)
+received, matched = console.send_and_expect('uname -m', match=machines)
 # `received` gets everything before a match was found
 # `matched` is the match string that was found
 
@@ -128,7 +128,7 @@ Thu  7 May 20:24:47 BST 2020
 from farmcore import HostConsole
 
 console = HostConsole('/bin/bash')
-__, matched = console.send('date', match='[0-9]+:[0-9]+:[0-9]+')
+__, matched = console.send_and_expect('date', match='[0-9]+:[0-9]+:[0-9]+')
 
 print(matched)
 # 20:24:49
@@ -164,7 +164,7 @@ console = HostConsole('ssh pi@raspberrypi.local /bin/bash')
 command = 'test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"'
 answers = ['5 > 6', '5 < 6']
 
-received, matched = console.send(command, match=answers)
+received, matched = console.send_and_expect(command, match=answers)
 
 print(matched)
 # 5 > 6
@@ -182,13 +182,16 @@ From this you can see that what we matched wasn't actually the answer to the com
 This happens because the console that we are attached to is echoing back everything we send to it.
 
 Let's see what's left in the console's receive buffer from after the last match.  
-By default the receive buffer is flushed before sending a command, but we can disable this with `flush_buffer=False`.  
+By default the receive buffer is flushed before sending a command, but we can disable this with `flush_before=False`.  
 If we don't have anything we want to match against, but still want to see the result of the command we send we can use `receive=True`.
-This will cause the console to wait until no more data is being sent and then return everything it received.  
+This will cause the console to wait until no more data is being sent and then return everything it received.
+
 Sending a command is also optional, and a newline will be sent by default if no command is specified, we can prevent this with `send_newline=False`.
 
 ```python
-received, matched = console.send(flush_buffer=False, receive=True, send_newline=False)
+received, matched = console.send_and_expect(flush_before=False, send_newline=False, match=['expected output'])
+received = console.send_and_read(flush_before=False, send_newline=False)
+console.send(flush_before=False, send_newline=False)
 
 print(received)
 # 5 < 6\r\n
@@ -219,7 +222,7 @@ console.send('stty -echo')
 command = 'test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"'
 answers = ['5 > 6', '5 < 6']
 
-received, matched = console.send(command, match=answers)
+received, matched = console.send_and_expect(command, match=answers)
 
 print(matched)
 # 5 < 6
@@ -275,7 +278,7 @@ console = HostConsole('ssh pi@raspberrypi.local /bin/bash')
 command = 'test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"'
 answers = ['5 > 6', '5 < 6']
 
-received, matched = console.send(command, match=answers)
+received, matched = console.send_and_expect(command, match=answers)
 print(console.log_file)
 
 # Flush the receive buffer so we can see all received data in the console log
