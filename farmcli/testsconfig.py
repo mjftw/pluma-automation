@@ -36,7 +36,7 @@ class TestsConfig:
 
         config.ensure_consumed()
 
-    def create_test_controller(self, board: Board):
+    def create_test_controller(self, board: Board) -> TestController:
         if not board or not isinstance(board, Board):
             raise ValueError(
                 f'Null or invalid \'board\', which must be of type \'{Board}\'')
@@ -72,14 +72,48 @@ class TestsConfig:
 
         return controller
 
-    def __populate_tests(self, tests_config):
+    def __populate_tests(self, tests_config: Configuration):
         self.tests = []
-        for test_provider in self.test_providers:
-            provider_config = tests_config.pop(
-                test_provider.configuration_key())
-            self.tests.extend(test_provider.all_tests(provider_config))
 
-    def selected_tests(self):
+        sequence = tests_config.pop('sequence')
+        if sequence:
+            self.tests = self.__all_tests_from_sequence(sequence)
+        else:
+            for provider in self.test_providers:
+                provider_config = tests_config.pop(
+                    provider.configuration_key())
+                self.tests.extend(provider.all_tests(provider_config))
+
+    def __all_tests_from_sequence(self, sequence: list) -> list:
+        if not isinstance(sequence, list):
+            raise TestsConfigError(
+                f'Invalid sequence, "sequence" must be a list (currently defined as {sequence})')
+
+        all_tests = []
+        supported_actions = [p.configuration_key()
+                             for p in self.test_providers]
+        for action in sequence:
+            if not isinstance(action, dict):
+                raise TestsConfigError(
+                    f'Invalid sequence action "{action}", which is not a dictionary')
+
+            if len(action) != 1:
+                raise TestsConfigError(
+                    f'Sequence list elements must be single key elements, but got "{action}". Supported actions: {supported_actions}')
+
+            action_key = next(iter(action))
+            try:
+                provider = next(p for p in self.test_providers
+                                if p.configuration_key() == action_key)
+                all_tests.extend(provider.all_tests(
+                    Configuration(action[action_key])))
+            except StopIteration:
+                raise TestsConfigError(
+                    f'No test provider was found for sequence action "{action_key}". Supported actions: {supported_actions}')
+
+        return all_tests
+
+    def selected_tests(self) -> list:
         return list(filter(lambda test: (test.selected), self.tests))
 
     def print_tests(self, log_level: LogLevel = None):
@@ -112,7 +146,7 @@ class TestsConfig:
         log.log('', level=log_level)
 
     @staticmethod
-    def create_tests(tests, board):
+    def create_tests(tests: list, board: Board) -> list:
         test_objects = []
         for test in tests:
             try:
