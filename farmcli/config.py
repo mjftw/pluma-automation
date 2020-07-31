@@ -122,35 +122,25 @@ class TestsProvider(ABC):
 
 class PlumaConfig:
     @staticmethod
-    def load_configuration(tests_config_path, target_config_path):
-        tests_config, target_config = PlumaConfig.load_configuration_raw(
-            tests_config_path, target_config_path)
+    def load_configurations(tests_config_path, target_config_path):
+        tests_config = PlumaConfig.load_yaml(
+            "Tests file", tests_config_path)
+        target_config = PlumaConfig.load_yaml(
+            "Target file", target_config_path)
 
         return Configuration(tests_config), Configuration(target_config)
 
     @staticmethod
-    def load_configuration_raw(tests_config_path, target_config_path):
-        tests_config = None
-        target_config = None
-
+    def load_yaml(name, yaml_file_path):
         try:
-            with open(tests_config_path, 'r') as config:
-                tests_config = yaml.load(config, Loader=yaml.FullLoader)
-        except FileNotFoundError:
+            with open(yaml_file_path, 'r') as config:
+                return yaml.load(config, Loader=yaml.FullLoader)
+        except FileNotFoundError as e:
             raise ConfigurationError(
-                f'Configuration file "{tests_config_path}" does not exist')
-        except:
+                f'{name} "{yaml_file_path}" does not exist') from e
+        except yaml.parser.ParserError as e:
             raise ConfigurationError(
-                f'Failed to open configuration file "{tests_config_path}"')
-
-        try:
-            with open(target_config_path, 'r') as config:
-                target_config = yaml.load(config, Loader=yaml.FullLoader)
-        except FileNotFoundError:
+                f'Error while parsing {name} "{yaml_file_path}"') from e
+        except e:
             raise ConfigurationError(
-                f'Target file "{target_config_path}" does not exist')
-        except:
-            raise ConfigurationError(
-                f'Failed to open target file "{tests_config_path}"')
-
-        return tests_config, target_config
+                f'An error occured while opening/parsing {name} "{yaml_file_path}"') from e

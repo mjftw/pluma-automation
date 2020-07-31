@@ -56,7 +56,7 @@ def tests_providers():
 
 
 def instantiate(args, tests_config_path: str, target_config_path: str, show_tests_list: bool) -> TestController:
-    tests_config, target_config = PlumaConfig.load_configuration(
+    tests_config, target_config = PlumaConfig.load_configurations(
         tests_config_path, target_config_path)
 
     board = TargetConfig.create_board(target_config)
@@ -93,7 +93,7 @@ def execute_run(args, tests_config_path: str, target_config_path: str, check_onl
 
 def execute_tests(args, tests_config_path: str, target_config_path: str):
     '''Execute the "tests" command, listing all tests.'''
-    tests_config, _ = PlumaConfig.load_configuration(
+    tests_config, _ = PlumaConfig.load_configurations(
         tests_config_path, target_config_path)
 
     log.log(

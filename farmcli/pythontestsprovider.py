@@ -47,6 +47,7 @@ class PythonTestsProvider(TestsProvider):
             for test_parameters in test_parameters_list:
                 test.parameter_sets.append(test_parameters)
 
+        parameters.ensure_consumed()
         config.ensure_consumed()
         return all_tests
 
