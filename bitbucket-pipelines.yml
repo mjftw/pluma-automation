@@ -1,9 +1,19 @@
-image: ubuntu:18.04
 pipelines:
   default:
-    - step:
-        script:
-          - ./install.sh -n
-          - ./pluma.py check -c pluma.yml.sample -t pluma-target.yml.sample
-          - export PLUMA_ENV=CI
-          - make test
+    - parallel:
+      - step:
+          name: Install and test
+          image: ubuntu:18.04
+          script:
+            - ./install.sh -n
+            - ./pluma.py check -c pluma.yml.sample -t pluma-target.yml.sample
+            - export PLUMA_ENV=CI
+            - make test
+      - step:
+          name: Build docker image and test
+          services:
+            - docker
+          script:
+            - make docker-build
+            - docker run --rm witekio/automation-lab:latest pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
+            - docker run --rm -e PLUMA_ENV=CI witekio/automation-lab:latest bash -c "cd /root/farm-core && make test"
