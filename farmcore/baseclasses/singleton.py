@@ -1,7 +1,8 @@
 class Singleton:
-    _instance = None
+    __instance = None
 
     def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = object.__new__(cls)
-        return cls._instance
+        if not cls.__instance:
+            cls.__instance = object.__new__(cls)
+            cls.__instance._initialized = False
+        return cls.__instance

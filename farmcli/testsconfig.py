@@ -3,9 +3,10 @@ import inspect
 import re
 import json
 
+from farmcore.baseclasses import PlumaLogger
 from farmtest import TestController, TestBase, TestRunner, ShellTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
-from farmcli import PlumaLogger, Configuration, ConfigurationError
+from farmcli import Configuration, ConfigurationError
 
 log = PlumaLogger()
 

@@ -493,8 +493,7 @@ class TestRunner():
         if self.email_on_fail:
             self.send_fail_email(exception, test, task_name)
 
-        self.board.log('Task failed {}'.format(failed),
-            colour='red', bold=True)
+        self.board.log_error(f'Task failed {failed}')
 
         if abort:
             raise AbortTesting(str(exception))

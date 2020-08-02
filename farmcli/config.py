@@ -1,7 +1,7 @@
 import yaml
 import json
 
-from farmcli import PlumaLogger
+from farmcore.baseclasses import PlumaLogger
 
 log = PlumaLogger()
 

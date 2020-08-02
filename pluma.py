@@ -5,8 +5,9 @@ import time
 import argparse
 
 from farmcore import Board
+from farmcore.baseclasses import PlumaLogger
 from farmtest import TestController
-from farmcli import PlumaConfig, TestsConfig, TargetConfig, PlumaLogger, TestsConfigError, TargetConfigError
+from farmcli import PlumaConfig, TestsConfig, TargetConfig, TestsConfigError, TargetConfigError
 
 log = PlumaLogger()
 

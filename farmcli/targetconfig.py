@@ -2,7 +2,8 @@ import json
 import logging
 
 from farmcore import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
-from farmcli import PlumaLogger, Configuration, ConfigurationError
+from farmcore.baseclasses import PlumaLogger
+from farmcli import Configuration, ConfigurationError
 
 log = PlumaLogger()
 

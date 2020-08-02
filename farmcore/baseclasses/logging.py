@@ -4,7 +4,7 @@ import os
 from farmutils import datetime_to_timestamp
 
 from .hierarchy import hier_setter
-
+from .logger import PlumaLogger
 
 """ Enable logging """
 DEFAULT_LOG_ON = True
@@ -171,20 +171,17 @@ class Logging():
                     os.makedirs(logdir)
                 with open(log_file, 'a', encoding='utf-8') as logfd:
                     logfd.write(message + '\n')
+
             if echo:
-                if colour in ascii_colmap:
-                    message = '{}{}{}'.format(
-                        ascii_colmap[colour],
-                        message,
-                        ascii_colmap['normal']
-                    )
-                if bold:
-                    message = '{}{}{}'.format(
-                        ascii_colmap['bold'],
-                        message,
-                        ascii_colmap['normal']
-                    )
-                print(message.replace('\\n', '\n'))
+                self.__log(message, colour, bold)
+
+    def log_error(self, message: str):
+        global_log = PlumaLogger()
+        global_log.error(message.replace('\\n', '\n'))
+
+    def __log(self, message: str, colour: str = None, bold: bool = False):
+        global_log = PlumaLogger()
+        global_log.log(message.replace('\\n', '\n'), color=colour, bold=bold)
 
     def error(self, message, exception=None):
         message = "ERROR: {}".format(message)
