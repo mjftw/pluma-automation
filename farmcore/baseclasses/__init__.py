@@ -6,4 +6,4 @@ from .storagebase import StorageBase
 from .nonblocking import Nonblocking
 from .locking import Locking
 from .singleton import Singleton
-from .logger import PlumaLogger
+from .logging import Logger, LogMode, LogLevel

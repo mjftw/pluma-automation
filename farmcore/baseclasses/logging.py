@@ -1,10 +1,11 @@
 import datetime
 import os
 
+from enum import Enum, IntEnum
 from farmutils import datetime_to_timestamp
 
 from .hierarchy import hier_setter
-from .logger import PlumaLogger
+from .singleton import Singleton
 
 """ Enable logging """
 DEFAULT_LOG_ON = True
@@ -24,8 +25,7 @@ DEFAULT_LOG_TIME = False
 """ Add log name to logs """
 DEFAULT_LOG_NAME = None
 
-
-ascii_colmap = {
+COLOR_STYLES = {
     'black': '\033[30m',
     'red': '\033[31m',
     'green': '\033[32m',
@@ -33,10 +33,116 @@ ascii_colmap = {
     'blue': '\033[34m',
     'purple': '\033[35m',
     'cyan': '\033[36m',
-    'white': '\033[3m',
-    'bold': '\033[1m',
-    'normal': '\033[0m'
+    'white': '\033[3m'
 }
+STYLE_NORMAL = '\033[0m'
+STYLE_BOLD = '\033[1m'
+
+
+class LogLevel(IntEnum):
+    _MAX = 6
+    ERROR = 5
+    IMPORTANT = 4
+    WARNING = 3
+    INFO = 2
+    NOTICE = 1
+    DEBUG = 0
+
+
+class LogMode(Enum):
+    SILENT = 0
+    QUIET = 1
+    NORMAL = 2
+    VERBOSE = 3
+    DEBUG = 4
+
+    def min_level(self) -> LogLevel:
+        if self == LogMode.SILENT:
+            return int(LogLevel._MAX)
+        if self == LogMode.QUIET:
+            return int(LogLevel.IMPORTANT)
+        if self == LogMode.NORMAL:
+            return int(LogLevel.INFO)
+        if self == LogMode.VERBOSE:
+            return int(LogLevel.NOTICE)
+        if self == LogMode.DEBUG:
+            return int(LogLevel.DEBUG)
+
+
+class Logger(Singleton):
+    '''Global log manager for the standard output.
+
+    Handles the text formatting and what to output
+    based on log levels and log mode.
+    '''
+
+    def __init__(self):
+        if self._initialized:
+            return
+
+        self._initialized = True
+        self.mode = LogMode.NORMAL
+        self.held = False
+        self.log_buffer = ''
+
+    def log(self, message, color=None, bold=False, newline=True, bypass_hold=False, level=None):
+        if not level:
+            level = LogLevel.NOTICE
+
+        if level < self.mode.min_level():
+            return
+
+        self._log(message, color, bold, newline, bypass_hold)
+
+    def debug(self, message):
+        self.log(message, level=LogLevel.DEBUG)
+
+    def notice(self, message):
+        self.log(message, level=LogLevel.NOTICE)
+
+    def info(self, message):
+        self.log(message, level=LogLevel.INFO)
+
+    def warning(self, message):
+        self.log(message, color='yellow', level=LogLevel.WARNING)
+
+    def important(self, message):
+        self.log(message, level=LogLevel.IMPORTANT)
+
+    def error(self, message):
+        self.log(message, color='red', level=LogLevel.ERROR)
+
+    def _log(self, message, color=None, bold=False, newline=True, bypass_hold=False):
+        style_reset = STYLE_NORMAL
+        if color:
+            if color in COLOR_STYLES:
+                message = f'{COLOR_STYLES[color]}{message}{style_reset}'
+                style_reset = ''
+            else:
+                raise ValueError(
+                    f'Invalid color {color}. Supported colors: {COLOR_STYLES}')
+
+        if bold:
+            message = f'{STYLE_BOLD}{message}{style_reset}'
+
+        if newline:
+            message += os.linesep
+
+        if self.held and not bypass_hold:
+            self.log_buffer += message
+        else:
+            print(message, end='', flush=not newline)
+
+    def hold(self):
+        '''Hold the log output until `release` is called.'''
+        self.held = True
+
+    def release(self):
+        '''Flush the log, and restore log output to normal.'''
+        self.held = False
+        if self.log_buffer:
+            self._log(self.log_buffer)
+        self.log_buffer = ''
 
 
 class Logging():
@@ -47,15 +153,15 @@ class Logging():
 
     @property
     def log_on(self):
-        if hasattr(self, "_log_on"):
-            return self._log_on
-        else:
-            return DEFAULT_LOG_ON
+        log = Logger()
+        return log.mode != LogMode.SILENT
 
     @log_on.setter
     @hier_setter
     def log_on(self, log_on):
-        self._log_on = log_on
+        log = Logger()
+        if log_on is False:
+            log.mode = LogMode.SILENT
 
     @property
     def log_name(self):
@@ -141,8 +247,8 @@ class Logging():
         if self.log_file:
             open(self.log_file, 'w').close()
 
-    def log(self, message, colour=None, bold=False,
-            force_echo=None, force_log_file=False):
+    def log(self, message, colour=None, bold=False, force_echo=None,
+            force_log_file=False, newline=True, bypass_hold=False, level=None):
         prefix = ''
 
         if force_echo is not None:
@@ -173,18 +279,20 @@ class Logging():
                     logfd.write(message + '\n')
 
             if echo:
-                self.__log(message, colour, bold)
+                logger = Logger()
+                logger.log(message.replace('\\n', '\n'), color=colour, bold=bold,
+                           newline=newline, bypass_hold=bypass_hold, level=level)
 
-    def log_error(self, message: str):
-        global_log = PlumaLogger()
-        global_log.error(message.replace('\\n', '\n'))
+    def hold_log(self):
+        global_log = Logger()
+        global_log.hold()
 
-    def __log(self, message: str, colour: str = None, bold: bool = False):
-        global_log = PlumaLogger()
-        global_log.log(message.replace('\\n', '\n'), color=colour, bold=bold)
+    def release_log(self):
+        global_log = Logger()
+        global_log.release()
 
     def error(self, message, exception=None):
-        message = "ERROR: {}".format(message)
+        message = f'ERROR: {message}'
         self.log(message, colour='red', bold=True)
         if exception:
             raise exception(message)

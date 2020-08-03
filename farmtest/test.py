@@ -47,6 +47,7 @@ from copy import copy
 
 from farmutils import Email, send_exception_email, datetime_to_timestamp
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailedError
+from farmcore.baseclasses import Logger, LogLevel
 
 
 class TestingException(Exception):
@@ -68,7 +69,12 @@ class AbortTestingAndReport(AbortTesting):
 class TestBase():
     def __init__(self, board, test_name_suffix=None):
         self.board = board
-        self._test_name = self.__class__.__name__
+
+        if self.__class__.__module__:
+            self._test_name = f'{self.__class__.__module__}.{self.__class__.__name__}'
+        else:
+            self._test_name = self.__class__.__name__
+
         if test_name_suffix:
             assert isinstance(test_name_suffix, str)
             self._test_name += f'_{test_name_suffix}'
@@ -293,8 +299,13 @@ class TestRunner():
         if self.sequential:
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
                 colour='blue', bold=True)
+
+            completed = 0
+            total = len(self.tests)
             for test_name in (str(test) for test in self.tests
                     if str(test) != "TestCore"):
+                self.progress = completed / total
+                completed += 1
                 for task_name in self.tasks:
                     # Run TestCore tasks for every test
                     tests_to_run = []
@@ -303,6 +314,8 @@ class TestRunner():
                     tests_to_run.append(test_name)
 
                     self._run_tasks(task_name, tests_to_run)
+
+            self.progress = None
         else:
             self.board.log('== TESTING MODE: PARALLEL ==',
                 colour='blue', bold=True)
@@ -455,9 +468,22 @@ class TestRunner():
 
         self.data[str(test)]['tasks']['ran'].append(task_name)
 
-        if test.__class__ != TestCore:
-            self.board.log("Running: {} - {}".format(
-                str(test), task_name), colour='green')
+        print_test = test.__class__ != TestCore
+        if print_test:
+            test_message = f'{str(test)} - {task_name}'
+
+            if self.progress is not None:
+                percent_text = f'{int(100 * self.progress)}%'.center(3)
+                test_message = f'[{percent_text}] {test_message}'
+
+            column_limit = 75
+            if len(test_message) > column_limit:
+                test_message = f'{test_message[:column_limit-3]}...'
+
+            self.board.log(test_message.ljust(column_limit) + ' ',
+                           level=LogLevel.IMPORTANT, newline=False)
+            self.board.hold_log()
+
         try:
             task_func()
         # If exception is one we deliberately caused, don't handle it
@@ -467,6 +493,10 @@ class TestRunner():
             raise e
         except Exception as e:
             self.data[str(test)]['tasks']['failed'].append(task_name)
+
+            if print_test:
+                self.board.log('FAIL', colour='red',
+                               level=LogLevel.IMPORTANT, bypass_hold=True)
 
             # If request to abort testing, do so
             if isinstance(e, AbortTesting):
@@ -479,6 +509,14 @@ class TestRunner():
 
             abort_testing = not self.continue_on_fail
             self._handle_failed_task(test, task_name, e, abort_testing)
+        else:
+            if print_test:
+                self.board.log('PASS', colour='green',
+                               level=LogLevel.IMPORTANT, bypass_hold=True)
+        finally:
+            if print_test:
+                self.board.release_log()
+
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {
@@ -493,8 +531,11 @@ class TestRunner():
         if self.email_on_fail:
             self.send_fail_email(exception, test, task_name)
 
-        self.board.log_error(f'Task failed {failed}')
-
+        self.board.log(f'Task failed: ', level=LogLevel.ERROR,
+                       bold=True, colour='red', newline=False)
+        self.board.log(str(exception), level=LogLevel.ERROR,
+                       colour='red', newline=False)
+        self.board.log(f'Details: {failed}', colour='yellow')
         if abort:
             raise AbortTesting(str(exception))
 

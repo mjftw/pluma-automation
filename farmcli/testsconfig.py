@@ -3,12 +3,12 @@ import inspect
 import re
 import json
 
-from farmcore.baseclasses import PlumaLogger
+from farmcore.baseclasses import Logger
 from farmtest import TestController, TestBase, TestRunner, ShellTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
 from farmcli import Configuration, ConfigurationError
 
-log = PlumaLogger()
+log = Logger()
 
 SETTINGS_SECTION = 'settings'
 PYTHON_TESTS_SECTION = 'tests'
@@ -39,6 +39,7 @@ class TestsConfig:
                     continue_on_fail=settings.pop(
                         'continue_on_fail',  default=True),
                     skip_tasks=settings.pop('skip_tasks',  default=[]),
+                    use_testcore=False
                 ),
                 log_func=log.log
             )

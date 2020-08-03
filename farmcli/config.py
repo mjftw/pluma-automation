@@ -1,9 +1,9 @@
 import yaml
 import json
 
-from farmcore.baseclasses import PlumaLogger
+from farmcore.baseclasses import Logger
 
-log = PlumaLogger()
+log = Logger()
 
 
 class ConfigurationError(Exception):

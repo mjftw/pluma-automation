@@ -2,10 +2,10 @@ import json
 import logging
 
 from farmcore import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
-from farmcore.baseclasses import PlumaLogger
+from farmcore.baseclasses import Logger
 from farmcli import Configuration, ConfigurationError
 
-log = PlumaLogger()
+log = Logger()
 
 
 class TargetConfigError(Exception):
@@ -35,12 +35,12 @@ class TargetConfig:
             log.log('Components:', bold=True)
             more_info = '- Default' if serial and main_console == serial else ''
             log.log(f'    Serial:         {str(serial)} {more_info}',
-                    color='green' if serial else 'normal')
+                    color='green' if serial else None)
             more_info = '- Default' if ssh and main_console == ssh else ''
             log.log(f'    SSH:            {str(ssh)} {more_info}',
-                    color='green' if ssh else 'normal')
+                    color='green' if ssh else None)
             log.log(f'    Power control:  {str(power)}',
-                    color='green' if power else 'normal')
+                    color='green' if power else None)
             log.log('')
 
             config.ensure_consumed()
