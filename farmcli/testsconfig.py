@@ -5,19 +5,34 @@ import json
 
 from functools import partial
 from farmcore.baseclasses import Logger, LogLevel
-from farmtest import TestController, TestBase, TestRunner, ShellTest
+from farmtest import TestController, TestBase, TestRunner, ShellTest, ExecutableTest
 from farmtest.stock.deffuncs import sc_run_n_iterations
 from farmcli import Configuration, ConfigurationError
+from .testsbuilder import TestsBuilder
 
 log = Logger()
 
 SETTINGS_SECTION = 'settings'
 PYTHON_TESTS_SECTION = 'tests'
 SCRIPT_TESTS_SECTION = 'script_tests'
+C_TESTS_SECTION = 'c_tests'
 
 
 class TestsConfigError(Exception):
     pass
+
+
+class TestDefinition():
+    def __init__(self, name, testclass, parameters):
+        self.name = name
+        self.testclass = testclass
+        self.parameters = parameters
+
+        if not self.parameters:
+            self.parameters = {}
+        elif not isinstance(self.parameters, dict):
+            raise ConfigurationError(
+                f'Invalid parameters format for test "{name}": {self.parameters.__class__}, {self.parameters}')
 
 
 class TestsConfig:
@@ -25,8 +40,7 @@ class TestsConfig:
     def create_test_controller(config, board):
         try:
             settings = config.pop(SETTINGS_SECTION)
-            tests = TestsConfig.selected_tests(
-                config.pop(PYTHON_TESTS_SECTION), config.pop(SCRIPT_TESTS_SECTION))
+            tests = TestsConfig.selected_tests_from_config(config)
             config.ensure_consumed()
 
             test_objects = TestsConfig.create_tests(tests, board)
@@ -71,24 +85,28 @@ class TestsConfig:
 
     @staticmethod
     def print_tests(config):
-        TestsConfig.selected_tests(config.pop(PYTHON_TESTS_SECTION),
-                                   config.pop(SCRIPT_TESTS_SECTION))
+        TestsConfig.selected_tests_from_config(config)
 
     @staticmethod
-    def selected_tests(python_tests_config, script_tests_config):
-        if not python_tests_config:
-            raise TestsConfigError(
-                f'Configuration file is invalid, missing a "{PYTHON_TESTS_SECTION}" section')
+    def selected_tests_from_config(config):
+        return TestsConfig.selected_tests(config.pop(PYTHON_TESTS_SECTION),
+                                          config.pop(SCRIPT_TESTS_SECTION),
+                                          config.pop(C_TESTS_SECTION))
 
-        tests = TestsConfig.selected_python_tests(python_tests_config)
-        tests.extend(TestsConfig.selected_script_tests(
-            script_tests_config.content()))
+    @staticmethod
+    def selected_tests(python_tests_config, script_tests_config, c_tests_config):
+        tests = []
+        tests.extend(TestsConfig.selected_python_tests(python_tests_config))
+        tests.extend(TestsConfig.selected_script_tests(script_tests_config))
+        tests.extend(TestsConfig.selected_c_tests(c_tests_config))
         return tests
 
     @staticmethod
     def selected_python_tests(config):
+        log.log('Core tests:', bold=True)
         if not config:
-            raise ValueError('Null configuration provided')
+            log.log('    None\n')
+            return []
 
         include = config.pop('include') or []
         exclude = config.pop('exclude') or []
@@ -98,7 +116,6 @@ class TestsConfig:
 
         # Instantiate tests selected
         selected_tests = []
-        log.log('Core tests:', bold=True)
         for test_name in sorted(all_tests):
             selected = TestsConfig.test_matches(test_name, include, exclude)
             test_parameters_list = parameters.pop_raw(test_name)
@@ -120,8 +137,10 @@ class TestsConfig:
 
                         log.log(f'          {printed_data}')
 
-                    selected_tests.append(
-                        {'name': test_name, 'class': all_tests[test_name], 'parameters': test_parameters})
+                    test = TestDefinition(
+                        test_name, testclass=all_tests[test_name],
+                        parameters=test_parameters)
+                    selected_tests.append(test)
 
         log.log('')
         config.ensure_consumed()
@@ -135,6 +154,9 @@ class TestsConfig:
             log.log('    None\n')
             return []
 
+        if isinstance(config, Configuration):
+            config = config.content()
+
         selected_tests = []
         for test_name in config:
             log.log(f'    [x] {test_name}', color='green')
@@ -142,8 +164,8 @@ class TestsConfig:
             try:
                 test_parameters = config[test_name]
                 test_parameters['name'] = test_name
-                test = {'name': test_name, 'class': ShellTest,
-                        'parameters': test_parameters}
+                test = TestDefinition(
+                    test_name, testclass=ShellTest, parameters=test_parameters)
                 selected_tests.append(test)
             except Exception as e:
                 raise TestsConfigError(
@@ -153,16 +175,66 @@ class TestsConfig:
         return selected_tests
 
     @staticmethod
+    def selected_c_tests(config):
+        log.log('C tests:', bold=True)
+        if not config:
+            log.log('    None\n')
+            return []
+
+        yocto_sdk_file = config.pop('yocto_sdk')
+        env_file = config.pop('source_environment')
+        if not yocto_sdk_file and not env_file:
+            raise TestsConfigError(
+                'Missing "yocto_sdk" or "source_environment" attributes for C tests')
+
+        install_dir = None
+        if yocto_sdk_file:
+            install_dir = TestsBuilder.install_yocto_sdk(yocto_sdk_file)
+
+        if not env_file:
+            env_file = TestsBuilder.find_yocto_sdk_env_file(install_dir)
+
+        selected_tests = []
+        tests_config = config.pop('tests', default={}).content()
+        for test_name in tests_config:
+            log.log(f'    [x] {test_name}', color='green')
+
+            try:
+                test_parameters = tests_config[test_name]
+                test_executable = TestsBuilder.build_c_test(
+                    target_name=test_name, env_file=env_file,
+                    sources=test_parameters.pop('sources'), flags=test_parameters.pop('flags', None))
+
+                test_parameters['executable_file'] = test_executable
+
+                test = TestDefinition(
+                    test_name, testclass=ExecutableTest, parameters=test_parameters)
+                selected_tests.append(test)
+            except KeyError as e:
+                raise TestsConfigError(
+                    f'Error processing C test "{test_name}": Missing mandatory attribute {e}')
+            except Exception as e:
+                raise TestsConfigError(
+                    f'Error processing C test "{test_name}": {e}')
+
+        return selected_tests
+
+    @staticmethod
     def create_tests(tests, board):
         test_objects = []
         for test in tests:
-            test_name = test['name']
+            test_name = test.name
             try:
-                test_object = test['class'](board, **test['parameters'])
+                test_object = test.testclass(board, **test.parameters)
                 test_objects.append(test_object)
             except Exception as e:
-                raise TestsConfigError(
-                    f'Failed to create test "{test_name}":\n    {e}')
+                if f'{e}'.startswith('__init__()'):
+                    raise TestsConfigError(
+                        f'The test "{test_name}" requires one or more parameters to be provided '
+                        f'in the "parameters" attribute in your "pluma.yml" file:\n    {e}')
+                else:
+                    raise TestsConfigError(
+                        f'Failed to create test "{test_name}":\n    {e}')
 
         return test_objects
 

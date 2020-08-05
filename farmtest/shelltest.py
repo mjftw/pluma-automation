@@ -14,7 +14,7 @@ class ShellTest(TestBase):
         self.should_print = should_print or []
         self.should_not_print = should_not_print or []
         self.run_on_host = run_on_host
-        self.timeout = timeout
+        self.timeout = timeout if timeout is not None else 5
 
         self.scripts = script
         if not isinstance(self.scripts, list):
@@ -42,18 +42,28 @@ class ShellTest(TestBase):
                 raise TaskFailed(
                     f'Failed to run script test "{self._test_name}": no console available')
 
+            self.board.login()
+
         for script in self.scripts:
             self.run_command(console, script)
 
     def run_command(self, console, script):
-        self.board.login()
+        CommandRunner.run(test_name=self._test_name, log_function=self.board.log, console=console, command=script,
+                          timeout=self.timeout, should_print=self.should_print, should_not_print=self.should_not_print)
 
-        received = console.send_and_read(script, timeout=self.timeout)
-        if received.startswith(script):
-            received = received[len(script):]
+
+class CommandRunner():
+    @staticmethod
+    def run(test_name, console, command, log_function=print, timeout=None, should_print=None, should_not_print=None):
+        should_print = should_print or []
+        should_not_print = should_not_print or []
+
+        received = console.send_and_read(command, timeout=timeout)
+        if received.startswith(command):
+            received = received[len(command):]
         received = received.strip()
 
-        prefix = f'Script test "{self._test_name}":'
+        prefix = f'Script test "{test_name}":'
         if not received:
             raise TaskFailed(f'{prefix} No response available')
 
@@ -65,42 +75,52 @@ class ShellTest(TestBase):
             formatted_received += f'{line}\n'
             first_line = False
 
-        sent_line = f'  Sent:     $ {script}\n'
-        should_print_line = f'  Expected: {self.should_print}\n'
-        should_not_print_line = f'  Errors:   {self.should_not_print}\n'
+        sent_line = f'  Sent:     $ {command}\n'
+        should_print_line = f'  Expected: {should_print}\n'
+        should_not_print_line = f'  Errors:   {should_not_print}\n'
         received_line = f'  Received: {formatted_received}'
 
-        if self.output_matches_pattern(self.should_not_print, received):
+        if CommandRunner.output_matches_pattern(should_not_print, received):
             raise TaskFailed(
                 f'{prefix} Response matched error condition:\n' +
                 sent_line + should_not_print_line + received_line)
 
-        if len(self.should_print) > 0:
-            response_valid = self.output_matches_pattern(
-                self.should_print, received)
+        if len(should_print) > 0:
+            response_valid = CommandRunner.output_matches_pattern(
+                should_print, received)
 
             if not response_valid:
                 raise TaskFailed(
                     f'{prefix} Response did not match expected:\n' +
                     sent_line + should_print_line + received_line)
-            else:
-                self.board.log(
+            elif log_function:
+                log_function(
                     f'{prefix} Matching response found:\n' +
                     sent_line + should_print_line + received_line)
-        else:
-            self.board.log(
-                f'{prefix}\n' + sent_line + received_line)
+        elif log_function:
+            log_function(f'{prefix}\n' + sent_line + received_line)
 
+        retcode_command = 'echo retcode=$?'
         retcode_received, matched = console.send_and_expect(
-            'echo retcode=$?', match='retcode=0')
-        if matched == False:
-            raise TaskFailed(
-                f'{prefix} Command "{script}" returned with a non-zero exit code\n' + sent_line + received_line + f'  Return code: {retcode_received}')
+            retcode_command, match='retcode=0')
+
+        if retcode_received.startswith(retcode_command):
+            retcode_received = retcode_received[len(retcode_command):]
+
+        if not matched:
+            error = f'{prefix} Command "{command}" returned with a non-zero exit code\n' + \
+                sent_line + received_line + \
+                f'  Return code query output: {retcode_received}'
+            ansi_colors_regexp = re.compile(
+                r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+            error = ansi_colors_regexp.sub('', error)
+            raise TaskFailed(error)
 
         # Be sure nothing stays in the buffer
-        console.wait_for_quiet(verbose=False)
+        console.wait_for_quiet()
 
-    def output_matches_pattern(self, patterns, output):
+    @staticmethod
+    def output_matches_pattern(patterns, output):
         if patterns is None:
             raise ValueError('None pattern provided')
 

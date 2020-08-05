@@ -4,13 +4,13 @@ credentials:
 
 console:
   serial:
-    port: /dev/ttyUSB0
+    #port: /dev/ttyUSB0
   ssh:
     target: 192.168.0.25
 
-power:
-  ippower9258:
-    host: 192.168.0.30
-    outlet: 1
-    login: admin
-    password: bob
+#power:
+#  ippower9258:
+#    host: 192.168.0.30
+#    outlet: 1
+#    login: admin
+#    password: pass

@@ -17,6 +17,9 @@ class SSHConsole(HostConsole):
 
         super().__init__(command)
 
+    def support_file_copy(self):
+        return True
+
     def copy_to_host(self, source, destination, timeout=30):
         return self._scp_copy(f'{self.login_user}@{self.target}:{source}', destination, timeout=timeout)
 
@@ -33,4 +36,4 @@ class SSHConsole(HostConsole):
             subprocess.check_output(command_list, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise Exception(
-                f'Failed to copy (scp) "{source}" to "{destination}".\n  Command {command} failed with error:\n    "{e.output}"')
+                f'Failed to copy (scp) "{source}" to "{destination}".\n  Command {command} failed with error:\n    "{e.output.decode()}"')

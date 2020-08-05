@@ -109,6 +109,9 @@ class TargetFactory:
 
     @staticmethod
     def create_power_control(power_config, console):
+        if not power_config:
+            power_config = Configuration()
+
         POWER_SOFT = 'soft'
         POWER_IPPOWER9258 = 'ippower9258'
         POWER_LIST = [POWER_SOFT, POWER_IPPOWER9258]

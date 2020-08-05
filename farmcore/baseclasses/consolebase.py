@@ -528,6 +528,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         data = json.loads(matched)
         return data
 
+    def support_file_copy(self):
+        return False
+
     def copy_to_target(self, source, destination, timeout=30):
         raise ValueError(
             f'Console type {self} does not support copying to target')
