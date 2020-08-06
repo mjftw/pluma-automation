@@ -81,31 +81,34 @@ class TestsConfig:
     def selected_tests(self):
         return list(filter(lambda test: (test.selected), self.tests))
 
-    def print_tests(self):
-        TestsConfig.print_tests_definition(self.tests)
+    def print_tests(self, log_level: LogLevel = None):
+        TestsConfig.print_tests_definition(self.tests, log_level=log_level)
 
     @staticmethod
-    def print_tests_definition(tests: list):
+    def print_tests_definition(tests: list, log_level: LogLevel = None):
+        if not log_level:
+            log_level = LogLevel.INFO
+
         tests = sorted(
             tests, key=lambda test: test.provider.configuration_key())
 
         last_provider = None
         for test in tests:
             if test.provider != last_provider:
-                log.log(
-                    f'{os.linesep}{test.provider.display_name()}:', bold=True)
+                log.log(f'{os.linesep}{test.provider.display_name()}:',
+                        bold=True, level=log_level)
                 last_provider = test.provider
 
             check = 'x' if test.selected else ' '
             log.log(f'    [{check}] {test.name}',
-                    color='green' if test.selected else 'normal')
+                    color='green' if test.selected else 'normal', level=log_level)
 
             for test_parameters in test.parameter_sets:
                 if test.selected and len(test_parameters) > 0:
                     printed_data = json.dumps(test_parameters)
-                    log.log(f'          {printed_data}')
+                    log.log(f'          {printed_data}', level=log_level)
 
-        log.log('')
+        log.log('', level=log_level)
 
     @staticmethod
     def create_tests(tests, board):

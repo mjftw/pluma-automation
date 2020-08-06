@@ -6,6 +6,7 @@ import traceback
 import os
 
 from farmcore.baseclasses import Logger, LogMode, LogLevel
+from farmtest import TestController
 from farmcli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
 from farmcli import TestsConfigError, TestsBuildError, TargetConfigError
 from farmcli import PythonTestsProvider, ShellTestsProvider, CTestsProvider
@@ -51,7 +52,7 @@ def tests_providers():
             CTestsProvider()]
 
 
-def instantiate(args, tests_config_path, target_config_path):
+def instantiate(args, tests_config_path: str, target_config_path: str, show_tests_list: bool) -> TestController:
     tests_config, target_config = PlumaConfig.load_configuration(
         tests_config_path, target_config_path)
 
@@ -60,13 +61,17 @@ def instantiate(args, tests_config_path, target_config_path):
     board.log_file = tests_config.pop('log') or default_log
 
     testsConfig = TestsConfig(tests_config, tests_providers())
-    testsConfig.print_tests()
+
+    tests_list_log_level = LogLevel.INFO if show_tests_list else LogLevel.NOTICE
+    testsConfig.print_tests(tests_list_log_level)
+
     return testsConfig.create_test_controller(board)
 
 
-def execute_run(args, tests_config_path, target_config_path, check_only=False):
+def execute_run(args, tests_config_path: str, target_config_path: str, check_only: bool = False):
     '''Execute the "run" command, and allow checking only ("check" command).'''
-    controller = instantiate(args, tests_config_path, target_config_path)
+    controller = instantiate(args, tests_config_path,
+                             target_config_path, show_tests_list=check_only)
     if check_only:
         log.log('Configuration and tests successfully validated.',
                 level=LogLevel.IMPORTANT)
@@ -83,7 +88,7 @@ def execute_run(args, tests_config_path, target_config_path, check_only=False):
     return success
 
 
-def execute_tests(args, tests_config_path, target_config_path):
+def execute_tests(args, tests_config_path: str, target_config_path: str):
     '''Execute the "tests" command, listing all tests.'''
     tests_config, _ = PlumaConfig.load_configuration(
         tests_config_path, target_config_path)
@@ -91,7 +96,7 @@ def execute_tests(args, tests_config_path, target_config_path):
     log.log(
         'List of core and script tests available, based on the current configuration.')
     testsConfig = TestsConfig(tests_config, tests_providers())
-    testsConfig.print_tests()
+    testsConfig.print_tests(log_level=LogLevel.IMPORTANT)
 
 
 def execute_clean(args):
@@ -133,18 +138,10 @@ def main():
             success = execute_run(args, tests_config_path, target_config_path)
             exit(0 if success else 1)
         elif args.command == CHECK_COMMAND:
-            # Force log mode to print the relevant information
-            mode_set = log.mode
-            log.mode = LogMode.VERBOSE
             execute_run(args, tests_config_path, target_config_path,
                         check_only=True)
-            log.mode = mode_set
         elif args.command == TESTS_COMMAND:
-            # Force log mode to print the relevant information
-            mode_set = log.mode
-            log.mode = LogMode.VERBOSE
             execute_tests(args, tests_config_path, target_config_path)
-            log.mode = mode_set
         elif args.command == CLEAN_COMMAND:
             execute_clean(args)
     except TestsConfigError as e:
