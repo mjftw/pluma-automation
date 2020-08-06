@@ -12,7 +12,7 @@ core_tests:
       total_mb: 985
       available_mb: 500
 
-script_tests:
+shell_tests:
   cat_meminfo:
     script:
     - cat /proc/meminfo

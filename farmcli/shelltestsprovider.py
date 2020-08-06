@@ -6,15 +6,15 @@ from .config import TestDefinition, TestsProvider
 log = Logger()
 
 
-class ScriptTestsProvider(TestsProvider):
+class ShellTestsProvider(TestsProvider):
     def __init__(self):
         pass
 
     def display_name(self):
-        return 'Inline tests (pluma.yml)'
+        return 'Inline tests (pluma.yml, Shell)'
 
     def configuration_key(self):
-        return 'script_tests'
+        return 'shell_tests'
 
     def all_tests(self, config):
         if not config:

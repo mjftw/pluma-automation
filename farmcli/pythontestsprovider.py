@@ -1,9 +1,9 @@
-import testsuite
 import re
 import json
 import inspect
-
 from operator import attrgetter
+
+import testsuite
 from farmcore.baseclasses import Logger
 from farmtest import TestBase
 from farmcli import Configuration
@@ -17,7 +17,7 @@ class PythonTestsProvider(TestsProvider):
         pass
 
     def display_name(self):
-        return 'Core tests'
+        return 'Core tests (testsuite, Python)'
 
     def configuration_key(self):
         return 'core_tests'
@@ -62,7 +62,7 @@ class PythonTestsProvider(TestsProvider):
         return sorted(all_tests, key=attrgetter('name'))
 
     @staticmethod
-    def test_matches(test_name, include, exclude):
+    def test_matches(test_name: str, include: list, exclude: list) -> bool:
         # Very suboptimal way of doing it.
         for regex_string in exclude:
             regex = re.compile(regex_string)

@@ -19,51 +19,8 @@ class TestsConfigError(Exception):
     pass
 
 
-class TestDefinition():
-    def __init__(self, name: str, testclass: type, test_provider: object, parameter_sets=None, selected=False):
-        if not name or name == '':
-            raise ValueError('Test name cannot be empty')
-
-        if not testclass or not test_provider:
-            raise ValueError('Test class and test provider must be set')
-
-        self.name = name
-        self.testclass = testclass
-        self.provider = test_provider
-        self.parameter_sets = parameter_sets or []
-        self.selected = selected
-
-        if isinstance(self.parameter_sets, dict):
-            self.parameter_sets = [self.parameter_sets]
-        elif not isinstance(self.parameter_sets, list):
-            raise ValueError(
-                f'Parameter sets for test "{name}" should be a list of dictionaries')
-
-        for parameter_set in self.parameter_sets:
-            if not isinstance(parameter_set, dict):
-                raise ConfigurationError(
-                    f'Invalid parameters format for test "{name}": {parameter_set.__class__}, {parameter_set}')
-
-
-class TestsProvider(ABC):
-    @abstractmethod
-    def display_name(self):
-        pass
-
-    @abstractmethod
-    def configuration_key(self):
-        pass
-
-    @abstractmethod
-    def all_tests(self, config):
-        pass
-
-    def selected_tests(self, config):
-        return list(filter(lambda test: (test.selected), self.all_tests(config)))
-
-
 class Configuration:
-    def __init__(self, config={}):
+    def __init__(self, config: dict = {}):
         if not isinstance(config, dict):
             raise ValueError('Configuration class requires a "dict" object')
 
@@ -101,6 +58,66 @@ class Configuration:
 
     def __str__(self):
         return json.dumps(self.content())
+
+
+class TestDefinition():
+    '''Data class representing a test, its class, and parameters.'''
+
+    def __init__(self, name: str, testclass: type, test_provider: object, parameter_sets: list = None, selected: bool = False):
+        if not name or name == '':
+            raise ValueError('Test name cannot be empty')
+
+        if not testclass or not test_provider:
+            raise ValueError('Test class and test provider must be set')
+
+        self.name = name
+        self.testclass = testclass
+        self.provider = test_provider
+        self.parameter_sets = parameter_sets or []
+        self.selected = selected
+
+        if isinstance(self.parameter_sets, dict):
+            self.parameter_sets = [self.parameter_sets]
+        elif not isinstance(self.parameter_sets, list):
+            raise ValueError(
+                f'Parameter sets for test "{name}" should be a list of dictionaries')
+
+        for parameter_set in self.parameter_sets:
+            if not isinstance(parameter_set, dict):
+                raise ConfigurationError(
+                    f'Invalid parameters format for test "{name}": {parameter_set.__class__}, {parameter_set}')
+
+
+class TestsProvider(ABC):
+    '''Abstract base class that provides TestDefinition from the configuration
+
+    Classes implementing TestsProvider must provide a unique configuration key
+    (configuration_key), and the "all_tests", which returns the list of
+    TestDefinition from a configuration.
+    '''
+    @abstractmethod
+    def display_name(self) -> str:
+        '''Return a human-friendly name for the provider'''
+        pass
+
+    @abstractmethod
+    def configuration_key(self) -> str:
+        '''Return a unique key (string) representing the provider.
+
+        If the configuration key is encountered in the test configuration,
+        this provider will be used when creating the tests definition by
+        calling "all_tests" and "selected_tests".
+        '''
+        pass
+
+    @abstractmethod
+    def all_tests(self, config: Configuration) -> list:
+        '''Return all tests from the "config" provided, as a list of TestDefinition'''
+        pass
+
+    def selected_tests(self, config: Configuration) -> list:
+        '''Return selected tests from the "config" provided, as a list of TestDefinition'''
+        return list(filter(lambda test: (test.selected), self.all_tests(config)))
 
 
 class PlumaConfig:

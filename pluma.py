@@ -8,7 +8,7 @@ import os
 from farmcore.baseclasses import Logger, LogMode, LogLevel
 from farmcli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
 from farmcli import TestsConfigError, TestsBuildError, TargetConfigError
-from farmcli import PythonTestsProvider, ScriptTestsProvider, CTestsProvider
+from farmcli import PythonTestsProvider, ShellTestsProvider, CTestsProvider
 
 log = Logger()
 
@@ -47,7 +47,7 @@ def parse_arguments():
 
 
 def tests_providers():
-    return [PythonTestsProvider(), ScriptTestsProvider(),
+    return [PythonTestsProvider(), ShellTestsProvider(),
             CTestsProvider()]
 
 

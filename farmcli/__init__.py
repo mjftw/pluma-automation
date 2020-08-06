@@ -3,5 +3,5 @@ from .testsconfig import TestsConfig
 from .testsbuilder import TestsBuilder, TestsBuildError
 from .targetconfig import TargetConfig, TargetFactory
 from .pythontestsprovider import PythonTestsProvider
-from .scripttestsprovider import ScriptTestsProvider
+from .shelltestsprovider import ShellTestsProvider
 from .ctestsprovider import CTestsProvider
