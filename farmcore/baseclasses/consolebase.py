@@ -439,10 +439,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             raise ConsoleCannotOpenError
 
         cmd = cmd or ''
-
-        if isinstance(cmd, str):
-            cmd = self.encode(cmd)
-
         self.log(f'Sending command: \'{cmd}\'', force_log_file=None,
                  level=LogLevel.DEBUG)
 
