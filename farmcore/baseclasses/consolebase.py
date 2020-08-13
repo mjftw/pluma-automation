@@ -57,6 +57,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         self._buffer = ''
         self._last_received = ''
         self._raw_logfile_fd = None
+        self._pex = None
 
     @property
     @abstractmethod
