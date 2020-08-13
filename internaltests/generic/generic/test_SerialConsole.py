@@ -495,3 +495,25 @@ def test_SerialConsole_flush_clears_buffer(serial_console_proxy):
 
         assert data_received is False
 
+
+def test_SerialConsole_read_all(serial_console_proxy):
+    data1 = 'Line1'
+
+    serial_console_proxy.console.open()
+    serial_console_proxy.proxy.write(data1)
+
+    assert serial_console_proxy.console.read_all() == data1
+    assert serial_console_proxy.console.read_all() == ''
+
+
+def test_SerialConsole_read_all_preserve_buffer(serial_console_proxy):
+    data2 = 'Line2'
+    serial_console_proxy.console.open()
+    serial_console_proxy.proxy.write(data2)
+
+    assert serial_console_proxy.console.read_all(
+        preserve_read_buffer=True) == data2
+    assert serial_console_proxy.console.read_all(
+        preserve_read_buffer=True) == data2
+    assert serial_console_proxy.console.read_all() == data2
+    assert serial_console_proxy.console.read_all() == ''

@@ -8,11 +8,10 @@ from deprecated import deprecated
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from functools import wraps
-
 from farmutils import datetime_to_timestamp
 
 from .farmclass import Farmclass
-
+from .logging import LogLevel
 
 DEFAULT_PROMPT = r'>>FARM>>'
 
@@ -94,24 +93,36 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def raw_logfile_clear(self):
         open(self.raw_logfile, 'w').close()
 
+    @deprecated(version='2.0', reason='Use "read_all" instead')
     def flush(self, clear_buf=False):
+        if clear_buf:
+            # Preserve behavior of returning nothing when clearing
+            self.read_all(preserve_read_buffer=False)
+        else:
+            return self.read_all(preserve_read_buffer=True)
+
+    def read_all(self, preserve_read_buffer: bool = False) -> str:
+        '''Read all from the console, empty and return the read buffer'''
+
         if not self.is_open:
             self.open()
         try:
             while 1:
-                last_read = self.decode(self._pex.read_nonblocking(1, 0.01))
-                self._buffer += last_read
+                self._buffer += self.decode(
+                    self._pex.read_nonblocking(1, 0.01))
         except pexpect.exceptions.TIMEOUT:
             pass
         except pexpect.exceptions.EOF:
             pass
 
-        if clear_buf:
+        buffer = self._buffer
+        if not preserve_read_buffer:
             if self._buffer.strip():
-                self.log(
-                    f'<<flushed>>{self._buffer}<</flushed>>', force_echo=False)
+                self.log(f'<<flushed>>{self._buffer}<</flushed>>',
+                         force_echo=False, level=LogLevel.DEBUG)
             self._buffer = ''
-        return self._buffer
+
+        return buffer
 
     @property
     def _buffer_size(self):
@@ -219,7 +230,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         self.flush()
         if start_bytes is None:
-            start_bytes = self._flush_get_size()
+            start_bytes = self._buffer_size
 
         elapsed = 0.0
 
@@ -458,7 +469,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             cmd = self.encode(cmd)
 
         if flush_before:
-            self.flush(True)
+            self.read_all()
 
         if send_newline:
             self._pex.sendline(cmd)
