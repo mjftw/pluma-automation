@@ -51,7 +51,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             f'{self.__class__.__name__}_raw_{timestamp}.log')
 
         self.encoding = encoding or 'ascii'
-        self.linesep = linesep or '\r\n'
+        self.linesep = linesep or '\n'
         self.raw_logfile = raw_logfile or default_raw_logfile
 
         self._buffer = ''
