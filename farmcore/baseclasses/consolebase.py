@@ -370,47 +370,29 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                         matched, excepts), exception=ConsoleExceptionKeywordReceivedError)
             else:
                 self.wait_for_quiet(
-                    timeout=quiet_timeout,
-                    sleep_time=quiet_sleep,
                     quiet=quiet_time,
-                    verbose=log_verbose)
+                    sleep_time=quiet_sleep,
+                    timeout=quiet_timeout)
                 received = self._buffer
 
         return (received, matched)
 
-    def send_and_read(self,
-                      cmd,
-                      timeout=None,
-                      sleep_time=None,
-                      quiet_time=None,
-                      send_newline=True,
-                      flush_before=True,
-                      verbose=False):
-        quiet_timeout = timeout if timeout is not None else 3
-        quiet_sleep = sleep_time if sleep_time is not None else 0.1
+    def send_and_read(self, cmd: str, timeout: int = None,
+                      sleep_time: int = None, quiet_time: int = None,
+                      send_newline: bool = True, flush_before: bool = True) -> str:
+        timeout = timeout if timeout is not None else 3
+        sleep_time = sleep_time if sleep_time is not None else 0.1
         quiet_time = quiet_time if quiet_time is not None else 0.3
 
         self.send_nonblocking(cmd, send_newline=send_newline,
-                              verbose=verbose, flush_before=flush_before)
+                              flush_before=flush_before)
+        self.wait_for_quiet(quiet=quiet_time, sleep_time=sleep_time,
+                            timeout=timeout)
+        return self.read_all()
 
-        self.wait_for_quiet(
-            timeout=quiet_timeout,
-            sleep_time=quiet_sleep,
-            quiet=quiet_time,
-            verbose=verbose)
-        received = self._buffer
-
-        return received
-
-    def send_and_expect(self,
-                        cmd,
-                        match,
-                        excepts=None,
-                        timeout=None,
-                        send_newline=True,
-                        flush_before=True,
-                        verbose=False):
-
+    def send_and_expect(self, cmd: str, match: list,
+                        excepts: list = None, timeout: int = None,
+                        send_newline: bool = True, flush_before: bool = True) -> (str, int):
         match = match or []
         excepts = excepts or []
         timeout = timeout if timeout is not None else 5
@@ -425,12 +407,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         watches.extend(excepts)
 
         self.send_nonblocking(cmd, send_newline=send_newline,
-                              verbose=verbose, flush_before=flush_before)
+                              flush_before=flush_before)
 
-        matched = self.wait_for_match(
-            timeout=timeout,
-            match=watches,
-            verbose=verbose)
+        matched = self.wait_for_match(timeout=timeout, match=watches)
         received = self.decode(self._pex.before)
         new_received = received[len(self._last_received):]
 
@@ -441,8 +420,8 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             self._last_received = received
             match_str = f'<<not_matched expects={watches}>>'
 
-        self.log(
-            f'<<received>>{new_received}{match_str}<</received>>', force_echo=False)
+        self.log(f'<<received>>{new_received}{match_str}<</received>>',
+                 force_echo=False, level=LogLevel.DEBUG)
 
         if matched in excepts:
             self.error(f'Matched [{matched}] is in exceptions list {excepts}',
@@ -450,11 +429,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         return (received, matched)
 
-    def send_nonblocking(self, cmd,
-                         send_newline=True,
-                         flush_before=True,
-                         verbose=False
-                         ):
+    def send_nonblocking(self, cmd: str,
+                         send_newline: bool = True,
+                         flush_before: bool = True):
 
         if not self.is_open:
             self.open()
@@ -462,11 +439,12 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             raise ConsoleCannotOpenError
 
         cmd = cmd or ''
-        if verbose:
-            self.log(f'Sending command: \'{cmd}\'', force_log_file=None)
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
+
+        self.log(f'Sending command: \'{cmd}\'', force_log_file=None,
+                 level=LogLevel.DEBUG)
 
         if flush_before:
             self.read_all()
@@ -476,7 +454,8 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         else:
             self._pex.send(cmd)
 
-        self.log(f'<<sent>>{cmd}<</sent>>', force_echo=False)
+        self.log(f'<<sent>>{cmd}<</sent>>',
+                 force_echo=False, level=LogLevel.DEBUG)
 
     def check_alive(self, timeout=10.0):
         start_bytes = self._flush_get_size()
