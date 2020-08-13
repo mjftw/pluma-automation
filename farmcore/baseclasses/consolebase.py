@@ -70,6 +70,9 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         @wraps(f)
         def wrap(self):
             f(self)
+
+            self._pex.linesep = self.encode(self.linesep)
+
             if self.raw_logfile:
                 # Create raw_logfile dir if it does not already exist
                 os.makedirs(os.path.dirname(self.raw_logfile), exist_ok=True)
@@ -313,8 +316,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         quiet_sleep = sleep_time if sleep_time is not None else 0.1
         quiet_time = quiet_time if quiet_time is not None else 0.3
 
-        self._pex.linesep = self.encode(self.linesep)
-
         if flush_buffer:
             self.flush(True)
 
@@ -455,8 +456,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         if isinstance(cmd, str):
             cmd = self.encode(cmd)
-
-        self._pex.linesep = self.encode(self.linesep)
 
         if flush_before:
             self.flush(True)
