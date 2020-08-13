@@ -454,8 +454,10 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
                  force_echo=False, level=LogLevel.DEBUG)
 
     def check_alive(self, timeout=10.0):
+        '''Return True if the console responds to <Enter>'''
+
         start_bytes = self._flush_get_size()
-        self.send_and_read('')
+        self.send_nonblocking('', flush_before=False)
         alive = self.wait_for_bytes(timeout=timeout, start_bytes=start_bytes)
 
         if alive:
