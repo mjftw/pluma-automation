@@ -247,40 +247,36 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         return False
 
-    def wait_for_quiet(self, timeout=None, quiet=None, sleep_time=None, verbose=False):
+    def wait_for_quiet(self, quiet=None, sleep_time=None, timeout=None):
         if not self.is_open:
             self.open()
 
+        quiet = quiet if quiet is not None else 0.5
+        sleep_time = sleep_time if sleep_time is not None else 0.2
         timeout = timeout if timeout is not None else 10.0
-        quiet = quiet if quiet is not None else 0.3
-        sleep_time = sleep_time if sleep_time is not None else 0.1
-        time_quiet = 0.0
+
+        last_read_buffer_size = 0
+        read_buffer_size = 0
         elapsed = 0.0
-
-        last_bytes = 0
-
-        current_bytes = self._flush_get_size(False)
+        time_quiet = 0.0
         while(elapsed < timeout):
-            current_bytes = self._flush_get_size(False)
-
-            if current_bytes == last_bytes:
-                time_quiet += sleep_time
-            else:
-                time_quiet = 0
-
-            if verbose:
-                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
-                    elapsed, timeout, time_quiet, quiet, current_bytes
-                ))
-
-            if time_quiet > quiet:
-                return True
-
-            last_bytes = self._flush_get_size(False)
-
             time.sleep(sleep_time)
             elapsed += sleep_time
 
+            read_buffer_size = self._flush_get_size(clear_buf=False)
+
+            # Check if more data was received
+            if read_buffer_size == last_read_buffer_size:
+                time_quiet += sleep_time
+                if time_quiet > quiet:
+                    return True
+            else:
+                time_quiet = 0
+
+                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
+                    elapsed, timeout, time_quiet, quiet, read_buffer_size), level=LogLevel.DEBUG)
+
+        # Timeout
         return False
 
     @deprecated(version='2.0', reason='You should use "send_nonblocking" instead')
