@@ -484,7 +484,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             matches.remove(username_match)
             (__, matched) = self.send_and_expect(cmd=username,
                                                  match=matches)
-            self.wait_for_quiet()
 
         if password_match and matched == password_match:
             if not password:
@@ -494,7 +493,6 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             matches.remove(password_match)
             (__, matched) = self.send_and_expect(cmd=password,
                                                  match=matches)
-            self.wait_for_quiet()
 
         if ((success_match and matched != success_match) or
                 matched in [pexpect.TIMEOUT, pexpect.EOF]):
