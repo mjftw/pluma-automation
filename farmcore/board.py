@@ -50,7 +50,7 @@ class Board(Farmclass):
         timeout = override_timeout or self.boot_max_s
         bootstr = override_bootstr or self.bootstr
 
-        if self.console is None:
+        if self.power is None:
 	        raise BoardFieldInstanceIsNoneError('"power" instance is not set')
         
         if self.console is None:
