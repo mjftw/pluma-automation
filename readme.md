@@ -79,9 +79,166 @@ Where `PROJECT_DIR` is a directory containing all python scripts needed to run, 
 For more detailed instructions, see the [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide.
 Here you'll find instructions on how to run the Automation Lab with Docker.
 
+## Using the Command line interface (pluma.py)
+
+This device test framework can be used from a simple command line interface, [`pluma.py`](pluma.py), which can be used to easily define and run tests for an embedded device. Running tests can be done simply by running `./pluma.py run`.
+
+The following is a sample command line output when running tests from sample files:
+```
+./pluma.py run -c pluma.yml.sample -t pluma-target.yml.sample
+[ 0%] farmtest.shelltest.ShellTest[target_setup] - test_body                PASS
+[16%] farmtest.shelltest.ShellTest[host_setup] - test_body                  PASS
+[33%] farmtest.shelltest.ShellTest[multiple_commands] - test_body           PASS
+[50%] farmtest.shelltest.ShellTest[cat_meminfo] - test_body                 PASS
+[66%] testsuite.memory.MemorySize - test_body                               PASS
+[83%] farmtest.shelltest.ShellTest[cleanup] - test_body                     PASS
+All tests were successful.
+```
+
+It uses relies on two YAML configuration files:
+* `pluma.yml`: Defines the tests sequence and parameters
+* `pluma-target.yml`: Defines the device setup and settings: hardware used, credentials, serial, ssh.
+
+The CLI provides the following sub commands:
+* `pluma.py tests`: Show a list of the tests available and in use from the configuration
+* `pluma.py check`: Validates the device and tests definition
+* `pluma.py run`: Run the tests defined for the device
+* `pluma.py clean`: Remove build files and built executables
+
+### Device definition YAML
+The device definition file (pluma-target.yml) contains hardware and connectivity related information, used to interface and control the device.
+This includes the console used, and how to control its power. A sample configuration is provided as [`pluma-target.yml.sample`](pluma-target.yml.sample).
+A minimal configuration for serial could look like this:
+```
+console:
+  # Use a serial console, available on /dev/ttyUSB0
+  serial:
+    port: /dev/ttyUSB0
+```
+
+While a minimal configuration to connect via SSH would be:
+```
+credentials:
+  # Hardcoded credentials. Can be removed entirely if authenticating
+  # with a public key
+  login: root
+  password: 12345
+
+console:
+  # Use an SSH connection to the target
+  ssh:
+    target: 192.168.0.25
+```
+
+### Tests definition YAML
+The tests definition (pluma.yml) contains all information related to the tests to be run on the target.
+This includes the test list, their parameters, sequence of test and general test settings. A sample configuration is provided as [`pluma.yml.sample`](pluma.yml.sample).
+
+The following is a basic tests definition example, that runs all tests in the order provided
+
+```
+settings:
+  continue_on_fail: true
+  iterations: 3
+
+sequence:
+- shell_tests:
+    host_setup:
+      script: echo "setup host"
+      run_on_host: true
+    target_setup:
+      script: echo "running on the device"
+      # Wait 20s at most for the script to run
+      timeout: 20
+- core_tests:
+    # Select tests from a suite of generic in `testsuite` folder.
+    # Run all tests available under `testsuite.memory*`
+    include: [testsuite.memory]
+    parameters:
+      # Pass parameters to a specific test
+      testsuite.memory.MemorySize:
+        total_mb: 985
+        available_mb: 500
+- c_tests:
+    # Path to a Yocto SDK toolchain to be installed and used
+    # to cross-compile
+    yocto_sdk: /opt/yocto/oecore-x86_64-armv5-toolchain-nodistro.0.sh
+    tests:
+      # This will be cross-compiled, deployed, run, and removed, after
+      # checking the return code.
+      MyTestName:
+        sources: [mytest_main.c]
+- shell_tests:
+    cleanup_on_device:
+      # Run multiple commands
+      script:
+      - echo "doing some cleanup"
+      - ls
+      should_print: ["doing some cleanup"]
+```
+
+The test run will fail if any of the tests or tasks run fail.
+
+### Detailed CLI arguments
+
+```
+usage: pluma.py [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [-f] [--silent] [--debug]
+                [{run,check,tests,clean,version}]
+
+A lightweight automated testing tool for embedded devices.
+
+positional arguments:
+  {run,check,tests,clean,version}
+                        command for pluma, defaults to "run". "run": Run the tests suite, "check":
+                        validate configuration files and tests, "tests": list all tests available and
+                        selected, "clean": remove logs, toolchains, and built executables
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         prints more information related to tests and progress
+  -q, --quiet           print only test progress and results
+  -c CONFIG, --config CONFIG
+                        path to the tests configuration file. Default: "pluma.yml"
+  -t TARGET, --target TARGET
+                        path to the target configuration file. Default: "pluma-target.yml"
+  -f, --force           force operation instead of prompting
+  --silent              silence all output
+  --debug               enable debug information
+```
+
+### CLI Frequently Asked Questions
+
+#### Is it possible to specify which device or test configuration to use?
+Yes, use the CLI `-c <tests_config>` option to use a specific test configuration, or `-t <target_config>` option to use a specific device configuration file.
+
+#### Is it possible to add custom tests?
+Custom tests can be added as:
+- Shell tests, directly in the test configuration file
+- Compiled or C test, using the `c_tests` test provider, and passing the source files, and path to Yocto SDK
+- Python tests, by directly adding your `.py` files to the `testsuite` folder, and creating test classes based on `TestBase` (see existing tests in the same folder for reference)
+
+#### How to show the output of the commands ran?
+Use the `-v` or `--verbose` flag when invoking `pluma.py run` in order to show the commands output.
+
+#### Is it possible to run commands on the host?
+Yes, you can use `run_on_host: true` inside a `shell_test` in order to run the command specified on the host machine.
+
+```
+- shell_test:
+    script: echo 'echo from host!'
+    run_on_host: true
+```
+
+#### Is it possible to run tests multiple times?
+Yes, you can use the `iterations` setting in the test file to run the whole set of tests multiple times:
+```
+settings:
+  iterations: 20
+```
+
 ## Using the Packages
 
-Once you've installed the lab (or run the Docker container), you should be able to import and use the farmcore, farmtest, and farmutils in your Python scripts.
+You can make use of the packages provided outside of the CLI, once you've installed the lab (or run the Docker container). You should be able to import and use the farmcore, farmtest, and farmutils in your Python scripts.
 
 ```python
 # my_project_file.py
