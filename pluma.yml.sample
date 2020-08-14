@@ -9,6 +9,8 @@ sequence:
     host_setup:
       script: echo "setting things up locally"
       run_on_host: true
+- wait:
+    duration: 2
 - shell_tests:
     multiple_commands:
       script:

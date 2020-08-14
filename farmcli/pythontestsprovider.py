@@ -22,7 +22,7 @@ class PythonTestsProvider(TestsProvider):
     def configuration_key(self):
         return 'core_tests'
 
-    def all_tests(self, config):
+    def all_tests(self, key: str, config):
         if not config:
             return []
 

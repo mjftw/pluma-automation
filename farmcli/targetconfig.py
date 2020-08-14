@@ -24,6 +24,9 @@ class TargetConfig:
             serial, ssh = TargetFactory.create_consoles(
                 config.pop('console'), credentials)
             main_console = serial or ssh
+            if not main_console:
+                log.warning(
+                    "No console defined in the device configuration file")
 
             power = TargetFactory.create_power_control(
                 config.pop('power'), main_console)

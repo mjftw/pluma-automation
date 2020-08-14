@@ -86,9 +86,9 @@ class TestDefinition():
                 f'Parameter sets for test "{name}" should be a list of dictionaries')
 
         for parameter_set in self.parameter_sets:
-            if not isinstance(parameter_set, dict):
+            if parameter_set and not isinstance(parameter_set, dict):
                 raise ConfigurationError(
-                    f'Invalid parameters format for test "{name}": {parameter_set.__class__}, {parameter_set}')
+                    f'Parameters should be a dict for test "{name}": {parameter_set.__class__}, {parameter_set}')
 
 
 class TestsProvider(ABC):
@@ -114,8 +114,8 @@ class TestsProvider(ABC):
         pass
 
     @abstractmethod
-    def all_tests(self, config: Configuration) -> list:
-        '''Return all tests from the "config" provided, as a list of TestDefinition'''
+    def all_tests(self, key: str, config: Configuration) -> list:
+        '''Return all tests from the "config" provided by the sequence key "key", as a list of TestDefinition'''
         pass
 
     def selected_tests(self, config: Configuration) -> list:

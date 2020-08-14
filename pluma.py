@@ -9,7 +9,7 @@ from farmcore.baseclasses import Logger, LogMode, LogLevel
 from farmtest import TestController
 from farmcli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
 from farmcli import TestsConfigError, TestsBuildError, TargetConfigError
-from farmcli import PythonTestsProvider, ShellTestsProvider, CTestsProvider
+from farmcli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, DeviceActionProvider
 from version import get_farmcore_version
 
 log = Logger()
@@ -52,7 +52,7 @@ def parse_arguments():
 
 def tests_providers():
     return [PythonTestsProvider(), ShellTestsProvider(),
-            CTestsProvider()]
+            CTestsProvider(), DeviceActionProvider()]
 
 
 def instantiate(args, tests_config_path: str, target_config_path: str, show_tests_list: bool) -> TestController:

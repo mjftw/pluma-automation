@@ -6,3 +6,7 @@ from .targetconfig import TargetConfig, TargetFactory
 from .pythontestsprovider import PythonTestsProvider
 from .shelltestsprovider import ShellTestsProvider
 from .ctestsprovider import CTestsProvider
+from .deviceactionbase import DeviceActionBase
+from .deviceactionregistry import DeviceActionRegistry
+from .deviceactions import LoginAction, PowerOnAction, PowerOffAction, PowerCycleAction, WaitAction, WaitForPatternAction
+from .deviceactionprovider import DeviceActionProvider

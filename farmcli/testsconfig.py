@@ -78,11 +78,6 @@ class TestsConfig:
         sequence = tests_config.pop('sequence')
         if sequence:
             self.tests = self.__all_tests_from_sequence(sequence)
-        else:
-            for provider in self.test_providers:
-                provider_config = tests_config.pop(
-                    provider.configuration_key())
-                self.tests.extend(provider.all_tests(provider_config))
 
     def __all_tests_from_sequence(self, sequence: list) -> list:
         if not isinstance(sequence, list):
@@ -90,8 +85,20 @@ class TestsConfig:
                 f'Invalid sequence, "sequence" must be a list (currently defined as {sequence})')
 
         all_tests = []
-        supported_actions = [p.configuration_key()
-                             for p in self.test_providers]
+        supported_actions = {}
+        # Register all keys used to map sequence elements to tests providers
+        for provider in self.test_providers:
+            keys = provider.configuration_key()
+            if isinstance(keys, str):
+                keys = [keys]
+
+            for key in keys:
+                if key in supported_actions:
+                    raise TestsConfigError(
+                        f'Error adding keys for provider {str(provider)}: key "{key}" is already registered by {str(supported_actions[key])}')
+                supported_actions[key] = provider
+
+        # Parse sequence
         for action in sequence:
             if not isinstance(action, dict):
                 raise TestsConfigError(
@@ -99,17 +106,22 @@ class TestsConfig:
 
             if len(action) != 1:
                 raise TestsConfigError(
-                    f'Sequence list elements must be single key elements, but got "{action}". Supported actions: {supported_actions}')
+                    f'Sequence list elements must be single key elements, but got "{action}". Supported actions: {supported_actions.keys()}')
 
             action_key = next(iter(action))
-            try:
-                provider = next(p for p in self.test_providers
-                                if p.configuration_key() == action_key)
-                all_tests.extend(provider.all_tests(
-                    Configuration(action[action_key])))
-            except StopIteration:
+            provider = supported_actions.get(action_key)
+            if not provider:
                 raise TestsConfigError(
-                    f'No test provider was found for sequence action "{action_key}". Supported actions: {supported_actions}')
+                    f'No test provider was found for sequence action "{action_key}". Supported actions: {supported_actions.keys()}')
+
+            if isinstance(action[action_key], dict):
+                tests = provider.all_tests(key=action_key,
+                                           config=Configuration(action[action_key]))
+            else:
+                tests = provider.all_tests(key=action_key,
+                                           config=action[action_key])
+
+            all_tests.extend(tests)
 
         return all_tests
 
@@ -125,7 +137,7 @@ class TestsConfig:
             log_level = LogLevel.INFO
 
         tests = sorted(
-            tests, key=lambda test: test.provider.configuration_key())
+            tests, key=lambda test: test.provider.__class__.__name__)
 
         last_provider = None
         for test in tests:
@@ -139,7 +151,7 @@ class TestsConfig:
                     color='green' if test.selected else 'normal', level=log_level)
 
             for test_parameters in test.parameter_sets:
-                if test.selected and len(test_parameters) > 0:
+                if test.selected and test_parameters:
                     printed_data = json.dumps(test_parameters)
                     log.log(f'          {printed_data}', level=log_level)
 
@@ -151,6 +163,7 @@ class TestsConfig:
         for test in tests:
             try:
                 for parameters in test.parameter_sets:
+                    parameters = parameters if parameters else dict()
                     test_object = test.testclass(board, **parameters)
                     test_objects.append(test_object)
             except Exception as e:

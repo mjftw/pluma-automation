@@ -18,7 +18,7 @@ class ShellTestsProvider(TestsProvider):
     def configuration_key(self):
         return 'shell_tests'
 
-    def all_tests(self, config):
+    def all_tests(self, key: str, config):
         if not config:
             return []
 
