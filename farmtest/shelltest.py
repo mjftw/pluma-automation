@@ -4,7 +4,6 @@ import re
 from farmcore.baseclasses import ConsoleBase, Logger
 from farmcore import HostConsole
 from .test import TestBase, TaskFailed
-from farmcore import HostConsole
 
 
 class ShellTest(TestBase):
@@ -64,64 +63,90 @@ class CommandRunner():
         should_not_print = should_not_print or []
         log = Logger()
 
-        received = console.send_and_read(command, timeout=timeout)
-        if received.startswith(command):
-            received = received[len(command):]
-        received = received.strip()
+        output = console.send_and_read(command, timeout=timeout)
 
+        command_end = None
+        # Look for 2 instances of the command max, as it may echo twice,
+        # once as a console echo, and once after the prompt.
+        i = 0
+        for match in re.finditer(command, output):
+            i += 1
+            if i > 2:
+                break
+
+            command_end = match.end(0)
+
+        if command_end:
+            output = output[command_end:]
+
+        output = output.strip()
         prefix = f'Script test "{test_name}":'
-        if not received:
-            raise TaskFailed(f'{prefix} No response available')
+        if not output:
+            raise TaskFailed(
+                f'{prefix} No response received after sending command')
 
-        formatted_received = ''
+        formatted_output = ''
         first_line = True
-        for line in received.splitlines():
+        for line in output.splitlines():
             if not first_line:
-                formatted_received += '            '
-            formatted_received += f'{line}{os.linesep}'
+                formatted_output += '            '
+            formatted_output += f'{line}{os.linesep}'
             first_line = False
 
         sent_line = f'  Sent:     $ {command}{os.linesep}'
         should_print_line = f'  Expected: {should_print}{os.linesep}'
         should_not_print_line = f'  Errors:   {should_not_print}{os.linesep}'
-        received_line = f'  Received: {formatted_received}'
+        output_line = f'  Output:   {formatted_output}'
 
-        if CommandRunner.output_matches_pattern(should_not_print, received):
+        if CommandRunner.output_matches_pattern(should_not_print, output):
             raise TaskFailed(
                 f'{prefix} Response matched error condition:{os.linesep}' +
-                sent_line + should_not_print_line + received_line)
+                sent_line + should_not_print_line + output_line)
 
-        if len(should_print) > 0:
+        if should_print:
             response_valid = CommandRunner.output_matches_pattern(
-                should_print, received)
+                should_print, output)
 
             if not response_valid:
                 raise TaskFailed(
                     f'{prefix} Response did not match expected:{os.linesep}' +
-                    sent_line + should_print_line + received_line)
+                    sent_line + should_print_line + output_line)
             else:
                 log.log(
                     f'{prefix} Matching response found:{os.linesep}' +
-                    sent_line + should_print_line + received_line)
+                    sent_line + should_print_line + output_line)
         else:
-            log.log(f'{prefix}{os.linesep}' + sent_line + received_line)
+            log.log(f'{prefix}{os.linesep}' + sent_line + output_line)
 
         if runs_in_shell:
-            retcode_command = 'echo retcode=$?'
-            retcode_received, matched = console.send_and_expect(
-                retcode_command, match='retcode=0')
+            retcode = CommandRunner.query_return_code(console)
+            if retcode is 0:
+                error = None
+            elif retcode is None:
+                error = 'failed to retrieve return code for command'
+            else:
+                error = f'returned with exit code {retcode}'
 
-            if retcode_received.startswith(retcode_command):
-                retcode_received = retcode_received[len(retcode_command):]
-
-            if not matched:
-                error = f'{prefix} Command "{command}" returned with a non-zero exit code{os.linesep}' + \
-                    sent_line + received_line + \
-                    f'  Return code query output: {retcode_received}'
-                ansi_colors_regexp = re.compile(
-                    r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-                error = ansi_colors_regexp.sub('', error)
+            if error:
+                error = f'{prefix} Command "{command}" {error}{os.linesep}' + \
+                    sent_line + output_line
                 raise TaskFailed(error)
+
+        return output
+
+    @staticmethod
+    def query_return_code(console: ConsoleBase):
+        '''Query and return the return code of the last command ran.'''
+        retcode_output = console.send_and_read('echo retcode=$?')
+        if not retcode_output:
+            return None
+
+        retcode_match = re.search(r'retcode=(-?\d+)\b', retcode_output,
+                                  re.MULTILINE)
+        if not retcode_match:
+            return None
+
+        return int(retcode_match.group(1))
 
     @staticmethod
     def output_matches_pattern(patterns, output):

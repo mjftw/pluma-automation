@@ -39,6 +39,7 @@ setuptools.setup(
         'requests',
         'pytest',
         'pytest-cov',
+        'mock',
         'pyyaml>=5.1',
         'deprecated'
     ],
