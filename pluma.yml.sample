@@ -21,12 +21,14 @@ sequence:
       # should_not_print: ['error', 'unknown']
       timeout: 2
 - core_tests:
-    include: [testsuite.memory]
+    include: [testsuite.memory, testsuite.kernel]
     exclude: []
     parameters:
       testsuite.memory.MemorySize:
         total_mb: 985
         available_mb: 500
+      testsuite.kernel.KernelModulesLoaded:
+        modules: [wlan, galcore]
 # - c_tests:
 #     yocto_sdk: /home/aleravat/witekio/mturbo-yocto/yocto/oecore-x86_64-armv5-toolchain-nodistro.0.sh
 #     tests:
