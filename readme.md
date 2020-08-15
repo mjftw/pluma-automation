@@ -108,14 +108,15 @@ The device definition file (pluma-target.yml) contains hardware and connectivity
 This includes the console used, and how to control its power. A sample configuration is provided as [`pluma-target.yml.sample`](pluma-target.yml.sample).
 A minimal configuration for serial could look like this:
 ```
+#pluma-target.yml
 console:
-  # Use a serial console, available on /dev/ttyUSB0
   serial:
     port: /dev/ttyUSB0
 ```
 
 While a minimal configuration to connect via SSH would be:
 ```
+#pluma-target.yml
 credentials:
   # Hardcoded credentials. Can be removed entirely if authenticating
   # with a public key
@@ -128,6 +129,19 @@ console:
     target: 192.168.0.25
 ```
 
+Supported attributes:
+* `credentials:` Credentials common to serial and SSH console
+  * `login: <login>`
+  * `password: <password>`
+
+* `console:`
+  * `serial:`
+    * `port: <port>` - Serial port to the device, e.g. `/dev/ttyUSB0`
+  * `ssh:`
+    * `target: <ip/host>` - IP or hostname of the target device
+    * `login: <login>` - SSH specific login
+    * `password: <password>` - SSH specific password
+
 ### Tests definition YAML
 The tests definition (pluma.yml) contains all information related to the tests to be run on the target.
 This includes the test list, their parameters, sequence of test and general test settings. A sample configuration is provided as [`pluma.yml.sample`](pluma.yml.sample).
@@ -135,6 +149,7 @@ This includes the test list, their parameters, sequence of test and general test
 The following is a basic tests definition example, that runs all tests in the order provided
 
 ```
+#pluma.yml
 settings:
   continue_on_fail: true
   iterations: 3
@@ -177,7 +192,31 @@ sequence:
 
 The test run will fail if any of the tests or tasks run fail.
 
-### Detailed CLI arguments
+Supported attributes:
+* `settings:`
+  * `continue_on_fail: <bool>` - Continue or stop when a test/task fails
+  * `iterations: <int>` - Number of times the test sequence is executed
+
+* `sequence:` Ordered list of action to perform. Each elements can be one of [`shell_tests`, `core_test`, `c_tests`]. Elements can be repeated, but test names must be unique.
+  * `- core_tests:` Test to be used from the common test suite
+    * `include: <list_of_tests>` - Will match exact names, and tests starting from the name used. Full list of tests visible with `pluma.py tests` commands, and in the `testsuite` folder.
+    * `exclude: <list_of_test>` - Exclude tests, even if matched by `include`
+    * `parameters`
+      * `<testname>:` - Name of a test, must match its fully specified name, e.g. `testsuite.memory.MemorySize`. All the attributes under this will be directly passed to the test constructor. It is possible to use a YAML list of attributes to instantiate the test multiple times with different parameter sets.
+  * `- shell_tests:` Script tests or tasks
+    * `<testname>:`
+      * `script: <string or list>` - Command(s) to run on the target
+      * `run_on_host: <bool>` - Run on the host or target device. Defaults to `false`
+      * `should_print: <list>` - List of expected outputs when running the command(s). Receiving any of these outputs will cause the test to pass.
+      * `should_not_print: <list>` - List of error outputs when running the command(s). Receiving any of these outputs will cause the test to fail.
+  * `- c_tests:` Cross-compiled and deployed C tests or tasks
+    * `yocto_sdk: <path_to_sdk>`
+    * `tests:`
+      * `<testname>:`
+        * `sources: <list_of_source_files>` - Source files compiled for this test
+        * `flags: <list_of_flags>` - Compilation flags
+
+### Complete list of CLI options
 
 ```
 usage: pluma.py [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [-f] [--silent] [--debug]
