@@ -58,7 +58,7 @@ class ShellTest(TestBase):
 class CommandRunner():
     @staticmethod
     def run(test_name: str, console: ConsoleBase, command: str,
-            timeout: int = None, should_print: list = None, should_not_print: list = None, runs_in_shell: bool = True) -> str:
+            timeout: int = None, should_print: list = None, should_not_print: list = None, runs_in_shell: bool = True):
         should_print = should_print or []
         should_not_print = should_not_print or []
         log = Logger()
