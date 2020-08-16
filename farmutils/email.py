@@ -379,6 +379,9 @@ def send_exception_email(exception, recipients=None, board=None,
         subject=None, prepend_body=None, settings_file=None):
     settings_file = settings_file or DEFAULT_SETTINGS_FILE
     if not recipients:
+        if not os.path.exists(settings_file):
+            return
+
         with open(settings_file, 'r') as f:
             settings = json.load(f)
             if 'maintainers' not in settings:
