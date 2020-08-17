@@ -2,21 +2,22 @@ import os
 import re
 
 from farmcore.baseclasses import ConsoleBase, Logger
-from farmcore import HostConsole
+from farmcore import HostConsole, Board
 from .test import TestBase, TaskFailed
 
 
 class ShellTest(TestBase):
     shell_test_index = 0
 
-    def __init__(self, board, script, name=None, should_print=None, should_not_print=None,
-                 run_on_host=False, timeout=None,  runs_in_shell: bool = True):
+    def __init__(self, board: Board, script: str, name: str = None, should_print: list = None, should_not_print: list = None,
+                 run_on_host: bool = False, timeout: int = None, runs_in_shell: bool = True, login_automatically: bool = True):
         super().__init__(board)
         self.should_print = should_print or []
         self.should_not_print = should_not_print or []
         self.run_on_host = run_on_host
         self.timeout = timeout if timeout is not None else 5
         self.runs_in_shell = runs_in_shell
+        self.login_automatically = login_automatically
 
         self.scripts = script
         if not isinstance(self.scripts, list):
@@ -44,7 +45,8 @@ class ShellTest(TestBase):
                 raise TaskFailed(
                     f'Failed to run script test "{self._test_name}": no console available')
 
-            self.board.login()
+            if self.runs_in_shell and self.login_automatically:
+                self.board.login()
 
         for script in self.scripts:
             self.run_command(console, script)
