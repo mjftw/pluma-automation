@@ -1,6 +1,8 @@
 import os
 import re
 
+from farmcore.baseclasses import ConsoleBase, Logger
+from farmcore import HostConsole
 from .test import TestBase, TaskFailed
 from farmcore import HostConsole
 
@@ -48,15 +50,17 @@ class ShellTest(TestBase):
             self.run_command(console, script)
 
     def run_command(self, console, script):
-        CommandRunner.run(test_name=self._test_name, log_function=self.board.log, console=console, command=script,
+        CommandRunner.run(test_name=self._test_name, console=console, command=script,
                           timeout=self.timeout, should_print=self.should_print, should_not_print=self.should_not_print)
 
 
 class CommandRunner():
     @staticmethod
-    def run(test_name, console, command, log_function=print, timeout=None, should_print=None, should_not_print=None):
+    def run(test_name: str, console: ConsoleBase, command: str,
+            timeout: int = None, should_print: list = None, should_not_print: list = None) -> str:
         should_print = should_print or []
         should_not_print = should_not_print or []
+        log = Logger()
 
         received = console.send_and_read(command, timeout=timeout)
         if received.startswith(command):
@@ -93,12 +97,12 @@ class CommandRunner():
                 raise TaskFailed(
                     f'{prefix} Response did not match expected:{os.linesep}' +
                     sent_line + should_print_line + received_line)
-            elif log_function:
-                log_function(
+            else:
+                log.log(
                     f'{prefix} Matching response found:{os.linesep}' +
                     sent_line + should_print_line + received_line)
-        elif log_function:
-            log_function(f'{prefix}{os.linesep}' + sent_line + received_line)
+        else:
+            log.log(f'{prefix}{os.linesep}' + sent_line + received_line)
 
         retcode_command = 'echo retcode=$?'
         retcode_received, matched = console.send_and_expect(
