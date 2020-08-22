@@ -150,6 +150,7 @@ class CommandRunner():
 
     @staticmethod
     def output_matches_pattern(patterns, output):
+        '''Return wether the output matches any of the pattern or not.'''
         if patterns is None:
             raise ValueError('None pattern provided')
 
@@ -159,7 +160,7 @@ class CommandRunner():
         for pattern in patterns:
             regexp = re.compile(pattern)
             for line in output.splitlines():
-                if regexp.match(line) is not None:
+                if regexp.search(line):
                     return True
 
         return False

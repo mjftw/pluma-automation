@@ -56,8 +56,12 @@ def serial_console_proxy():
 
 
 @fixture
-def mock_board():
-    mock_console = MagicMock(ConsoleBase)
+def mock_console():
+    return MagicMock(ConsoleBase)
+
+
+@fixture
+def mock_board(mock_console):
     mock_board = MagicMock(Board)
     mock_board.console = mock_console
 
