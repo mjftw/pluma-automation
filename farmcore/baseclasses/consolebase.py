@@ -126,8 +126,10 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
     @property
     def _buffer_size(self):
+        '''Size of the Read buffer for the console'''
         return len(self._buffer)
 
+    @deprecated(version='2.0', reason='You should use "read_all" and "_buffer_size" instead')
     def _flush_get_size(self, clear_buf=False):
         self.flush(clear_buf)
         return self._buffer_size
@@ -228,14 +230,15 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
         if not self.is_open:
             self.open()
 
-        self.flush()
+        self.read_all(preserve_read_buffer=True)
         if start_bytes is None:
             start_bytes = self._buffer_size
 
         elapsed = 0.0
 
         while(elapsed < timeout):
-            current_bytes = self._flush_get_size()
+            self.read_all(preserve_read_buffer=True)
+            current_bytes = self._buffer_size
             if verbose:
                 self.log("Waiting for data: Waited[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
                     elapsed, timeout, current_bytes-start_bytes))
@@ -263,7 +266,8 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             time.sleep(sleep_time)
             elapsed += sleep_time
 
-            read_buffer_size = self._flush_get_size(clear_buf=False)
+            self.read_all(preserve_read_buffer=True)
+            read_buffer_size = self._buffer_size
 
             # Check if more data was received
             if read_buffer_size == last_read_buffer_size:
@@ -452,7 +456,8 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
     def check_alive(self, timeout=10.0):
         '''Return True if the console responds to <Enter>'''
 
-        start_bytes = self._flush_get_size()
+        self.read_all(preserve_read_buffer=True)
+        start_bytes = self._buffer_size
         self.send_nonblocking('', flush_before=False)
         alive = self.wait_for_bytes(timeout=timeout, start_bytes=start_bytes)
 
