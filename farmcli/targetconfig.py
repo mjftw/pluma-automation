@@ -112,12 +112,12 @@ class TargetFactory:
         POWER_IPPOWER9258 = 'ippower9258'
         POWER_LIST = [POWER_SOFT, POWER_IPPOWER9258]
 
-        if power_config.len() > 1:
+        if len(power_config) > 1:
             raise TargetConfigError(
                 f'Only one power control should be provided in the target configuration, but two or more provided:{os.linesep}{power_config}')
 
         control_type = POWER_SOFT
-        if power_config.len() > 0:
+        if len(power_config) > 0:
             control_type = power_config.first()
 
         if control_type not in POWER_LIST:

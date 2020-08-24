@@ -40,7 +40,7 @@ class Configuration:
     def read_and_keep(self, attribute):
         return self.config.get(attribute)
 
-    def len(self):
+    def __len__(self):
         return len(self.config)
 
     def first(self):
@@ -48,7 +48,7 @@ class Configuration:
             return key
 
     def ensure_consumed(self):
-        if self.len() > 0:
+        if len(self) > 0:
             unconsumed_data = self.config
             self.config = {}
             raise ConfigurationError(
@@ -60,6 +60,8 @@ class Configuration:
     def __str__(self):
         return json.dumps(self.content())
 
+    def __eq__(self, other):
+        return self.content() == other.content()
 
 class TestDefinition():
     '''Data class representing a test, its class, and parameters.'''
