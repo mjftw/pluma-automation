@@ -10,8 +10,7 @@ class ShellTest(TestBase):
     shell_test_index = 0
 
     def __init__(self, board, script, name=None, should_print=None, should_not_print=None, run_on_host=False, timeout=None,  runs_in_shell: bool = True):
-        super().__init__(self)
-        self.board = board
+        super().__init__(board)
         self.should_print = should_print or []
         self.should_not_print = should_not_print or []
         self.run_on_host = run_on_host

@@ -8,8 +8,7 @@ from farmcore.baseclasses import ConsoleBase
 
 class KernelModulesLoaded(TestBase):
     def __init__(self, board, modules: list):
-        super().__init__(self)
-        self.board = board
+        super().__init__(board)
 
         if modules is None:
             raise ValueError(f'"modules" cannot be empty')

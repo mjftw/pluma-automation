@@ -7,8 +7,7 @@ from farmcore.baseclasses import ConsoleBase
 
 class MemorySize(TestBase):
     def __init__(self, board, total_mb=None, available_mb=None):
-        super().__init__(self)
-        self.board = board
+        super().__init__(board)
         self.available_mb = available_mb
         self.total_mb = total_mb
 
