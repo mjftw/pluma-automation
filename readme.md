@@ -155,6 +155,13 @@ settings:
   iterations: 3
 
 sequence:
+# Power on, wait for prompt and login
+- poweron:
+- waitforpattern:
+    pattern: 'login:'
+    timeout: 20
+- login:
+# Run a series of tests
 - shell_tests:
     host_setup:
       script: echo "setup host"
@@ -215,6 +222,15 @@ Supported attributes:
       * `<testname>:`
         * `sources: <list_of_source_files>` - Source files compiled for this test
         * `flags: <list_of_flags>` - Compilation flags
+  * `- wait:` Wait for a specific duration
+    * `duration: <wait_in_seconds>`
+  * `- waitforpattern:` Wait for a specific pattern on the console
+    * `pattern: <pattern>`
+    * `timeout: <timeout_in_seconds>`
+  * `- login:` Attempt to login on the active console. Typically used for Serial
+  * `- poweron:` Use the power controller defined to power on the board
+  * `- poweroff:` Use the power controller defined to power off the board
+  * `- powercycle:` Use the power controller defined to power cycle the board (off and on)
 
 ### Complete list of CLI options
 
