@@ -1,6 +1,3 @@
-from generic_fixtures import soft_power
-
-
 def test_SoftPower_on_calls_console_send(soft_power):
     soft_power.on()
 

@@ -1,12 +1,14 @@
+from select import select
 import pty
 import os
 from collections import namedtuple
 from pytest import fixture
 from unittest.mock import MagicMock
-from farmcore import SoftPower, SerialConsole, PowerRelay
-from farmcore.mocks import ConsoleMock
 
 from utils import OsFile
+from farmcore import Board, SerialConsole, SoftPower
+from farmcore.baseclasses import ConsoleBase
+from farmcore.mocks import ConsoleMock
 
 
 @fixture
@@ -29,7 +31,7 @@ def serial_console_proxy():
 
     console = SerialConsole(
         port=slave_device,
-        baud=115200, # Baud Doesn't really matter as virtual tty,
+        baud=115200,  # Baud Doesn't really matter as virtual tty,
         encoding='utf-8'
     )
 
@@ -51,3 +53,12 @@ def serial_console_proxy():
             os.close(fd)
         except OSError:
             pass
+
+
+@fixture
+def mock_board():
+    mock_console = MagicMock(ConsoleBase)
+    mock_board = MagicMock(Board)
+    mock_board.console = mock_console
+
+    return mock_board
