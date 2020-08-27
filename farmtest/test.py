@@ -113,7 +113,7 @@ class TestCore(TestBase):
         self.settings['failed_bootlogs_dir'] = self.failed_bootlogs_dir
 
     def pre_host_mount(self):
-        self.board.log("\n=== PRE HOST MOUNT ===", colour='blue', bold=True)
+        self.board.log("\n=== PRE HOST MOUNT ===", color='blue', bold=True)
 
     def _host_mount(self):
         self.board.log("\n=!= HOST MOUNT =!=", bold=True)
@@ -132,7 +132,7 @@ class TestCore(TestBase):
         self.board.storage.mount_host(devnode)
 
     def prepare(self):
-        self.board.log("\n=== PREPARE ===", colour='blue', bold=True)
+        self.board.log("\n=== PREPARE ===", color='blue', bold=True)
 
     def _host_unmount(self):
         self.board.log("\n=!= HOST UNMOUNT =!=", bold=True)
@@ -153,7 +153,7 @@ class TestCore(TestBase):
         self.board.storage.to_board()
 
     def pre_board_on(self):
-        self.board.log("\n=== PRE BOARD ON ===", colour='blue', bold=True)
+        self.board.log("\n=== PRE BOARD ON ===", color='blue', bold=True)
 
     def _board_on_and_validate(self):
         self.board.log("\n=!= BOARD ON AND VALIDATE =!=", bold=True)
@@ -185,7 +185,7 @@ class TestCore(TestBase):
         self.data['boot_time'] = boot_time
 
     def pre_board_login(self):
-        self.board.log("\n=== PRE BOARD LOGIN ===", colour='blue', bold=True)
+        self.board.log("\n=== PRE BOARD LOGIN ===", color='blue', bold=True)
 
     def _board_login(self):
         self.board.log("\n=!= BOARD LOGIN =!=", bold=True)
@@ -195,7 +195,7 @@ class TestCore(TestBase):
             raise TaskFailed(str(e))
 
     def pre_board_mount(self):
-        self.board.log("\n=== PRE BOARD MOUNT ===", colour='blue', bold=True)
+        self.board.log("\n=== PRE BOARD MOUNT ===", color='blue', bold=True)
 
     def _board_mount(self):
         self.board.log("\n=!= BOARD MOUNT =!=", bold=True)
@@ -203,13 +203,13 @@ class TestCore(TestBase):
         self.board.storage.mount_board()
 
     def pre_test_body(self):
-        self.board.log("\n=== PRE TEST BODY ===", colour='blue', bold=True)
+        self.board.log("\n=== PRE TEST BODY ===", color='blue', bold=True)
 
     def test_body(self):
-        self.board.log("\n=== TEST BODY ===", colour='blue', bold=True)
+        self.board.log("\n=== TEST BODY ===", color='blue', bold=True)
 
     def post_test_body(self):
-        self.board.log("\n=== POST TEST BODY ===", colour='blue', bold=True)
+        self.board.log("\n=== POST TEST BODY ===", color='blue', bold=True)
 
     def _board_unmount(self):
         self.board.log("\n=!= BOARD UNMOUNT =!=", bold=True)
@@ -220,10 +220,10 @@ class TestCore(TestBase):
         self.board.power.off()
 
     def post_board_off(self):
-        self.board.log("\n=== POST BOARD OFF ===", colour='blue', bold=True)
+        self.board.log("\n=== POST BOARD OFF ===", color='blue', bold=True)
 
     def report(self):
-        self.board.log("\n=== REPORT ===", colour='blue', bold=True)
+        self.board.log("\n=== REPORT ===", color='blue', bold=True)
 
 
 class TestRunner():
@@ -298,7 +298,7 @@ class TestRunner():
 
         if self.sequential:
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
-                colour='blue', bold=True)
+                color='blue', bold=True)
 
             completed = 0
             total = len(self.tests)
@@ -318,11 +318,11 @@ class TestRunner():
             self.progress = None
         else:
             self.board.log('== TESTING MODE: PARALLEL ==',
-                colour='blue', bold=True)
+                color='blue', bold=True)
             self._run_tasks()
 
         self.board.log(f"\n== ALL TESTS COMPLETED ==",
-            colour='blue', bold=True)
+            color='blue', bold=True)
 
         # Check if any tasks failed
         if self.test_fails:
@@ -436,23 +436,23 @@ class TestRunner():
                 skip_message = f'Skipping task: {task_name}'
                 if "mount" in task_name and not self.board.storage:
                     self.board.log(skip_message + '. Board does not have storage',
-                        colour='green', bold=True)
+                        color='green', bold=True)
                     continue
                 if (( task_name in ['_board_on_and_validate', '_board_off'])
                         and not self.board.power):
                     self.board.log(skip_message + '. Board does '
-                        'not have power control', colour='green', bold=True)
+                        'not have power control', color='green', bold=True)
                     continue
 
                 if task_name in self.skip_tasks:
-                    self.board.log(skip_message, colour='green', bold=True)
+                    self.board.log(skip_message, color='green', bold=True)
                     continue
 
                 for test_name in test_names:
                     self._run_task(task_name, test_name)
         except AbortTesting as e:
             self.board.log(f"\n== TESTING ABORTED EARLY ==",
-                colour='red', bold=True)
+                color='red', bold=True)
 
     def _run_task(self, task_name, test_name):
         test = self._get_test_by_name(test_name)
@@ -495,7 +495,7 @@ class TestRunner():
             self.data[str(test)]['tasks']['failed'].append(task_name)
 
             if print_test:
-                self.board.log('FAIL', colour='red',
+                self.board.log('FAIL', color='red',
                                level=LogLevel.IMPORTANT, bypass_hold=True)
 
             # If request to abort testing, do so
@@ -511,7 +511,7 @@ class TestRunner():
             self._handle_failed_task(test, task_name, e, abort_testing)
         else:
             if print_test:
-                self.board.log('PASS', colour='green',
+                self.board.log('PASS', color='green',
                                level=LogLevel.IMPORTANT, bypass_hold=True)
         finally:
             if print_test:
@@ -536,8 +536,8 @@ class TestRunner():
             error = exception.__class__.__name__
 
         self.board.log(f'Task failed: {error}', level=LogLevel.ERROR,
-                       bold=True, colour='red')
-        self.board.log(f'Details: {failed}', colour='yellow')
+                       bold=True, color='red')
+        self.board.log(f'Details: {failed}', color='yellow')
 
         if abort:
             raise AbortTesting(str(exception))

@@ -247,7 +247,7 @@ class Logging():
         if self.log_file:
             open(self.log_file, 'w').close()
 
-    def log(self, message, colour=None, bold=False, force_echo=None,
+    def log(self, message, color=None, bold=False, force_echo=None,
             force_log_file=False, newline=True, bypass_hold=False, level=None):
         prefix = ''
 
@@ -280,7 +280,7 @@ class Logging():
 
             if echo:
                 logger = Logger()
-                logger.log(message.replace('\\n', '\n'), color=colour, bold=bold,
+                logger.log(message.replace('\\n', '\n'), color=color, bold=bold,
                            newline=newline, bypass_hold=bypass_hold, level=level)
 
     def hold_log(self):
@@ -293,6 +293,6 @@ class Logging():
 
     def error(self, message, exception=None):
         message = f'ERROR: {message}'
-        self.log(message, colour='red', bold=True)
+        self.log(message, color='red', bold=True)
         if exception:
             raise exception(message)

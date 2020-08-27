@@ -437,8 +437,8 @@ def send_exception_email(exception, recipients=None, board=None,
         if board.console and board.console.log_file:
             email.files.append(board.console.log_file)
 
-        board.log(email.subject, colour='red', bold=True)
-        board.log(str(error_info), colour='red', bold=True)
+        board.log(email.subject, color='red', bold=True)
+        board.log(str(error_info), color='red', bold=True)
         board.log('Informing lab maintainers via email')
 
     email.send()

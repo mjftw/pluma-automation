@@ -308,8 +308,8 @@ The per-message options below override any global setting from the previous sect
 ```python
 from my_hardware import my_board
 
-# Change the colour of the log message is printed to stdout
-my_board.log('Hello', colour='red')
+# Change the color of the log message is printed to stdout
+my_board.log('Hello', color='red')
 
 # Display the message printed to stdout in **bold**
 my_board.log('Hello', bold=True)
@@ -322,7 +322,7 @@ my_board.log('Hello', force_echo=True)
 my_board.log('Hello', force_log_file='./high_priority_messages.log')
 ```
 
-For changing the colour of the log message, the following `colour` strings are supported:
+For changing the color of the log message, the following `color` strings are supported:
 
 - black
 - blue

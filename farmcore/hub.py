@@ -115,7 +115,7 @@ class Hub(Farmclass, USB):
 
         # Graphivz attributes can be found at:
         #   https://www.graphviz.org/doc/info/attrs.html
-        # Colour names:
+        # Color names:
         #   https://www.graphviz.org/doc/info/colors.html
         node_attrs = {
             'Hub': {'fillcolor': 'deepskyblue'},
