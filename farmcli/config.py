@@ -86,11 +86,6 @@ class TestDefinition():
             raise ValueError(
                 f'Parameter sets for test "{name}" should be a list of dictionaries')
 
-        for parameter_set in self.parameter_sets:
-            if parameter_set and not isinstance(parameter_set, dict):
-                raise ConfigurationError(
-                    f'Parameters should be a dict for test "{name}": {parameter_set.__class__}, {parameter_set}')
-
 
 class TestsProvider(ABC):
     '''Abstract base class that provides TestDefinition from the configuration

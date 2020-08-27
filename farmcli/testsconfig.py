@@ -164,7 +164,12 @@ class TestsConfig:
             try:
                 for parameters in test.parameter_sets:
                     parameters = parameters if parameters else dict()
-                    test_object = test.testclass(board, **parameters)
+
+                    if isinstance(parameters, dict):
+                        test_object = test.testclass(board, **parameters)
+                    else:
+                        test_object = test.testclass(board, parameters)
+
                     test_objects.append(test_object)
             except Exception as e:
                 if f'{e}'.startswith('__init__()'):
