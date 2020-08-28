@@ -120,7 +120,7 @@ class CommandRunner():
 
         if runs_in_shell:
             retcode = CommandRunner.query_return_code(console)
-            if retcode is 0:
+            if retcode == 0:
                 error = None
             elif retcode is None:
                 error = 'failed to retrieve return code for command'

@@ -63,6 +63,7 @@ class Configuration:
     def __eq__(self, other):
         return self.content() == other.content()
 
+
 class TestDefinition():
     '''Data class representing a test, its class, and parameters.'''
 
@@ -144,6 +145,6 @@ class PlumaConfig:
         except yaml.parser.ParserError as e:
             raise ConfigurationError(
                 f'Error while parsing {name} "{yaml_file_path}"') from e
-        except e:
+        except Exception as e:
             raise ConfigurationError(
                 f'An error occured while opening/parsing {name} "{yaml_file_path}"') from e
