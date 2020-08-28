@@ -330,7 +330,7 @@ These do not require any hardware to be connected and should run on any system L
 
 The rest of the tests are expected to run on a Raspberry Pi 3/4 and require lab hardware peripherals to be connected in a specific way.
 
-If you want to run the hardware tests as well, you will need to ensure that your Raspberry Pi's lab peripherals are connected as specified in the [test configuration file](./tests/rpi/hardware.json).
+If you want to run the hardware tests as well, you will need to ensure that your Raspberry Pi's lab peripherals are connected as specified in the [test configuration file](./internaltests/rpi/hardware.json).
 You can edit this file to match the way how your lab hardware is connected if needed.
 
 You will also need to install the [RPi.GPIO](https://pypi.org/project/RPi.GPIO/) package, version 0.7.0 or newer.
