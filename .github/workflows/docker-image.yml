@@ -1,0 +1,18 @@
+name: Docker Image CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: make docker-build
+    - name: Run 'check' in Docker with sample files
+      run: docker run --rm witekio/automation-lab:latest pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
+    - name: Run tests from Docker
+      run: docker run --rm -e PLUMA_ENV=CI witekio/automation-lab:latest bash -c "cd /root/farm-core && make test"
