@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from farmcore import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
 from farmcore.baseclasses import Logger

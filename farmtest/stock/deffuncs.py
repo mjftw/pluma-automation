@@ -10,7 +10,8 @@ from ..unittest import deferred_function
 @deferred_function
 def tt_log_stats(TestController, board):
     if TestController is None:
-        raise TestMustBeInSController
+        raise ValueError('TestController should be set.')
+
     board.log("Test #: {}, pass #: {}, fail #: {}".format(
         TestController.stats['num_tests_run'],
         TestController.stats['num_tests_pass'],
