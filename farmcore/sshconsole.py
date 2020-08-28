@@ -13,7 +13,10 @@ class SSHConsole(HostConsole):
         if not password:
             command = f'ssh {login}@{target} -o StrictHostKeyChecking=no'
         else:
-            command = f'sshpass -p {password} ssh {login}@{target} -o PreferredAuthentications=password -o PubkeyAuthentication=no -o StrictHostKeyChecking=no'
+            command = \
+                f'sshpass -p {password} ssh {login}@{target}' \
+                ' -o PreferredAuthentications=password' \
+                ' -o PubkeyAuthentication=no -o StrictHostKeyChecking=no'
 
         super().__init__(command)
 
@@ -36,4 +39,6 @@ class SSHConsole(HostConsole):
             subprocess.check_output(command_list, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             raise Exception(
-                f'Failed to copy (scp) "{source}" to "{destination}".\n  Command {command} failed with error:\n    "{e.output.decode()}"')
+                f'Failed to copy (scp) "{source}" to "{destination}".\n'
+                f'  Command {command} failed with error:\n'
+                f'    "{e.output.decode()}"')

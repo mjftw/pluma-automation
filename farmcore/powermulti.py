@@ -25,7 +25,7 @@ class PowerMulti(PowerBase):
 
     def _build_sequence(self, method):
         seq = []
-        regex_str = '[0-9]+\.*[0-9]*m{0,1}s'
+        regex_str = r'[0-9]+\.*[0-9]*m{0,1}s'
         for p in self.power_seq:
             if isinstance(p, PowerBase):
                 seq.append(getattr(p, method))

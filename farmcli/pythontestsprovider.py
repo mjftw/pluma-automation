@@ -1,5 +1,4 @@
 import re
-import json
 import inspect
 from operator import attrgetter
 

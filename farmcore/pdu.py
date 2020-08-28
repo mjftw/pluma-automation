@@ -30,7 +30,7 @@ class PDUReqestsBase():
         assert hasattr(self, 'log')
 
     def _make_request(self, endpoint, params=None, method=None,
-            timeout=10, max_tries=1):
+                      timeout=10, max_tries=1):
         if isinstance(params, list):
             params = '&'.join(params)
 
@@ -81,10 +81,12 @@ class PDUReqestsBase():
 
         return r.text
 
+
 class EnergeniePDU(PowerBase, PDUReqestsBase):
     ''' Energenie MIHO005 Smart Plug with http request interface'''
+
     def __init__(self, host, socket, netport=None, interface=None,
-        interface_ip=None, reboot_delay=None):
+                 interface_ip=None, reboot_delay=None):
         assert isinstance(socket, int) and socket >= 0
 
         self.host = host
@@ -144,9 +146,10 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
 
 class IPPowerPDU(PowerBase, PDUReqestsBase):
     ''' IP Power 9258 is a PDU which can respond to http requests '''
+
     def __init__(self, port,
-            host=None, netport=None, username=None, password=None,
-            interface=None, interface_ip=None, reboot_delay=None):
+                 host=None, netport=None, username=None, password=None,
+                 interface=None, interface_ip=None, reboot_delay=None):
         if 1 <= port <= 4:
             self.port = port
         else:
@@ -161,7 +164,7 @@ class IPPowerPDU(PowerBase, PDUReqestsBase):
         PDUReqestsBase.__init__(self, interface, interface_ip or '192.168.1.110')
 
     def make_request(self, params):
-        #E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
+        # E.g. http://192.168.1.100/set.cmd?user=admin&pass=12345678&cmd=setpower+p61=0
         params_str = '&'.join([
             'user=' + self.username,
             'pass=' + self.password,
@@ -209,7 +212,6 @@ class APCPDU(PowerBase):
         self.console = TelnetConsole(self.host)
 
         PowerBase.__init__(self, reboot_delay)
-
 
     def _login(self):
         e = None

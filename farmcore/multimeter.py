@@ -216,5 +216,6 @@ class MultimeterTTI1604():
 
         return data_str, unit
 
+
 def _bitfield_int(byte_str, start_bit, stop_bit):
     return int(byte_str[7-stop_bit:8-start_bit], 2)

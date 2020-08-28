@@ -1,4 +1,3 @@
-name = "farmcore"
 from .exceptions import *
 from .board import Board, get_board_by_name
 from .usbrelay import USBRelay
@@ -16,3 +15,4 @@ from .hub import Hub
 from .sdwire import SDWire
 from .multimeter import MultimeterTTI1604
 from .modem import ModemSim868
+name = "farmcore"

@@ -3,12 +3,13 @@ import json
 import re
 from datetime import datetime
 
+
 def run_host_cmd(command, stdin=None, *args, **kwargs):
     ''' Wrapper for subprocess.Popen
     Runs the command @command in a subproccess
     returns a tuple of (<command output>, <returncode>)
     '''
-    kwargs_final={
+    kwargs_final = {
         'stdin': subprocess.PIPE,
         'stdout': subprocess.PIPE,
         'stderr': subprocess.STDOUT
@@ -36,17 +37,17 @@ def format_json_tinydb(db_file, db_output_file):
 
     # Convert ids from str to int so that they order properly
     for t in db_dict:
-        db_dict[t] = {int(x):db_dict[t][x] for x in db_dict[t].keys()}
+        db_dict[t] = {int(x): db_dict[t][x] for x in db_dict[t].keys()}
 
     db_json = json.dumps(db_dict,
-        sort_keys=True, indent=4, separators=(',', ': '))
+                         sort_keys=True, indent=4, separators=(',', ': '))
 
     with open(db_output_file, 'w') as f:
         f.writelines(db_json)
 
 
 def timestamp_to_datetime(timestamp):
-    return datetime.strptime(timestamp,'%Y-%m-%d-%H-%M-%S')
+    return datetime.strptime(timestamp, '%Y-%m-%d-%H-%M-%S')
 
 
 def datetime_to_timestamp(dt):
@@ -61,7 +62,7 @@ def regex_filter_list(patterns, items, unique=None):
     If @unique, duplicates are removed.
     '''
     gen = (i for p, i in filter(lambda pi: re.match(*pi),
-        (((p, i) for i in items for p in patterns))))
+                                (((p, i) for i in items for p in patterns))))
     if unique:
         gen = set(gen)
     return sorted(gen)

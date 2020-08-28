@@ -2,7 +2,6 @@ import math
 import os
 
 from farmtest import TestBase, TaskFailed
-from farmcore.baseclasses import ConsoleBase
 
 
 class MemorySize(TestBase):
@@ -12,8 +11,8 @@ class MemorySize(TestBase):
         self.total_mb = total_mb
 
         if not total_mb and not available_mb:
-            raise ValueError(f'"total_mb" and/or "available_mb" have to be'
-                             'provided for {self}, but none was provided."')
+            raise ValueError('"total_mb" and/or "available_mb" have to be'
+                             f'provided for {self}, but none was provided."')
 
     def test_body(self):
         console = self.board.console
@@ -31,7 +30,7 @@ class MemorySize(TestBase):
                     available_mb = math.floor(int(line.split()[1]) / 1024)
                 if line.startswith('MemTotal:'):
                     total_mb = math.floor(int(line.split()[1]) / 1024)
-        except:
+        except Exception:
             # Handled just after
             pass
 

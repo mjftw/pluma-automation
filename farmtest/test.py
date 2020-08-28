@@ -34,9 +34,7 @@ class ExampleTest():
         pass
 '''
 
-import sys
 import traceback
-import platform
 import datetime
 import time
 import re
@@ -45,9 +43,9 @@ import os
 import inspect
 from copy import copy
 
-from farmutils import Email, send_exception_email, datetime_to_timestamp
+from farmutils import send_exception_email, datetime_to_timestamp
 from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailedError
-from farmcore.baseclasses import Logger, LogLevel
+from farmcore.baseclasses import LogLevel
 
 
 class TestingException(Exception):
@@ -137,7 +135,7 @@ class TestCore(TestBase):
     def _host_unmount(self):
         self.board.log("\n=!= HOST UNMOUNT =!=", bold=True)
 
-        #TODO: Move this functionality to the board class
+        # TODO: Move this functionality to the board class
         devnode = None
         for _ in range(1, 5):
             if not self.board.hub.get_part():
@@ -166,7 +164,7 @@ class TestCore(TestBase):
             self.data['boot_log'] = os.path.join(
                 self.settings['failed_bootlogs_dir'],
                 '{}_failed_boot_{}.log'.format(self.board.name,
-                    datetime_to_timestamp(datetime.datetime.now())))
+                                               datetime_to_timestamp(datetime.datetime.now())))
 
             try:
                 if not os.path.exists(self.settings['failed_bootlogs_dir']):
@@ -228,9 +226,9 @@ class TestCore(TestBase):
 
 class TestRunner():
     def __init__(self, board, tests=None,
-            skip_tasks=None, email_on_fail=True, use_testcore=True,
-            sequential=False, failed_bootlogs_dir=None,
-            continue_on_fail=False):
+                 skip_tasks=None, email_on_fail=True, use_testcore=True,
+                 sequential=False, failed_bootlogs_dir=None,
+                 continue_on_fail=False):
         self.board = board
         self.email_on_fail = email_on_fail
         self.continue_on_fail = continue_on_fail
@@ -298,12 +296,12 @@ class TestRunner():
 
         if self.sequential:
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
-                color='blue', bold=True)
+                           color='blue', bold=True)
 
             completed = 0
             total = len(self.tests)
             for test_name in (str(test) for test in self.tests
-                    if str(test) != "TestCore"):
+                              if str(test) != "TestCore"):
                 self.progress = completed / total
                 completed += 1
                 for task_name in self.tasks:
@@ -318,11 +316,11 @@ class TestRunner():
             self.progress = None
         else:
             self.board.log('== TESTING MODE: PARALLEL ==',
-                color='blue', bold=True)
+                           color='blue', bold=True)
             self._run_tasks()
 
-        self.board.log(f"\n== ALL TESTS COMPLETED ==",
-            color='blue', bold=True)
+        self.board.log("\n== ALL TESTS COMPLETED ==",
+                       color='blue', bold=True)
 
         # Check if any tasks failed
         if self.test_fails:
@@ -413,7 +411,6 @@ class TestRunner():
         if not isinstance(test_names, list):
             test_names = [test_names]
 
-
         try:
             for task_name in task_names:
                 tests_with_task = self.get_tests_with_task(task_name)
@@ -436,12 +433,12 @@ class TestRunner():
                 skip_message = f'Skipping task: {task_name}'
                 if "mount" in task_name and not self.board.storage:
                     self.board.log(skip_message + '. Board does not have storage',
-                        color='green', bold=True)
+                                   color='green', bold=True)
                     continue
-                if (( task_name in ['_board_on_and_validate', '_board_off'])
+                if ((task_name in ['_board_on_and_validate', '_board_off'])
                         and not self.board.power):
                     self.board.log(skip_message + '. Board does '
-                        'not have power control', color='green', bold=True)
+                                   'not have power control', color='green', bold=True)
                     continue
 
                 if task_name in self.skip_tasks:
@@ -450,16 +447,15 @@ class TestRunner():
 
                 for test_name in test_names:
                     self._run_task(task_name, test_name)
-        except AbortTesting as e:
-            self.board.log(f"\n== TESTING ABORTED EARLY ==",
-                color='red', bold=True)
+        except AbortTesting:
+            self.board.log("\n== TESTING ABORTED EARLY ==",
+                           color='red', bold=True)
 
     def _run_task(self, task_name, test_name):
         test = self._get_test_by_name(test_name)
         if not test:
-            self.board.error(
-                'Cannot run specified test {} as it is not in test list'.format(
-                test_name, TestingException))
+            self.board.error(f'Cannot run specified test {test_name}'
+                             ' as it is not in test list', TestingException)
 
         task_func = getattr(test, task_name, None)
         if not task_func:
@@ -516,7 +512,6 @@ class TestRunner():
         finally:
             if print_test:
                 self.board.release_log()
-
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {

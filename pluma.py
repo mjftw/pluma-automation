@@ -32,19 +32,26 @@ def parse_arguments():
                         f'"{TESTS_COMMAND}": list all tests available and selected, '
                         f'"{CLEAN_COMMAND}": remove logs, toolchains, and built executables')
     parser.add_argument(
-        '-v', '--verbose', action='store_const', const=True, help='prints more information related to tests and progress')
+        '-v', '--verbose', action='store_const', const=True,
+        help='prints more information related to tests and progress')
     parser.add_argument(
-        '-q', '--quiet', action='store_const', const=True, help='print only test progress and results')
+        '-q', '--quiet', action='store_const', const=True,
+        help='print only test progress and results')
     parser.add_argument(
-        '-c', '--config', default='pluma.yml', help='path to the tests configuration file. Default: "pluma.yml"')
+        '-c', '--config', default='pluma.yml',
+        help='path to the tests configuration file. Default: "pluma.yml"')
     parser.add_argument(
-        '-t', '--target', default='pluma-target.yml', help='path to the target configuration file. Default: "pluma-target.yml"')
+        '-t', '--target', default='pluma-target.yml',
+        help='path to the target configuration file. Default: "pluma-target.yml"')
     parser.add_argument(
-        '-f', '--force', action='store_const', const=True, help='force operation instead of prompting')
+        '-f', '--force', action='store_const', const=True,
+        help='force operation instead of prompting')
     parser.add_argument(
-        '--silent', action='store_const', const=True, help='silence all output')
+        '--silent', action='store_const', const=True,
+        help='silence all output')
     parser.add_argument(
-        '--debug', action='store_const', const=True, help='enable debug information')
+        '--debug', action='store_const', const=True,
+        help='enable debug information')
 
     args = parser.parse_args()
     return args

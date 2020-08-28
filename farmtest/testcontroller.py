@@ -1,6 +1,5 @@
 import time
 import json
-import re
 import pygal
 from datetime import datetime
 from copy import deepcopy

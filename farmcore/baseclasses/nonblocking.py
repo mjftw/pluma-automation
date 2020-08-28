@@ -1,6 +1,7 @@
 from multiprocessing.pool import ThreadPool
 import threading
 
+
 class Nonblocking:
     '''
     This is a base class that allows the inheriting class to mark
@@ -29,6 +30,7 @@ class Nonblocking:
     worker threads are in use, then the nonblocking method call will be added
     to a queue, and called once a worker thread is free.
     '''
+
     def __init__(self, threads=1):
         '''
         Use @threads to specify number of worker threads. You probably
@@ -41,6 +43,7 @@ class Nonblocking:
         '''
         Decorates class methods in order to make then nonblocking.
         '''
+
         def __init__(self, fn):
             self.fn = fn
             self.async_result = None

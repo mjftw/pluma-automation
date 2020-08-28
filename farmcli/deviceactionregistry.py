@@ -29,7 +29,8 @@ class DeviceActionRegistry():
 
         if action_key in cls.action_classes_dict:
             raise Exception(
-                f'Error registering DeviceAction subclass "{action_class}": Action key {action_key} is already registered for {cls.action_classes_dict[action_key].__name__}')
+                f'Error registering DeviceAction subclass "{action_class}": Action key {action_key} is already'
+                ' registered for {cls.action_classes_dict[action_key].__name__}')
 
         cls.action_classes_dict[action_key] = action_class
 

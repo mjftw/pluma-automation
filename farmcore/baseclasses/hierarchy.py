@@ -38,7 +38,7 @@ class Hierarchy():
             child._children_set_attr(attr, value)
 
     def show_hier(self, indent_level=1, indent_size=4, recurse=True,
-            exclude=[]):
+                  exclude=[]):
         """ Return string containing all local vars, and get children to do the same """
         children = {}
         attrs = {}
@@ -50,7 +50,7 @@ class Hierarchy():
             type_indent_level = indent_level
 
         hier_str += ("-"*type_indent_level*indent_size +
-            "{}:\n".format(type(self).__name__))
+                     "{}:\n".format(type(self).__name__))
 
         children, attrs = self._get_hier()
 
@@ -67,7 +67,7 @@ class Hierarchy():
 
         for key in attrs:
             hier_str += ("-"*indent_level*indent_size +
-                  "{}: {}\n".format(key, attrs[key]))
+                         "{}: {}\n".format(key, attrs[key]))
         for key in children:
             if recurse:
                 hier_str += children[key].show_hier(
@@ -78,11 +78,13 @@ class Hierarchy():
                 )
             else:
                 hier_str += ("-"*indent_level*indent_size +
-                    "{}: {}\n".format(key, type(children[key]).__name__))
+                             "{}: {}\n".format(key, type(children[key]).__name__))
 
         return hier_str
 
-#TODO: Not sure this is working. Check & Fix.
+# TODO: Not sure this is working. Check & Fix.
+
+
 def hier_setter(f):
     def wrapper(*args):
         f(*args)

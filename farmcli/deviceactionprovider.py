@@ -1,5 +1,5 @@
 from farmcore.baseclasses import Logger
-from farmcli import Configuration, TestsConfigError, DeviceActionRegistry
+from farmcli import Configuration, DeviceActionRegistry
 from .config import TestDefinition, TestsProvider
 
 log = Logger()

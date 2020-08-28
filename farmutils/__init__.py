@@ -1,4 +1,3 @@
-name = "farmutils"
 from .exceptions import *
 from .email import Email, send_exception_email
 from .git import reset_repos, get_latest_tag, get_tag_list, \
@@ -8,3 +7,4 @@ from .helpers import run_host_cmd, format_json_tinydb, \
 from .interactive import getch, seech
 from .asynchronous import AsyncSampler
 from .graphing import boot_graph
+name = "farmutils"

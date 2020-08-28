@@ -1,5 +1,4 @@
 import json
-import logging
 import os
 
 from farmcore import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
@@ -118,7 +117,8 @@ class TargetFactory:
 
         if len(power_config) > 1:
             raise TargetConfigError(
-                f'Only one power control should be provided in the target configuration, but two or more provided:{os.linesep}{power_config}')
+                'Only one power control should be provided in the target configuration,'
+                f' but two or more provided:{os.linesep}{power_config}')
 
         control_type = POWER_SOFT
         if len(power_config) > 0:

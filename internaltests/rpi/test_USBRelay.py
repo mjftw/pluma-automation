@@ -45,6 +45,7 @@ import time
 
 from fixtures import relay_pins, usb_relay
 
+
 def assert_continuity(output_pin, input_pin, repititions=100):
     ''' Toggle output and check input matches to assert continuity
     Repeat many times to rule out floating input matching output by chance

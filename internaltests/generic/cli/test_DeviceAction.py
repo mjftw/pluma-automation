@@ -1,9 +1,8 @@
 import time
 import pytest
 
-from farmcore.baseclasses import ConsoleBase
 from farmcore import Board
-from farmtest import CommandRunner, TaskFailed
+from farmtest import TaskFailed
 from farmcli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, WaitForPatternAction
 
 from utils import nonblocking

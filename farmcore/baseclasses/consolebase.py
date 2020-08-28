@@ -189,7 +189,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
             if matched_str:
                 self.log(f'Matched {matched_str}')
             else:
-                self.log(f'No match found before timeout or EOF')
+                self.log('No match found before timeout or EOF')
 
         return matched_str
 

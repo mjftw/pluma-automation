@@ -1,4 +1,3 @@
-import os
 import time
 import pytest
 from farmcore.exceptions import ConsoleLoginFailedError

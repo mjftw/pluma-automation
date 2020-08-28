@@ -48,10 +48,8 @@ class TestsBuilder:
         install_dir = os.path.abspath(install_dir)
         TestsBuilder.create_directory(install_dir)
 
-        log.log(
-            f'Installing Yocto SDK...', level=LogLevel.INFO)
-        log.log(
-            f'  SDK: "{yocto_sdk}"\n  Destination: "{install_dir}"')
+        log.log('Installing Yocto SDK...', level=LogLevel.INFO)
+        log.log(f'  SDK: "{yocto_sdk}"\n  Destination: "{install_dir}"')
 
         try:
             command = [yocto_sdk, '-y', '-d', install_dir]

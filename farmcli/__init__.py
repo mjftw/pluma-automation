@@ -1,4 +1,3 @@
-name = "farmcli"
 from .config import PlumaConfig, Configuration, ConfigurationError, TestsConfigError, TargetConfigError, TestsProvider
 from .testsconfig import TestsConfig
 from .testsbuilder import TestsBuilder, TestsBuildError
@@ -10,3 +9,4 @@ from .deviceactionbase import DeviceActionBase
 from .deviceactionregistry import DeviceActionRegistry
 from .deviceactions import LoginAction, PowerOnAction, PowerOffAction, PowerCycleAction, WaitAction, WaitForPatternAction
 from .deviceactionprovider import DeviceActionProvider
+name = "farmcli"

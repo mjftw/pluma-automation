@@ -8,11 +8,11 @@ class Locking:
         '''
         Decorates class methods in order to make them lockling.
         '''
+
         def __init__(self, fn):
             self.fn = fn
 
             self.parent = None
-
 
         def __get__(self, instance, owner):
             if instance is None:

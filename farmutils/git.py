@@ -8,17 +8,21 @@ from .helpers import run_host_cmd
 class GitError(Exception):
     pass
 
+
 class GitInvalidVersionSpecifierError(GitError):
     pass
 
+
 class GitCommandFailedError(GitError):
     pass
+
 
 def run_git_cmd(git_command):
     git_result, git_rc = run_host_cmd(git_command)
     if git_rc:
         raise GitCommandFailedError(git_command)
     return (git_result, git_rc)
+
 
 def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
     for repo in repos:
@@ -56,11 +60,11 @@ def get_tag_list(srcdir):
 def version_is_valid(version, pattern=None):
     '''
     Check that @version string matches regex @pattern.
-    If no pattern given, the regex used is: ^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}$
+    If no pattern given, the regex used is: ^[0-9]{1,4}\\.[0-9]{1,4}\\.[0-9]{1,4}$
     This corresponds to: major.minor.revision, x.y.z
     '''
 
-    pattern = pattern or '^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}$'
+    pattern = pattern or r'^[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}$'
 
     return True if re.search(pattern, version) else False
 
@@ -96,7 +100,7 @@ def filter_versions(versions, v_filter):
     # Sort versions
     versions.sort()
 
-    v_pattern = '[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}'
+    v_pattern = r'[0-9]{1,4}\.[0-9]{1,4}\.[0-9]{1,4}'
 
     # Get reference version
     v_ref_match = re.match(v_pattern, v_filter)
@@ -114,7 +118,7 @@ def filter_versions(versions, v_filter):
             versions = [v_ref] if v_ref in versions else None
 
         else:
-            cond_pattern = '^[!\-+][0-9]*$'
+            cond_pattern = r'^[!\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
                 raise GitInvalidVersionSpecifierError('Invalid condition [{}] in filter [{}]'.format(
                     v_cond, v_filter))
@@ -149,7 +153,7 @@ def filter_versions(versions, v_filter):
         else:
             v_cond = v_filter
 
-            cond_pattern = '^[\-+][0-9]*$'
+            cond_pattern = r'^[\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
                 raise GitInvalidVersionSpecifierError('Invalid filter [{}]'.format(
                     v_filter))
@@ -166,11 +170,11 @@ def filter_versions(versions, v_filter):
                 if v_cond and len(versions) > int(v_cond):
                     versions = versions[:int(v_cond)]
 
-
     # convert version tuple list back to version strings
     versions = None if not versions else list(map(lambda v: '{}.{}.{}'.format(v[0], v[1], v[2]), versions))
 
     return versions
+
 
 def compile_version_list(srcdir, version_filters):
     '''
@@ -241,5 +245,3 @@ def compile_version_list(srcdir, version_filters):
     filtered_versions = list(map(lambda v: '{}.{}.{}'.format(v[0], v[1], v[2]), filtered_versions))
 
     return filtered_versions or None
-
-

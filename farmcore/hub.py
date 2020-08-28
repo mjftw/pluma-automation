@@ -36,7 +36,7 @@ class Hub(Farmclass, USB):
 
         devinfo['usbpath'] = None
         for p in path[path.index(self.usb_device):]:
-            devpath = re.match(pattern='[0-9\-\.]{'+f'{len(p)}'+'}', string=p)
+            devpath = re.match(pattern=r'[0-9\-\.]{'+f'{len(p)}'+'}', string=p)
             if devpath:
                 devinfo['usbpath'] = devpath.string
             elif devinfo['usbpath']:
@@ -141,7 +141,7 @@ class Hub(Farmclass, USB):
 
         class HubDeviceNode():
             def __init__(self, device, devtype, index,
-                    parent=None, linelabel=None, extra_info=None):
+                         parent=None, linelabel=None, extra_info=None):
                 self.device = device
                 self.devtype = devtype
                 self.index = index
@@ -203,15 +203,15 @@ class Hub(Farmclass, USB):
             nodes.sort(key=lambda x: x.devpath)
             for node in nodes:
                 dot.node(node.devname, node.devlabel,
-                    {**node_default_attrs, **node_attrs.get(node.devtype, {})})
+                         {**node_default_attrs, **node_attrs.get(node.devtype, {})})
 
                 node.parent = None
                 # Connect partitions to block devices
                 if not node.parent and node.devtype == 'Partition':
                     filtered_nodes = [n for n in nodes
-                        if n != node and
-                            n.devtype == 'Block' and
-                            n.devpath == node.devpath]
+                                      if n != node and
+                                      n.devtype == 'Block' and
+                                      n.devpath == node.devpath]
 
                     if filtered_nodes:
                         node.parent = filtered_nodes[0]
@@ -225,9 +225,9 @@ class Hub(Farmclass, USB):
                 # Connect block devices to SDWires
                 if not node.parent and node.devtype == 'Block':
                     filtered_nodes = [n for n in nodes
-                        if n != node and
-                            n.devtype == 'SD-Wire' and
-                            n.devpathlist[:-1] == node.devpathlist[:-1]]
+                                      if n != node and
+                                      n.devtype == 'SD-Wire' and
+                                      n.devpathlist[:-1] == node.devpathlist[:-1]]
 
                     if filtered_nodes:
                         node.parent = filtered_nodes[0]
@@ -236,9 +236,9 @@ class Hub(Farmclass, USB):
                 if not node.parent:
                     # Find upstream hubs
                     filtered_nodes = [n for n in nodes
-                        if n != node and
-                            n.devtype == 'Hub' and
-                            node.devpath.startswith(n.devpath)]
+                                      if n != node and
+                                      n.devtype == 'Hub' and
+                                      node.devpath.startswith(n.devpath)]
 
                     if filtered_nodes:
                         # Find node.parent hub (hub with longest matching path)
@@ -253,7 +253,7 @@ class Hub(Farmclass, USB):
 
                 if node.parent:
                     dot.edge(node.parent.devname, node.devname,
-                        label=node.linelabel, **edge_attrs)
+                             label=node.linelabel, **edge_attrs)
 
             return dot
 
@@ -363,8 +363,8 @@ class Hub(Farmclass, USB):
 
     def get_hub(self, key=None, get_all=None):
         devinfo = self.filter_downstream({
-                'devtype': 'usb_device',
-            })
+            'devtype': 'usb_device',
+        })
         hubs = []
         for d in devinfo:
             if 'USB' in d['model'] and 'Hub' in d['model']:
@@ -394,7 +394,7 @@ class Hub(Farmclass, USB):
         for device in self.downstream:
             if device not in categorised:
                 matching = [c for c in categorised
-                    if c['usbpath'] == device['usbpath'] and c['serial'] == device['serial']]
+                            if c['usbpath'] == device['usbpath'] and c['serial'] == device['serial']]
                 if not matching:
                     uncategorised.append(device)
 
