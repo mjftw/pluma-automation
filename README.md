@@ -213,9 +213,12 @@ Supported attributes:
   * `- shell_tests:` Script tests or tasks
     * `<testname>:`
       * `script: <string or list>` - Command(s) to run on the target
-      * `run_on_host: <bool>` - Run on the host or target device. Defaults to `false`
       * `should_print: <list>` - List of expected outputs when running the command(s). Receiving any of these outputs will cause the test to pass.
       * `should_not_print: <list>` - List of error outputs when running the command(s). Receiving any of these outputs will cause the test to fail.
+      * `timeout: <timeout_in_seconds>` - Duration to wait for "silence" on the console after running a command. Will return earlier if the console stays silent.
+      * `run_on_host: <bool>` - Run on the host or target device. Defaults to `false`.
+      * `runs_in_shell: <bool>` - When a command runs it a shell, the return code is read and used to deduce success/failure of the command. Can be set to `false` to only send the command instead. Defaults to `true`.
+      * `login_automatically: <bool>` - Will attempt to login automatically before sending any command. Can be set to `false` to prevent this behavior. Detaults to `true`.
   * `- c_tests:` Cross-compiled and deployed C tests or tasks
     * `yocto_sdk: <path_to_sdk>`
     * `tests:`
