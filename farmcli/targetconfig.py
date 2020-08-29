@@ -18,37 +18,55 @@ class TargetConfig:
     @staticmethod
     def create_board(config):
         try:
-            credentials = TargetFactory.parse_credentials(
-                config.pop('credentials'))
-
-            serial, ssh = TargetFactory.create_consoles(
-                config.pop('console'), credentials)
-            main_console = serial or ssh
-            if not main_console:
-                log.warning(
-                    "No console defined in the device configuration file")
-
-            power = TargetFactory.create_power_control(
-                config.pop('power'), main_console)
-
-            log.log('Components:', bold=True)
-            more_info = '- Default' if serial and main_console == serial else ''
-            log.log(f'    Serial:         {str(serial)} {more_info}',
-                    color='green' if serial else None)
-            more_info = '- Default' if ssh and main_console == ssh else ''
-            log.log(f'    SSH:            {str(ssh)} {more_info}',
-                    color='green' if ssh else None)
-            log.log(f'    Power control:  {str(power)}',
-                    color='green' if power else None)
-            log.log('')
-
-            config.ensure_consumed()
-            board = Board('Test board', console={'serial': serial, 'ssh': ssh}, power=power,
-                          login_user=credentials.login, login_pass=credentials.password)
+            board = TargetConfig.__create_board(config)
         except ConfigurationError as e:
             raise TargetConfigError(e)
+        else:
+            TargetConfig.print_board_settings(board)
+            return board
 
-        return board
+    @staticmethod
+    def __create_board(config: Configuration) -> Board:
+        credentials = TargetFactory.parse_credentials(
+            config.pop('credentials'))
+
+        serial, ssh = TargetFactory.create_consoles(
+            config.pop('console'), credentials)
+
+        if not serial and not ssh:
+            log.warning("No console defined in the device configuration file")
+
+        power = TargetFactory.create_power_control(
+            config.pop('power'), ssh)
+
+        config.ensure_consumed()
+        return Board('Test board', console={'serial': serial, 'ssh': ssh}, power=power,
+                     login_user=credentials.login, login_pass=credentials.password)
+
+    @staticmethod
+    def print_board_settings(board: Board):
+        log.log('Components:', bold=True)
+
+        serial = board.get_console('serial')
+        suffix = 'Default' if serial and board.console is serial else None
+        TargetConfig.print_component('Serial', serial, suffix)
+
+        ssh = board.get_console('ssh')
+        suffix = 'Default' if ssh and board.console is ssh else None
+        TargetConfig.print_component('SSH', ssh, suffix)
+
+        TargetConfig.print_component('Power control', board.power)
+        TargetConfig.print_component('Storage', board.storage)
+        TargetConfig.print_component('USB Hub', board.hub)
+        log.log('')
+
+    @staticmethod
+    def print_component(label: str, component, suffix: str = None):
+        color = 'green' if component else None
+        if suffix:
+            log.log(f'    {label}:  {str(component)} - {suffix}', color=color)
+        else:
+            log.log(f'    {label}:  {str(component)}', color=color)
 
 
 class TargetFactory:
