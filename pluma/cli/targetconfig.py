@@ -1,8 +1,9 @@
 import json
 import os
+from typing import List
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
-from pluma.core.baseclasses import Logger
+from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase
 from pluma.cli import Configuration, ConfigurationError, TargetConfigError
 
 log = Logger()
@@ -16,7 +17,10 @@ class Credentials:
 
 class TargetConfig:
     @staticmethod
-    def create_board(config):
+    def create_board(config: Configuration) -> Board:
+        if not isinstance(config, Configuration):
+            raise ValueError('Invalid configuration: The configuration passed '
+                             'should be a Configuration instance.')
         try:
             board = TargetConfig.__create_board(config)
         except ConfigurationError as e:
@@ -71,7 +75,7 @@ class TargetConfig:
 
 class TargetFactory:
     @staticmethod
-    def parse_credentials(credentials_config):
+    def parse_credentials(credentials_config: Configuration) -> Credentials:
         if not credentials_config:
             return Credentials()
 
@@ -82,7 +86,7 @@ class TargetFactory:
         return credentials
 
     @staticmethod
-    def create_consoles(config, credentials):
+    def create_consoles(config: Configuration, credentials: Credentials) -> List[ConsoleBase]:
         if not config:
             return None, None
 
@@ -92,7 +96,7 @@ class TargetFactory:
         return serial, ssh
 
     @staticmethod
-    def create_serial(serial_config):
+    def create_serial(serial_config: Configuration) -> ConsoleBase:
         if not serial_config:
             return None
 
@@ -108,7 +112,7 @@ class TargetFactory:
         return serial
 
     @staticmethod
-    def create_ssh(ssh_config, credentials):
+    def create_ssh(ssh_config: Configuration, credentials: Credentials) -> ConsoleBase:
         if not ssh_config:
             return None
 
@@ -125,7 +129,7 @@ class TargetFactory:
         return SSHConsole(target, login, password)
 
     @staticmethod
-    def create_power_control(power_config, console):
+    def create_power_control(power_config: Configuration, console: ConsoleBase) -> PowerBase:
         if not power_config:
             power_config = Configuration()
 
@@ -138,9 +142,12 @@ class TargetFactory:
                 'Only one power control should be provided in the target configuration,'
                 f' but two or more provided:{os.linesep}{power_config}')
 
-        control_type = POWER_SOFT
-        if len(power_config) > 0:
+        if power_config:
             control_type = power_config.first()
+        elif console:
+            control_type = POWER_SOFT
+        else:
+            return None
 
         if control_type not in POWER_LIST:
             raise TargetConfigError(

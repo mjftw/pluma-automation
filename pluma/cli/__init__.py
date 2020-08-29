@@ -1,4 +1,5 @@
-from .config import PlumaConfig, Configuration, ConfigurationError, TestsConfigError, TargetConfigError, TestsProvider
+from .config import PlumaConfig, Configuration, ConfigurationError, TestsConfigError, \
+    TargetConfigError, TestsProvider, TestDefinition
 from .testsconfig import TestsConfig
 from .testsbuilder import TestsBuilder, TestsBuildError
 from .targetconfig import TargetConfig, TargetFactory

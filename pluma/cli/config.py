@@ -111,7 +111,7 @@ class TestsProvider(ABC):
 
     @abstractmethod
     def all_tests(self, key: str, config: Configuration) -> list:
-        '''Return all tests from the "config" provided by the sequence key "key", as a list of TestDefinition'''
+        '''Return all TestDefinition from the "config" provided by the sequence key "key"'''
         pass
 
     def selected_tests(self, config: Configuration) -> list:
