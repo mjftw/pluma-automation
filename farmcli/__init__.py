@@ -10,4 +10,5 @@ from .deviceactionregistry import DeviceActionRegistry
 from .deviceactions import LoginAction, PowerOnAction, PowerOffAction, PowerCycleAction, WaitAction, \
     WaitForPatternAction, SetAction
 from .deviceactionprovider import DeviceActionProvider
+from .api import Pluma
 name = "farmcli"
