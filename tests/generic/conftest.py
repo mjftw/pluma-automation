@@ -65,3 +65,24 @@ def mock_board(mock_console):
     mock_board.console = mock_console
 
     return mock_board
+
+
+@fixture
+def target_config():
+    return {}
+
+
+@fixture
+def ssh_config():
+    return {
+        'target': '123',
+        'login': 'abc'
+    }
+
+
+@fixture
+def serial_config():
+    return {
+        'port': 'abc',
+        'baud': 123,
+    }

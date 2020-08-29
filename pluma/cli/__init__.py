@@ -2,7 +2,7 @@ from .config import PlumaConfig, Configuration, ConfigurationError, TestsConfigE
     TargetConfigError, TestsProvider, TestDefinition
 from .testsconfig import TestsConfig
 from .testsbuilder import TestsBuilder, TestsBuildError
-from .targetconfig import TargetConfig, TargetFactory
+from .targetconfig import TargetConfig, TargetFactory, Credentials
 from .pythontestsprovider import PythonTestsProvider
 from .shelltestsprovider import ShellTestsProvider
 from .ctestsprovider import CTestsProvider
