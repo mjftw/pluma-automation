@@ -231,6 +231,8 @@ Supported attributes:
     * `pattern: <pattern>`
     * `timeout: <timeout_in_seconds>`
   * `- login:` Attempt to login on the active console. Typically used for Serial
+  * `- set:`
+    * `device_console: <ssh/serial>` Set the default console to be used for communication with the device
   * `- poweron:` Use the power controller defined to power on the board
   * `- poweroff:` Use the power controller defined to power off the board
   * `- powercycle:` Use the power controller defined to power cycle the board (off and on)

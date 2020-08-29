@@ -3,12 +3,16 @@ settings:
   iterations: 1
 
 sequence:
+- set:
+    device_console: serial
 - shell_tests:
     target_setup:
       script: echo "setting things up on the target"
     host_setup:
       script: echo "setting things up locally"
       run_on_host: true
+- set:
+    device_console: ssh
 - wait:
     duration: 2
 - shell_tests:

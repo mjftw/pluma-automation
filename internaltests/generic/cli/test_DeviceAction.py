@@ -1,10 +1,12 @@
 import time
 import pytest
+from unittest.mock import MagicMock
 
 from farmcore import Board
+from farmcore.baseclasses import ConsoleBase
 from farmtest import TaskFailed
-from farmcli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, WaitForPatternAction
-
+from farmcli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, \
+    WaitForPatternAction, SetAction
 from utils import nonblocking
 
 
@@ -94,3 +96,25 @@ def test_WaitForPatternAction_should_fail_when_no_matched_proxy_console(mock_boa
 
     with pytest.raises(TaskFailed):
         async_action.get()
+
+
+def test_SetAction_should_set_console():
+    ssh_console = MagicMock(ConsoleBase)
+    serial_console = MagicMock(ConsoleBase)
+    board = Board("board", console={'ssh': ssh_console, 'serial': serial_console})
+
+    action = SetAction(board, device_console='ssh')
+    action.execute()
+
+    assert board.console is ssh_console
+
+    action = SetAction(board, device_console='serial')
+    action.execute()
+    assert board.console is serial_console
+
+
+@pytest.mark.parametrize('console_type', ['ssh', 'serial'])
+def test_SetAction_should_error_if_no_console(mock_board, console_type):
+    mock_board.get_console.return_value = None
+    with pytest.raises(ValueError):
+        SetAction(mock_board, device_console=console_type)

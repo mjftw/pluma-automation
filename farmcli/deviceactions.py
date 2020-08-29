@@ -1,8 +1,12 @@
 import time
+from enum import Enum
 
+from farmcore.baseclasses import Logger
 from farmcore import Board
 from farmtest import TaskFailed
 from farmcli import DeviceActionBase, DeviceActionRegistry
+
+log = Logger()
 
 
 @DeviceActionRegistry.register()
@@ -62,3 +66,20 @@ class WaitForPatternAction(DeviceActionBase):
         if not matched_output:
             raise TaskFailed(
                 f'{str(self)}: Timeout reached while waiting for pattern "{self.pattern}"')
+
+
+@DeviceActionRegistry.register()
+class SetAction(DeviceActionBase):
+    def __init__(self, board: Board, device_console: str = None):
+        super().__init__(board)
+
+        self.device_console = device_console
+
+        if self.device_console and not self.board.get_console(self.device_console):
+            raise ValueError(f'Cannot set console to "{self.device_console}": '
+                             'no such console was set for this board')
+
+    def execute(self):
+        if self.device_console:
+            log.log(f'Setting device console to {self.device_console}')
+            self.board.console = self.board.get_console(self.device_console)

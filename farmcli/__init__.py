@@ -7,6 +7,7 @@ from .shelltestsprovider import ShellTestsProvider
 from .ctestsprovider import CTestsProvider
 from .deviceactionbase import DeviceActionBase
 from .deviceactionregistry import DeviceActionRegistry
-from .deviceactions import LoginAction, PowerOnAction, PowerOffAction, PowerCycleAction, WaitAction, WaitForPatternAction
+from .deviceactions import LoginAction, PowerOnAction, PowerOffAction, PowerCycleAction, WaitAction, \
+    WaitForPatternAction, SetAction
 from .deviceactionprovider import DeviceActionProvider
 name = "farmcli"

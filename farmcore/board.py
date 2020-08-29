@@ -1,8 +1,7 @@
 import time
 from pexpect import TIMEOUT, EOF
 
-
-from .baseclasses import Farmclass
+from .baseclasses import Farmclass, ConsoleBase
 from .exceptions import ConsoleExceptionKeywordReceivedError
 
 
@@ -26,11 +25,13 @@ class Board(Farmclass):
                  prompt=None, logfile=None,
                  login_user_match=None, login_pass_match=None):
         self.name = name
-
         self.power = power
         self.storage = storage
-        self.console = console
         self.hub = hub
+
+        self._current_console_name = None
+        self._consoles = None
+        self.consoles = console
 
         self.prompt = prompt or '\\$'
         self.login_user = login_user or 'root'
@@ -47,6 +48,46 @@ class Board(Farmclass):
 
     def __repr__(self):
         return 'Board[{}]'.format(self.name)
+
+    @property
+    def console(self) -> ConsoleBase:
+        if self._current_console_name:
+            return self.consoles[self._current_console_name]
+        else:
+            return None
+
+    @console.setter
+    def console(self, new_console: ConsoleBase):
+        if not self.consoles or new_console not in self.consoles.values():
+            self.consoles = new_console
+        else:
+            for name, console in self.consoles.items():
+                if console is new_console:
+                    self._current_console_name = name
+                    break
+
+    @property
+    def consoles(self) -> dict:
+        return self._consoles
+
+    @consoles.setter
+    def consoles(self, new_consoles) -> dict:
+        if isinstance(new_consoles, ConsoleBase):
+            new_consoles = {'main': new_consoles}
+        elif not isinstance(new_consoles, dict) and new_consoles is not None:
+            raise ValueError("Error settings consoles: Must be a ConsoleBase or dict")
+
+        if new_consoles and self._current_console_name not in new_consoles.keys():
+            self._current_console_name = next(iter(new_consoles)) if new_consoles else None
+
+        self._consoles = new_consoles
+
+    def get_console(self, console_name: str = None) -> ConsoleBase:
+        '''Get a specific console from the Board.'''
+        if console_name:
+            return self.consoles.get(console_name)
+        else:
+            return self.console
 
     def reboot_and_validate(self, override_bootstr=None, override_timeout=None,
                             exception_bootstr=None):

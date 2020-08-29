@@ -4,7 +4,7 @@ credentials:
 
 console:
   serial:
-    #port: /dev/ttyUSB0
+    port: /dev/ttyUSB0
   ssh:
     target: 192.168.0.25
 

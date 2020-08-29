@@ -43,7 +43,7 @@ class TargetConfig:
             log.log('')
 
             config.ensure_consumed()
-            board = Board('Test board', console=main_console, power=power,
+            board = Board('Test board', console={'serial': serial, 'ssh': ssh}, power=power,
                           login_user=credentials.login, login_pass=credentials.password)
         except ConfigurationError as e:
             raise TargetConfigError(e)
