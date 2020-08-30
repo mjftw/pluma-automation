@@ -1,7 +1,7 @@
 import time
 from pexpect import TIMEOUT, EOF
 
-from .baseclasses import HardwareBase, ConsoleBase
+from .baseclasses import HardwareBase, ConsoleBase, SystemContext
 from .exceptions import ConsoleExceptionKeywordReceivedError
 
 
@@ -18,12 +18,10 @@ class BoardFieldInstanceIsNoneError(BoardError):
 
 
 class Board(HardwareBase):
-    def __init__(self, name, power=None, hub=None,
-                 storage=None, console=None,
-                 login_user=None, login_pass=None,
-                 bootstr=None, boot_max_s=None,
-                 prompt=None, logfile=None,
-                 login_user_match=None, login_pass_match=None):
+    def __init__(self, name, power=None, hub=None, storage=None, console=None,
+                 login_user=None, login_pass=None, bootstr=None, boot_max_s=None, logfile=None,
+                 login_user_match=None, login_pass_match=None,
+                 system: SystemContext = None):
         self.name = name
         self.power = power
         self.storage = storage
@@ -32,8 +30,8 @@ class Board(HardwareBase):
         self._current_console_name = None
         self._consoles = None
         self.consoles = console
+        self.system = system or SystemContext()
 
-        self.prompt = prompt or '\\$'
         self.login_user = login_user or 'root'
         self.login_pass = login_pass
         self.login_user_match = login_user_match or 'login:'
@@ -104,13 +102,14 @@ class Board(HardwareBase):
                 '"console" instance is not set')
 
         # If we have set a prompt, add this to bootstr search
-        if self.prompt:
+        prompt = self.system.prompt_regex
+        if prompt:
             if not bootstr:
-                bootstr = self.prompt
+                bootstr = prompt
             elif isinstance(bootstr, list):
-                bootstr.append(self.prompt)
+                bootstr.append(prompt)
             else:
-                bootstr = [bootstr, self.prompt]
+                bootstr = [bootstr, prompt]
 
         if not bootstr:
             raise BoardBootValidationError(
@@ -139,7 +138,8 @@ class Board(HardwareBase):
 
         self.log('Boot success. Matched [{}]'.format(matched))
 
-        if self.prompt and matched == self.prompt:
+        prompt = self.system.prompt_regex
+        if prompt and matched == prompt:
             self.booted_to_prompt = True
 
         return self.last_boot_len
@@ -158,7 +158,7 @@ class Board(HardwareBase):
             password=self.login_pass,
             username_match=self.login_user_match,
             password_match=self.login_pass_match,
-            success_match=self.prompt
+            success_match=self.system.prompt_regex
         )
 
 
