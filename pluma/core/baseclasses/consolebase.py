@@ -479,7 +479,7 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         if success_match:
             matches.append(success_match)
 
-        fail_message = f'ERROR: Failed to log in: U="{username}" P="{password}"'
+        fail_message = f'Failed to log in with login="{username}" and password="{password}"'
         (__, matched) = self.send_and_expect('', match=matches)
         if not matched:
             self.error(fail_message, ConsoleLoginFailedError)
@@ -528,6 +528,10 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
     def copy_to_host(self, source, destination, timeout=30):
         raise ValueError(
             f'Console type {self} does not support copying from target')
+
+    @property
+    def requires_login(self):
+        return True
 
     def wait_for_prompt(self, timeout: int = None):
         '''Wait for a prompt, throws if no prompt before timeout'''

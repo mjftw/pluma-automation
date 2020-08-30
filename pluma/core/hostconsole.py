@@ -44,3 +44,7 @@ class HostConsole(ConsoleBase):
         if not self.is_open:
             self.open()
         self._pex.interact()
+
+    @property
+    def requires_login(self):
+        return False
