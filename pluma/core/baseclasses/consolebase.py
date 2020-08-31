@@ -253,35 +253,41 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
 
         return False
 
-    def wait_for_quiet(self, quiet=None, sleep_time=None, timeout=None):
+    def wait_for_quiet(self, quiet: int = None, sleep_time: int = None, timeout: int = None) -> bool:
         if not self.is_open:
             self.open()
-
         quiet = quiet if quiet is not None else 0.5
-        sleep_time = sleep_time if sleep_time is not None else 0.2
+        sleep_time = sleep_time if sleep_time is not None else 0.1
         timeout = timeout if timeout is not None else 10.0
 
         last_read_buffer_size = 0
         read_buffer_size = 0
         elapsed = 0.0
         time_quiet = 0.0
+
+        start = time.time()
+        elapsed = 0
         while(elapsed < timeout):
             time.sleep(sleep_time)
-            elapsed += sleep_time
+            prev_elapsed = elapsed
+            elapsed = time.time() - start
+            delta_time = elapsed - prev_elapsed
 
             self.read_all(preserve_read_buffer=True)
             read_buffer_size = self._buffer_size
 
             # Check if more data was received
             if read_buffer_size == last_read_buffer_size:
-                time_quiet += sleep_time
+                time_quiet += delta_time
                 if time_quiet > quiet:
                     return True
             else:
                 time_quiet = 0
 
-                self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
-                    elapsed, timeout, time_quiet, quiet, read_buffer_size), level=LogLevel.DEBUG)
+            self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
+                elapsed, timeout, time_quiet, quiet, read_buffer_size), level=LogLevel.DEBUG)
+
+            last_read_buffer_size = read_buffer_size
 
         # Timeout
         return False
