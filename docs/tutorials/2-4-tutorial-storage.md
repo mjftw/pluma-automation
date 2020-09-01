@@ -2,14 +2,14 @@
 
 During testing it is often the case that a new firmware version must be loaded on the board. This can be done over the network using SSH, NFS, FTP etc in many cases, but this may not work when the device boots from the new firmware image.
 
-To get around this issue, the Automation Lab has support for the SD-Wire board from Tizen. This acts as an SD card multiplexer, able to switch the SD card between the Lab host and target board.  
-Using this method the SD card could be attached to the Lab host, a new boot image written to it, and passed back to the target before boot.
+To get around this issue, Pluma has support for the SD-Wire board from Tizen. This acts as an SD card multiplexer, able to switch the SD card between the the Pluma host and target board.  
+Using this method the SD card could be attached to the Pluma host, a new boot image written to it, and passed back to the target before boot.
 
 For more information on the SD-Wire, see [Supported Hardware](../supported-hardware.md).
 
 ## Mounting an SD Card to modify files
 
-The SD card can be moved between the board and the Lab host using the `to_board()` and `to_host()` methods of the `SDWire` class.
+The SD card can be moved between the board and the Pluma host using the `to_board()` and `to_host()` methods of the `SDWire` class.
 
 ```python
 from farmcore import SDWire

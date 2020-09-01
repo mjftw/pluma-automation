@@ -125,7 +125,8 @@ class TestCore(TestBase):
                 devnode = self.board.hub.get_part('devnode')
                 break
         if not devnode:
-            raise TaskFailed('Cannot mount: No block device partition downstream of hub')
+            raise TaskFailed(
+                'Cannot mount: No block device partition downstream of hub')
 
         self.board.storage.mount_host(devnode)
 
@@ -146,7 +147,8 @@ class TestCore(TestBase):
         if devnode:
             self.board.storage.unmount_host(devnode)
         else:
-            self.board.log("Cannot find block device partition. Continuing anyway")
+            self.board.log(
+                "Cannot find block device partition. Continuing anyway")
 
         self.board.storage.to_board()
 
@@ -169,7 +171,8 @@ class TestCore(TestBase):
             try:
                 if not os.path.exists(self.settings['failed_bootlogs_dir']):
                     os.makedirs(self.settings['failed_bootlogs_dir'])
-                shutil.copy2(self.board.console.log_file, self.data['boot_log'])
+                shutil.copy2(self.board.console.log_file,
+                             self.data['boot_log'])
             except Exception as ex:
                 self.data['boot_log'] = None
                 raise ex
@@ -232,7 +235,7 @@ class TestRunner():
         self.board = board
         self.email_on_fail = email_on_fail
         self.continue_on_fail = continue_on_fail
-        self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/lab'
+        self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/pluma'
         self.skip_tasks = skip_tasks or []
         self.test_fails = []
 
@@ -352,7 +355,8 @@ class TestRunner():
 
         max_duplicate_tests = 500
         original_name = test._test_name
-        stripped_name = re.sub(r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
+        stripped_name = re.sub(
+            r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
 
         for i in range(1, max_duplicate_tests+1):
             if not self._get_test_by_name(str(test._test_name)):

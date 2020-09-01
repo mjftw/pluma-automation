@@ -1,6 +1,6 @@
 # Tutorial - Reporting (Under Development)
 
-See next page for some information on setting up the Automation Lab for email reporting.
+See next page for some information on setting up Pluma for email reporting.
 
 This is currently the only content in the reporting series, but there is more to come.
 ___

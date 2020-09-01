@@ -45,7 +45,7 @@ dev@labhost:~ $ pwd
 In [4]:
 ```
 
-The console's `interact()` method lets you take interactive control of the DUT console. This can be very handy for debugging as it allows you to take interactive control of the console after the Lab has been using it for automation.
+The console's `interact()` method lets you take interactive control of the DUT console. This can be very handy for debugging as it allows you to take interactive control of the console after Pluma has been using it for automation.
 
 HostConsole is a very flexible console class, and we can use it to run a bash shell on our DUT over SSH as well:
 
@@ -73,11 +73,11 @@ from farmcore import HostConsole
 console = HostConsole('ssh dut-user@dut-host /bin/bash')
 
 console.send('cd ~')
-console.send('echo "Hello World!" > lab-test.txt')
+console.send('echo "Hello World!" > pluma-test.txt')
 
 console.interact()
 pi@raspberry:~ $
-pi@raspberry:~ $ cat lab-test.txt
+pi@raspberry:~ $ cat pluma-test.txt
 Hello World!
 ```
 
@@ -239,9 +239,9 @@ The console log is only updated when an operation on the console class takes pla
 
 The raw log file contains an up to date log of everything that has been sent on the console to date, without control information.
 
-All Automation Lab hardware control classes have a log file, but only the console classes have a raw log file.
+All Pluma hardware control classes have a log file, but only the console classes have a raw log file.
 
-Both default to being stored in a temporary file in `/tmp/lab`, but you can change the logfile locations by setting the attributes on the console instance.
+Both default to being stored in a temporary file in `/tmp/pluma`, but you can change the logfile locations by setting the attributes on the console instance.
 
 ```python
 console.raw_logfile = './raw_console_data.log'
@@ -255,7 +255,7 @@ console.raw_logfile_clear()
 console.log_file_clear()
 ```
 
-It can be useful to have a live view of how the lab is interacting with a board as it runs. To do this you can run the following command in a separate shell:
+It can be useful to have a live view of how Pluma is interacting with a board as it runs. To do this you can run the following command in a separate shell:
 
 ```shell
 tail -f ./raw_console_data.log
@@ -285,13 +285,13 @@ print(console.log_file)
 console.flush(clear_buf=True)
 
 print(console.log_file)
-#/tmp/lab/HostConsole_2020-05-07-19-25-04.log
+#/tmp/pluma/HostConsole_2020-05-07-19-25-04.log
 ```
 
 Looking at the log file we can see what went wrong.
 
 ```shell
-dev@labhost:~ $ cat /tmp/lab/HostConsole_2020-05-07-19-25-04.log
+dev@labhost:~ $ cat /tmp/pluma/HostConsole_2020-05-07-19-25-04.log
 <sent>>b'test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"'<</sent>>
 Waiting up to 5s for patterns: ['5 > 6', '5 < 6']...
 <<received>>test 5 -gt 6 && echo "<<matched expects=['5 > 6', '5 < 6']>>5 > 6<</matched>><</received>>

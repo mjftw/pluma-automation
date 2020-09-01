@@ -1,7 +1,7 @@
-# Witekio Lab Development Style Guide
+# Witekio Pluma Development Style Guide
 **UNDER DEVELOPMENT**
 
-- [Witekio Lab Development Style Guide](#witekio-lab-development-style-guide)
+- [Witekio Pluma Development Style Guide](#witekio-pluma-development-style-guide)
   - [Introduction](#introduction)
   - [PEP8 Style Guide](#pep8-style-guide)
   - [General Guidelines](#general-guidelines)
@@ -12,9 +12,9 @@
     - [Exceptions](#exceptions)
 
 ## Introduction
-This document will outline the recommended coding style to be followed by developers working on the Witekio Automation Lab.
+This document will outline the recommended coding style to be followed by developers working on Pluma Automation.
 
-The main rule you should follow when adding code to the Lab *(and you could argue that this applies to any codebase)* is to try to match the coding style for what is already there.
+The main rule you should follow when adding code to Pluma *(and you could argue that this applies to any codebase)* is to try to match the coding style for what is already there.
 Your code should blend in with its surroundings, like a stealthy chameleon in a tree.  
 
 To quote [PEP20 - The Zen of Python](https://www.python.org/dev/peps/pep-0020/):
@@ -42,7 +42,7 @@ To quote [PEP20 - The Zen of Python](https://www.python.org/dev/peps/pep-0020/):
 As a general guide to write good Python, that works well and is easy to maintain, this works pretty well!
 
 ## PEP8 Style Guide
-When writing code for the Lab, we try to follow Python's [PEP8](https://www.python.org/dev/peps/pep-0008/) wherever possible.  
+When writing code for Pluma, we try to follow Python's [PEP8](https://www.python.org/dev/peps/pep-0008/) wherever possible.  
 The is the de facto community accepted style guide for all new Python code. Follow it and you're bound to end up with reasonably well styled code.
 
 What PEP8 does tell you:
@@ -86,7 +86,7 @@ The easiest way to make sure your code is compliant is to install a linter.
 There are many linters available for this purpose, but I would recommend [Pylama](https://github.com/klen/pylama), as this one is known to work. I use [VS Code ](https://code.visualstudio.com/) for development, and there is an extension available to make this liter run by default. Linters should be available for many other code editors as well.  
 Using a linter will help you write better code, with less effort.
 
-All the Lab code uses Python3, make sure your linter is set up for this as it may default to Python2.
+All Pluma code uses Python3, make sure your linter is set up for this as it may default to Python2.
 
 ## General Guidelines
 This section covers some key points to follow to help write good code.  
@@ -176,7 +176,7 @@ This topic could fill many chapters of a book on it's own, but a few key points 
 - ...
 
 If you are writing something that is not specifically related to the project you are working on, then maybe this code would be a good addition to the `farm-core` core codebase, rather than the repository for the project.  
-Adding code to the core codebase (where appropriate) means that the Lab may suddenly gain a new ability, that can be reused on many future projects.
+Adding code to the core codebase (where appropriate) means that Pluma may suddenly gain a new ability, that can be reused on many future projects.
 
 ## Specific Guidelines
 

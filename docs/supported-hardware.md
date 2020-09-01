@@ -1,7 +1,7 @@
-# Automation Lab Supported Hardware
+# Pluma Automation Supported Hardware
 **===== IN DEVELOPMENT =====**
 
-- [Automation Lab Supported Hardware](#automation-lab-supported-hardware)
+- [Pluma Automation Supported Hardware](#pluma-automation-supported-hardware)
   - [Automation Hosts](#automation-hosts)
     - [Linux PC](#linux-pc)
     - [Raspberry Pi 4](#raspberry-pi-4)

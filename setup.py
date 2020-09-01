@@ -15,11 +15,11 @@ except FileNotFoundError:
         readme_file))
 
 setuptools.setup(
-    name="farm-core",
+    name="pluma-automation",
     version=get_farmcore_version(),
     author="Witekio",
     author_email="mwebster@witekio.com",
-    description="Automation Lab: farm-core",
+    description="Pluma Automation",
     long_description=long_description,
     long_description_content_type=long_description_content_type,
     url="https://bitbucket.org/adeneo-embedded/farm-core",

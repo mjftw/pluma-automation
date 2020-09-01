@@ -4,7 +4,7 @@ In this set of tutorials we will first look at how to interact with our board's 
 
 * [Adding a console controller](./2-1-tutorial-console.md)
 
-We'll also view our USB tree and look at how the Automation Lab discovers USB devices.
+We'll also view our USB tree and look at how Pluma discovers USB devices.
 
 * [USB Devices](./2-2-tutorial-usb.md)
 

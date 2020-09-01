@@ -46,7 +46,7 @@ class ConsoleBase(Farmclass, metaclass=ABCMeta):
 
         timestamp = datetime_to_timestamp(datetime.now())
         default_raw_logfile = os.path.join(
-            '/tmp', 'lab',
+            '/tmp', 'pluma',
             f'{self.__class__.__name__}_raw_{timestamp}.log')
 
         self.encoding = encoding or 'ascii'

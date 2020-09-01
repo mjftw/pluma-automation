@@ -210,21 +210,21 @@ To see where the `Board`'s current log file is we can read the `log_file` proper
 
 ```python
 print(my_board.log_file)
-#/tmp/lab/Board_2020-06-05-10-52-25.log
+#/tmp/pluma/Board_2020-06-05-10-52-25.log
 ```
 
 Let's check the contents of that file to ensure our "Hello World!" message was saved:
 
 ```shell
-pi@raspberry:~ $ cat /tmp/lab/Board_2020-06-05-10-52-25.log
+pi@raspberry:~ $ cat /tmp/pluma/Board_2020-06-05-10-52-25.log
 Hello World!
 ```
 
-Often it is useful to see the log updating in realtime as the Lab is running.  
+Often it is useful to see the log updating in realtime as Pluma is running.  
 We can do this with:
 
 ```shell
-pi@raspberry:~ $ tail -f /tmp/lab/Board_2020-06-05-10-52-25.log
+pi@raspberry:~ $ tail -f /tmp/pluma/Board_2020-06-05-10-52-25.log
 Hello World!
 ```
 
@@ -232,8 +232,8 @@ Hello World!
 
 You'll notice that the log file in the last example is in the `/tmp/` directory.
 This means that it is only stored in memory and will not persist across reboots.
-Another thing to note is that the end of the file name is a timestamp, noting the time that the Lab's Python session started.
-As a result of this, each time you run a lab script a new log file will be created.
+Another thing to note is that the end of the file name is a timestamp, noting the time that Pluma's Python session started.
+As a result of this, each time you run a Pluma script a new log file will be created.
 
 This is often not the behaviour you want.
 Wouldn't it be nice if we could make the log file permanent, and just append new messages to the end of the log for a new session rather than having to store many log files?

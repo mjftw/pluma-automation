@@ -1,6 +1,6 @@
 # Tutorial: Hardware Control - Adding a Power Controller
 
-One of the key features of the Automation Lab is the ability to turn devices on and off from within Python.
+One of the key features of Pluma is the ability to turn devices on and off from within Python.
 
 Depending on the hardware available to you the way this physically happens might be quite different, but the your code need not be.
 
@@ -129,7 +129,7 @@ power.on()
 power.off()
 ```
 
-In this example a DLP-IOR4 USB relay is connected to the Lab host at USB path `1-1.2`. If you're not sure what this means then check out [Tutorial: USB devices](./2-2-tutorial-usb.md).
+In this example a DLP-IOR4 USB relay is connected to the Pluma host at USB path `1-1.2`. If you're not sure what this means then check out [Tutorial: USB devices](./2-2-tutorial-usb.md).
 
 ## Combining power capabilities with PowerMulti
 

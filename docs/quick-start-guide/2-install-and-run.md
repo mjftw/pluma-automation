@@ -1,6 +1,6 @@
 # Install and Run
 
-The Automation Lab can be installed locally, or ran with a Docker container. Both approaches are described below
+Pluma Automation can be installed locally, or ran with a Docker container. Both approaches are described below
 
 ## Local installation
 
@@ -42,14 +42,14 @@ For additional options, check the install help with:
 
 ### Get or Build the image
 
-The Automation Lab image should be available as `witekio/automation-lab` directly if you are registered and part of Witekio's team in Docker HUB. Otherwise, you can easily build it:
+Pluma Automation image should be available as `witekio/pluma-automation` directly if you are registered and part of Witekio's team in Docker HUB. Otherwise, you can easily build it:
 
-* Clone the Automation Lab repository
+* Clone Pluma Automation repository
 * Navigate to the root and run `make docker-build`, or `make docker-build-arm` on an ARM device. If the build succeeds, you have your Docker image ready.
 
 ### Run with make
 
-To run the Automation Lab container using make, you must specify your project directory and the relative path of the script to run within that directory.
+To run Pluma Automation container using make, you must specify your project directory and the relative path of the script to run within that directory.
 
 * `PROJECT_DIR` - Path to the top level project directory to be mounted in the container
   * Must include all scripts required to run the PROJECT_SCRIPT
@@ -77,38 +77,38 @@ Running `make-docker-run` without specifying `PROJECT_SCRIPT` will drop you at t
 
 ### Run manually (Not recommended)
 
-When running the Automation Lab container manually, you have to mount the folder containing your Automation Lab test script and run as below:
+When running Pluma Automation container manually, you have to mount the folder containing your Pluma test script and run as below:
 
 ```shell
-  docker run -it --rm -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py
+  docker run -it --rm -v (pwd):/root witekio/pluma-automation python3 /root/my_test_script.py
 ```
 
 Note: To use the SD Wire of USB Serial adaptors you must invoke docker run with the arguments `--privileged -v /dev:/dev`.
 
 ```shell
-  docker run -it --rm --privileged -v /dev:/dev -v (pwd):/root witekio/automation-lab python3 /root/my_test_script.py
+  docker run -it --rm --privileged -v /dev:/dev -v (pwd):/root witekio/pluma-automation python3 /root/my_test_script.py
 ```
 
 **Warning:** _This will give the container access to all of your system devices. Use with caution._
 
 ### Run with GitLab CI pipeline
 
-From your test repository, you can simply use Docker HUB's image (after granting access to the registry), or push the automation lab image in the project's registry.
+From your test repository, you can simply use Docker HUB's image (after granting access to the registry), or push the Pluma image in the project's registry.
 
-1. Register your test device as a Docker SSH GitLab runner, with a dedicated tag (e.g. `automation-lab-tester`): https://docs.gitlab.com/runner/
-1. Push the Automation Lab Docker image to your project registry: https://docs.gitlab.com/ee/user/packages/container_registry/
+1. Register your test device as a Docker SSH GitLab runner, with a dedicated tag (e.g. `pluma-automation-tester`): https://docs.gitlab.com/runner/
+1. Push Pluma Automation Docker image to your project registry: https://docs.gitlab.com/ee/user/packages/container_registry/
 1. Create a `.gitlab-ci.yml` file in your repository configured as below
 
 ```yml
 device-test-job:
-  image: registry.gitlab.com/witekio/<your-project>/automation-lab:latest
+  image: registry.gitlab.com/witekio/<your-project>/pluma-automation:latest
   tags:
-    - automation-lab-tester         # This should match your GitLab runner tag
+    - pluma-automation-tester         # This should match your GitLab runner tag
   script:
-    - python3 my_test_script.py     # Run your automation lab script
+    - python3 my_test_script.py     # Run your Pluma script
 ```
 
-Now every time your pipeline runs, it will run your test script from your automation lab device, and report the test status.
+Now every time your pipeline runs, it will run your test script from your Pluma device, and report the test status.
 ___
 
 << Previous: [Introduction](./1-introduction.md) |
