@@ -1,16 +1,16 @@
 # Tutorial: Hardware Control - USB Devices
 
-The majority of the devices that the Automation Lab can control are USB based.
-In this tutorial we'll view our USB tree, and look at how the Automation Lab discovers USB devices.
+The majority of the devices that Pluma can control are USB based.
+In this tutorial we'll view our USB tree, and look at how Pluma discovers USB devices.
 
 All of our interaction with the USB tree is done via the `Hub` class, which represents a USB Hub.
 The words "USB Hub" probably make you think of an external USB splitter of sorts, but we can also use the `Hub` class without one, as you'll see later.
 
-While the Automation Lab does have a `USB` class, this is just used for the low level system interaction and it's unlikely you'll need to look here.
+While Pluma does have a `USB` class, this is just used for the low level system interaction and it's unlikely you'll need to look here.
 
 ## View USB tree
 
-The easiest way to see what USB devices we have connected to our Lab host is to plot them.
+The easiest way to see what USB devices we have connected to our Pluma host is to plot them.
 
 ```python
 from farmcore import Hub
@@ -25,10 +25,10 @@ usb_bus_1.plot()
 You should have a pop up window showing something like the image below.
 ![USB Bus 1 Plot](./usb_bus_1.svg)
 
-You can see that on our test Lab host we have 2 hubs, 2 USB Relays, 1 USB -> UART adaptor, 1 USB -> Ethernet adapter, 1 unsupported "Unknown" device, and an SD-Wire containing an SD card with 2 partitions.
+You can see that on our test Pluma host we have 2 hubs, 2 USB Relays, 1 USB -> UART adaptor, 1 USB -> Ethernet adapter, 1 unsupported "Unknown" device, and an SD-Wire containing an SD card with 2 partitions.
 What you see will depend on your system configuration.
 
-Any device that shows up with a name that isn't "Unknown Device" can be controlled with an Automation Lab class.
+Any device that shows up with a name that isn't "Unknown Device" can be controlled with a Pluma class.
 
 The above example uses X11 to display the plot, so this may not work on some systems.
 
@@ -262,7 +262,7 @@ However, if we're looking to get information on a specific USB relay this doesn'
 If we know which USB hub the device is connected to then we can do better!
 Previously we've only used the `Hub` class to query the entire USB bus (`Hub('usb1')`), but we can also look only at the devices downstream of a specific USB Hub.
 
-Let's assume that know that the USB relay we're looking for is connected to hub `1-1.1`, or a hub below that. You'd typically want to find this information when setting up your Lab devices anyway.
+Let's assume that know that the USB relay we're looking for is connected to hub `1-1.1`, or a hub below that. You'd typically want to find this information when setting up your Pluma devices anyway.
 
 ```python
 from farmcore import Hub

@@ -16,7 +16,7 @@ def tt_log_stats(TestController, board):
         TestController.stats['num_tests_run'],
         TestController.stats['num_tests_pass'],
         TestController.stats['num_tests_fail']
-        ))
+    ))
 
 
 # ==== TestController Setup functions ====
@@ -45,7 +45,7 @@ def ss_log_test_plan(TestController, board):
 @deferred_function
 def sr_log_test_results(TestController, board):
     print("In func {}".format(__name__))
-    message = "Test TestController results: \n".format(TestController.name)
+    message = "Test TestController results: \n"
     for test in TestController.tests_passed:
         message += "\t{}: PASS\n".format(
             test.body['str'])
@@ -96,8 +96,9 @@ def console_is_alive(console):
         raise e
     except InterruptedError as e:
         raise e
-    except Exception as e:
+    except Exception:
         return False
+
 
 @deferred_function
 def sc_run_n_iterations(TestController, ntimes):
@@ -118,7 +119,7 @@ def sc_run_daily_at_hour(TestController, start_hour):
     date_now = now.strftime("%Y/%m/%d")
 
     if start_hour <= now.hour:
-        if not data_key in TestController.data:
+        if data_key not in TestController.data:
             TestController.data[data_key] = [date_now]
             return True
 
@@ -127,6 +128,7 @@ def sc_run_daily_at_hour(TestController, start_hour):
             return True
 
     return False
+
 
 @deferred_function
 def sc_run_in_datetime_range(datetime_start, datetime_end):

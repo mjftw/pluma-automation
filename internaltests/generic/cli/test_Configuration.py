@@ -44,7 +44,7 @@ def test_TestsConfig_pop(minimal_config):
     assert minimal_config.pop(ATTRIBUTE1) == ATTRIBUTE1_VALUE
     assert len(minimal_config) == len(MINIMAL_CONFIG_DICT)-1
 
-    assert minimal_config.pop(ATTRIBUTE1) == None
+    assert minimal_config.pop(ATTRIBUTE1) is None
 
 
 def test_TestsConfig_pop_dict(minimal_config):

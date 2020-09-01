@@ -1,4 +1,3 @@
-from multiprocessing.pool import ThreadPool
 import threading
 import time
 
@@ -9,6 +8,7 @@ class AsyncSampler():
     # Known issues:
     #   When exiting the main thread, while the sampler thread is running,
     #   the sampler thread does not terminate
+
     def __init__(self, sample_func):
         if not callable(sample_func):
             raise AttributeError('sample_func must be callable')

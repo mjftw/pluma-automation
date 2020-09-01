@@ -71,4 +71,5 @@ def _check_schema_branch(obj, schema, path):
                 raise ValidationError(f'"{path}.{key}" did not match expected regex: {val.pattern}')
         elif isinstance(val, type):
             if not isinstance(obj[key], val):
-                raise ValidationError(f'Incorrect type for "{path}.{key}" Expected {val.__name__}, found {obj[key].__class__.__name__}')
+                raise ValidationError(
+                    f'Incorrect type for "{path}.{key}" Expected {val.__name__}, found {obj[key].__class__.__name__}')

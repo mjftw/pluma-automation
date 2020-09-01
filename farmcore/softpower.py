@@ -4,7 +4,7 @@ from .exceptions import PDUError
 
 class SoftPower(PowerBase):
     def __init__(self, console, on_cmd=None, off_cmd=None,
-            reboot_cmd=None, reboot_delay=None):
+                 reboot_cmd=None, reboot_delay=None):
         assert isinstance(console, ConsoleBase)
 
         self.console = console

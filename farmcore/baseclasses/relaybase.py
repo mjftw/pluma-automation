@@ -2,6 +2,7 @@ from .farmclass import Farmclass
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 
+
 class RelayBase(Farmclass, metaclass=ABCMeta):
 
     @abstractmethod

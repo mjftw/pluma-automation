@@ -24,6 +24,7 @@ class ModemError(Exception):
 
 class ModemSim868(Farmclass):
     ''' Diver for the Sim868 based GSM/GNSM/GPS/Bluetooth modem '''
+
     def __init__(self, port):
         ''' @port: Port of the serial console for sending AT commands '''
         self.console = SerialConsole(port, 115200)
@@ -41,7 +42,7 @@ class ModemSim868(Farmclass):
     def AT_send(self, *args, **kwargs):
         if self._recording_lock:
             self.error('Cannot send AT commands while recording in progress',
-                ModemError)
+                       ModemError)
 
         return self.console.send_and_expect(*args, **kwargs)
 
@@ -52,7 +53,7 @@ class ModemSim868(Farmclass):
             return False
 
         # Check sim ready
-        __, matched = self.AT_send('AT+CPIN?', match='\+CPIN: READY')
+        __, matched = self.AT_send('AT+CPIN?', match=r'\+CPIN: READY')
         if not matched:
             return False
 
@@ -73,7 +74,7 @@ class ModemSim868(Farmclass):
                 paused_to_check = True
             else:
                 self.error('Must set check_while_recording to check phone status while recording',
-                    ModemError)
+                           ModemError)
         else:
             # Don't check modem is ready if it is already recording
             if not self.ready():
@@ -123,11 +124,11 @@ class ModemSim868(Farmclass):
 
         # Enable call notification and wait for incoming
         received, matched = self.AT_send(
-            cmd='AT+CLIP=1', match='\+CLIP: "\+{0,1}[0-9]+"', timeout=timeout)
+            cmd='AT+CLIP=1', match=r'\+CLIP: "\+{0,1}[0-9]+"', timeout=timeout)
         if not matched:
             return None
 
-        substr = re.findall('\+{0,1}[0-9]+', matched)
+        substr = re.findall(r'\+{0,1}[0-9]+', matched)
         if not substr or len(substr) == 0:
             raise RuntimeError('Invalid regex match')
         caller = substr[0]
@@ -174,11 +175,11 @@ class ModemSim868(Farmclass):
         self.log('Calling {}'.format(number))
 
         received, matched = self.AT_send('ATD{};'.format(number),
-            match=['OK', 'NO DIALTONE', 'BUSY', 'NO CARRIER', 'NO ANSWER'],
-            excepts='ERROR')
+                                         match=['OK', 'NO DIALTONE', 'BUSY', 'NO CARRIER', 'NO ANSWER'],
+                                         excepts='ERROR')
         if not matched:
             self.error('Unexpected response from modem: {}'.format(received),
-                ModemError)
+                       ModemError)
 
         if matched == 'OK':
             if not self.ongoing_call():
@@ -239,12 +240,10 @@ class ModemSim868(Farmclass):
         '''
         if not self.call_recording_ongoing() and not self._recording_paused:
             self.error('No ongoing or paused recording, cannot stop',
-                ModemError)
+                       ModemError)
             return False
 
         self._stop_recoding_and_buffer()
-
-        packets = []
 
         with open(file, 'wb') as f:
             # Write AMR file header
@@ -321,7 +320,7 @@ class ModemSim868(Farmclass):
 
     def _start_recoding(self):
         __, matched = self.AT_send('AT+CRECORD={}'.format(self._recording_settings),
-            match=['OK', 'CRECORD'], excepts='ERROR')
+                                   match=['OK', 'CRECORD'], excepts='ERROR')
         if not matched:
             self.error('Failed to start recording', ModemError)
 
@@ -349,7 +348,7 @@ class ModemSim868(Farmclass):
         if not matched:
             self.error('SMS start command failed', ModemError)
         __, matched = self.AT_send('{}\x1A'.format(message),
-            match='CMGS', timeout=20)
+                                   match='CMGS', timeout=20)
         if not matched:
             self.error('Failed to send SMS', ModemError)
 

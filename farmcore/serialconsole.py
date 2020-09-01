@@ -8,7 +8,7 @@ from .baseclasses import ConsoleBase
 
 class SerialConsole(ConsoleBase):
     def __init__(self, port, baud,
-            encoding=None, linesep=None, raw_logfile=None):
+                 encoding=None, linesep=None, raw_logfile=None):
         self.port = port
         self.baud = baud
         self._timeout = 0.001
@@ -16,7 +16,7 @@ class SerialConsole(ConsoleBase):
         self._ser = None
         self._pex = None
         super().__init__(encoding=encoding, linesep=linesep,
-            raw_logfile=raw_logfile)
+                         raw_logfile=raw_logfile)
 
     def __repr__(self):
         return "SerialConsole[{}]".format(self.port)
@@ -73,7 +73,7 @@ class SerialConsole(ConsoleBase):
         print(f'Press {exit_char} to exit')
 
         com = self._logging_Nanocom(self.raw_logfile, self._ser,
-            exit_character=exit_char)
+                                    exit_character=exit_char)
 
         com.start()
         try:
@@ -84,7 +84,6 @@ class SerialConsole(ConsoleBase):
             self.log('Exiting interactive console...')
             com.close()
 
-
     class _logging_Nanocom(Nanocom):
         '''
         This class just slightly modifies Nanocom to get it to log
@@ -93,6 +92,7 @@ class SerialConsole(ConsoleBase):
         is written to the raw logfile, along with everything else.
         The reader() method is copy-pasted from Nanocom and modified.
         '''
+
         def __init__(self, logfile, *args, **kwargs):
             self.logfile = logfile
             Nanocom.__init__(self, *args, **kwargs)

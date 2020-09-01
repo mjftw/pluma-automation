@@ -3,6 +3,7 @@ import time
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 
+
 class PowerBase(Farmclass, metaclass=ABCMeta):
     def __init__(self, reboot_delay=None):
         self.reboot_delay = reboot_delay or 0.5

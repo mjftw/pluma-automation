@@ -7,7 +7,8 @@ from abc import ABCMeta, abstractmethod
 from .farmclass import Farmclass
 from farmutils import run_host_cmd
 
-#FIXME: This class is unfinished, and does not conform with other base classes.
+# FIXME: This class is unfinished, and does not conform with other base classes.
+
 
 class StorageError(Exception):
     pass
@@ -99,9 +100,9 @@ class StorageBase(Farmclass, metaclass=ABCMeta):
         else:
             return False
     # TODO: Impliment these
+
     def mount_board(self):
         print("--- Manual Intervention Required! ---")
 
     def unmount_board(self):
         print("--- Manual Intervention Required! ---")
-

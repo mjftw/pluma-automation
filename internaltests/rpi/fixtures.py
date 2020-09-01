@@ -16,12 +16,12 @@ def read_config_usb_path(name):
     conf = read_config()
 
     check_schema(conf,
-        {
-            'usb_paths': {
-                name: usb_path_regex()
-            }
-        }
-    )
+                 {
+                     'usb_paths': {
+                         name: usb_path_regex()
+                     }
+                 }
+                 )
 
     return conf['usb_paths'][name]
 
@@ -31,21 +31,21 @@ def relay_pins():
     conf = read_config()
 
     check_schema(conf,
-        {
-            "board_pins" : {
-                "usb_relay": {
-                    "1": {
-                        "A": int,
-                        "Common": int
-                    },
-                    "4": {
-                        "B": int,
-                        "Common": int
-                    }
-                }
-            }
-        }
-    )
+                 {
+                     "board_pins": {
+                         "usb_relay": {
+                             "1": {
+                                 "A": int,
+                                 "Common": int
+                             },
+                             "4": {
+                                 "B": int,
+                                 "Common": int
+                             }
+                         }
+                     }
+                 }
+                 )
 
     return conf['board_pins']['usb_relay']
 
@@ -83,4 +83,3 @@ def hub_sdwire_path():
 @fixture
 def hub_ethernet_path():
     return read_config_usb_path('hub_ethernet')
-

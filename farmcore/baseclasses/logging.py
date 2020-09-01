@@ -203,7 +203,7 @@ class Logging():
     def log_file(self):
         if not hasattr(self, "_log_file"):
             # Default logfile for all farmclasses lives in /tmp
-            self._log_file = os.path.join('/tmp', 'lab', '{}_{}.log'.format(
+            self._log_file = os.path.join('/tmp', 'pluma', '{}_{}.log'.format(
                 self.__class__.__name__, datetime_to_timestamp(datetime.datetime.now())))
         return self._log_file
 

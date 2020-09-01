@@ -1,5 +1,5 @@
 DOCKER_REGISTRY = index.docker.io
-IMAGE_NAME = automation-lab
+IMAGE_NAME = pluma-automation
 IMAGE_VERSION = latest
 IMAGE_ORG = witekio
 IMAGE_TAG = $(DOCKER_REGISTRY)/$(IMAGE_ORG)/$(IMAGE_NAME):$(IMAGE_VERSION)
@@ -21,13 +21,13 @@ DOCKER_RUN_PRIVILEGED_ARGS := $(DOCKER_RUN_ARGS) --privileged -v /dev:/dev
 
 .DEFAULT_GOAL := docker-build
 
-install:: ## Install the automation lab
+install:: ## Install Pluma
 		@./install.sh
 
-test:: ## Run the all Automation Lab tests that don't require hardware
+test:: ## Run the all Pluma Automation tests that don't require hardware
 		@./internaltests/scripts/run_tests.sh generic
 
-test-all:: ## Run all the Automation Lab tests (generic and RPi specific)
+test-all:: ## Run all Pluma Automation tests (generic and RPi specific)
 		@./internaltests/scripts/run_tests.sh
 
 test-coverage:: ## Check the code coverage for all tests that don't require hardware

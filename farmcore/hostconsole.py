@@ -31,7 +31,7 @@ class HostConsole(ConsoleBase):
             self._pex = pexpect.spawn(self.command, timeout=0.01)
             # Wait to have a prompt, otherwise a connection failure can be is silently ignored
             self._pex.expect([r'\$', '>', '#'], timeout=6)
-        except:
+        except Exception:
             raise ConsoleCannotOpenError
 
         if not self.is_open:

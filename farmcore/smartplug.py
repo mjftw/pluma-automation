@@ -1,0 +1,2 @@
+# class KasaSmartPlug:
+#     pass

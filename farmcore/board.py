@@ -9,19 +9,22 @@ from .exceptions import ConsoleExceptionKeywordReceivedError
 class BoardError(Exception):
     pass
 
+
 class BoardBootValidationError(BoardError):
     pass
+
 
 class BoardFieldInstanceIsNoneError(BoardError):
     pass
 
+
 class Board(Farmclass):
     def __init__(self, name, power=None, hub=None,
-            storage=None, console=None,
-            login_user=None, login_pass=None,
-            bootstr=None, boot_max_s=None,
-            prompt=None, logfile=None, 
-            login_user_match=None, login_pass_match=None):
+                 storage=None, console=None,
+                 login_user=None, login_pass=None,
+                 bootstr=None, boot_max_s=None,
+                 prompt=None, logfile=None,
+                 login_user_match=None, login_pass_match=None):
         self.name = name
 
         self.power = power
@@ -46,15 +49,15 @@ class Board(Farmclass):
         return 'Board[{}]'.format(self.name)
 
     def reboot_and_validate(self, override_bootstr=None, override_timeout=None,
-            exception_bootstr=None):
+                            exception_bootstr=None):
         timeout = override_timeout or self.boot_max_s
         bootstr = override_bootstr or self.bootstr
 
         if self.power is None:
-	        raise BoardFieldInstanceIsNoneError('"power" instance is not set')
-        
+            raise BoardFieldInstanceIsNoneError('"power" instance is not set')
+
         if self.console is None:
-	        raise BoardFieldInstanceIsNoneError('"console" instance is not set')
+            raise BoardFieldInstanceIsNoneError('"console" instance is not set')
 
         # If we have set a prompt, add this to bootstr search
         if self.prompt:
@@ -97,8 +100,8 @@ class Board(Farmclass):
 
     def login(self):
         if self.console is None:
-	        raise BoardFieldInstanceIsNoneError('"console" instance is not set')
-        
+            raise BoardFieldInstanceIsNoneError('"console" instance is not set')
+
         if self.booted_to_prompt:
             self.log('Booted to prompt. Not need to log in')
             return

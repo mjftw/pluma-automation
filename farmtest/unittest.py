@@ -1,8 +1,10 @@
 import inspect
 from copy import copy
 
+
 class deferred_function():
     """ Can be used as a function decorator """
+
     def __init__(self, f, *args, **kwargs):
         if isinstance(f, deferred_function):
             self.f = copy(f.f)

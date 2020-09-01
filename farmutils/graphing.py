@@ -3,8 +3,9 @@ import pygal
 import math
 import json
 
+
 def boot_graph(data_file, output_file, boot_test_name,
-        window=1, interpolate=None):
+               window=1, interpolate=None):
     with open(data_file, 'r') as f:
         all_data = json.load(f)
 

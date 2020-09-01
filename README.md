@@ -1,8 +1,8 @@
-# Witekio Automation Lab
+# Pluma Automation
 
 ![Native installation and tests](https://github.com/Witekio/pluma-automation/workflows/Native%20installation%20and%20tests/badge.svg)
 
-The Automation Lab is a tool designed to perform black box testing of embedded hardware; designed to be as lightweight as possible!
+Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https://www.witekio.com) to perform black box testing of embedded hardware; designed to be as lightweight as possible!
 
 At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
 This package is named `farmcore`.
@@ -33,24 +33,24 @@ Hardware control features include:
 * [Smart USB device detection](docs/tutorials/2-2-tutorial-usb.md)
 * ... and much more!
 
-The Automation Lab is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.
+Pluma Automation is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.
 Just be sure to raise a pull request with your shiny new feature ;).
 
 ![System Diagram](docs/quick-start-guide/automation_lab_system_diagram.png)
 
 ## Getting Started
 
-The Automation Lab has a documentation site, hosting all the documents below, as well as an up to date API guide.  
+Pluma Automation has a documentation site, hosting all the documents below, as well as an up to date API guide.  
 It can be found at [http://labdocs](http://labdocs).
 
 **Note:** _The docs site is only accessible from within the Witekio network_
 
 To get up and running quickly, check out the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md).  
-Look at the [Tutorials](./docs/tutorials/1-tutorial-introduction.md) for guidance and examples on how to use the Automation Lab in your project.
+Look at the [Tutorials](./docs/tutorials/1-tutorial-introduction.md) for guidance and examples on how to use Pluma Automation in your project.
 
 ## Installation
 
-The Automation Lab can be run natively, or using Docker.
+Pluma Automation can be run natively, or using Docker.
 
 ### Native
 For native installation, just run the `install.sh` script.
@@ -77,7 +77,7 @@ make docker-run-privileged PROJECT_DIR=/path/to/my/project PROJECT_SCRIPT=myscri
 **Note:** _For ARM based systems you must use the `docker-run-privileged-arm` target instead_.
 
 Where `PROJECT_DIR` is a directory containing all python scripts needed to run, and `PROJECT_SCRIPT` is the script to run from within that directory.
-For more detailed instructions, see the [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide. Here you'll find instructions on how to run the Automation Lab with Docker.
+For more detailed instructions, see the [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide. Here you'll find instructions on how to run Pluma Automation with Docker.
 
 ## Using the Command line interface (pluma.py)
 
@@ -215,9 +215,12 @@ Supported attributes:
   * `- shell_tests:` Script tests or tasks
     * `<testname>:`
       * `script: <string or list>` - Command(s) to run on the target
-      * `run_on_host: <bool>` - Run on the host or target device. Defaults to `false`
       * `should_print: <list>` - List of expected outputs when running the command(s). Receiving any of these outputs will cause the test to pass.
       * `should_not_print: <list>` - List of error outputs when running the command(s). Receiving any of these outputs will cause the test to fail.
+      * `timeout: <timeout_in_seconds>` - Duration to wait for "silence" on the console after running a command. Will return earlier if the console stays silent.
+      * `run_on_host: <bool>` - Run on the host or target device. Defaults to `false`.
+      * `runs_in_shell: <bool>` - When a command runs it a shell, the return code is read and used to deduce success/failure of the command. Can be set to `false` to only send the command instead. Defaults to `true`.
+      * `login_automatically: <bool>` - Will attempt to login automatically before sending any command. Can be set to `false` to prevent this behavior. Detaults to `true`.
   * `- c_tests:` Cross-compiled and deployed C tests or tasks
     * `yocto_sdk: <path_to_sdk>`
     * `tests:`
@@ -293,7 +296,7 @@ settings:
 
 ## Using the Packages
 
-You can make use of the packages provided outside of the CLI, once you've installed the lab (or run the Docker container). You should be able to import and use the farmcore, farmtest, and farmutils in your Python scripts.
+You can make use of the packages provided outside of the CLI, once you've installed Pluma (or run the Docker container). You should be able to import and use the farmcore, farmtest, and farmutils in your Python scripts.
 
 ```python
 # my_project_file.py
@@ -316,7 +319,7 @@ The above code is just for demonstration, for working code examples check out th
 ## Running the Tests
 
 The project's tests are split into two groups.
-Those that do not require a specific lab hardware setup and those that do.
+Those that do not require a specific hardware setup and those that do.
 
 ### Generic tests
 
@@ -330,10 +333,10 @@ These do not require any hardware to be connected and should run on any system L
 
 ### Hardware specific tests
 
-The rest of the tests are expected to run on a Raspberry Pi 3/4 and require lab hardware peripherals to be connected in a specific way.
+The rest of the tests are expected to run on a Raspberry Pi 3/4 and require hardware peripherals to be connected in a specific way.
 
-If you want to run the hardware tests as well, you will need to ensure that your Raspberry Pi's lab peripherals are connected as specified in the [test configuration file](./internaltests/rpi/hardware.json).
-You can edit this file to match the way how your lab hardware is connected if needed.
+If you want to run the hardware tests as well, you will need to ensure that your Raspberry Pi's peripherals are connected as specified in the [test configuration file](./internaltests/rpi/hardware.json).
+You can edit this file to match the way how your hardware is connected if needed.
 
 You will also need to install the [RPi.GPIO](https://pypi.org/project/RPi.GPIO/) package, version 0.7.0 or newer.
 
@@ -352,10 +355,10 @@ If you plan on using the tests to check your changes, it is recommended that you
 
 ## Contributing
 
-If you would like to contribute to developing the Automation Lab then check out our [Contributing Guide](./docs/how-to-contribute.md) to find out how.
+If you would like to contribute to developing Pluma then check out our [Contributing Guide](./docs/how-to-contribute.md) to find out how.
 
 We also have a code style guide for you to read before you begin development: [Style Guide](./docs/style-guide.md)
 
 ## Licensing
 
-The Automation Lab is released under a [GPLv3 License](LICENSE.txt).
+Pluma Automation is released under a [GPLv3 License](LICENSE.txt).

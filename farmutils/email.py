@@ -25,6 +25,7 @@ class EmailInvalidSettingsError(EmailError):
 
 class Email():
     """ Create and send emails """
+
     def __init__(self,
                  to=[],
                  cc=[],
@@ -220,7 +221,7 @@ class Email():
 
     @property
     def smtp_password(self):
-            return self._smtp_password
+        return self._smtp_password
 
     @smtp_password.setter
     def smtp_password(self, smtp_password):
@@ -265,7 +266,6 @@ class Email():
         except smtplib.SMTPException as e:
             self.error(str(e))
             raise(e)
-
 
     def _send(self, msg):
         """ Send email with current settings """
@@ -326,7 +326,6 @@ class Email():
             if not os.path.isfile(a):
                 self.error(f"Cannot find file to attach: {a}", EmailInvalidSettingsError)
 
-
     def _make_attachments(self):
         """ Create attachment parts for files and images
 
@@ -376,7 +375,7 @@ class Email():
 
 
 def send_exception_email(exception, recipients=None, board=None,
-        subject=None, prepend_body=None, settings_file=None):
+                         subject=None, prepend_body=None, settings_file=None):
     settings_file = settings_file or DEFAULT_SETTINGS_FILE
     if not recipients:
         if not os.path.exists(settings_file):
@@ -402,7 +401,7 @@ def send_exception_email(exception, recipients=None, board=None,
         'cause': str(exception),
         'time': datetime.now().strftime('%d-%m-%y %H:%M:%S'),
         'trace': traceback.format_exc()
-        }
+    }
 
     if prepend_body:
         email.body += '{}<br><hr><br>'.format(prepend_body)
@@ -414,10 +413,10 @@ def send_exception_email(exception, recipients=None, board=None,
         <b>Trace:</b> {}<br>
         <hr>
         '''.format(
-            error_info['exception'],
-            error_info['cause'],
-            error_info['time'],
-            '<br>'.join(error_info['trace'].split('\n')))
+        error_info['exception'],
+        error_info['cause'],
+        error_info['time'],
+        '<br>'.join(error_info['trace'].split('\n')))
 
     email.body += '''
         <b>Platform: </b>{}<br><hr>
@@ -429,7 +428,7 @@ def send_exception_email(exception, recipients=None, board=None,
         email.subject = 'Unhandled Exception Occured: [{}]'.format(
             error_info['exception'])
         if board:
-            email.subject =('{} [{}]'.format(email.subject, board.name))
+            email.subject = ('{} [{}]'.format(email.subject, board.name))
 
     if board:
         email.body += '<b>Board Info:</b><br>'

@@ -1,4 +1,3 @@
-from select import select
 import pty
 import os
 from collections import namedtuple

@@ -1,6 +1,6 @@
 import copy
 import pytest
-from farmcli import TestsConfig, Configuration, TestsConfigError, TestsProvider
+from farmcli import TestsConfig, Configuration, TestsProvider
 
 MINIMAL_CONFIG = {
     'sequence': []

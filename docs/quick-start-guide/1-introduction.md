@@ -1,8 +1,8 @@
-# Automation Lab Quick Start Guide
+# Pluma Automation Quick Start Guide
 
 ## Introduction
 
-The Automation Lab is a tool designed to perform black box testing of embedded hardware; designed to be as lightweight as possible!
+Pluma Automation is a tool designed to perform black box testing of embedded hardware; designed to be as lightweight as possible!
 
 At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
 This package is named `farmcore`.
@@ -18,7 +18,7 @@ This guide will aim to give an introduction to the layout of the codebase, and t
 
 ### Repositories
 
-The Automation Lab is designed in such a way that the core code is able to remain separate from project specific tests, setup etc.
+Pluma Automation is designed in such a way that the core code is able to remain separate from project specific tests, setup etc.
 
 In order to facilitate this, any code that could be reused in any project is found in the repository named [farm-core][farm-core].
 
@@ -30,7 +30,7 @@ Expect to modify your `farm-<customer>` repository frequently, whilst leaving [f
 ### Examples and automated tests (farm-example)
 
 Some example test scripts can be found in the [farm-example][farm-example] repository.
-This repository also contains all of the automated tests that check that the lab code is still functioning, although these are currently in development.
+This repository also contains all of the automated tests that check that Pluma code is still functioning, although these are currently in development.
 
 ### Documentation (farm-documentation)
 

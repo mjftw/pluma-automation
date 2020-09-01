@@ -39,7 +39,7 @@ def test_PowerMulti_calls_targets_on_methods_in_correct_order():
     mocks_on_list = []
     num_mock_powers = 3
     mock_powers = [MockPower(mocks_on_list=mocks_on_list)
-        for __ in range(0, num_mock_powers)]
+                   for __ in range(0, num_mock_powers)]
 
     power = PowerMulti(
         power_seq=mock_powers
@@ -67,7 +67,7 @@ def test_PowerMulti_calls_targets_off_methods_in_sequence_order_with_reverse_off
     mocks_off_list = []
     num_mock_powers = 3
     mock_powers = [MockPower(mocks_off_list=mocks_off_list)
-        for __ in range(0, num_mock_powers)]
+                   for __ in range(0, num_mock_powers)]
 
     power = PowerMulti(
         power_seq=mock_powers,
@@ -83,7 +83,7 @@ def test_PowerMulti_calls_targets_off_methods_in_reverse_order_with_reverse_off_
     mocks_off_list = []
     num_mock_powers = 3
     mock_powers = [MockPower(mocks_off_list=mocks_off_list)
-        for __ in range(0, num_mock_powers)]
+                   for __ in range(0, num_mock_powers)]
 
     power = PowerMulti(
         power_seq=mock_powers,
@@ -99,7 +99,7 @@ def test_PowerMulti_calls_targets_off_methods_in_reverse_order_with_reverse_off_
     mocks_off_list = []
     num_mock_powers = 3
     mock_powers = [MockPower(mocks_off_list=mocks_off_list)
-        for __ in range(0, num_mock_powers)]
+                   for __ in range(0, num_mock_powers)]
 
     power = PowerMulti(
         power_seq=mock_powers

@@ -1,18 +1,14 @@
-import math
-import os
 import re
 
 from farmtest import TestBase, TaskFailed, CommandRunner
-from farmcore.baseclasses import ConsoleBase
 
 
 class KernelModulesLoaded(TestBase):
     def __init__(self, board, modules: list):
-        super().__init__(self)
-        self.board = board
+        super().__init__(board)
 
-        if modules is None:
-            raise ValueError(f'"modules" cannot be empty')
+        if not modules:
+            raise ValueError('"modules" list cannot be empty')
 
         if isinstance(modules, str):
             modules = [modules]

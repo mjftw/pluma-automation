@@ -9,6 +9,7 @@ def git_is_installed():
     else:
         return True
 
+
 def get_farmcore_version():
     ''' Find the current farm-core version from git tags using git-describe '''
     if not git_is_installed():

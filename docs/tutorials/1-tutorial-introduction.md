@@ -1,13 +1,13 @@
-# Welcome to the Automation Lab Tutorials
+# Welcome to Pluma Automation Tutorials
 
 ## Prerequisites
 
 ### Software
 
-In order to follow these tutorials you will need to have successfully installed the Automation Lab software.  
+In order to follow these tutorials you will need to have successfully installed Pluma.  
 Check out the [Install and Run](../quick-start-guide/2-install-and-run.md) guide for instructions on how to do this.  
-You can use your normal computer as the Lab host machine, although we recommended that you are running Linux.  
-The Lab code is developed and tested using Ubuntu 16.04 or newer, so you may have an easier time using these distributions.
+You can use your normal computer as the Pluma host machine, although we recommended that you are running Linux.  
+The Pluma code is developed and tested using Ubuntu 16.04 or newer, so you may have an easier time using these distributions.
 
 ### Hardware
 
@@ -31,7 +31,7 @@ You should be able to follow along using any of the [Supported Hardware](../supp
 
 ## Source code
 
-Once the Automation Lab software is installed, you should be able to import and use the Python packages in your scripts.  
+Once the Pluma software is installed, you should be able to import and use the Python packages in your scripts.  
 To work through the tutorials, you can create a project directory and follow along in your editor of choice.
 
 ```shell
@@ -39,21 +39,21 @@ mkdir ~/lab_projects
 code ~/lab_projects/my_lab_script.py
 ```
 
-The Python interactive shell is very useful when combined with the Lab, and can be used to control your DUT from the command line.
+The Python interactive shell is very useful when combined with Pluma, and can be used to control your DUT from the command line.
 While you could use the standard Python3 shell, we recommend using [iPython3][ipython] as this has a nicer interface and lots of useful features such as auto-completion.  
-The interactive shell is a great way to explore the Automation Lab's classes.
+The interactive shell is a great way to explore Pluma's classes.
 
 [ipython]: https://ipython.org/install.html
 
 ## Structure
 
-These tutorials will follow the process of connecting an embedded device to the Automation Lab, performing some tests, and viewing the results.  
+These tutorials will follow the process of connecting an embedded device to Pluma, performing some tests, and viewing the results.  
 Each tutorial will build on the knowledge from the previous ones, and introduce some new concepts.
 
-While the Automation Lab's main focus is automated testing, it can also be used for remote hardware control.  
+While Pluma's main focus is automated testing, it can also be used for remote hardware control.  
 We'll start by setting up our hardware control classes so that we can control a board from an interactive Python shell.
 
-Once we have this working, we can hand control of the board over to the Lab's automated testing framework and start writing our tests.
+Once we have this working, we can hand control of the board over to Pluma's automated testing framework and start writing our tests.
 
 ## Tutorial sets
 

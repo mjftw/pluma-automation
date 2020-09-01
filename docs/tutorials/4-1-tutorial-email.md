@@ -1,6 +1,6 @@
 # Tutorial: Email Setup
 
-To use the email functionality of the lab you should create an email settings file.  
+To use the email functionality of Pluma you should create an email settings file.  
 This file should be in the root directory of this repository and be named `email_settings.json`.  
 This file should be json formatted as shown in the example file below:
 

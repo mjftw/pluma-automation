@@ -1,5 +1,5 @@
 from farmcore.baseclasses import Logger
-from farmcli import Configuration, TestsConfigError, DeviceActionRegistry
+from farmcli import Configuration, DeviceActionRegistry
 from .config import TestDefinition, TestsProvider
 
 log = Logger()
@@ -16,6 +16,12 @@ class DeviceActionProvider(TestsProvider):
         return DeviceActionRegistry.all_actions()
 
     def all_tests(self, key: str, config):
-        parameter_set = config.content() if config else None
+        parameter_set = None
+        if config:
+            if not isinstance(config, Configuration):
+                parameter_set = config
+            else:
+                parameter_set = config.content()
+
         return [TestDefinition({key}, testclass=DeviceActionRegistry.action_class(key), test_provider=self,
                                parameter_sets=[parameter_set], selected=True)]

@@ -95,7 +95,8 @@ class TestsConfig:
             for key in keys:
                 if key in supported_actions:
                     raise TestsConfigError(
-                        f'Error adding keys for provider {str(provider)}: key "{key}" is already registered by {str(supported_actions[key])}')
+                        f'Error adding keys for provider {str(provider)}: key "{key}"'
+                        ' is already registered by {str(supported_actions[key])}')
                 supported_actions[key] = provider
 
         # Parse sequence
@@ -106,13 +107,15 @@ class TestsConfig:
 
             if len(action) != 1:
                 raise TestsConfigError(
-                    f'Sequence list elements must be single key elements, but got "{action}". Supported actions: {supported_actions.keys()}')
+                    f'Sequence list elements must be single key elements, but got "{action}".'
+                    ' Supported actions: {supported_actions.keys()}')
 
             action_key = next(iter(action))
             provider = supported_actions.get(action_key)
             if not provider:
                 raise TestsConfigError(
-                    f'No test provider was found for sequence action "{action_key}". Supported actions: {supported_actions.keys()}')
+                    f'No test provider was found for sequence action "{action_key}".'
+                    ' Supported actions: {supported_actions.keys()}')
 
             if isinstance(action[action_key], dict):
                 tests = provider.all_tests(key=action_key,
@@ -164,7 +167,12 @@ class TestsConfig:
             try:
                 for parameters in test.parameter_sets:
                     parameters = parameters if parameters else dict()
-                    test_object = test.testclass(board, **parameters)
+
+                    if isinstance(parameters, dict):
+                        test_object = test.testclass(board, **parameters)
+                    else:
+                        test_object = test.testclass(board, parameters)
+
                     test_objects.append(test_object)
             except Exception as e:
                 if f'{e}'.startswith('__init__()'):
