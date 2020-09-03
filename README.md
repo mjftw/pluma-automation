@@ -1,5 +1,8 @@
 # Pluma Automation
 
+![Native installation and tests](https://github.com/Witekio/pluma-automation/workflows/Native%20installation%20and%20tests/badge.svg)
+![Docker Image CI](https://github.com/Witekio/pluma-automation/workflows/Docker%20Image%20CI/badge.svg)
+
 Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https://www.witekio.com) to perform black box testing of embedded hardware; designed to be as lightweight as possible!
 
 At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
