@@ -227,11 +227,11 @@ Not only does this make writing code easier, it also gives some protection again
 E.g. (External script)
 ```python
 # Without using exceptions.py
-from farmcore.baseclasses.consolebase import ConsoleLoginFailedError
-from farmcore.board import BoardBootValidationError
+from pluma.core.baseclasses.consolebase import ConsoleLoginFailedError
+from pluma.core.board import BoardBootValidationError
 
 # With exceptions.py
-from farmcore.exceptions import ConsoleLoginFailedError, BoardBootValidationError
+from pluma.core.exceptions import ConsoleLoginFailedError, BoardBootValidationError
 ```
 
 The former is vulnerable to breaking if for instance `ConsoleLoginFailedError` moved to a different file in a new version of `farmcore`, but the latter is would not break.

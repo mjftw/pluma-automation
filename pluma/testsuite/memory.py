@@ -1,7 +1,7 @@
 import math
 import os
 
-from farmtest import TestBase, TaskFailed
+from pluma.test import TestBase, TaskFailed
 
 
 class MemorySize(TestBase):

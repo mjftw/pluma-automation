@@ -8,7 +8,7 @@ from deprecated import deprecated
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from functools import wraps
-from farmutils import datetime_to_timestamp
+from pluma.utils import datetime_to_timestamp
 
 from .farmclass import Farmclass
 from .logging import LogLevel

@@ -2,7 +2,7 @@ import yaml
 import json
 import os
 
-from farmcore.baseclasses import Logger
+from pluma.core.baseclasses import Logger
 from abc import ABC, abstractmethod
 
 log = Logger()

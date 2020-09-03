@@ -2,10 +2,10 @@ import time
 import pytest
 from unittest.mock import MagicMock
 
-from farmcore import Board
-from farmcore.baseclasses import ConsoleBase
-from farmtest import TaskFailed
-from farmcli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, \
+from pluma.core import Board
+from pluma.core.baseclasses import ConsoleBase
+from pluma.test import TaskFailed
+from pluma.cli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, \
     WaitForPatternAction, SetAction
 from utils import nonblocking
 
@@ -101,7 +101,8 @@ def test_WaitForPatternAction_should_fail_when_no_matched_proxy_console(mock_boa
 def test_SetAction_should_set_console():
     ssh_console = MagicMock(ConsoleBase)
     serial_console = MagicMock(ConsoleBase)
-    board = Board("board", console={'ssh': ssh_console, 'serial': serial_console})
+    board = Board("board", console={
+                  'ssh': ssh_console, 'serial': serial_console})
 
     action = SetAction(board, device_console='ssh')
     action.execute()

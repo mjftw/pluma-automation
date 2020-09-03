@@ -2,7 +2,7 @@ import subprocess
 import os.path
 import sys
 import shutil
-from farmcore.baseclasses import Logger, LogLevel
+from pluma.core.baseclasses import Logger, LogLevel
 
 log = Logger()
 

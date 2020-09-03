@@ -2,10 +2,10 @@ import re
 import inspect
 from operator import attrgetter
 
-import testsuite
-from farmcore.baseclasses import Logger
-from farmtest import TestBase
-from farmcli import Configuration
+import pluma.testsuite
+from pluma.core.baseclasses import Logger
+from pluma.test import TestBase
+from pluma.cli import Configuration
 from .config import TestDefinition, TestsProvider
 
 log = Logger()
@@ -53,8 +53,8 @@ class PythonTestsProvider(TestsProvider):
     def find_python_tests(self):
         # Find all tests
         all_tests = []
-        for m in inspect.getmembers(testsuite, inspect.isclass):
-            if m[1].__module__.startswith(testsuite.__name__ + '.'):
+        for m in inspect.getmembers(pluma.testsuite, inspect.isclass):
+            if m[1].__module__.startswith(pluma.testsuite.__name__ + '.'):
                 if issubclass(m[1], TestBase):
                     all_tests.append(TestDefinition(
                         name=f'{m[1].__module__}.{m[1].__name__}', testclass=m[1], test_provider=self))

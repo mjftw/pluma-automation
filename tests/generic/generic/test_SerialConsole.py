@@ -1,6 +1,6 @@
 import time
 import pytest
-from farmcore.exceptions import ConsoleLoginFailedError
+from pluma.core.exceptions import ConsoleLoginFailedError
 
 from utils import nonblocking
 from loremipsum import loremipsum

@@ -1,6 +1,6 @@
 import pytest
 
-from farmtest import CommandRunner
+from pluma.test import CommandRunner
 
 
 def test_CommandRunner_query_return_code_should_call_send_and_read(mock_console):

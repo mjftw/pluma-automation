@@ -5,7 +5,7 @@ import tempfile
 from abc import ABCMeta, abstractmethod
 
 from .farmclass import Farmclass
-from farmutils import run_host_cmd
+from pluma.utils import run_host_cmd
 
 # FIXME: This class is unfinished, and does not conform with other base classes.
 
@@ -50,7 +50,8 @@ class StorageBase(Farmclass, metaclass=ABCMeta):
             if not os.path.isdir(mountpoint):
                 os.mkdir(mountpoint)
 
-            (output, ret) = run_host_cmd('mount {} {}'.format(devnode, mountpoint))
+            (output, ret) = run_host_cmd(
+                'mount {} {}'.format(devnode, mountpoint))
             if ret == 0:
                 success = True
                 break

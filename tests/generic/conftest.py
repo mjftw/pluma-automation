@@ -5,9 +5,9 @@ from pytest import fixture
 from unittest.mock import MagicMock
 
 from utils import OsFile
-from farmcore import Board, SerialConsole, SoftPower
-from farmcore.baseclasses import ConsoleBase
-from farmcore.mocks import ConsoleMock
+from pluma.core import Board, SerialConsole, SoftPower
+from pluma.core.baseclasses import ConsoleBase
+from pluma.core.mocks import ConsoleMock
 
 
 @fixture

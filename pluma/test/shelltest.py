@@ -1,8 +1,8 @@
 import os
 import re
 
-from farmcore.baseclasses import ConsoleBase, Logger
-from farmcore import HostConsole, Board
+from pluma.core.baseclasses import ConsoleBase, Logger
+from pluma.core import HostConsole, Board
 from .test import TestBase, TaskFailed
 
 

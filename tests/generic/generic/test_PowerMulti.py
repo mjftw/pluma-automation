@@ -1,5 +1,5 @@
-from farmcore import PowerMulti
-from farmcore.baseclasses import PowerBase
+from pluma.core import PowerMulti
+from pluma.core.baseclasses import PowerBase
 
 
 class MockPower(PowerBase):

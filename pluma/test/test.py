@@ -43,9 +43,9 @@ import os
 import inspect
 from copy import copy
 
-from farmutils import send_exception_email, datetime_to_timestamp
-from farmcore.exceptions import BoardBootValidationError, ConsoleLoginFailedError
-from farmcore.baseclasses import LogLevel
+from pluma.utils import send_exception_email, datetime_to_timestamp
+from pluma.core.exceptions import BoardBootValidationError, ConsoleLoginFailedError
+from pluma.core.baseclasses import LogLevel
 
 
 class TestingException(Exception):

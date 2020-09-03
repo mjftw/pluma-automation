@@ -1,7 +1,7 @@
 import pytest
 import copy
 from pytest import fixture
-from farmcli import Configuration, ConfigurationError
+from pluma.cli import Configuration, ConfigurationError
 
 ATTRIBUTE1 = 'att1'
 ATTRIBUTE1_VALUE = 5

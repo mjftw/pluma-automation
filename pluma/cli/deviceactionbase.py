@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
-from farmcore import Board
-from farmtest import TestBase
+from pluma.core import Board
+from pluma.test import TestBase
 
 
 class DeviceActionBase(TestBase):

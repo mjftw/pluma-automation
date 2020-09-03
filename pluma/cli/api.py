@@ -2,11 +2,11 @@ import sys
 import time
 import os
 
-from farmcore.baseclasses import Logger, LogLevel
-from farmtest import TestController
-from farmcli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
-from farmcli import TestsBuildError
-from farmcli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, DeviceActionProvider
+from pluma.core.baseclasses import Logger, LogLevel
+from pluma.test import TestController
+from pluma.cli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
+from pluma.cli import TestsBuildError
+from pluma.cli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, DeviceActionProvider
 from version import get_farmcore_version
 
 log = Logger()

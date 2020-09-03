@@ -1,6 +1,6 @@
 import re
 
-from farmtest import TestBase, TaskFailed, CommandRunner
+from pluma.test import TestBase, TaskFailed, CommandRunner
 
 
 class KernelModulesLoaded(TestBase):

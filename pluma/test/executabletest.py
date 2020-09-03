@@ -4,7 +4,7 @@ import random
 
 from .test import TestBase, TaskFailed
 from .shelltest import CommandRunner
-from farmcore import HostConsole
+from pluma.core import HostConsole
 
 
 class ExecutableTest(TestBase):

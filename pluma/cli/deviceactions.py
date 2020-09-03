@@ -1,10 +1,10 @@
 import time
 from enum import Enum
 
-from farmcore.baseclasses import Logger
-from farmcore import Board
-from farmtest import TaskFailed
-from farmcli import DeviceActionBase, DeviceActionRegistry
+from pluma.core.baseclasses import Logger
+from pluma.core import Board
+from pluma.test import TaskFailed
+from pluma.cli import DeviceActionBase, DeviceActionRegistry
 
 log = Logger()
 

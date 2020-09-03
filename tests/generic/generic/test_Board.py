@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import MagicMock
 
-from farmcore import Board
-from farmcore.baseclasses import ConsoleBase
+from pluma.core import Board
+from pluma.core.baseclasses import ConsoleBase
 
 ssh_console = MagicMock(ConsoleBase)
 serial_console = MagicMock(ConsoleBase)
@@ -58,7 +58,8 @@ def test_Board_get_console_should_return_the_proper_console_by_name():
     console1_name = 'abc'
     console2 = MagicMock(ConsoleBase)
     console2_name = 'def'
-    board = Board(name='board', console={console1_name: console1, console2_name: console2})
+    board = Board(name='board', console={
+                  console1_name: console1, console2_name: console2})
 
     assert board.get_console(console1_name) is console1
     assert board.get_console(console2_name) is console2

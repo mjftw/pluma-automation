@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from farmcore import HostConsole
+from pluma.core import HostConsole
 
 
 @pytest.mark.xfail(os.getenv('PLUMA_ENV') == 'CI', reason='CI fails to properly spawn a shell')

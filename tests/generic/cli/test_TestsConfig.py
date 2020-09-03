@@ -1,6 +1,6 @@
 import copy
 import pytest
-from farmcli import TestsConfig, Configuration, TestsProvider
+from pluma.cli import TestsConfig, Configuration, TestsProvider
 
 MINIMAL_CONFIG = {
     'sequence': []

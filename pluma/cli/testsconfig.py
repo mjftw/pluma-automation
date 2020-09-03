@@ -2,11 +2,11 @@ import json
 import os
 from functools import partial
 
-from farmcore.baseclasses import Logger, LogLevel
-from farmtest import TestController, TestRunner
-from farmtest.stock.deffuncs import sc_run_n_iterations
-from farmcli import Configuration, ConfigurationError, TestsConfigError
-from farmcore import Board
+from pluma.core.baseclasses import Logger, LogLevel
+from pluma.test import TestController, TestRunner
+from pluma.test.stock.deffuncs import sc_run_n_iterations
+from pluma.cli import Configuration, ConfigurationError, TestsConfigError
+from pluma.core import Board
 
 log = Logger()
 

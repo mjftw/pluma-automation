@@ -6,7 +6,7 @@ from copy import deepcopy
 from statistics import mean, median_grouped, mode, stdev, variance,\
     StatisticsError
 
-from farmutils import send_exception_email, datetime_to_timestamp, \
+from pluma.utils import send_exception_email, datetime_to_timestamp, \
     regex_filter_list
 
 from .unittest import deferred_function
@@ -313,8 +313,10 @@ class TestController():
                     if 'count' not in results_summary[test][data_key]:
                         results_summary[test][data_key]['count'] = {}
                     if str(data_value) not in results_summary[test][data_key]['count']:
-                        results_summary[test][data_key]['count'][str(data_value)] = 0
-                    results_summary[test][data_key]['count'][str(data_value)] += 1
+                        results_summary[test][data_key]['count'][str(
+                            data_value)] = 0
+                    results_summary[test][data_key]['count'][str(
+                        data_value)] += 1
 
             # Calculate statistical data
             for data_key in results_summary[test]:
@@ -374,7 +376,8 @@ class TestController():
                 break
             if str(test) not in settings:
                 # NOTE: Assuming test settings never change between iterations
-                settings[str(test)] = self.results[0]['TestRunner'][str(test)]['settings']
+                settings[str(test)] = self.results[0]['TestRunner'][str(
+                    test)]['settings']
 
         return settings
 

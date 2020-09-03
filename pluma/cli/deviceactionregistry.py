@@ -1,7 +1,7 @@
 import re
 
-from farmcore import Board
-from farmcli import DeviceActionBase
+from pluma.core import Board
+from pluma.cli import DeviceActionBase
 
 
 class DeviceActionRegistry():

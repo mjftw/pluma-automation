@@ -1,6 +1,6 @@
-from farmcore.baseclasses import Logger
-from farmtest import ExecutableTest
-from farmcli import TestsConfigError
+from pluma.core.baseclasses import Logger
+from pluma.test import ExecutableTest
+from pluma.cli import TestsConfigError
 from .config import TestDefinition, TestsProvider
 from .testsbuilder import TestsBuilder
 

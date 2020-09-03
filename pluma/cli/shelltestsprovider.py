@@ -1,8 +1,8 @@
 import os
 
-from farmcore.baseclasses import Logger
-from farmtest import ShellTest
-from farmcli import Configuration, TestsConfigError
+from pluma.core.baseclasses import Logger
+from pluma.test import ShellTest
+from pluma.cli import Configuration, TestsConfigError
 from .config import TestDefinition, TestsProvider
 
 log = Logger()
