@@ -1,6 +1,28 @@
 import setuptools
+import subprocess
 
-from version import get_farmcore_version
+
+def git_is_installed():
+    try:
+        subprocess.check_call(['which', 'git'], stdout=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        return False
+    else:
+        return True
+
+
+def get_version():
+    ''' Find the current pluma version from git tags using git-describe '''
+    if not git_is_installed():
+        raise EnvironmentError(
+            '\n\nThe tool "git" must be installed on the system to install '
+            'this package.\n'
+            'See: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git\n'
+        )
+
+    version = subprocess.check_output(
+        ['git', 'describe', '--tags', '--always', '--match', 'v*.*.*'])
+    return version.decode('utf-8').strip()
 
 
 readme_file = "readme.md"
@@ -16,14 +38,13 @@ except FileNotFoundError:
 
 setuptools.setup(
     name="pluma-automation",
-    version=get_farmcore_version(),
+    version=get_version(),
     author="Witekio",
     author_email="mwebster@witekio.com",
     description="Pluma Automation",
     long_description=long_description,
     long_description_content_type=long_description_content_type,
     url="https://bitbucket.org/adeneo-embedded/pluma",
-    package_dir={'': 'pluma'},
     packages=setuptools.find_packages(),
     install_requires=[
         'pyserial',

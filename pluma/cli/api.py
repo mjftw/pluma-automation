@@ -7,7 +7,7 @@ from pluma.test import TestController
 from pluma.cli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
 from pluma.cli import TestsBuildError
 from pluma.cli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, DeviceActionProvider
-from version import get_farmcore_version
+from pkg_resources import get_distribution
 
 log = Logger()
 
@@ -86,4 +86,5 @@ class Pluma:
     @staticmethod
     def version() -> str:
         '''Return the version string of Pluma'''
-        return get_farmcore_version()
+        top_level_package = __package__.split('.')[0]
+        return get_distribution(top_level_package).version
