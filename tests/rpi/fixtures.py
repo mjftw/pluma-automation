@@ -1,5 +1,5 @@
 import re
-from pluma.core import USBRelay, Hub
+from pluma import USBRelay, Hub
 from pytest import fixture
 
 from config import read_config

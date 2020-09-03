@@ -1,7 +1,7 @@
 import json
 import os
 
-from pluma.core import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
+from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
 from pluma.core.baseclasses import Logger
 from pluma.cli import Configuration, ConfigurationError, TargetConfigError
 

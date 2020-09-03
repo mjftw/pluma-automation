@@ -12,7 +12,7 @@ For more information on the SD-Wire, see [Supported Hardware](../supported-hardw
 The SD card can be moved between the board and the Pluma host using the `to_board()` and `to_host()` methods of the `SDWire` class.
 
 ```python
-from pluma.core import SDWire
+from pluma import SDWire
 from pluma.utils import run_host_cmd
 
 storage = SDWire()

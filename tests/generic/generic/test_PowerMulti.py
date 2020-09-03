@@ -1,4 +1,4 @@
-from pluma.core import PowerMulti
+from pluma import PowerMulti
 from pluma.core.baseclasses import PowerBase
 
 

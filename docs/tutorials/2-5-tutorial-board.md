@@ -5,7 +5,7 @@ The Board class is the software representation of our board, acting as a top lev
 The following example assumes that `my_hub`, `my_power`, `my_storage`, and `my_console` have already been defined elsewhere. These can be any variant of the hardware control classes (e.g. `HostConsole`, `SerialConsole`, or something else for `console`).
 
 ```python
-from pluma.core import Board
+from pluma import Board
 
 # Defined elsewhere for this example
 from my_hardware import my_hub, my_power, my_storage, my_console
@@ -52,7 +52,7 @@ As well as acting as a top level hardware reference, the `Board` class leverages
 The `reboot_and_validate()` method will first call the `Board`'s `power` instances `reboot()` method, then watch the `Board`'s `console` for a known boot string.
 
 ```python
-from pluma.core import BoardBootValidationError
+from pluma import BoardBootValidationError
 
 # Board defined elsewhere for this example
 from my_hardware import my_board as board
@@ -73,7 +73,7 @@ To pick a reasonable value you should watch the console log during boot, and fin
 For the example below we have chosen `Poky` as our `bootstr`. This would be a reasonable choice if booting a [Yocto](https://www.yoctoproject.org/) based Linux distribution.
 
 ```python
-from pluma.core import Board
+from pluma import Board
 
 imx6_board = Board(
     name='imx6_yocto',
@@ -87,7 +87,7 @@ Another helper provided by the `Board` is the `login()` method. This method uses
 The login is actually performed using the `console`'s `login()` method.
 
 ```python
-from pluma.core import Board, ConsoleLoginFailedError
+from pluma import Board, ConsoleLoginFailedError
 
 # Control classes defined elsewhere for this example
 from my_hardware import console, power
@@ -121,7 +121,7 @@ It also expects the password prompt to be "Password:", and will not enter the pa
 If these defaults do not work for your system, they can be changed with the board parameters `login_user_match` and `login_pass_match`.
 
 ```python
-from pluma.core import Board
+from pluma import Board
 
 # Control classes defined elsewhere for this example
 from my_hardware import console
@@ -144,7 +144,7 @@ In other words, if we see the `prompt` after we entered the password then the lo
 This method can be more robust, but requires additional knowledge of the board's console behaviour in advance.
 
 ```python
-from pluma.core import Board
+from pluma import Board
 
 # Control classes defined elsewhere for this example
 from my_hardware import console
@@ -166,7 +166,7 @@ To get around this issue, if `login()` is called after `reboot_and_validate()` r
 To know whether this is not the case you can read the board's `booted_to_prompt` property
 
 ```python
-from pluma.core import Board, ConsoleLoginFailedError
+from pluma import Board, ConsoleLoginFailedError
 
 # Control classes defined elsewhere for this example
 from my_hardware import console, power

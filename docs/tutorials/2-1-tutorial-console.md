@@ -11,7 +11,7 @@ This common base means that once the console is defined, the rest of the program
 A common use case is to interact with a board's debug UART using a USB to UART cable.
 
 ```python
-from pluma.core import SerialConsole
+from pluma import SerialConsole
 
 console = SerialConsole(
     port='/dev/ttyUSB0'
@@ -31,7 +31,7 @@ Try it out for yourself in an interactive Python interpreter:
 ```shell
 dev@labhost:~ $ ipython3
 
-In [1]: from pluma.core import HostConsole
+In [1]: from pluma import HostConsole
 
 In [2]: console = HostConsole('/bin/bash')
 
@@ -50,7 +50,7 @@ The console's `interact()` method lets you take interactive control of the DUT c
 HostConsole is a very flexible console class, and we can use it to run a bash shell on our DUT over SSH as well:
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 
 console = HostConsole('ssh pi@raspberrypi.local /bin/bash')
 ```
@@ -68,7 +68,7 @@ The main use for the console classes is to send commands to our DUT.
 Try out the following:
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 
 console = HostConsole('ssh dut-user@dut-host /bin/bash')
 
@@ -90,7 +90,7 @@ Another useful feature of the console is to send a command and check the respons
 As an example, lets use the console to find out what machine architecture our DUT is using the `uname -m` command.
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 
 console = HostConsole('ssh dut-user@dut-host /bin/bash')
 
@@ -125,7 +125,7 @@ Thu  7 May 20:24:47 BST 2020
 ```
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 
 console = HostConsole('/bin/bash')
 __, matched = console.send_and_expect('date', match='[0-9]+:[0-9]+:[0-9]+')
@@ -158,7 +158,7 @@ This command checks if 5 is greater than 6, and should report "5 < 6" as expecte
 Now let's try the same command via the console.
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 console = HostConsole('ssh pi@raspberrypi.local /bin/bash')
 
 command = 'test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"'
@@ -210,7 +210,7 @@ print(buffer_contents)
 One way to get around this is to disable echo on the console. Disabling the prompt can be helpful too.
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 # Note: ssh -t is required in order to use the stty command over SSH
 console = HostConsole('ssh -t pi@raspberrypi.local /bin/bash')
 
@@ -272,7 +272,7 @@ tail -f $(ls -t | grep '.log' | head -n 1)
 Let's repeat the problematic previous example and have a look at the log files.
 
 ```python
-from pluma.core import HostConsole
+from pluma import HostConsole
 console = HostConsole('ssh pi@raspberrypi.local /bin/bash')
 
 command = 'test 5 -gt 6 && echo "5 > 6" || echo "5 < 6"'

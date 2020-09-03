@@ -2,7 +2,7 @@ import time
 import pytest
 from unittest.mock import MagicMock
 
-from pluma.core import Board
+from pluma import Board
 from pluma.core.baseclasses import ConsoleBase
 from pluma.test import TaskFailed
 from pluma.cli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, \

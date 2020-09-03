@@ -6,7 +6,7 @@ from pluma.core.baseclasses import Logger, LogLevel
 from pluma.test import TestController, TestRunner
 from pluma.test.stock.deffuncs import sc_run_n_iterations
 from pluma.cli import Configuration, ConfigurationError, TestsConfigError
-from pluma.core import Board
+from pluma import Board
 
 log = Logger()
 

@@ -5,7 +5,7 @@ from pytest import fixture
 from unittest.mock import MagicMock
 
 from utils import OsFile
-from pluma.core import Board, SerialConsole, SoftPower
+from pluma import Board, SerialConsole, SoftPower
 from pluma.core.baseclasses import ConsoleBase
 from pluma.core.mocks import ConsoleMock
 

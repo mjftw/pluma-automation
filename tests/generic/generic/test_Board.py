@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import MagicMock
 
-from pluma.core import Board
+from pluma import Board
 from pluma.core.baseclasses import ConsoleBase
 
 ssh_console = MagicMock(ConsoleBase)

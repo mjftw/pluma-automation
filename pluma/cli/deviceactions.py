@@ -2,7 +2,7 @@ import time
 from enum import Enum
 
 from pluma.core.baseclasses import Logger
-from pluma.core import Board
+from pluma import Board
 from pluma.test import TaskFailed
 from pluma.cli import DeviceActionBase, DeviceActionRegistry
 

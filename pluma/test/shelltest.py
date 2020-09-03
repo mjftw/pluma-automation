@@ -2,7 +2,7 @@ import os
 import re
 
 from pluma.core.baseclasses import ConsoleBase, Logger
-from pluma.core import HostConsole, Board
+from pluma import HostConsole, Board
 from .test import TestBase, TaskFailed
 
 

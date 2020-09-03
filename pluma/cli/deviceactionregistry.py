@@ -1,6 +1,6 @@
 import re
 
-from pluma.core import Board
+from pluma import Board
 from pluma.cli import DeviceActionBase
 
 

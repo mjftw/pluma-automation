@@ -13,7 +13,7 @@ While Pluma does have a `USB` class, this is just used for the low level system 
 The easiest way to see what USB devices we have connected to our Pluma host is to plot them.
 
 ```python
-from pluma.core import Hub
+from pluma import Hub
 
 # Get a reference to USB Bus 1
 usb_bus_1 = Hub('usb1')
@@ -46,7 +46,7 @@ dev@labhost:~ $ ssh -Y pi@raspberrypi.local
 
 pi@raspberry:~ $ ipython3
 ...
-In [1]: from pluma.core import Hub
+In [1]: from pluma import Hub
 In [2]: Hub('usb1').plot()
 ```
 
@@ -190,7 +190,7 @@ We can also get the Hub class to find us the USB address (and other information)
 Up until this point we've only used the `plot()` method of the `Hub` class, but we can use it to find information on specific devices too.
 
 ```python
-from pluma.core import Hub
+from pluma import Hub
 
 hub = Hub('usb1')
 serial = hub.get_serial()
@@ -232,7 +232,7 @@ Since we have 2 USB Relays connected to our test system we'll use these as an ex
 Say we want to find the device nodes of all of the USB relays connected to our system, we might try:
 
 ```python
-from pluma.core import Hub
+from pluma import Hub
 print(
     Hub('usb1').get_relay('devnode')
 )
@@ -246,7 +246,7 @@ This has worked, but we've only found the USB relay highest in our USB tree!
 To get around this issue we can use the `all` parameter:
 
 ```python
-from pluma.core import Hub
+from pluma import Hub
 print(
     Hub('usb1').get_relay('devnode', get_all=True)
 )
@@ -265,7 +265,7 @@ Previously we've only used the `Hub` class to query the entire USB bus (`Hub('us
 Let's assume that know that the USB relay we're looking for is connected to hub `1-1.1`, or a hub below that. You'd typically want to find this information when setting up your Pluma devices anyway.
 
 ```python
-from pluma.core import Hub
+from pluma import Hub
 print(
     Hub('1-1.1').get_relay('devnode')
 )
@@ -296,7 +296,7 @@ Okay, so we can find information on USB devices, but why would we want to do tha
 Let's look again at an example in the previous tutorial where we wanted to send data to a board's serial console.
 
 ```python
-from pluma.core import SerialConsole
+from pluma import SerialConsole
 
 console = SerialConsole(
     port='/dev/ttyUSB2'
@@ -315,7 +315,7 @@ You'd be wise to not hard code this value in your code, because sooner or later 
 You can use the `Hub` class to find this value, so you don't have to:
 
 ```python
-from pluma.core import SerialConsole, Hub
+from pluma import SerialConsole, Hub
 
 usb_1_bus = Hub('usb1')
 
@@ -333,7 +333,7 @@ Yes, unless you have more than one USB Serial adaptor connected to your system.
 Let's make make our code more stable by specifying what USB hub our USB serial adaptor is plugged into.
 
 ```python
-from pluma.core import SerialConsole, Hub
+from pluma import SerialConsole, Hub
 
 hub = Hub('1-1.1')
 

@@ -14,7 +14,7 @@ For a full list of the supported power hardware, see [Supported Hardware](../sup
 In this example we will be using the [IP Power 9258](https://www.aviosys.com/products/9858MT.html), a power distribution unit whose sockets can be switched on and off via HTTP requests.
 
 ```python
-from pluma.core import IPPowerPDU
+from pluma import IPPowerPDU
 
 power = IPPowerPDU(
     port=1
@@ -38,7 +38,7 @@ It is important to be able to specify this as some devices won't turn off instan
 If we were to turn the device back on one second after switching off the power, the device may not have actually turned off at all!
 
 ```python
-from pluma.core import IPPowerPDU
+from pluma import IPPowerPDU
 
 power = IPPowerPDU(
     port=1
@@ -57,7 +57,7 @@ Sometimes you may not be able to control the board's power supply directly, or p
 The `SoftPower` class can help us here.
 
 ```python
-from pluma.core import SoftPower, SerialConsole
+from pluma import SoftPower, SerialConsole
 
 console = SerialConsole(
     port='/dev/ttyUSB2'
@@ -77,7 +77,7 @@ This would send the command `"poweroff"` to the board's console, triggering a so
 We can do much the same with rebooting too:
 
 ```python
-from pluma.core import SoftPower, SerialConsole
+from pluma import SoftPower, SerialConsole
 
 console = SerialConsole(
     port='/dev/ttyUSB2'
@@ -112,7 +112,7 @@ In this scenario we are using the relay to bridge the wires connected to the sys
 Flipping the relay to position `A` then back to `B` is effectively the same as pressing the push button.
 
 ```python
-from pluma.core import PowerRelay, USBRelay
+from pluma import PowerRelay, USBRelay
 
 power = PowerRelay(
     on_seq=[(1, 'A'), '200ms', (1, 'B')],
@@ -143,7 +143,7 @@ The `PowerMulti` class is how. It's is a wrapper class which takes multiple othe
 Let's see how we'd use it to fix our power problem.
 
 ```python
-from pluma.core import PowerRelay, USBRelay, IPPowerPDU, PowerMulti
+from pluma import PowerRelay, USBRelay, IPPowerPDU, PowerMulti
 
 power_button = PowerRelay(
     on_seq=[(1, 'A'), '200ms', (1, 'B')],
@@ -205,7 +205,7 @@ To turn it off we want to:
 1. Turn the power socket off
 
 ```python
-from pluma.core import PowerRelay, USBRelay, IPPowerPDU, PowerMulti, SoftPower
+from pluma import PowerRelay, USBRelay, IPPowerPDU, PowerMulti, SoftPower
 
 power_button = PowerRelay(
     on_seq=[(1, 'A'), '200ms', (1, 'B')],
