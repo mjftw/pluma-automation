@@ -25,16 +25,16 @@ install:: ## Install Pluma
 		@./install.sh
 
 test:: ## Run the all Pluma Automation tests that don't require hardware
-		@./internaltests/scripts/run_tests.sh generic
+		@./tests/scripts/run_tests.sh generic
 
 test-all:: ## Run all Pluma Automation tests (generic and RPi specific)
-		@./internaltests/scripts/run_tests.sh
+		@./tests/scripts/run_tests.sh
 
 test-coverage:: ## Check the code coverage for all tests that don't require hardware
-		@./internaltests/scripts/check_test_coverage.sh generic
+		@./tests/scripts/check_test_coverage.sh generic
 
 test-all-coverage:: ## Check the code coverage for all tests (generic and RPi specific)
-		@./internaltests/scripts/check_test_coverage.sh
+		@./tests/scripts/check_test_coverage.sh
 
 docker-build:: ## Build the docker image
 		@echo Building $(IMAGE_TAG)
