@@ -16,4 +16,4 @@ pipelines:
           script:
             - make docker-build
             - docker run --rm witekio/pluma-automation:latest python3 -m pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
-            - docker run --rm -e PLUMA_ENV=CI witekio/pluma-automation:latest bash -c "cd /root/farm-core && make test"
+            - docker run --rm -e PLUMA_ENV=CI witekio/pluma-automation:latest bash -c "cd /root/pluma && make test"

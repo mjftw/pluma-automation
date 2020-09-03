@@ -1,10 +1,10 @@
 #!/bin/bash
 this_dir="$(dirname $0)"
 test_dir="$(readlink -f $this_dir/..)"
-farmcore_dir="$(pip3 show farm-core | awk -F': ' '/Location/ {print $2}')"
+farmcore_dir="$(pip3 show pluma | awk -F': ' '/Location/ {print $2}')"
 
 if [ -z "${farmcore_dir}" ]; then
-    echo 'Cannot find pip3 package "farm-core". Is it installed?'
+    echo 'Cannot find pip3 package "pluma". Is it installed?'
     exit 1
 fi
 

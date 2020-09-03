@@ -4,7 +4,7 @@ To use the email functionality of Pluma you should create an email settings file
 This file should be in the root directory of this repository and be named `email_settings.json`.  
 This file should be json formatted as shown in the example file below:
 
-`<farm-core>`/email_settings.json:
+`<pluma>`/email_settings.json:
 
 ```json
 {

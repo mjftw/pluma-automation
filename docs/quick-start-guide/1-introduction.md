@@ -20,12 +20,12 @@ This guide will aim to give an introduction to the layout of the codebase, and t
 
 Pluma Automation is designed in such a way that the core code is able to remain separate from project specific tests, setup etc.
 
-In order to facilitate this, any code that could be reused in any project is found in the repository named [farm-core][farm-core].
+In order to facilitate this, any code that could be reused in any project is found in the repository named [pluma][pluma].
 
 For customer specific modifications, a second repository should be created, following the naming format `farm-<customer>`.
 
-You will likely create one such repository for your project, using it as your working directory, and including content from farm-core in order to control hardware, run tests, and more.
-Expect to modify your `farm-<customer>` repository frequently, whilst leaving [farm-core][farm-core] unchanged unless really needed.
+You will likely create one such repository for your project, using it as your working directory, and including content from pluma in order to control hardware, run tests, and more.
+Expect to modify your `farm-<customer>` repository frequently, whilst leaving [pluma][pluma] unchanged unless really needed.
 
 ### Examples and automated tests (farm-example)
 
@@ -34,9 +34,9 @@ This repository also contains all of the automated tests that check that Pluma c
 
 ### Documentation (farm-documentation)
 
-All documentation on the `farm-core` API can be found alongside the code in the form of docstrings.
+All documentation on the `pluma` API can be found alongside the code in the form of docstrings.
 This information is useful for finding the specifics of how to use a given class or function, but does not provide any high level information about when they should be used.  
-High level documentation can be found `docs` directory, and is focused on describing the intended use cases for various classes and frameworks in the `farm-core` library.
+High level documentation can be found `docs` directory, and is focused on describing the intended use cases for various classes and frameworks in the `pluma` library.
 
 The [farm-documentation][farm-documentation] does not provide any information that cannot be found in this repository, but it does format it in a much more human readable manner.  
 The documentation is built using [Sphinx][sphinx], and is presented as a [Read The Docs][readthedocs] style web page.  
@@ -44,11 +44,11 @@ This includes converting all docstrings into an API guide, as well as converting
 
 The [farm-documentation][farm-documentation] repository also contains all the makefiles and scripts required to run a documentation server to host these documents.
 
-### Core codebase (farm-core)
+### Core codebase (pluma)
 
-Since quick start guide guide is primarily aimed at getting up and running using the code in this repository, the rest of this guide will focus on the core codebase - [farm-core](farm-core).
+Since quick start guide guide is primarily aimed at getting up and running using the code in this repository, the rest of this guide will focus on the core codebase - [pluma](pluma).
 
-The basic structure of [farm-core][farm-core] is shown below:
+The basic structure of [pluma][pluma] is shown below:
 
 ```preformatted-text
 .
@@ -75,5 +75,5 @@ Next: [Install and Run](./2-install-and-run.md) >>
 [sphinx]: https://www.sphinx-doc.org
 [readthedocs]: https://readthedocs.org
 [farm-documentation]: https://bitbucket.org/adeneo-embedded/farm-documentation
-[farm-core]: https://bitbucket.org/adeneo-embedded/farm-core
+[pluma]: https://bitbucket.org/adeneo-embedded/pluma
 [farm-example]: https://bitbucket.org/adeneo-embedded/farm-example

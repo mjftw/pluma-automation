@@ -2,7 +2,7 @@
 
 ## Versions
 
-- Versions of `farm-core` work on `major.minor.revision`.
+- Versions of `pluma` work on `major.minor.revision`.
 - Major version is reserved for a large change, such as a large set of feature additions. Backwards compatibility IS NOT assumed.
 - Minor version indicates feature changes. Backwards compatibility IS NOT assumed.
 - Revision version indicates only bugfixes and minor required changes. Backwards compatibility IS assumed.
@@ -25,7 +25,7 @@
 
 ## Syncing repositories
 
-- Since there is one core `farm-core` repository, and many customer repositories `farm-<customer_name>`, steps must be taken to prevent changes to the core repository breaking the customer deployments.
-- To allow this, customer deployments should always use a release branch of `farm-core` , and not follow the master, feature, or bugfix branches.
-- Any time the `farm-<customer_name>` repository updates to using a newer revision of `farm-core`, a tag should be added to the `farm-<customer_name>` head, which matches the version of `farm-core` that it is compatible with.
-- This means that in order to use a customer repository, the same tag is checked out in `farm-core` and `farm-<customer_name>`, and everything is guaranteed to work.
+- Since there is one core `pluma` repository, and many customer repositories `farm-<customer_name>`, steps must be taken to prevent changes to the core repository breaking the customer deployments.
+- To allow this, customer deployments should always use a release branch of `pluma` , and not follow the master, feature, or bugfix branches.
+- Any time the `farm-<customer_name>` repository updates to using a newer revision of `pluma`, a tag should be added to the `farm-<customer_name>` head, which matches the version of `pluma` that it is compatible with.
+- This means that in order to use a customer repository, the same tag is checked out in `pluma` and `farm-<customer_name>`, and everything is guaranteed to work.

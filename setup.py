@@ -22,7 +22,7 @@ setuptools.setup(
     description="Pluma Automation",
     long_description=long_description,
     long_description_content_type=long_description_content_type,
-    url="https://bitbucket.org/adeneo-embedded/farm-core",
+    url="https://bitbucket.org/adeneo-embedded/pluma",
     package_dir={'': 'pluma'},
     packages=setuptools.find_packages(),
     install_requires=[

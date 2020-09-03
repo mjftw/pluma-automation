@@ -11,7 +11,7 @@ def git_is_installed():
 
 
 def get_farmcore_version():
-    ''' Find the current farm-core version from git tags using git-describe '''
+    ''' Find the current pluma version from git tags using git-describe '''
     if not git_is_installed():
         raise EnvironmentError(
             '\n\nThe tool "git" must be installed on the system to install '

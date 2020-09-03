@@ -1,4 +1,4 @@
-digraph "packages_farm-core" {
+digraph "packages_pluma" {
     charset="utf-8"
     rankdir=BT
     subgraph cluster_farmcore {

@@ -55,7 +55,7 @@ Pluma Automation can be run natively, or using Docker.
 
 ### Native
 For native installation, just run the `install.sh` script.
-This will install all the required system packages, then install the `farm-core` python packages. This installer assumes you are running a debian based Linux distro, such as Ubuntu or Raspian.
+This will install all the required system packages, then install the `pluma` python packages. This installer assumes you are running a debian based Linux distro, such as Ubuntu or Raspian.
 
 ```shell
 ./install.sh

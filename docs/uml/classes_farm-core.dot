@@ -1,4 +1,4 @@
-digraph "classes_farm-core" {
+digraph "classes_pluma" {
     charset="utf-8"
     rankdir=BT
     // ==========================
