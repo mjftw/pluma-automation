@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 import argparse
 import traceback
 import os
 
-from farmcore.baseclasses import Logger, LogMode, LogLevel
-from farmcli import Pluma, TestsConfigError, TestsBuildError, TargetConfigError
+from .core.baseclasses import Logger, LogMode, LogLevel
+from .cli import Pluma, TestsConfigError, TestsBuildError, TargetConfigError
 
 log = Logger()
 
