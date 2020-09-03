@@ -1,8 +1,0 @@
-TestController:
-    - Global data improvements
-        - Add a method to write test data to a file
-            - TestController.write_test_data(file: string, test: TestBase = None, iteration: int = None)
-            - Write a json formatted string to a file, with path @file, containing the global test data
-            - If the path to that file does not exist, create it
-            - Optional @test parameter to signal that only the data for that test should be written
-            - Optional @iteration parameter to signal that only data for that iteration should be written
