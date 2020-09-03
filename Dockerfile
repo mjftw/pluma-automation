@@ -7,13 +7,13 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en
 ENV LC_ALL en_US.UTF-8
 
-# Copy farm core
+# Copy pluma
 COPY ./ /root/pluma
 
-# Install farm core
+# Install pluma
 RUN /root/pluma/install.sh -n
 RUN mkdir /etc/pluma \
  && cp /root/pluma/pluma.yml.sample /etc/pluma/pluma.yml \
  && cp /root/pluma/pluma-target.yml.sample /etc/pluma/pluma-target.yml
 
-CMD ["python3 -m pluma", "-c", "/etc/pluma/pluma.yml", "-t", "/etc/pluma/pluma-target.yml"]
+CMD ["python3", "-m", "pluma", "-c", "/etc/pluma/pluma.yml", "-t", "/etc/pluma/pluma-target.yml"]

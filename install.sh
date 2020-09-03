@@ -13,7 +13,7 @@ function display_help {
             echo "  $0 [-d] [-h] [-y] [-n]"
             echo ""
             echo "  -d Install as pluma developer. This causes changes to the local"
-            echo "     pluma directory to be imported on 'import farmcore' etc."
+            echo "     pluma directory to be imported on 'import pluma' etc."
             echo "     Do not enable this option unless you plan to modify pluma."
             echo "  -y Answer yes to all questions (non-interactive installer)"
             echo "  -n Answer no to all questions (non-interactive installer)"
@@ -57,8 +57,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
 
 function install_python_packages {
     echo
-    echo "Installing pluma packages (farmcore, farmtest, farmutils)..."
-    pip3 uninstall -y pluma || true
+    echo "Installing pluma package..."
 
     if [ $install_as_dev -eq 1 ]; then
         # Install packages as a pluma package developer.
@@ -66,18 +65,18 @@ function install_python_packages {
         #   scripts here WILL be picked up by installed package.
         # This option is to be used when developing the pluma packages.
 
-        pip3 install --editable $PROJECT_ROOT
+        python3 -m pip install --upgrade --editable $PROJECT_ROOT
         echo
-        echo "=== Installed pluma packages (farmcore, farmtest, farmutils), editable from $PROJECT_ROOT (dev mode) ==="
+        echo "=== Installed pluma package, editable from $PROJECT_ROOT (dev mode) ==="
     else
         # Install pluma packages as pluma package user.
         # Edits in local pluma dir will not be used by installed packages, and
         #   package must be reinstalled using script to track these changes.
         # This is what we would want for a normal user.
 
-        pip3 install $PROJECT_ROOT
+        python3 -m pip install --upgrade $PROJECT_ROOT
         echo
-        echo "=== Installed pluma packages (farmcore, farmtest, farmutils) ==="
+        echo "=== Installed pluma package ==="
     fi
 }
 
