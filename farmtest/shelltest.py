@@ -9,8 +9,10 @@ from .test import TestBase, TaskFailed
 class ShellTest(TestBase):
     shell_test_index = 0
 
-    def __init__(self, board: Board, script: str, name: str = None, should_print: list = None, should_not_print: list = None,
-                 run_on_host: bool = False, timeout: int = None, runs_in_shell: bool = True, login_automatically: bool = True):
+    def __init__(self, board: Board, script: str, name: str = None, should_print: list = None,
+                 should_not_print: list = None,  run_on_host: bool = False, timeout: int = None,
+                 runs_in_shell: bool = True, login_automatically: bool = True,
+                 background: bool = False):
         super().__init__(board)
         self.should_print = should_print or []
         self.should_not_print = should_not_print or []
@@ -18,6 +20,7 @@ class ShellTest(TestBase):
         self.timeout = timeout if timeout is not None else 5
         self.runs_in_shell = runs_in_shell
         self.login_automatically = login_automatically
+        self.background = background
 
         self.scripts = script
         if not isinstance(self.scripts, list):
@@ -45,6 +48,17 @@ class ShellTest(TestBase):
                 raise TaskFailed(
                     f'Failed to run script test "{self._test_name}": no console available')
 
+            if self.background:
+                try:
+                    # Attempt to clone the connection to run commands independently
+                    console = console.clone()
+                except NotImplementedError:
+                    raise TaskFailed(f'{console} supports a single connection, a new console '
+                                     'cannot be spawned to run the commands in the background. '
+                                     'Consider using "<command>&" or "nohup <command>&" to run a '
+                                     'command in the background.')
+                    pass
+
             if self.runs_in_shell and self.login_automatically:
                 self.board.login()
 
@@ -53,14 +67,16 @@ class ShellTest(TestBase):
 
     def run_command(self, console, script):
         CommandRunner.run(test_name=self._test_name, console=console, command=script,
-                          timeout=self.timeout, should_print=self.should_print, should_not_print=self.should_not_print,
+                          timeout=self.timeout, should_print=self.should_print,
+                          should_not_print=self.should_not_print,
                           runs_in_shell=self.runs_in_shell)
 
 
 class CommandRunner():
     @staticmethod
     def run(test_name: str, console: ConsoleBase, command: str,
-            timeout: int = None, should_print: list = None, should_not_print: list = None, runs_in_shell: bool = True):
+            timeout: int = None, should_print: list = None, should_not_print: list = None,
+            runs_in_shell: bool = True):
         should_print = should_print or []
         should_not_print = should_not_print or []
         log = Logger()

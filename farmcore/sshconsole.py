@@ -20,6 +20,9 @@ class SSHConsole(HostConsole):
 
         super().__init__(command)
 
+    def clone(self):
+        return SSHConsole(target=self.target, login=self.login_user, password=self.login_pass)
+
     def support_file_copy(self):
         return True
 
