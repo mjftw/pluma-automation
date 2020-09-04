@@ -4,6 +4,8 @@
 name: Native installation and tests
 
 on:
+  push:
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
