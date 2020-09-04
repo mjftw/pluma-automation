@@ -2,10 +2,10 @@ import os
 
 from .usb import USB
 from .interface import NetInterface
-from .baseclasses import Farmclass
+from .baseclasses import HardwareBase
 
 
-class USBEnet(Farmclass, NetInterface, USB):
+class USBEnet(HardwareBase, NetInterface, USB):
     device_path = '/sys/bus/usb/devices/'
 
     def __init__(self, usb_device):

@@ -8,9 +8,9 @@ digraph "classes_pluma" {
 		label = "farmcore";
 		color=blue
 
-        "21" [label="{Farmclass|\l|}", shape="record"];
+        "21" [label="{HardwareBase|\l|}", shape="record"];
         label="farmcore";
-        "22" [label="{FarmclassMock|num_children : int\l|add_child()\l}", shape="record"];
+        "22" [label="{HardwareMock|num_children : int\l|add_child()\l}", shape="record"];
         "26" [label="{Hierarchy|\l|show_hier()\l}", shape="record"];
         "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
         "83" [label="{Locking.method|fn\lparent : NoneType\l|}", shape="record"];

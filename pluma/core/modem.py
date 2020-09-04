@@ -15,14 +15,14 @@ except (OSError, IOError):
     pass
 
 from .serialconsole import SerialConsole
-from .baseclasses import Farmclass
+from .baseclasses import HardwareBase
 
 
 class ModemError(Exception):
     pass
 
 
-class ModemSim868(Farmclass):
+class ModemSim868(HardwareBase):
     ''' Diver for the Sim868 based GSM/GNSM/GPS/Bluetooth modem '''
 
     def __init__(self, port):
@@ -175,7 +175,8 @@ class ModemSim868(Farmclass):
         self.log('Calling {}'.format(number))
 
         received, matched = self.AT_send('ATD{};'.format(number),
-                                         match=['OK', 'NO DIALTONE', 'BUSY', 'NO CARRIER', 'NO ANSWER'],
+                                         match=['OK', 'NO DIALTONE', 'BUSY',
+                                                'NO CARRIER', 'NO ANSWER'],
                                          excepts='ERROR')
         if not matched:
             self.error('Unexpected response from modem: {}'.format(received),
@@ -227,7 +228,8 @@ class ModemSim868(Farmclass):
         self._recording_settings = '1,5,0'
         self._start_recoding()
 
-        self.log('Started recording. Do not try to send AT commands before ending recording')
+        self.log(
+            'Started recording. Do not try to send AT commands before ending recording')
 
         return True
 

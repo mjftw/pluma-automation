@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod
 from functools import wraps
 from pluma.utils import datetime_to_timestamp
 
-from .farmclass import Farmclass
+from .hardwarebase import HardwareBase
 from .logging import LogLevel
 
 DEFAULT_PROMPT = r'>>FARM>>'
@@ -36,7 +36,7 @@ class ConsoleInvalidJSONReceivedError(ConsoleError):
     pass
 
 
-class ConsoleBase(Farmclass, metaclass=ABCMeta):
+class ConsoleBase(HardwareBase, metaclass=ABCMeta):
     """ Implements the console functionality not specific to a given transport layer """
 
     def __init__(self, encoding=None, linesep=None, raw_logfile=None):

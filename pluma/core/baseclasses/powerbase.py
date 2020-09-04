@@ -1,10 +1,10 @@
-from .farmclass import Farmclass
+from .hardwarebase import HardwareBase
 import time
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 
 
-class PowerBase(Farmclass, metaclass=ABCMeta):
+class PowerBase(HardwareBase, metaclass=ABCMeta):
     def __init__(self, reboot_delay=None):
         self.reboot_delay = reboot_delay or 0.5
 

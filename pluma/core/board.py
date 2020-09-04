@@ -1,7 +1,7 @@
 import time
 from pexpect import TIMEOUT, EOF
 
-from .baseclasses import Farmclass, ConsoleBase
+from .baseclasses import HardwareBase, ConsoleBase
 from .exceptions import ConsoleExceptionKeywordReceivedError
 
 
@@ -17,7 +17,7 @@ class BoardFieldInstanceIsNoneError(BoardError):
     pass
 
 
-class Board(Farmclass):
+class Board(HardwareBase):
     def __init__(self, name, power=None, hub=None,
                  storage=None, console=None,
                  login_user=None, login_pass=None,
@@ -75,10 +75,12 @@ class Board(Farmclass):
         if isinstance(new_consoles, ConsoleBase):
             new_consoles = {'main': new_consoles}
         elif not isinstance(new_consoles, dict) and new_consoles is not None:
-            raise ValueError("Error settings consoles: Must be a ConsoleBase or dict")
+            raise ValueError(
+                "Error settings consoles: Must be a ConsoleBase or dict")
 
         if new_consoles and self._current_console_name not in new_consoles.keys():
-            self._current_console_name = next(iter(new_consoles)) if new_consoles else None
+            self._current_console_name = next(
+                iter(new_consoles)) if new_consoles else None
 
         self._consoles = new_consoles
 
@@ -98,7 +100,8 @@ class Board(Farmclass):
             raise BoardFieldInstanceIsNoneError('"power" instance is not set')
 
         if self.console is None:
-            raise BoardFieldInstanceIsNoneError('"console" instance is not set')
+            raise BoardFieldInstanceIsNoneError(
+                '"console" instance is not set')
 
         # If we have set a prompt, add this to bootstr search
         if self.prompt:
@@ -110,7 +113,8 @@ class Board(Farmclass):
                 bootstr = [bootstr, self.prompt]
 
         if not bootstr:
-            raise BoardBootValidationError("Cannot validate boot. No bootstring given")
+            raise BoardBootValidationError(
+                "Cannot validate boot. No bootstring given")
 
         self.booted_to_prompt = False
         self.last_boot_len = None
@@ -128,7 +132,8 @@ class Board(Farmclass):
                 str(e)))
 
         if matched is False or matched is TIMEOUT or matched is EOF:
-            raise BoardBootValidationError("Did not get bootstring: {}".format(bootstr))
+            raise BoardBootValidationError(
+                "Did not get bootstring: {}".format(bootstr))
 
         self.last_boot_len = round(time.time() - start_time, 2)
 
@@ -141,7 +146,8 @@ class Board(Farmclass):
 
     def login(self):
         if self.console is None:
-            raise BoardFieldInstanceIsNoneError('"console" instance is not set')
+            raise BoardFieldInstanceIsNoneError(
+                '"console" instance is not set')
 
         if self.booted_to_prompt:
             self.log('Booted to prompt. Not need to log in')
@@ -159,7 +165,8 @@ class Board(Farmclass):
 def get_board_by_name(boards, name):
     invalid_boards = [b for b in boards if not isinstance(b, Board)]
     if invalid_boards:
-        raise RuntimeError(f'All boards must be of type Board! Invalid: {invalid_boards}')
+        raise RuntimeError(
+            f'All boards must be of type Board! Invalid: {invalid_boards}')
 
     filtered_boards = [b for b in boards if b.name == name]
     if len(filtered_boards) <= 0:

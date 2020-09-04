@@ -8,7 +8,7 @@ digraph "packages_pluma" {
         "0" [label="farmcore", shape="box"];
         "1" [label="farmcore.baseclasses", shape="box"];
         "2" [label="farmcore.baseclasses.consolebase", shape="box"];
-        "3" [label="farmcore.baseclasses.farmclass", shape="box"];
+        "3" [label="farmcore.baseclasses.hardwarebase", shape="box"];
         "4" [label="farmcore.baseclasses.hierarchy", shape="box"];
         "5" [label="farmcore.baseclasses.locking", shape="box"];
         "6" [label="farmcore.baseclasses.logging", shape="box"];
@@ -23,7 +23,7 @@ digraph "packages_pluma" {
         "15" [label="farmcore.mocks", shape="box"];
         "16" [label="farmcore.mocks.boardmock", shape="box"];
         "17" [label="farmcore.mocks.consolemock", shape="box"];
-        "18" [label="farmcore.mocks.farmclassmock", shape="box"];
+        "18" [label="farmcore.mocks.hardwaremock", shape="box"];
         "19" [label="farmcore.mocks.powermock", shape="box"];
         "20" [label="farmcore.mocks.relaymock", shape="box"];
         "21" [label="farmcore.mocks.serialconsolemock", shape="box"];

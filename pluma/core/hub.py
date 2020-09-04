@@ -1,11 +1,11 @@
 import re
 from graphviz import Digraph
 
-from .baseclasses import Farmclass
+from .baseclasses import HardwareBase
 from .usb import USB, puctx
 
 
-class Hub(Farmclass, USB):
+class Hub(HardwareBase, USB):
     def __init__(self, usb_device):
         USB.__init__(self, usb_device)
 
@@ -242,7 +242,8 @@ class Hub(Farmclass, USB):
 
                     if filtered_nodes:
                         # Find node.parent hub (hub with longest matching path)
-                        filtered_nodes.sort(key=lambda x: len(x.devpathlist), reverse=True)
+                        filtered_nodes.sort(key=lambda x: len(
+                            x.devpathlist), reverse=True)
                         node.parent = filtered_nodes[0]
 
                         path = node.devpath

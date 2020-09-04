@@ -1,9 +1,9 @@
-from .farmclass import Farmclass
+from .hardwarebase import HardwareBase
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 
 
-class RelayBase(Farmclass, metaclass=ABCMeta):
+class RelayBase(HardwareBase, metaclass=ABCMeta):
 
     @abstractmethod
     def toggle(f):

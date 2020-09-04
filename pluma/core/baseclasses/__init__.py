@@ -1,4 +1,4 @@
-from .farmclass import Farmclass
+from .hardwarebase import HardwareBase
 from .consolebase import ConsoleBase
 from .powerbase import PowerBase
 from .relaybase import RelayBase

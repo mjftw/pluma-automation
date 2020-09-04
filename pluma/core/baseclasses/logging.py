@@ -202,7 +202,7 @@ class Logging():
     @property
     def log_file(self):
         if not hasattr(self, "_log_file"):
-            # Default logfile for all farmclasses lives in /tmp
+            # Default logfile for all hardwarebasees lives in /tmp
             self._log_file = os.path.join('/tmp', 'pluma', '{}_{}.log'.format(
                 self.__class__.__name__, datetime_to_timestamp(datetime.datetime.now())))
         return self._log_file

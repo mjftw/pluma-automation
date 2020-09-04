@@ -4,7 +4,7 @@ import time
 import tempfile
 from abc import ABCMeta, abstractmethod
 
-from .farmclass import Farmclass
+from .hardwarebase import HardwareBase
 from pluma.utils import run_host_cmd
 
 # FIXME: This class is unfinished, and does not conform with other base classes.
@@ -14,7 +14,7 @@ class StorageError(Exception):
     pass
 
 
-class StorageBase(Farmclass, metaclass=ABCMeta):
+class StorageBase(HardwareBase, metaclass=ABCMeta):
     '''
     Base class for storage classes that can be switched between
     the host and board.
