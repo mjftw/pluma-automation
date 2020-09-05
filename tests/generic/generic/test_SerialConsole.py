@@ -140,6 +140,22 @@ def test_SerialConsole_send_matches_regex(serial_console_proxy):
     assert matched == expected_match
 
 
+def test_SerialConsole_send_and_expect_matches_regex(serial_console_proxy):
+    msg = 'Hello World! 123FooBarBaz'
+    regex = '[0-3]+Foo'
+
+    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                               cmd='abc', match=regex)
+
+    # Wait short time for function to start
+    time.sleep(0.1)
+
+    serial_console_proxy.proxy.write(msg)
+
+    __, matched = async_result.get()
+    assert matched == regex
+
+
 def test_SerialConsole_check_alive_returns_true_when_target_responds(serial_console_proxy):
     async_result = nonblocking(
         serial_console_proxy.console.check_alive)
