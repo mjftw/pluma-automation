@@ -53,6 +53,9 @@ class TargetConfig:
         TargetConfig.print_component('SSH', ssh, suffix)
 
         TargetConfig.print_component('Prompt', board.system.prompt_regex)
+        TargetConfig.print_component('Login', board.system.credentials.login)
+        TargetConfig.print_component(
+            'Password', '******' if board.system.credentials.password else None)
         TargetConfig.print_component('Power control', board.power)
         TargetConfig.print_component('Storage', board.storage)
         TargetConfig.print_component('USB Hub', board.hub)
