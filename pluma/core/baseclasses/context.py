@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Credentials:
     '''Data class containing credentials'''
-    login: str = None
+    login: str = 'root'
     password: str = None
 
 

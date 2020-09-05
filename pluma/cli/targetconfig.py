@@ -45,7 +45,6 @@ class TargetConfig:
 
         config.ensure_consumed()
         return Board('Test board', console={'serial': serial, 'ssh': ssh}, power=power,
-                     login_user=credentials.login, login_pass=credentials.password,
                      system=system)
 
     @staticmethod

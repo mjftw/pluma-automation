@@ -95,8 +95,9 @@ from my_hardware import console, power
 
 board = Board(
     name='rpi4',
-    login_user='pi',
-    login_pass='raspberry', # Omit if user has no password
+    system=SystemContext(
+        # Omit password if user has no password
+        credentials=Credentials(login='pi', password='raspberry')),
     console=console,
     power=power
 )
@@ -131,9 +132,10 @@ board = Board(
     name='my_unusual_board',
     console=console,
     login_user_match='Enter username:',
-    login_user='dave',
     login_pass_match='Enter password:',
-    login_pass='bad_password'
+    system=SystemContext(credentials=Credentials(
+        login='dave',
+        password='bad_password'))
 )
 ```
 
@@ -153,9 +155,9 @@ from my_hardware import console
 board = Board(
     name='my_unusual_board',
     console=console,
-    login_user='pi',
-    login_pass='raspberry',
-    prompt='pi@raspberrypi:~ $'
+    system=SystemContext(
+        prompt_regex=r'pi@raspberrypi:~ \$'
+        credentials=Credentials(login='pi', password='raspberry'))
 )
 ```
 
@@ -175,9 +177,9 @@ from my_hardware import console, power
 board = Board(
     name='rpi4',
     console=console,
-    login_user='pi',
-    login_pass='raspberry',
-    prompt='pi@raspberrypi:~ $'
+    system=SystemContext(
+        prompt_regex=r'pi@raspberrypi:~ \$'
+        credentials=Credentials(login='pi', password='raspberry'))
 )
 
 

@@ -3,6 +3,7 @@ Notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 ### Changed
+- Board: 'login_user' and 'login_pass' are now be passed with the 'system' argument, as SystemContext.Credentials
 - ConsoleBase.wait_for_quiet: 'quiet' is now the first argument, and 'timeout' the last
 - farmcore module changed to pluma.core (can also just import as pluma)
 - farmutils module changed to pluma.utils

@@ -19,7 +19,7 @@ class BoardFieldInstanceIsNoneError(BoardError):
 
 class Board(HardwareBase):
     def __init__(self, name, power=None, hub=None, storage=None, console=None,
-                 login_user=None, login_pass=None, bootstr=None, boot_max_s=None, logfile=None,
+                 bootstr=None, boot_max_s=None, logfile=None,
                  login_user_match=None, login_pass_match=None,
                  system: SystemContext = None):
         self.name = name
@@ -32,8 +32,6 @@ class Board(HardwareBase):
         self.consoles = console
         self.system = system or SystemContext()
 
-        self.login_user = login_user or 'root'
-        self.login_pass = login_pass
         self.login_user_match = login_user_match or 'login:'
         self.login_pass_match = login_pass_match or 'Password:'
         self.bootstr = bootstr or self.login_user_match
@@ -154,8 +152,8 @@ class Board(HardwareBase):
             return
 
         self.console.login(
-            username=self.login_user,
-            password=self.login_pass,
+            username=self.system.credentials.login,
+            password=self.system.credentials.password,
             username_match=self.login_user_match,
             password_match=self.login_pass_match,
             success_match=self.system.prompt_regex
