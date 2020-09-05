@@ -34,7 +34,7 @@ def test_TargetFactory_parse_credentials():
 
 def test_TargetFactory_parse_credentials_should_work_with_empty_config():
     creds = TargetFactory.parse_credentials(Configuration())
-    assert creds.login is None
+    assert creds.login == 'root'
     assert creds.password is None
 
 

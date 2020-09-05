@@ -17,7 +17,7 @@ class TargetConfig:
             raise ValueError('Invalid configuration: The configuration passed '
                              'should be a Configuration instance.')
         try:
-            board = TargetConfig.__create_board(config)
+            board = TargetConfig._create_board(config)
         except ConfigurationError as e:
             raise TargetConfigError(e)
         else:
@@ -25,16 +25,9 @@ class TargetConfig:
             return board
 
     @staticmethod
-    def __create_board(config: Configuration) -> Board:
-        credentials = TargetFactory.parse_credentials(
-            config.pop('credentials'))
-
-        system = config.pop('system')
-        if system:
-            system = SystemContext(prompt_regex=system.pop('prompt_regex'), credentials=credentials)
-        else:
-            system = SystemContext(credentials=credentials)
-
+    def _create_board(config: Configuration) -> Board:
+        credentials = TargetFactory.parse_credentials(config.pop('credentials'))
+        system = TargetFactory.parse_system_context(config.pop('system'), credentials)
         serial, ssh = TargetFactory.create_consoles(config.pop('console'), system)
 
         if not serial and not ssh:
@@ -86,6 +79,18 @@ class TargetFactory:
             credentials_config.pop('password'))
         credentials_config.ensure_consumed()
         return credentials
+
+    @staticmethod
+    def parse_system_context(system_config: Configuration, credentials: Credentials) \
+            -> SystemContext:
+        if system_config:
+            system = SystemContext(prompt_regex=system_config.pop(
+                'prompt_regex'), credentials=credentials)
+            system_config.ensure_consumed()
+        else:
+            system = SystemContext(credentials=credentials)
+
+        return system
 
     @staticmethod
     def create_consoles(config: Configuration, system: SystemContext) -> List[ConsoleBase]:
