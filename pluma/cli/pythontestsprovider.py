@@ -1,3 +1,4 @@
+import importlib
 import re
 import inspect
 from operator import attrgetter
@@ -54,11 +55,13 @@ class PythonTestsProvider(TestsProvider):
         # Find all tests
         all_tests = []
 
-        for _, module in inspect.getmembers(pluma.plugins, inspect.ismodule):
-            for _, cls in inspect.getmembers(module, inspect.isclass):
+        for module_name, module in inspect.getmembers(pluma.plugins, inspect.ismodule):
+            for class_name, cls in inspect.getmembers(module, inspect.isclass):
                 if issubclass(cls, TestBase):
                     all_tests.append(TestDefinition(
-                        name=f'{cls.__module__}.{cls.__name__}', testclass=cls, test_provider=self))
+                        name=f'{cls.__module__[cls.__module__.index(module_name):]}.{class_name}',
+                        testclass=cls,
+                        test_provider=self))
 
         return sorted(all_tests, key=attrgetter('name'))
 
