@@ -46,6 +46,9 @@ setuptools.setup(
     long_description_content_type=long_description_content_type,
     url="https://bitbucket.org/adeneo-embedded/pluma",
     packages=setuptools.find_packages(),
+    entry_points = {
+        'console_scripts': ['pluma=pluma.__main__:main'],
+    },
     install_requires=[
         'pyserial',
         'setuptools',
