@@ -4,7 +4,7 @@ import os
 
 from .core.baseclasses import Logger, LogMode, LogLevel
 from .cli import Pluma, TestsConfigError, TestsBuildError, TargetConfigError
-from .cli.plugins import load_modules
+from .cli.plugins import load_plugin_modules
 
 log = Logger()
 
@@ -73,8 +73,9 @@ def main():
     tests_config_path = args.config
     target_config_path = args.target
 
-    for plugin_dir in args.plugin:
-        load_modules(plugin_dir)
+    if args.plugin:
+        for plugin_dir in args.plugin:
+            load_plugin_modules(plugin_dir)
 
     try:
         command = args.command

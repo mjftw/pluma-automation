@@ -2,7 +2,7 @@ import re
 import inspect
 from operator import attrgetter
 
-import pluma.testsuite
+import pluma.plugins
 from pluma.core.baseclasses import Logger
 from pluma.test import TestBase
 from pluma.cli import Configuration
@@ -53,11 +53,12 @@ class PythonTestsProvider(TestsProvider):
     def find_python_tests(self):
         # Find all tests
         all_tests = []
-        for m in inspect.getmembers(pluma.testsuite, inspect.isclass):
-            if m[1].__module__.startswith(pluma.testsuite.__name__ + '.'):
-                if issubclass(m[1], TestBase):
+
+        for _, module in inspect.getmembers(pluma.plugins, inspect.ismodule):
+            for _, cls in inspect.getmembers(module, inspect.isclass):
+                if issubclass(cls, TestBase):
                     all_tests.append(TestDefinition(
-                        name=f'{m[1].__module__}.{m[1].__name__}', testclass=m[1], test_provider=self))
+                        name=f'{cls.__module__}.{cls.__name__}', testclass=cls, test_provider=self))
 
         return sorted(all_tests, key=attrgetter('name'))
 
