@@ -4,6 +4,7 @@ import os
 
 from .core.baseclasses import Logger, LogMode, LogLevel
 from .cli import Pluma, TestsConfigError, TestsBuildError, TargetConfigError
+from .cli.plugins import load_modules
 
 log = Logger()
 
@@ -36,6 +37,8 @@ def parse_arguments():
     parser.add_argument(
         '-t', '--target', default='pluma-target.yml',
         help='path to the target configuration file. Default: "pluma-target.yml"')
+    parser.add_argument('--plugin', action='append',
+        help='load plugin modules from directory path')
     parser.add_argument(
         '-f', '--force', action='store_const', const=True,
         help='force operation instead of prompting')
@@ -69,6 +72,9 @@ def main():
     set_log_mode(args)
     tests_config_path = args.config
     target_config_path = args.target
+
+    for plugin_dir in args.plugin:
+        load_modules(plugin_dir)
 
     try:
         command = args.command
