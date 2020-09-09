@@ -4,11 +4,12 @@ from nanocom import Nanocom
 import pexpect.fdpexpect
 
 from .baseclasses import ConsoleBase
+from .dataclasses import SystemContext
 
 
 class SerialConsole(ConsoleBase):
-    def __init__(self, port, baud,
-                 encoding=None, linesep=None, raw_logfile=None):
+    def __init__(self, port, baud, encoding=None, linesep=None,
+                 raw_logfile=None, system: SystemContext = None):
         self.port = port
         self.baud = baud
         self._timeout = 0.001
@@ -16,7 +17,7 @@ class SerialConsole(ConsoleBase):
         self._ser = None
         self._pex = None
         super().__init__(encoding=encoding, linesep=linesep,
-                         raw_logfile=raw_logfile)
+                         raw_logfile=raw_logfile, system=system)
 
     def __repr__(self):
         return "SerialConsole[{}]".format(self.port)
@@ -39,6 +40,7 @@ class SerialConsole(ConsoleBase):
 
         self._pex = pexpect.fdpexpect.fdspawn(
             fd=self._ser.fileno(), timeout=self._timeout)
+        self._pex.timeout = 0.5
 
         if not self.is_open:
             raise RuntimeError(

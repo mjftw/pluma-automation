@@ -9,6 +9,7 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from pluma.utils import datetime_to_timestamp
+from pluma.core.dataclasses import SystemContext
 
 from .hardwarebase import HardwareBase
 from .logging import LogLevel
@@ -39,7 +40,8 @@ class ConsoleInvalidJSONReceivedError(ConsoleError):
 class ConsoleBase(HardwareBase, metaclass=ABCMeta):
     """ Implements the console functionality not specific to a given transport layer """
 
-    def __init__(self, encoding=None, linesep=None, raw_logfile=None):
+    def __init__(self, encoding: str = None, linesep: str = None,
+                 raw_logfile: str = None, system: SystemContext = None):
         if not hasattr(self, '_pex'):
             raise AttributeError(
                 "Variable '_pex' must be created by inheriting class")
@@ -52,6 +54,7 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         self.encoding = encoding or 'ascii'
         self.linesep = linesep or '\n'
         self.raw_logfile = raw_logfile or default_raw_logfile
+        self.system = system or SystemContext()
 
         self._buffer = ''
         self._last_received = ''
@@ -525,3 +528,10 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
     def copy_to_host(self, source, destination, timeout=30):
         raise ValueError(
             f'Console type {self} does not support copying from target')
+
+    def wait_for_prompt(self, timeout: int = None):
+        '''Wait for a prompt, throws if no prompt before timeout'''
+
+        prompt_regex = self.system.prompt_regex
+        self.log(f'Waiting for prompt "{prompt_regex}" for {timeout}s')
+        self.wait_for_match(match=prompt_regex, timeout=timeout)

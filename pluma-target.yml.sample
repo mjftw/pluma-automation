@@ -2,6 +2,9 @@ credentials:
   login: mendel
   password: mendel
 
+system:
+  prompt_regex: "\\S+@\\S+:"
+
 console:
   serial:
     port: /dev/ttyUSB0

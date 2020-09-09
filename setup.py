@@ -1,5 +1,6 @@
 import setuptools
 import subprocess
+import sys
 
 
 def git_is_installed():
@@ -36,6 +37,29 @@ except FileNotFoundError:
     print('Cannot find readme {}. Omitting long package description'.format(
         readme_file))
 
+requires = [
+    'pyserial',
+    'setuptools',
+    'pyudev',
+    'pexpect>=4.6',
+    'pyftdi',
+    'pyroute2',
+    'pandas',
+    'pygal',
+    'cairosvg',
+    'graphviz',
+    'nanocom',
+    'requests',
+    'pytest',
+    'pytest-cov',
+    'pyyaml>=5.1',
+    'deprecated'
+]
+
+# dataclasses backport for 3.6
+if sys.version_info[:2] == (3, 6):
+    requires.append('dataclasses')
+
 setuptools.setup(
     name="pluma-automation",
     version=get_version(),
@@ -46,27 +70,11 @@ setuptools.setup(
     long_description_content_type=long_description_content_type,
     url="https://bitbucket.org/adeneo-embedded/pluma",
     packages=setuptools.find_packages(),
-    entry_points = {
+    entry_points={
         'console_scripts': ['pluma=pluma.__main__:main'],
     },
-    install_requires=[
-        'pyserial',
-        'setuptools',
-        'pyudev',
-        'pexpect>=4.6',
-        'pyftdi',
-        'pyroute2',
-        'pandas',
-        'pygal',
-        'cairosvg',
-        'graphviz',
-        'nanocom',
-        'requests',
-        'pytest',
-        'pytest-cov',
-        'pyyaml>=5.1',
-        'deprecated'
-    ],
+    python_requires='>=3.6',
+    install_requires=requires,
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

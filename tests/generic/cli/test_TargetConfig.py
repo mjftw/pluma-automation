@@ -1,6 +1,7 @@
 import copy
 import pytest
 
+from pluma.core.dataclasses import SystemContext
 from pluma.cli import TargetConfig, TargetFactory, TargetConfigError, \
     Configuration, Credentials, ConfigurationError
 from pluma import IPPowerPDU, SoftPower
@@ -33,7 +34,7 @@ def test_TargetFactory_parse_credentials():
 
 def test_TargetFactory_parse_credentials_should_work_with_empty_config():
     creds = TargetFactory.parse_credentials(Configuration())
-    assert creds.login is None
+    assert creds.login == 'root'
     assert creds.password is None
 
 
@@ -42,27 +43,27 @@ def test_TargetFactory_create_serial(serial_config):
     baudrate = serial_config['baud']
     config = Configuration(copy.deepcopy(serial_config))
 
-    console = TargetFactory.create_serial(config)
+    console = TargetFactory.create_serial(config, SystemContext())
     assert console.port == port
     assert console.baud == baudrate
 
 
 def test_TargetFactory_create_serial_should_return_none_with_no_config():
-    assert TargetFactory.create_serial(None) is None
+    assert TargetFactory.create_serial(None, None) is None
 
 
 def test_TargetFactory_create_serial_should_error_with_no_port(serial_config):
     serial_config['other'] = 'abc'
 
     with pytest.raises(ConfigurationError):
-        TargetFactory.create_serial(Configuration(serial_config))
+        TargetFactory.create_serial(Configuration(serial_config), SystemContext())
 
 
-def test_TargetFactory_create_serial_should_if_uncomsuned():
+def test_TargetFactory_create_serial_should_error_if_uncomsuned():
     config = Configuration({'baud': 123})
 
     with pytest.raises(TargetConfigError):
-        TargetFactory.create_serial(config)
+        TargetFactory.create_serial(config, SystemContext())
 
 
 def test_TargetFactory_create_ssh(ssh_config):
@@ -70,18 +71,18 @@ def test_TargetFactory_create_ssh(ssh_config):
     login = ssh_config['login']
     config = Configuration(copy.deepcopy(ssh_config))
 
-    console = TargetFactory.create_ssh(config, Credentials())
+    console = TargetFactory.create_ssh(config, SystemContext())
     assert console.target == target
-    assert console.login_user == login
-    assert console.login_pass is None
+    assert console.system.credentials.login == login
+    assert console.system.credentials.password is None
 
 
 def test_TargetFactory_create_ssh_should_use_password(ssh_config):
     password = 'pass'
     ssh_config['password'] = password
 
-    console = TargetFactory.create_ssh(Configuration(ssh_config), Credentials())
-    assert console.login_pass == password
+    console = TargetFactory.create_ssh(Configuration(ssh_config), SystemContext())
+    assert console.system.credentials.password == password
 
 
 def test_TargetFactory_create_ssh_should_default_to_credentials(ssh_config):
@@ -90,10 +91,10 @@ def test_TargetFactory_create_ssh_should_default_to_credentials(ssh_config):
     credslogin = 'credslogin'
     credspassword = 'credspass'
 
-    console = TargetFactory.create_ssh(Configuration(ssh_config),
-                                       Credentials(credslogin, credspassword))
-    assert console.login_user == credslogin
-    assert console.login_pass == credspassword
+    system = SystemContext(credentials=Credentials(credslogin, credspassword))
+    console = TargetFactory.create_ssh(Configuration(ssh_config), system)
+    assert console.system.credentials.login == credslogin
+    assert console.system.credentials.password == credspassword
 
 
 def test_TargetFactory_create_ssh_should_prefer_ssh_credentials(ssh_config):
@@ -104,10 +105,10 @@ def test_TargetFactory_create_ssh_should_prefer_ssh_credentials(ssh_config):
     credslogin = 'credslogin'
     credspassword = 'credspass'
 
-    console = TargetFactory.create_ssh(Configuration(ssh_config),
-                                       Credentials(credslogin, credspassword))
-    assert console.login_user == sshlogin
-    assert console.login_pass == sshpassword
+    system = SystemContext(credentials=Credentials(credslogin, credspassword))
+    console = TargetFactory.create_ssh(Configuration(ssh_config), system)
+    assert console.system.credentials.login == sshlogin
+    assert console.system.credentials.password == sshpassword
 
 
 def test_TargetFactory_create_power_control_should_return_none_with_no_console():

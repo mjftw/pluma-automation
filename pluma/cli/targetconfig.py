@@ -1,18 +1,14 @@
 import json
 import os
 from typing import List
+from copy import deepcopy
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
-from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase
 from pluma.cli import Configuration, ConfigurationError, TargetConfigError
+from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase
+from pluma.core.dataclasses import SystemContext, Credentials
 
 log = Logger()
-
-
-class Credentials:
-    def __init__(self, login=None, password=None):
-        self.login = login
-        self.password = password
 
 
 class TargetConfig:
@@ -22,7 +18,7 @@ class TargetConfig:
             raise ValueError('Invalid configuration: The configuration passed '
                              'should be a Configuration instance.')
         try:
-            board = TargetConfig.__create_board(config)
+            board = TargetConfig._create_board(config)
         except ConfigurationError as e:
             raise TargetConfigError(e)
         else:
@@ -30,12 +26,10 @@ class TargetConfig:
             return board
 
     @staticmethod
-    def __create_board(config: Configuration) -> Board:
-        credentials = TargetFactory.parse_credentials(
-            config.pop('credentials'))
-
-        serial, ssh = TargetFactory.create_consoles(
-            config.pop('console'), credentials)
+    def _create_board(config: Configuration) -> Board:
+        credentials = TargetFactory.parse_credentials(config.pop('credentials'))
+        system = TargetFactory.parse_system_context(config.pop('system'), credentials)
+        serial, ssh = TargetFactory.create_consoles(config.pop('console'), system)
 
         if not serial and not ssh:
             log.warning("No console defined in the device configuration file")
@@ -45,7 +39,7 @@ class TargetConfig:
 
         config.ensure_consumed()
         return Board('Test board', console={'serial': serial, 'ssh': ssh}, power=power,
-                     login_user=credentials.login, login_pass=credentials.password)
+                     system=system)
 
     @staticmethod
     def print_board_settings(board: Board):
@@ -59,6 +53,10 @@ class TargetConfig:
         suffix = 'Default' if ssh and board.console is ssh else None
         TargetConfig.print_component('SSH', ssh, suffix)
 
+        TargetConfig.print_component('Prompt', board.system.prompt_regex)
+        TargetConfig.print_component('Login', board.system.credentials.login)
+        TargetConfig.print_component(
+            'Password', '******' if board.system.credentials.password else None)
         TargetConfig.print_component('Power control', board.power)
         TargetConfig.print_component('Storage', board.storage)
         TargetConfig.print_component('USB Hub', board.hub)
@@ -67,6 +65,7 @@ class TargetConfig:
     @staticmethod
     def print_component(label: str, component, suffix: str = None):
         color = 'green' if component else None
+
         if suffix:
             log.log(f'    {label}:  {str(component)} - {suffix}', color=color)
         else:
@@ -86,17 +85,29 @@ class TargetFactory:
         return credentials
 
     @staticmethod
-    def create_consoles(config: Configuration, credentials: Credentials) -> List[ConsoleBase]:
+    def parse_system_context(system_config: Configuration, credentials: Credentials) \
+            -> SystemContext:
+        if system_config:
+            system = SystemContext(prompt_regex=system_config.pop(
+                'prompt_regex'), credentials=credentials)
+            system_config.ensure_consumed()
+        else:
+            system = SystemContext(credentials=credentials)
+
+        return system
+
+    @staticmethod
+    def create_consoles(config: Configuration, system: SystemContext) -> List[ConsoleBase]:
         if not config:
             return None, None
 
-        serial = TargetFactory.create_serial(config.pop('serial'))
-        ssh = TargetFactory.create_ssh(config.pop('ssh'), credentials)
+        serial = TargetFactory.create_serial(config.pop('serial'), system)
+        ssh = TargetFactory.create_ssh(config.pop('ssh'), system)
         config.ensure_consumed()
         return serial, ssh
 
     @staticmethod
-    def create_serial(serial_config: Configuration) -> ConsoleBase:
+    def create_serial(serial_config: Configuration, system: SystemContext) -> ConsoleBase:
         if not serial_config:
             return None
 
@@ -107,26 +118,33 @@ class TargetFactory:
             raise TargetConfigError(
                 'Missing "port" attributes for serial console in the configuration file')
 
-        serial = SerialConsole(port, int(serial_config.pop('baud') or 115200))
+        serial = SerialConsole(port=port, baud=int(serial_config.pop('baud') or 115200),
+                               system=system)
         serial_config.ensure_consumed()
         return serial
 
     @staticmethod
-    def create_ssh(ssh_config: Configuration, credentials: Credentials) -> ConsoleBase:
+    def create_ssh(ssh_config: Configuration, system: SystemContext) -> ConsoleBase:
         if not ssh_config:
             return None
 
         log.debug('SSH config = ' + json.dumps(ssh_config.content()))
         target = ssh_config.pop('target')
-        login = ssh_config.pop('login', credentials.login)
+        login = ssh_config.pop('login', system.credentials.login)
 
         if not target or not login:
             raise TargetConfigError(
                 'Missing "target" or "login" attributes for SSH console in the configuration file')
 
-        password = ssh_config.pop('password', credentials.password)
+        password = ssh_config.pop('password', system.credentials.password)
         ssh_config.ensure_consumed()
-        return SSHConsole(target, login, password)
+
+        # Create a new system config to override default credentials
+        ssh_system = deepcopy(system)
+        ssh_system.credentials.login = login
+        ssh_system.credentials.password = password
+
+        return SSHConsole(target, system=ssh_system)
 
     @staticmethod
     def create_power_control(power_config: Configuration, console: ConsoleBase) -> PowerBase:

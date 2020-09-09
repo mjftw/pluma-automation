@@ -2,14 +2,15 @@ import pexpect
 import pexpect.fdpexpect
 
 from .baseclasses import ConsoleBase
+from .dataclasses import SystemContext
 from .exceptions import ConsoleCannotOpenError
 
 
 class HostConsole(ConsoleBase):
-    def __init__(self, command):
+    def __init__(self, command, system: SystemContext = None):
         self.command = command
         self._pex = None
-        super().__init__()
+        super().__init__(system=system)
 
     def __repr__(self):
         command = self.command
@@ -29,12 +30,9 @@ class HostConsole(ConsoleBase):
     def open(self):
         try:
             self._pex = pexpect.spawn(self.command, timeout=0.01)
-            # Wait to have a prompt, otherwise a connection failure can be is silently ignored
-            self._pex.expect([r'\$', '>', '#'], timeout=6)
+            self._pex.timeout = 0.5
+            assert self.is_open
         except Exception:
-            raise ConsoleCannotOpenError
-
-        if not self.is_open:
             raise ConsoleCannotOpenError
 
     @ConsoleBase.close
