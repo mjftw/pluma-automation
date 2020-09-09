@@ -5,8 +5,9 @@ from pytest import fixture
 from unittest.mock import MagicMock
 
 from utils import OsFile
-from pluma import Board, SerialConsole, SoftPower
+from pluma import Board, SerialConsole, SoftPower, SSHConsole
 from pluma.core.baseclasses import ConsoleBase
+from pluma.core.dataclasses import SystemContext, Credentials
 from pluma.core.mocks import ConsoleMock
 
 
@@ -52,6 +53,11 @@ def serial_console_proxy():
             os.close(fd)
         except OSError:
             pass
+
+
+@fixture
+def minimal_ssh_console():
+    return SSHConsole(target="localhost", system=SystemContext(Credentials("root")))
 
 
 @fixture

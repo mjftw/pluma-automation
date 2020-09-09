@@ -12,6 +12,8 @@ class HostConsole(ConsoleBase):
         self._pex = None
         super().__init__(system=system)
 
+        self._requires_login = False
+
     def __repr__(self):
         command = self.command
         if len(command) > 30:

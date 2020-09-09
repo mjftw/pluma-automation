@@ -5,7 +5,7 @@ from .dataclasses import SystemContext
 
 
 class SSHConsole(HostConsole):
-    def __init__(self, target: str, system: SystemContext = None):
+    def __init__(self, target: str, system: SystemContext):
         self.target = target
 
         if not target:
@@ -32,6 +32,7 @@ class SSHConsole(HostConsole):
             super().open()
             self.wait_for_prompt(timeout=5)
         except Exception:
+            self.close()
             raise ConsoleCannotOpenError
 
     def support_file_copy(self):

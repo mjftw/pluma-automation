@@ -45,7 +45,7 @@ class ShellTest(TestBase):
                 raise TaskFailed(
                     f'Failed to run script test "{self._test_name}": no console available')
 
-            if self.runs_in_shell and self.login_automatically:
+            if self.runs_in_shell and self.login_automatically and console.requires_login:
                 self.board.login()
 
         for script in self.scripts:
