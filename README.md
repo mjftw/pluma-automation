@@ -6,12 +6,12 @@
 Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https://www.witekio.com) to perform black box testing of embedded hardware; designed to be as lightweight as possible!
 
 At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
-This package is named `farmcore`.
+This package is named `pluma.core` (accessible as `pluma` top level package).
 
-On top of the hardware control library sits a testing framework `farmtest`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
-`farmcore` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
+On top of the hardware control library sits a testing framework `pluma.test`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
+`pluma.core` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
 
-Finally we have `farmutils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
+Finally we have `pluma.utils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
 
 System features include:
 
@@ -82,17 +82,17 @@ For more detailed instructions, see the [Install and Run](./docs/quick-start-gui
 
 ## Using the command line interface
 
-This device test framework can be used from a simple command line interface, [`pluma`](pluma/__main__.py), which can be used to easily define and run tests for an embedded device. Running tests can be done simply by running `python3 -m pluma run`.
+This device test framework can be used from a simple command line interface, [`pluma`](pluma/__main__.py), which can be used to easily define and run tests for an embedded device. Running tests can be done simply by running `pluma run`.
 
 The following is a sample command line output when running tests from sample files:
 ```
-./python3 -m pluma run -c pluma.yml.sample -t pluma-target.yml.sample
-[ 0%] farmtest.shelltest.ShellTest[target_setup] - test_body                PASS
-[16%] farmtest.shelltest.ShellTest[host_setup] - test_body                  PASS
-[33%] farmtest.shelltest.ShellTest[multiple_commands] - test_body           PASS
-[50%] farmtest.shelltest.ShellTest[cat_meminfo] - test_body                 PASS
-[66%] testsuite.memory.MemorySize - test_body                               PASS
-[83%] farmtest.shelltest.ShellTest[cleanup] - test_body                     PASS
+./pluma run -c pluma.yml.sample -t pluma-target.yml.sample
+[ 0%] pluma.test.shelltest.ShellTest[target_setup] - test_body                PASS
+[16%] pluma.test.shelltest.ShellTest[host_setup] - test_body                  PASS
+[33%] pluma.test.shelltest.ShellTest[multiple_commands] - test_body           PASS
+[50%] pluma.test.shelltest.ShellTest[cat_meminfo] - test_body                 PASS
+[66%] testsuite.memory.MemorySize - test_body                                 PASS
+[83%] pluma.test.shelltest.ShellTest[cleanup] - test_body                     PASS
 All tests were successful.
 ```
 
@@ -101,10 +101,10 @@ It uses relies on two YAML configuration files:
 * `pluma-target.yml`: Defines the device setup and settings: hardware used, credentials, serial, ssh.
 
 The CLI provides the following sub commands:
-* `python3 -m pluma tests`: Show a list of the tests available and in use from the configuration
-* `python3 -m pluma check`: Validates the device and tests definition
-* `python3 -m pluma run`: Run the tests defined for the device
-* `python3 -m pluma clean`: Remove build files and built executables
+* `pluma tests`: Show a list of the tests available and in use from the configuration
+* `pluma check`: Validates the device and tests definition
+* `pluma run`: Run the tests defined for the device
+* `pluma clean`: Remove build files and built executables
 
 ### Device definition YAML
 The device definition file (pluma-target.yml) contains hardware and connectivity related information, used to interface and control the device.
@@ -209,7 +209,7 @@ Supported attributes:
 
 * `sequence:` Ordered list of action to perform. Each elements can be one of [`shell_tests`, `core_test`, `c_tests`]. Elements can be repeated, but test names must be unique.
   * `- core_tests:` Test to be used from the common test suite
-    * `include: <list_of_tests>` - Will match exact names, and tests starting from the name used. Full list of tests visible with `python3 -m pluma tests` commands, and in the `testsuite` folder.
+    * `include: <list_of_tests>` - Will match exact names, and tests starting from the name used. Full list of tests visible with `pluma tests` commands, and in the `testsuite` folder.
     * `exclude: <list_of_test>` - Exclude tests, even if matched by `include`
     * `parameters`
       * `<testname>:` - Name of a test, must match its fully specified name, e.g. `testsuite.memory.MemorySize`. All the attributes under this will be directly passed to the test constructor. It is possible to use a YAML list of attributes to instantiate the test multiple times with different parameter sets.
@@ -243,7 +243,7 @@ Supported attributes:
 ### Complete list of CLI options
 
 ```
-usage: python3 -m pluma [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [-f] [--silent] [--debug]
+usage: pluma [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [-f] [--silent] [--debug]
                 [{run,check,tests,clean,version}]
 
 A lightweight automated testing tool for embedded devices.
@@ -279,7 +279,7 @@ Custom tests can be added as:
 - Python tests, by directly adding your `.py` files to the `testsuite` folder, and creating test classes based on `TestBase` (see existing tests in the same folder for reference)
 
 #### How to show the output of the commands ran?
-Use the `-v` or `--verbose` flag when invoking `python3 -m pluma run` in order to show the commands output.
+Use the `-v` or `--verbose` flag when invoking `pluma run` in order to show the commands output.
 
 #### Is it possible to run commands on the host?
 Yes, you can use `run_on_host: true` inside a `shell_test` in order to run the command specified on the host machine.
@@ -299,16 +299,16 @@ settings:
 
 ## Using the Packages
 
-You can make use of the packages provided outside of the CLI, once you've installed Pluma (or run the Docker container). You should be able to import and use the farmcore, farmtest, and farmutils in your Python scripts.
+You can make use of the packages provided outside of the CLI, once you've installed Pluma (or run the Docker container). You should be able to import and use the `pluma` modules in your Python scripts.
 
 ```python
 # my_project_file.py
-import farmcore
-import farmtest
-import farmutils
+import pluma
+from pluma import test
+from pluma import utils
 
 # Create a Board (full Board arguments not shown)
-my_board = farmcore.Board('My board')
+my_board = pluma.Board('My board')
 
 # Send a command to the board
 my_board.console.send('uname -a')

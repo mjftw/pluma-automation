@@ -211,8 +211,7 @@ class MultimeterMeasurementError(MultimeterError):
     pass
 ```
 
-
-In order to simplify importing exceptions in external scripts, we have a separate execeptions file (`exceptions.py`).  
+In order to simplify importing exceptions in external scripts, we have a separate exceptions file (`exceptions.py`).  
 When adding new exceptions for a class to use, make sure to add this new exception to the exception file, so that it can be accessed outside of the package, without having to know exactly what file it is actually defined in.
 
 E.g. (Excerpt from `exceptions.py`)
@@ -222,7 +221,7 @@ from .modem import ModemError
 ```
 
 This allows external scripts to use the exceptions, without having to know the full path to the python file that defines them.  
-Not only does this make writing code easier, it also gives some protection against the internal structure of farmcore/farmtest/farmutils changing.
+Not only does this make writing code easier, it also gives some protection against the internal structure of the `pluma` modules changing.
 
 E.g. (External script)
 ```python
@@ -234,4 +233,4 @@ from pluma.core.board import BoardBootValidationError
 from pluma.core.exceptions import ConsoleLoginFailedError, BoardBootValidationError
 ```
 
-The former is vulnerable to breaking if for instance `ConsoleLoginFailedError` moved to a different file in a new version of `farmcore`, but the latter is would not break.
+The former is vulnerable to breaking if for instance `ConsoleLoginFailedError` moved to a different file in a new version of `pluma.core`, but the latter is would not break.

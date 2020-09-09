@@ -1,4 +1,4 @@
-''' farmcore.USBRelay class tests
+''' pluma.core.USBRelay class tests
 
 These tests require that the USB Relay (DLP-IOR4) be set up in a certain way.
 Four GPIOs on the RPi must also be connected to the USB Relay.

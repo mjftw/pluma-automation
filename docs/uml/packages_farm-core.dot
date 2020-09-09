@@ -1,71 +1,71 @@
 digraph "packages_pluma" {
     charset="utf-8"
     rankdir=BT
-    subgraph cluster_farmcore {
-		label = "farmcore";
+    subgraph cluster_plumacore {
+		label = "pluma.core";
 		color=blue
 
-        "0" [label="farmcore", shape="box"];
-        "1" [label="farmcore.baseclasses", shape="box"];
-        "2" [label="farmcore.baseclasses.consolebase", shape="box"];
-        "3" [label="farmcore.baseclasses.hardwarebase", shape="box"];
-        "4" [label="farmcore.baseclasses.hierarchy", shape="box"];
-        "5" [label="farmcore.baseclasses.locking", shape="box"];
-        "6" [label="farmcore.baseclasses.logging", shape="box"];
-        "7" [label="farmcore.baseclasses.powerbase", shape="box"];
-        "8" [label="farmcore.baseclasses.relaybase", shape="box"];
-        "9" [label="farmcore.baseclasses.storagebase", shape="box"];
-        "10" [label="farmcore.board", shape="box"];
-        "11" [label="farmcore.exceptions", shape="box"];
-        "12" [label="farmcore.hostconsole", shape="box"];
-        "13" [label="farmcore.hub", shape="box"];
-        "14" [label="farmcore.interface", shape="box"];
-        "15" [label="farmcore.mocks", shape="box"];
-        "16" [label="farmcore.mocks.boardmock", shape="box"];
-        "17" [label="farmcore.mocks.consolemock", shape="box"];
-        "18" [label="farmcore.mocks.hardwaremock", shape="box"];
-        "19" [label="farmcore.mocks.powermock", shape="box"];
-        "20" [label="farmcore.mocks.relaymock", shape="box"];
-        "21" [label="farmcore.mocks.serialconsolemock", shape="box"];
-        "22" [label="farmcore.mocks.storagemock", shape="box"];
-        "23" [label="farmcore.modem", shape="box"];
-        "24" [label="farmcore.multimeter", shape="box"];
-        "26" [label="farmcore.pdu", shape="box"];
-        "27" [label="farmcore.powermulti", shape="box"];
-        "28" [label="farmcore.powerrelay", shape="box"];
-        "30" [label="farmcore.sdwire", shape="box"];
-        "31" [label="farmcore.serialconsole", shape="box"];
-        "32" [label="farmcore.softpower", shape="box"];
-        "33" [label="farmcore.telnetconsole", shape="box"];
-        "34" [label="farmcore.usb", shape="box"];
-        "35" [label="farmcore.usbenet", shape="box"];
-        "36" [label="farmcore.usbrelay", shape="box"];
+        "0" [label="pluma.core", shape="box"];
+        "1" [label="pluma.core.baseclasses", shape="box"];
+        "2" [label="pluma.core.baseclasses.consolebase", shape="box"];
+        "3" [label="pluma.core.baseclasses.hardwarebase", shape="box"];
+        "4" [label="pluma.core.baseclasses.hierarchy", shape="box"];
+        "5" [label="pluma.core.baseclasses.locking", shape="box"];
+        "6" [label="pluma.core.baseclasses.logging", shape="box"];
+        "7" [label="pluma.core.baseclasses.powerbase", shape="box"];
+        "8" [label="pluma.core.baseclasses.relaybase", shape="box"];
+        "9" [label="pluma.core.baseclasses.storagebase", shape="box"];
+        "10" [label="pluma.core.board", shape="box"];
+        "11" [label="pluma.core.exceptions", shape="box"];
+        "12" [label="pluma.core.hostconsole", shape="box"];
+        "13" [label="pluma.core.hub", shape="box"];
+        "14" [label="pluma.core.interface", shape="box"];
+        "15" [label="pluma.core.mocks", shape="box"];
+        "16" [label="pluma.core.mocks.boardmock", shape="box"];
+        "17" [label="pluma.core.mocks.consolemock", shape="box"];
+        "18" [label="pluma.core.mocks.hardwaremock", shape="box"];
+        "19" [label="pluma.core.mocks.powermock", shape="box"];
+        "20" [label="pluma.core.mocks.relaymock", shape="box"];
+        "21" [label="pluma.core.mocks.serialconsolemock", shape="box"];
+        "22" [label="pluma.core.mocks.storagemock", shape="box"];
+        "23" [label="pluma.core.modem", shape="box"];
+        "24" [label="pluma.core.multimeter", shape="box"];
+        "26" [label="pluma.core.pdu", shape="box"];
+        "27" [label="pluma.core.powermulti", shape="box"];
+        "28" [label="pluma.core.powerrelay", shape="box"];
+        "30" [label="pluma.core.sdwire", shape="box"];
+        "31" [label="pluma.core.serialconsole", shape="box"];
+        "32" [label="pluma.core.softpower", shape="box"];
+        "33" [label="pluma.core.telnetconsole", shape="box"];
+        "34" [label="pluma.core.usb", shape="box"];
+        "35" [label="pluma.core.usbenet", shape="box"];
+        "36" [label="pluma.core.usbrelay", shape="box"];
     }
-    subgraph cluster_farmtest {
-		label = "farmtest";
+    subgraph cluster_plumatest {
+		label = "pluma.test";
 		color=blue
 
-        "37" [label="farmtest", shape="box"];
-        "38" [label="farmtest.exceptions", shape="box"];
-        "39" [label="farmtest.stock", shape="box"];
-        "40" [label="farmtest.stock.deffuncs", shape="box"];
-        "41" [label="farmtest.stock.tests", shape="box"];
-        "42" [label="farmtest.test", shape="box"];
-        "43" [label="farmtest.testcontroller", shape="box"];
-        "44" [label="farmtest.unittest", shape="box"];
+        "37" [label="pluma.test", shape="box"];
+        "38" [label="pluma.test.exceptions", shape="box"];
+        "39" [label="pluma.test.stock", shape="box"];
+        "40" [label="pluma.test.stock.deffuncs", shape="box"];
+        "41" [label="pluma.test.stock.tests", shape="box"];
+        "42" [label="pluma.test.test", shape="box"];
+        "43" [label="pluma.test.testcontroller", shape="box"];
+        "44" [label="pluma.test.unittest", shape="box"];
     }
-    subgraph cluster_farmutils {
-		label = "farmutils";
+    subgraph cluster_plumautils {
+		label = "pluma.utils";
 		color=blue
 
-        "45" [label="farmutils", shape="box"];
-        "46" [label="farmutils.asynchronous", shape="box"];
-        "47" [label="farmutils.email", shape="box"];
-        "48" [label="farmutils.exceptions", shape="box"];
-        "49" [label="farmutils.git", shape="box"];
-        "50" [label="farmutils.graphing", shape="box"];
-        "51" [label="farmutils.helpers", shape="box"];
-        "52" [label="farmutils.interactive", shape="box"];
+        "45" [label="pluma.utils", shape="box"];
+        "46" [label="pluma.utils.asynchronous", shape="box"];
+        "47" [label="pluma.utils.email", shape="box"];
+        "48" [label="pluma.utils.exceptions", shape="box"];
+        "49" [label="pluma.utils.git", shape="box"];
+        "50" [label="pluma.utils.graphing", shape="box"];
+        "51" [label="pluma.utils.helpers", shape="box"];
+        "52" [label="pluma.utils.interactive", shape="box"];
     }
     "0" -> "10" [arrowhead="open", color="blue", arrowtail="none"];
     "0" -> "11" [arrowhead="open", color="blue", arrowtail="none"];

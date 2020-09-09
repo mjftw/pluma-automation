@@ -14,8 +14,6 @@ from pluma.core.dataclasses import SystemContext
 from .hardwarebase import HardwareBase
 from .logging import LogLevel
 
-DEFAULT_PROMPT = r'>>FARM>>'
-
 
 class ConsoleError(Exception):
     pass

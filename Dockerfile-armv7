@@ -1,10 +1,10 @@
 FROM arm32v7/ubuntu:18.04
 
-# Copy farm core
+# Copy pluma
 COPY ./ /root/pluma
 
 RUN apt-get update && apt-get install -y python3
 
-# Install farm core
+# Install pluma
 RUN /root/pluma/install.sh -n
 

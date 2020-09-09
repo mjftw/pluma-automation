@@ -4,12 +4,12 @@ digraph "classes_pluma" {
     // ==========================
     // ==== Farmcore Classes ====
     // ==========================
-    subgraph cluster_farmcore {
-		label = "farmcore";
+    subgraph cluster_plumacore {
+		label = "pluma.core";
 		color=blue
 
         "21" [label="{HardwareBase|\l|}", shape="record"];
-        label="farmcore";
+        label="pluma.core";
         "22" [label="{HardwareMock|num_children : int\l|add_child()\l}", shape="record"];
         "26" [label="{Hierarchy|\l|show_hier()\l}", shape="record"];
         "31" [label="{Locking|global_lock : lock\l|}", shape="record"];
@@ -93,8 +93,8 @@ digraph "classes_pluma" {
     // ==========================
     // ==== Farmtest Classes ====
     // ==========================
-    subgraph cluster_farmtest {
-		label = "farmtest";
+    subgraph cluster_plumatest {
+		label = "pluma.test";
 		color=blue
 
         "69" [label="{TestBase|board\ldata : dict\lsettings : dict\l|}", shape="record"];
@@ -115,8 +115,8 @@ digraph "classes_pluma" {
     // ===========================
     // ==== Farmutils Classes ====
     // ===========================
-    subgraph cluster_farmutils {
-		label = "farmutils";
+    subgraph cluster_plumautils {
+		label = "pluma.utils";
 		color=blue
 
         "17" [label="{Email|bcc\lbcc : list\lbody\lbody : NoneType\lbody_type\lbody_type : str\lcc\lcc : list\lfiles\lfiles : list\limages\limages : list\limages_inline : bool\lsmtp_password\lsmtp_password : NoneType\lsmtp_server\lsmtp_server : NoneType, str\lsmtp_timeout : int, NoneType\lsmtp_username\lsmtp_username : NoneType\lsubject\lsubject : NoneType, str\lto\lto : list\l|error()\lload_settings_file()\llog()\lsend()\l}", shape="record"];
@@ -137,7 +137,7 @@ digraph "classes_pluma" {
     "4" -> "5" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "4" -> "80" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
-    // = farmcore =
+    // = pluma.core =
     // MultimeterErrors
     "39" -> "35" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
     "39" -> "37" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
@@ -169,25 +169,25 @@ digraph "classes_pluma" {
     // ModemErrors
     "34" -> "33" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
-    // = farmtest=
+    // = pluma.test=
     "71" -> "67" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
-    // = farmutils
+    // = pluma.utils
     "17" -> "19" [arrowhead="normal", arrowtail="none", color="red", fontcolor="red", label="raises", style="dashed"];
 
     // == Catches Exceptions ==
-    // = farmcore =
+    // = pluma.core =
     "0" -> "10" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
     "4" -> "12" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
     "0" -> "14" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
     "71" -> "14" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
     "71" -> "5" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
 
-    // = farmtest =
+    // = pluma.test =
     "73" -> "2" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
     "73" -> "1" [arrowhead="normal", arrowtail="none", color="orange", fontcolor="orange", label="catches", style="dashed"];
 
-    // = farmutils =
+    // = pluma.utils =
 
     // Inheitance/Relisation
     "0" -> "52" [arrowhead="empty", arrowtail="none"];

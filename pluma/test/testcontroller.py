@@ -35,7 +35,7 @@ class TestController():
 
     Args:
         testrunner: TestRunner object to be run each iteration.
-            See :class:`~farmtest.test.TestRunner`
+            See :class:`~pluma.test.test.TestRunner`
         setup (deffered_function): Setup function.
             Default: None, no setup function.
             See :meth:`setup`
@@ -72,7 +72,7 @@ class TestController():
             occurs during testing.
             Saved to :attr:`settings`
             Default: True
-            See :func:`~farmutils.email.send_exception_email`
+            See :func:`~pluma.utils.email.send_exception_email`
         log_func (function): Log function to use.
             Default: print
 

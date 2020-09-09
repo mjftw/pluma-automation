@@ -15,7 +15,7 @@ ENV LC_ALL en_US.UTF-8
 # Copy pluma
 COPY ./ /root/pluma
 
-# Install farm core
+# Install pluma
 RUN /root/pluma/install.sh -n \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*

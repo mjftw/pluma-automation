@@ -68,7 +68,7 @@ setuptools.setup(
     description="Pluma Automation",
     long_description=long_description,
     long_description_content_type=long_description_content_type,
-    url="https://bitbucket.org/adeneo-embedded/pluma",
+    url="https://github.com/Witekio/pluma-automation/",
     packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': ['pluma=pluma.__main__:main'],

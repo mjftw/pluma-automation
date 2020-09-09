@@ -13,6 +13,6 @@ jobs:
     - name: Build the Docker image
       run: make docker-build
     - name: Run 'check' in Docker with sample files
-      run: docker run --rm witekio/pluma-automation:latest python3 -m pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
+      run: docker run --rm witekio/pluma-automation:latest pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
     - name: Run tests from Docker
       run: docker run --rm -e PLUMA_ENV=CI witekio/pluma-automation:latest bash -c "cd /root/pluma && make test"

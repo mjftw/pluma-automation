@@ -6,7 +6,7 @@ pipelines:
           image: ubuntu:18.04
           script:
             - ./install.sh -n
-            - ./python3 -m pluma check -c pluma.yml.sample -t pluma-target.yml.sample
+            - ./pluma check -c pluma.yml.sample -t pluma-target.yml.sample
             - export PLUMA_ENV=CI
             - make test
       - step:
@@ -15,5 +15,5 @@ pipelines:
             - docker
           script:
             - make docker-build
-            - docker run --rm witekio/pluma-automation:latest python3 -m pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
+            - docker run --rm witekio/pluma-automation:latest pluma check -c /etc/pluma/pluma.yml -t /etc/pluma/pluma-target.yml
             - docker run --rm -e PLUMA_ENV=CI witekio/pluma-automation:latest bash -c "cd /root/pluma && make test"

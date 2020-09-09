@@ -4,14 +4,14 @@ Pluma Automation can be installed locally, or ran with a Docker container. Both 
 
 ## Local installation
 
-In order to use the packages farmcore, farmtest, and farmutils you will first need to install them all as Python packages.
+In order to use the packages `pluma.core`, `pluma.test`, and `pluma.utils` you will first need to install them all as Python packages.
 This is done using the Python package manager pip3.  
 There are also some Linux system level dependencies, which are satisfied using Debian packages.  
 This does mean that the codebase is currently only tested to work on Debian based Linux distributions, such as Ubuntu 18.04.
 It should be possible to satisfy these dependencies on a different distribution, but no work has been done to test this.  
 
 An install scrip [install.sh](install.sh) is provided.  
-This script will install all of the required Debian packages, and install farmcore, farmtest, and farmutils as pip packages.  
+This script will install all of the required Debian packages, and install `pluma.core`, `pluma.test`, and `pluma.utils` as pip packages.  
 
 It can be used as below:
 
@@ -29,7 +29,7 @@ If you are planning to develop the packages, and want your local source changes 
 ./install.sh -d
 ```
 
-When installing with this option, local changes immediately take affect, and any Python scripts importing farmcore, farmutils, or farmtest will be affected.
+When installing with this option, local changes immediately take affect, and any Python scripts importing `pluma.core`, `pluma.utils`, or `pluma.test` will be affected.
 It is recommended to only use this option if you are actively developing these packages, and not for a normal install!
 
 For additional options, check the install help with:

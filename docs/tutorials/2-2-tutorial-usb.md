@@ -182,7 +182,7 @@ From this you can see that the USB relay has the USB address `1-1.2`.
 
 You could also use `lsusb` as above, although you'll have to work out the actual address yourself.
 
-As we've already seen, the `farmcore` class `Hub` can also give you this information as a plot.
+As we've already seen, the `pluma.core` class `Hub` can also give you this information as a plot.
 We can also get the Hub class to find us the USB address (and other information) of a given type of USB device, as we'll see in the next section.
 
 ## Find USB devices

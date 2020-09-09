@@ -5,12 +5,12 @@
 Pluma Automation is a tool designed to perform black box testing of embedded hardware; designed to be as lightweight as possible!
 
 At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
-This package is named `farmcore`.
+This package is named `pluma.core` (accessible as `pluma` top level package).
 
-On top of the hardware control library sits a testing framework `farmtest`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
-`farmcore` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
+On top of the hardware control library sits a testing framework `pluma.test`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
+`pluma.core` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
 
-Finally we have `farmutils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
+Finally we have `pluma.utils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
 
 ![System Diagram](automation_lab_system_diagram.png)
 
@@ -26,11 +26,6 @@ For customer specific modifications, a second repository should be created, foll
 
 You will likely create one such repository for your project, using it as your working directory, and including content from pluma in order to control hardware, run tests, and more.
 Expect to modify your `farm-<customer>` repository frequently, whilst leaving [pluma][pluma] unchanged unless really needed.
-
-### Examples and automated tests (farm-example)
-
-Some example test scripts can be found in the [farm-example][farm-example] repository.
-This repository also contains all of the automated tests that check that Pluma code is still functioning, although these are currently in development.
 
 ### Documentation (farm-documentation)
 
@@ -51,16 +46,20 @@ Since quick start guide guide is primarily aimed at getting up and running using
 The basic structure of [pluma][pluma] is shown below:
 
 ```preformatted-text
-.
-├── farmcore            - Hardware control classes
+pluma
+├── core                - Hardware control classes
 │   ├── ...
 │   └── baseclasses     - Bases for types of class
 │       └── ...
-├── farmtest            - Testing framework
+├── test                - Testing framework
 │   ├── ...
 │   └── stock           - Generic tests and functions that apply to any project
 │       └── ...
-├── farmutils           - Utility functions
+├── utils               - Utility functions
+│   └── ...
+├── cli                 - Command line interface
+│   └── ...
+├── plugins             - Built-in plugins, such as the core test suite
 │   └── ...
 ├── docs                - Documentation
 │   └── ...
@@ -75,5 +74,4 @@ Next: [Install and Run](./2-install-and-run.md) >>
 [sphinx]: https://www.sphinx-doc.org
 [readthedocs]: https://readthedocs.org
 [farm-documentation]: https://bitbucket.org/adeneo-embedded/farm-documentation
-[pluma]: https://bitbucket.org/adeneo-embedded/pluma
-[farm-example]: https://bitbucket.org/adeneo-embedded/farm-example
+[pluma]: https://github.com/Witekio/pluma-automation/
