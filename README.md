@@ -54,6 +54,7 @@ Look at the [Tutorials](./docs/tutorials/1-tutorial-introduction.md) for guidanc
 Pluma Automation can be run natively, or using Docker.
 
 ### Native
+
 For native installation, just run the `install.sh` script.
 This will install all the required system packages, then install the `pluma` python packages. This installer assumes you are running a debian based Linux distro, such as Ubuntu or Raspian.
 
@@ -62,6 +63,7 @@ This will install all the required system packages, then install the `pluma` pyt
 ```
 
 ### Docker container
+
 To run with Docker you must first build the container.
 
 ```shell
@@ -75,6 +77,7 @@ Run the container with your project:
 ```shell
 make docker-run-privileged PROJECT_DIR=/path/to/my/project PROJECT_SCRIPT=myscript.py
 ```
+
 **Note:** _For ARM based systems you must use the `docker-run-privileged-arm` target instead_.
 
 Where `PROJECT_DIR` is a directory containing all python scripts needed to run, and `PROJECT_SCRIPT` is the script to run from within that directory.
@@ -85,7 +88,8 @@ For more detailed instructions, see the [Install and Run](./docs/quick-start-gui
 This device test framework can be used from a simple command line interface, [`pluma`](pluma/__main__.py), which can be used to easily define and run tests for an embedded device. Running tests can be done simply by running `pluma run`.
 
 The following is a sample command line output when running tests from sample files:
-```
+
+```preformatted-text
 ./pluma run -c pluma.yml.sample -t pluma-target.yml.sample
 [ 0%] pluma.test.shelltest.ShellTest[target_setup] - test_body                PASS
 [16%] pluma.test.shelltest.ShellTest[host_setup] - test_body                  PASS
@@ -97,20 +101,24 @@ All tests were successful.
 ```
 
 It uses relies on two YAML configuration files:
+
 * `pluma.yml`: Defines the tests sequence and parameters
 * `pluma-target.yml`: Defines the device setup and settings: hardware used, credentials, serial, ssh.
 
 The CLI provides the following sub commands:
+
 * `pluma tests`: Show a list of the tests available and in use from the configuration
 * `pluma check`: Validates the device and tests definition
 * `pluma run`: Run the tests defined for the device
 * `pluma clean`: Remove build files and built executables
 
 ### Device definition YAML
+
 The device definition file (pluma-target.yml) contains hardware and connectivity related information, used to interface and control the device.
 This includes the console used, and how to control its power. A sample configuration is provided as [`pluma-target.yml.sample`](pluma-target.yml.sample).
 A minimal configuration for serial could look like this:
-```
+
+```yml
 #pluma-target.yml
 console:
   serial:
@@ -118,7 +126,8 @@ console:
 ```
 
 While a minimal configuration to connect via SSH would be:
-```
+
+```yml
 #pluma-target.yml
 credentials:
   # Hardcoded credentials. Can be removed entirely if authenticating
@@ -133,6 +142,7 @@ console:
 ```
 
 Supported attributes:
+
 * `credentials:` Credentials common to serial and SSH console
   * `login: <login>`
   * `password: <password>`
@@ -146,12 +156,13 @@ Supported attributes:
     * `password: <password>` - SSH specific password
 
 ### Tests definition YAML
+
 The tests definition (pluma.yml) contains all information related to the tests to be run on the target.
 This includes the test list, their parameters, sequence of test and general test settings. A sample configuration is provided as [`pluma.yml.sample`](pluma.yml.sample).
 
 The following is a basic tests definition example, that runs all tests in the order provided
 
-```
+```yml
 #pluma.yml
 settings:
   continue_on_fail: true
@@ -203,6 +214,7 @@ sequence:
 The test run will fail if any of the tests or tasks run fail.
 
 Supported attributes:
+
 * `settings:`
   * `continue_on_fail: <bool>` - Continue or stop when a test/task fails
   * `iterations: <int>` - Number of times the test sequence is executed
@@ -242,7 +254,7 @@ Supported attributes:
 
 ### Complete list of CLI options
 
-```
+```preformatted-text
 usage: pluma [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [-f] [--silent] [--debug]
                 [{run,check,tests,clean,version}]
 
@@ -270,29 +282,36 @@ optional arguments:
 ### CLI Frequently Asked Questions
 
 #### Is it possible to specify which device or test configuration to use?
+
 Yes, use the CLI `-c <tests_config>` option to use a specific test configuration, or `-t <target_config>` option to use a specific device configuration file.
 
 #### Is it possible to add custom tests?
+
 Custom tests can be added as:
-- Shell tests, directly in the test configuration file
-- Compiled or C test, using the `c_tests` test provider, and passing the source files, and path to Yocto SDK
-- Python tests, by directly adding your `.py` files to the `testsuite` folder, and creating test classes based on `TestBase` (see existing tests in the same folder for reference)
+
+* Shell tests, directly in the test configuration file
+* Compiled or C test, using the `c_tests` test provider, and passing the source files, and path to Yocto SDK
+* Python tests, by directly adding your `.py` files to the `testsuite` folder, and creating test classes based on `TestBase` (see existing tests in the same folder for reference)
 
 #### How to show the output of the commands ran?
+
 Use the `-v` or `--verbose` flag when invoking `pluma run` in order to show the commands output.
 
 #### Is it possible to run commands on the host?
+
 Yes, you can use `run_on_host: true` inside a `shell_test` in order to run the command specified on the host machine.
 
-```
+```yml
 - shell_test:
     script: echo 'echo from host!'
     run_on_host: true
 ```
 
 #### Is it possible to run tests multiple times?
+
 Yes, you can use the `iterations` setting in the test file to run the whole set of tests multiple times:
-```
+
+```yml
 settings:
   iterations: 20
 ```
