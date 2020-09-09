@@ -60,6 +60,7 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         self._last_received = ''
         self._raw_logfile_fd = None
         self._pex = None
+        self._requires_login = True
 
     @property
     @abstractmethod
@@ -253,7 +254,8 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
 
         return False
 
-    def wait_for_quiet(self, quiet: int = None, sleep_time: int = None, timeout: int = None) -> bool:
+    def wait_for_quiet(self, quiet: float = None, sleep_time: float = None,
+                       timeout: float = None) -> bool:
         if not self.is_open:
             self.open()
         quiet = quiet if quiet is not None else 0.5
@@ -284,8 +286,10 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
             else:
                 time_quiet = 0
 
-            self.log("Waiting for quiet... Waited[{:.1f}/{:.1f}s] Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...".format(
-                elapsed, timeout, time_quiet, quiet, read_buffer_size), level=LogLevel.DEBUG)
+            log_string = ("Waiting for quiet... Waited[{:.1f}/{:.1f}s] "
+                          "Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...")
+            self.log(log_string.format(elapsed, timeout, time_quiet,
+                                       quiet, read_buffer_size), level=LogLevel.DEBUG)
 
             last_read_buffer_size = read_buffer_size
 
@@ -537,7 +541,7 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
 
     @property
     def requires_login(self):
-        return True
+        return self._requires_login
 
     def wait_for_prompt(self, timeout: int = None):
         '''Wait for a prompt, throws if no prompt before timeout'''

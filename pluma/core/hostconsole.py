@@ -12,6 +12,8 @@ class HostConsole(ConsoleBase):
         self._pex = None
         super().__init__(system=system)
 
+        self._requires_login = False
+
     def __repr__(self):
         command = self.command
         if len(command) > 30:
@@ -44,7 +46,3 @@ class HostConsole(ConsoleBase):
         if not self.is_open:
             self.open()
         self._pex.interact()
-
-    @property
-    def requires_login(self):
-        return False

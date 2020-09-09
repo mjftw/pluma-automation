@@ -5,7 +5,7 @@ from .dataclasses import SystemContext
 
 
 class SSHConsole(HostConsole):
-    def __init__(self, target: str, system: SystemContext = None):
+    def __init__(self, target: str, system: SystemContext):
         self.target = target
 
         if not target:
