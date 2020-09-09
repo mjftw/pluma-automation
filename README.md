@@ -112,6 +112,8 @@ The CLI provides the following sub commands:
 * `pluma run`: Run the tests defined for the device
 * `pluma clean`: Remove build files and built executables
 
+The command line interface can also be accessed with `python3 -m pluma`, as `pluma` maps directly to this.
+
 ### Device definition YAML
 
 The device definition file (pluma-target.yml) contains hardware and connectivity related information, used to interface and control the device.
@@ -221,7 +223,7 @@ Supported attributes:
 
 * `sequence:` Ordered list of action to perform. Each elements can be one of [`shell_tests`, `core_test`, `c_tests`]. Elements can be repeated, but test names must be unique.
   * `- core_tests:` Test to be used from the common test suite
-    * `include: <list_of_tests>` - Will match exact names, and tests starting from the name used. Full list of tests visible with `pluma tests` commands, and in the `testsuite` folder.
+    * `include: <list_of_tests>` - Will match exact names, and tests starting from the name used. Full list of tests visible with `pluma tests` commands, and in the plugins folders (from `--plugin` CLI option).
     * `exclude: <list_of_test>` - Exclude tests, even if matched by `include`
     * `parameters`
       * `<testname>:` - Name of a test, must match its fully specified name, e.g. `testsuite.memory.MemorySize`. All the attributes under this will be directly passed to the test constructor. It is possible to use a YAML list of attributes to instantiate the test multiple times with different parameter sets.
@@ -255,16 +257,19 @@ Supported attributes:
 ### Complete list of CLI options
 
 ```preformatted-text
-usage: pluma [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [-f] [--silent] [--debug]
+usage: pluma [-h] [-v] [-q] [-c CONFIG] [-t TARGET] [--plugin PLUGIN] [-f] [--silent] [--debug]
                 [{run,check,tests,clean,version}]
 
 A lightweight automated testing tool for embedded devices.
 
 positional arguments:
   {run,check,tests,clean,version}
-                        command for pluma, defaults to "run". "run": Run the tests suite, "check":
-                        validate configuration files and tests, "tests": list all tests available and
-                        selected, "clean": remove logs, toolchains, and built executables
+                        command for pluma, defaults to "run".
+                        "run": Run the tests suite,
+                        "check": validate configuration files and tests,
+                        "tests": list all tests available and selected,
+                        "clean": remove logs,
+                        toolchains, and built executables
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -274,6 +279,7 @@ optional arguments:
                         path to the tests configuration file. Default: "pluma.yml"
   -t TARGET, --target TARGET
                         path to the target configuration file. Default: "pluma-target.yml"
+  --plugin PLUGIN       load plugin modules from directory path
   -f, --force           force operation instead of prompting
   --silent              silence all output
   --debug               enable debug information
@@ -291,7 +297,7 @@ Custom tests can be added as:
 
 * Shell tests, directly in the test configuration file
 * Compiled or C test, using the `c_tests` test provider, and passing the source files, and path to Yocto SDK
-* Python tests, by directly adding your `.py` files to the `testsuite` folder, and creating test classes based on `TestBase` (see existing tests in the same folder for reference)
+* Python tests, by creating a `<plugin_name>` folder with .py files, and creating test classes based on `TestBase` (see existing tests in the same folder for reference). These are specified with the `--plugin /path/to/my/plugin_dir` CLI option.
 
 #### How to show the output of the commands ran?
 
