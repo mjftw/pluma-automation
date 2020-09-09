@@ -3,7 +3,8 @@ from nanocom import Nanocom
 
 import pexpect.fdpexpect
 
-from .baseclasses import ConsoleBase, SystemContext
+from .baseclasses import ConsoleBase
+from .dataclasses import SystemContext
 
 
 class SerialConsole(ConsoleBase):

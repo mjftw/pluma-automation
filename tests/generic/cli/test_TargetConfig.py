@@ -1,7 +1,7 @@
 import copy
 import pytest
 
-from pluma.core.baseclasses import SystemContext
+from pluma.core.dataclasses import SystemContext
 from pluma.cli import TargetConfig, TargetFactory, TargetConfigError, \
     Configuration, Credentials, ConfigurationError
 from pluma import IPPowerPDU, SoftPower

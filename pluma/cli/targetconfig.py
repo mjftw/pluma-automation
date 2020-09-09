@@ -4,8 +4,9 @@ from typing import List
 from copy import deepcopy
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
-from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase, SystemContext, Credentials
 from pluma.cli import Configuration, ConfigurationError, TargetConfigError
+from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase
+from pluma.core.dataclasses import SystemContext, Credentials
 
 log = Logger()
 

@@ -1,7 +1,8 @@
 import time
 from pexpect import TIMEOUT, EOF
 
-from .baseclasses import HardwareBase, ConsoleBase, SystemContext
+from .baseclasses import HardwareBase, ConsoleBase
+from .dataclasses import SystemContext
 from .exceptions import ConsoleExceptionKeywordReceivedError
 
 

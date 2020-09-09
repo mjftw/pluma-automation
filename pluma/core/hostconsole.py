@@ -1,7 +1,8 @@
 import pexpect
 import pexpect.fdpexpect
 
-from .baseclasses import ConsoleBase, SystemContext
+from .baseclasses import ConsoleBase
+from .dataclasses import SystemContext
 from .exceptions import ConsoleCannotOpenError
 
 

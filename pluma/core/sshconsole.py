@@ -1,7 +1,7 @@
 import subprocess
 
 from .hostconsole import HostConsole, ConsoleCannotOpenError
-from .baseclasses import SystemContext
+from .dataclasses import SystemContext
 
 
 class SSHConsole(HostConsole):

@@ -9,8 +9,8 @@ from datetime import datetime
 from abc import ABCMeta, abstractmethod
 from functools import wraps
 from pluma.utils import datetime_to_timestamp
+from pluma.core.dataclasses import SystemContext
 
-from .context import SystemContext
 from .hardwarebase import HardwareBase
 from .logging import LogLevel
 
