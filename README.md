@@ -90,7 +90,7 @@ This device test framework can be used from a simple command line interface, [`p
 The following is a sample command line output when running tests from sample files:
 
 ```preformatted-text
-./pluma run -c pluma.yml.sample -t pluma-target.yml.sample
+pluma run -c pluma.yml.sample -t pluma-target.yml.sample
 [ 0%] pluma.test.shelltest.ShellTest[target_setup] - test_body                PASS
 [16%] pluma.test.shelltest.ShellTest[host_setup] - test_body                  PASS
 [33%] pluma.test.shelltest.ShellTest[multiple_commands] - test_body           PASS
