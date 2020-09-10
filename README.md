@@ -145,6 +145,9 @@ console:
 
 Supported attributes:
 
+* `system:` System configuration
+  * `prompt_regex: <regex>` - The regex used to detected the system prompt
+
 * `credentials:` Credentials common to serial and SSH console
   * `login: <login>`
   * `password: <password>`
