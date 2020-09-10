@@ -488,27 +488,36 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
             matches.append(success_match)
 
         fail_message = f'Failed to log in with login="{username}" and password="{password}"'
-        (__, matched) = self.send_and_expect('', match=matches)
+        (output, matched) = self.send_and_expect('', match=matches)
         if not matched:
-            self.error(fail_message, ConsoleLoginFailedError)
+            self.error(f'{fail_message}:{os.linesep}  Output: {output}',
+                       ConsoleLoginFailedError)
 
         if matched == username_match:
+            self.log(f'Login prompt detected, sending username "{username}"')
             matches.remove(username_match)
-            (__, matched) = self.send_and_expect(cmd=username,
-                                                 match=matches)
+            (output, matched) = self.send_and_expect(cmd=username,
+                                                     match=matches)
 
         if password_match and matched == password_match:
             if not password:
                 self.error(f'{fail_message}: No password set, but password prompt detected',
                            ConsoleLoginFailedError)
 
+            self.log('Password prompt detected, sending password')
             matches.remove(password_match)
-            (__, matched) = self.send_and_expect(cmd=password,
-                                                 match=matches)
+            (output, matched) = self.send_and_expect(cmd=password,
+                                                     match=matches)
 
         if ((success_match and matched != success_match) or
                 matched in [pexpect.TIMEOUT, pexpect.EOF]):
-            self.error(fail_message, ConsoleLoginFailedError)
+            self.error(f'{fail_message}: Failed to detect the prompt "{success_match}".'
+                       'The prompt can be set in the target configuration with'
+                       f' the "system.prompt_regex" attribute:{os.linesep}  Output: {output}',
+                       ConsoleLoginFailedError)
+
+        if success_match and matched == success_match:
+            self.log('Prompt detected')
 
         self.log('Login successful')
 
