@@ -87,3 +87,16 @@ class SetAction(DeviceActionBase):
         if self.device_console:
             log.log(f'Setting device console to {self.device_console}')
             self.board.console = self.board.get_console(self.device_console)
+
+
+@DeviceActionRegistry.register()
+class CopyToDeviceAction(DeviceActionBase):
+    def __init__(self, board: Board, file: str, destination: str, timeout: int = 15):
+        super().__init__(board)
+        self.file = file
+        self.destination = destination
+        self.timeout = timeout
+
+    def execute(self):
+        log.log(f'Copying {self.file} to target device destination {self.destination}')
+        self.board.console.copy_to_target(self.file, self.destination, self.timeout)
