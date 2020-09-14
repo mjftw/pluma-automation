@@ -1,3 +1,4 @@
+import os
 import setuptools
 import subprocess
 import sys
@@ -21,21 +22,24 @@ def get_version():
             'See: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git\n'
         )
 
-    version = subprocess.check_output(
-        ['git', 'describe', '--tags', '--always', '--match', 'v*.*.*'])
-    return version.decode('utf-8').strip()
+    try:
+        version = subprocess.check_output(
+            ['git', 'describe', '--tags', '--always', '--match', 'v*.*.*'])
+        version = version.decode('utf-8').strip()
+    except Exception as e:
+        version = None
+        print('Failed to read Git version, possibly because not .git repository'
+              f' is present in this folder. Falling back to "{version}".{os.linesep*2}{str(e)}')
+    finally:
+        return version
 
 
-readme_file = "readme.md"
+readme_file = 'README.md'
 long_description = None
 long_description_content_type = None
-try:
-    with open(readme_file, "r") as fh:
-        long_description = fh.read()
-        long_description_content_type = "text/markdown"
-except FileNotFoundError:
-    print('Cannot find readme {}. Omitting long package description'.format(
-        readme_file))
+with open(readme_file, 'r') as fh:
+    long_description = fh.read()
+    long_description_content_type = 'text/markdown'
 
 requires = [
     'pyserial',
@@ -61,14 +65,14 @@ if sys.version_info[:2] == (3, 6):
     requires.append('dataclasses')
 
 setuptools.setup(
-    name="pluma-automation",
+    name='pluma-automation',
     version=get_version(),
-    author="Witekio",
-    author_email="mwebster@witekio.com",
-    description="Pluma Automation",
+    author='Witekio',
+    author_email='mwebster@witekio.com',
+    description='Pluma Automation',
     long_description=long_description,
     long_description_content_type=long_description_content_type,
-    url="https://github.com/Witekio/pluma-automation/",
+    url='https://github.com/Witekio/pluma-automation/',
     packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': ['pluma=pluma.__main__:main'],
@@ -76,9 +80,9 @@ setuptools.setup(
     python_requires='>=3.6',
     install_requires=requires,
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
-        "Operating System :: POSIX :: Linux",
-        "Development Status :: 3 - Alpha"
+        'Programming Language :: Python :: 3',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'Operating System :: POSIX :: Linux',
+        'Development Status :: 3 - Alpha'
     ],
 )
