@@ -41,11 +41,6 @@ Just be sure to raise a pull request with your shiny new feature ;).
 
 ## Getting Started
 
-Pluma Automation has a documentation site, hosting all the documents below, as well as an up to date API guide.  
-It can be found at [http://labdocs](http://labdocs).
-
-**Note:** _The docs site is only accessible from within the Witekio network_
-
 To get up and running quickly, check out the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md).  
 Look at the [Tutorials](./docs/tutorials/1-tutorial-introduction.md) for guidance and examples on how to use Pluma Automation in your project.
 
@@ -360,7 +355,7 @@ You can run the project's hardware independent tests with:
 make test
 ```
 
-These do not require any hardware to be connected and should run on any system Linux system that supports Python3.
+These do not require any hardware to be connected and should run on any Linux system that supports Python3.
 
 ### Hardware specific tests
 
