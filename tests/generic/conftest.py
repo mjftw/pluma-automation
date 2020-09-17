@@ -1,5 +1,6 @@
 import pty
 import os
+import time
 from collections import namedtuple
 from pytest import fixture
 from unittest.mock import MagicMock
@@ -22,6 +23,20 @@ def soft_power():
     )
 
 
+class SerialConsoleProxy:
+    def __init__(self, proxy, console: ConsoleBase):
+        self.proxy = proxy
+        self.console = console
+
+    def fake_reception(self, message: str):
+        time.sleep(0.1)
+        self.proxy.write(message)
+
+    def read_serial_output(self):
+        # Give time for the data written to propagate
+        return self.proxy.read(timeout=0.2)
+
+
 @fixture
 def serial_console_proxy():
     # === Setup ===
@@ -39,8 +54,6 @@ def serial_console_proxy():
 
     # Clear master file just in case
     proxy.read(timeout=0)
-
-    SerialConsoleProxy = namedtuple('SerialConsoleProxy', ['proxy', 'console'])
 
     # === Return Fixture ===
     yield SerialConsoleProxy(proxy, console)

@@ -420,25 +420,28 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         self.send_nonblocking(cmd, send_newline=send_newline,
                               flush_before=flush_before)
 
-        matched = self.wait_for_match(timeout=timeout, match=watches)
+        matched_regex = self.wait_for_match(timeout=timeout, match=watches)
         received = self.decode(self._pex.before)
         new_received = received[len(self._last_received):]
 
-        if matched:
+        if matched_regex:
+            matched_text = self.decode(self._pex.after)
+            received += matched_text
             self._last_received = ''
-            match_str = f'<<matched expects={watches}>>{matched}<</matched>>'
+            debug_match_str = f'<<matched expects={watches}>>{matched_regex}<</matched>>'
         else:
+            matched_text = None
             self._last_received = received
-            match_str = f'<<not_matched expects={watches}>>'
+            debug_match_str = f'<<not_matched expects={watches}>>'
 
-        self.log(f'<<received>>{new_received}{match_str}<</received>>',
+        self.log(f'<<received>>{new_received}{debug_match_str}<</received>>',
                  force_echo=False, level=LogLevel.DEBUG)
 
-        if matched in excepts:
-            self.error(f'Matched [{matched}] is in exceptions list {excepts}',
+        if matched_regex in excepts:
+            self.error(f'Matched [{matched_regex}] is in exceptions list {excepts}',
                        exception=ConsoleExceptionKeywordReceivedError)
 
-        return (received, matched)
+        return (received, matched_text)
 
     def send_nonblocking(self, cmd: str,
                          send_newline: bool = True,
@@ -509,15 +512,13 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
             (output, matched) = self.send_and_expect(cmd=password,
                                                      match=matches)
 
-        if ((success_match and matched != success_match) or
-                matched in [pexpect.TIMEOUT, pexpect.EOF]):
+        if matched:
+            self.log('Prompt detected')
+        elif not matched and success_match:
             self.error(f'{fail_message}: Failed to detect the prompt "{success_match}".'
                        'The prompt can be set in the target configuration with'
                        f' the "system.prompt_regex" attribute:{os.linesep}  Output: {output}',
                        ConsoleLoginFailedError)
-
-        if success_match and matched == success_match:
-            self.log('Prompt detected')
 
         self.log('Login successful')
 

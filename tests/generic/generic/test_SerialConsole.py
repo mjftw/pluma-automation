@@ -141,19 +141,79 @@ def test_SerialConsole_send_matches_regex(serial_console_proxy):
 
 
 def test_SerialConsole_send_and_expect_matches_regex(serial_console_proxy):
-    msg = 'Hello World! 123FooBarBaz'
-    regex = '[0-3]+Foo'
+    expected_match = '123Match'
+    expected_received = f'Multiline content\n and {expected_match}'
+    regex = '[0-3]+Match'
 
-    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
-                               cmd='abc', match=regex)
+    send_and_expect_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                                         cmd='abc', match=regex)
 
-    # Wait short time for function to start
-    time.sleep(0.1)
+    serial_console_proxy.fake_reception(expected_received+'Trailing content')
 
-    serial_console_proxy.proxy.write(msg)
+    received, matched = send_and_expect_result.get()
+    assert received == expected_received
+    assert matched == expected_match
 
-    __, matched = async_result.get()
-    assert matched == regex
+
+def test_SerialConsole_send_and_expect_matches_regex_with_previous_content(
+        serial_console_proxy):
+    expected_match = '123Match'
+    expected_received = f'Multiline content\n and {expected_match}'
+    regex = '[0-3]+Match'
+
+    serial_console_proxy.fake_reception('Some content sent before trying to match')
+
+    send_and_expect_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                                         cmd='abc', match=regex)
+
+    serial_console_proxy.fake_reception(expected_received)
+
+    received, matched = send_and_expect_result.get()
+    assert received == expected_received
+    assert matched == expected_match
+
+
+def test_SerialConsole_send_and_expect_returns_received_if_no_match(serial_console_proxy):
+    expected_received = 'Not really matching.'
+    regex = 'A regex'
+
+    send_and_expect_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                                         cmd='abc', match=regex, timeout=0.5)
+
+    serial_console_proxy.fake_reception(expected_received)
+
+    received, matched = send_and_expect_result.get()
+    assert received == expected_received
+    assert matched is None
+
+
+def test_SerialConsole_send_and_expect_ignores_previous_content(serial_console_proxy):
+    expected_received = 'Not really matching.'
+    regex = '[0-3]+Match'
+
+    serial_console_proxy.fake_reception(expected_received)
+
+    send_and_expect_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                                         cmd='abc', match=regex, timeout=0.5)
+
+    received, matched = send_and_expect_result.get()
+    assert received == received
+    assert matched is None
+
+
+@pytest.mark.parametrize('timeout', [0.2, 1])
+def test_SerialConsole_send_and_expect_returns_after_timeout(serial_console_proxy, timeout):
+    start_time = time.time()
+
+    send_and_expect_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                                         cmd='abc', match='NoFoo', timeout=timeout)
+
+    serial_console_proxy.fake_reception('abc\ndef')
+
+    send_and_expect_result.get()
+    total_duration = time.time() - start_time
+
+    assert 0.8 * timeout < total_duration < 1.2*timeout
 
 
 def test_SerialConsole_check_alive_returns_true_when_target_responds(serial_console_proxy):
