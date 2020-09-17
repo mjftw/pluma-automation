@@ -41,13 +41,14 @@ def test_LoginAction_should_call_login(mock_board):
 
 
 def test_WaitAction_should_wait(mock_board):
-    action = WaitAction(mock_board, duration=1.5)
+    wait = 0.5
+    action = WaitAction(mock_board, duration=wait)
     start = time.time()
     action.execute()
     end = time.time()
 
     elapsed = end-start
-    assert elapsed > 1 and elapsed < 2
+    assert 0.8*wait < elapsed < 1.2*wait
 
 
 def test_WaitForPatternAction_should_fail_on_timeout(mock_board):
