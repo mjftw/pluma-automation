@@ -75,9 +75,17 @@ class Board(HardwareBase):
             raise ValueError(
                 "Error settings consoles: Must be a ConsoleBase or dict")
 
-        if new_consoles and self._current_console_name not in new_consoles.keys():
-            self._current_console_name = next(
-                iter(new_consoles)) if new_consoles else None
+        if new_consoles:
+            # Set current console to the first passed, in the previous one
+            # is not present
+            if self._current_console_name not in new_consoles.keys():
+                self._current_console_name = next(
+                    iter(new_consoles)) if new_consoles else None
+
+            for console_name, console in new_consoles.items():
+                if not isinstance(console, ConsoleBase):
+                    raise ValueError(f'Console "{console_name}" ({console}) is null or '
+                                     'not an instance of ConsoleBase')
 
         self._consoles = new_consoles
 

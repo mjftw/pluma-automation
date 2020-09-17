@@ -38,7 +38,14 @@ class TargetConfig:
             config.pop('power'), ssh)
 
         config.ensure_consumed()
-        return Board('Test board', console={'serial': serial, 'ssh': ssh}, power=power,
+
+        consoles = {}
+        if serial:
+            consoles['serial'] = serial
+        if ssh:
+            consoles['ssh'] = ssh
+
+        return Board('Test board', console=consoles, power=power,
                      system=system)
 
     @staticmethod
