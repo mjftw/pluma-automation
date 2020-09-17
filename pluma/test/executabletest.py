@@ -58,8 +58,8 @@ class ExecutableTest(TestBase):
             console = self.board.console
             if self.host_file:
                 temp_folder = self.random_folder_name()
-                CommandRunner.run(test_name=self._test_name, command=f'mkdir {temp_folder}', console=console,
-                                  log_function=None, timeout=self.timeout)
+                CommandRunner.run(test_name=self._test_name, command=f'mkdir {temp_folder}',
+                                  console=console, timeout=self.timeout)
                 destination = os.path.join(
                     temp_folder, os.path.basename(self.executable_file))
                 console.copy_to_target(self.executable_file, destination)
@@ -72,12 +72,12 @@ class ExecutableTest(TestBase):
                 f'Failed to run script test "{self}": no console available')
 
         try:
-            CommandRunner.run(test_name=self, command=filepath, console=console,
-                              log_function=self.board.log, timeout=self.timeout)
+            CommandRunner.run(test_name=self, command=filepath,
+                              console=console, timeout=self.timeout)
         finally:
             if temp_folder:
-                CommandRunner.run(test_name=self, command=f'rm -r {temp_folder}', console=console,
-                                  log_function=None, timeout=self.timeout)
+                CommandRunner.run(test_name=self, command=f'rm -r {temp_folder}',
+                                  console=console, timeout=self.timeout)
 
     def random_folder_name(self):
         characters = string.ascii_letters + string.digits
