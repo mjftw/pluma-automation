@@ -49,8 +49,8 @@ class SSHConsole(HostConsole):
 
     def _scp_copy(self, scp_source, scp_destination, timeout=30):
         command = f'scp {scp_source} {scp_destination}'
-        if self.login_pass:
-            command = f'sshpass -p {self.login_pass} {command}'
+        if self.system.credentials.password:
+            command = f'sshpass -p {self.system.credentials.password} {command}'
 
         try:
             command_list = command.split()
