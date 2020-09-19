@@ -23,8 +23,8 @@ sequence:
       timeout: 2
     cat_meminfo:
       script: cat /proc/meminfo
-      # should_print: ['MemFree:']
-      # should_not_print: ['error', 'unknown']
+      should_match_regex: ['MemFree:', 'MemAvailable:']
+      should_not_match_regex: ['error', 'unknown']
       timeout: 2
 - core_tests:
     include: [testsuite.memory, testsuite.kernel, testsuite.networking]

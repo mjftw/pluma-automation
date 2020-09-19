@@ -1,5 +1,6 @@
 import os
 import re
+from typing import List
 
 from pluma.core.baseclasses import ConsoleBase, Logger
 from pluma.test import TestingException
@@ -62,15 +63,15 @@ class CommandRunner():
 
     @staticmethod
     def log_error(test_name: str, sent: str, output: str, error: str,
-                  should_print=None, should_not_print=None):
+                  match_regex: List[str] = None, error_regex: List[str] = None):
         message = f'Script test "{test_name}": {error}:{os.linesep}'
         message += CommandRunner.format_command_log(sent=sent, output=output,
-                                                    should_print=should_print,
-                                                    should_not_print=should_not_print)
+                                                    match_regex=match_regex,
+                                                    error_regex=error_regex)
         raise TaskFailed(message)
 
     @staticmethod
-    def format_command_log(sent: str, output: str, should_print=None, should_not_print=None):
+    def format_command_log(sent: str, output: str, match_regex=None, error_regex=None):
         '''Return a formatted log output regarding a command and its output'''
         formatted_output = ''
         first_line = True
@@ -81,43 +82,29 @@ class CommandRunner():
             first_line = False
 
         sent_line = f'  Sent:     $ {sent}{os.linesep}'
-        should_print_line = f'  Expected: {should_print}{os.linesep}'
-        should_not_print_line = f'  Errors:   {should_not_print}{os.linesep}'
+        match_regex_line = f'  Expected: {match_regex}{os.linesep}' if match_regex else ''
+        error_regex_line = f'  Errors:   {error_regex}{os.linesep}' if error_regex else ''
         output_line = f'  Output:   {formatted_output}'
 
         message = sent_line
-        if should_print:
-            message += should_print_line
-        if should_not_print:
-            message += should_not_print_line
-
+        message += match_regex_line
+        message += error_regex_line
         message += output_line
         return message
 
     @staticmethod
     def check_output(test_name: str, command: str, output: str,
-                     should_print: list, should_not_print: list):
+                     match_regex: List[str], error_regex: List[str]):
         '''Check that command output includes expected content, and no error content'''
-        should_print = should_print or []
-        should_not_print = should_not_print or []
+        if CommandRunner.output_matches_any_pattern(error_regex, output):
+            CommandRunner.log_error(test_name=test_name, sent=command, output=output,
+                                    error_regex=error_regex,
+                                    error='Response matched an error pattern')
 
-        if should_not_print:
-            if not CommandRunner.output_matches_pattern(should_not_print, output):
-                CommandRunner.log_error(test_name=test_name, sent=command, output=output,
-                                        should_not_print=should_not_print,
-                                        error='Response matched error condition')
-
-        if should_print:
-            pattern_matched = CommandRunner.output_matches_pattern(should_print, output)
-
-            if not pattern_matched:
-                CommandRunner.log_error(test_name=test_name, sent=command, output=output,
-                                        should_print=should_print,
-                                        error='Response did not match expected')
-            else:
-                message = CommandRunner.format_command_log(sent=command, output=output,
-                                                           should_print=should_print)
-                log.log(message)
+        if not CommandRunner.output_matches_all_patterns(match_regex, output):
+            CommandRunner.log_error(test_name=test_name, sent=command, output=output,
+                                    match_regex=match_regex,
+                                    error='Response did not match all expected patterns')
 
     @staticmethod
     def cleanup_command_output(command: str, output: str) -> str:
@@ -153,18 +140,31 @@ class CommandRunner():
         return int(retcode_match.group(1))
 
     @staticmethod
-    def output_matches_pattern(patterns, output):
-        '''Return wether the output matches any of the pattern or not.'''
-        if patterns is None:
-            raise ValueError('None pattern provided')
+    def output_matches_all_patterns(patterns: List[str], output: str) -> bool:
+        '''Return wether the output matches all patterns or not.'''
+        if not patterns:
+            return True
 
         if not isinstance(patterns, list):
             patterns = [patterns]
 
         for pattern in patterns:
-            regexp = re.compile(pattern)
-            for line in output.splitlines():
-                if regexp.search(line):
-                    return True
+            if not re.search(pattern, output, re.MULTILINE):
+                return False
+
+        return True
+
+    @staticmethod
+    def output_matches_any_pattern(patterns: List[str], output: str) -> bool:
+        '''Return wether the output matches any of the pattern or not.'''
+        if not patterns:
+            return False
+
+        if not isinstance(patterns, list):
+            patterns = [patterns]
+
+        for pattern in patterns:
+            if re.search(pattern, output, re.MULTILINE):
+                return True
 
         return False

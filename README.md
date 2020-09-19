@@ -212,7 +212,7 @@ sequence:
       script:
       - echo "doing some cleanup"
       - ls
-      should_print: ["doing some cleanup"]
+      should_match_regex: ["doing some cleanup"]
 ```
 
 The test run will fail if any of the tests or tasks run fail.
@@ -232,8 +232,8 @@ Supported attributes:
   * `- shell_tests:` Script tests or tasks
     * `<testname>:`
       * `script: <string or list>` - Command(s) to run on the target
-      * `should_print: <list>` - List of expected outputs when running the command(s). Receiving any of these outputs will cause the test to pass.
-      * `should_not_print: <list>` - List of error outputs when running the command(s). Receiving any of these outputs will cause the test to fail.
+      * `should_match_regex: <list>` - List of expected outputs when running the command(s). Receiving all of these outputs will cause the test to pass.
+      * `should_not_match_regex: <list>` - List of error outputs when running the command(s). Receiving any of these outputs will cause the test to fail.
       * `timeout: <timeout_in_seconds>` - Duration to wait for "silence" on the console after running a command. Will return earlier if the console stays silent.
       * `run_on_host: <bool>` - Run on the host or target device. Defaults to `false`.
       * `runs_in_shell: <bool>` - When a command runs it a shell, the return code is read and used to deduce success/failure of the command. Can be set to `false` to only send the command instead. Defaults to `true`.

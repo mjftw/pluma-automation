@@ -1,3 +1,5 @@
+from typing import List
+
 from pluma.core.baseclasses import Logger
 from pluma import HostConsole, Board
 from pluma.core.baseclasses import ConsoleBase
@@ -9,12 +11,13 @@ log = Logger()
 class ShellTest(TestBase):
     shell_test_index = 0
 
-    def __init__(self, board: Board, script: str, name: str = None, should_print: list = None,
-                 should_not_print: list = None, run_on_host: bool = False, timeout: int = None,
-                 runs_in_shell: bool = True, login_automatically: bool = True):
+    def __init__(self, board: Board, script: str, name: str = None,
+                 should_match_regex: List[str] = None,  should_not_match_regex: List[str] = None,
+                 run_on_host: bool = False, timeout: int = None,  runs_in_shell: bool = True,
+                 login_automatically: bool = True):
         super().__init__(board)
-        self.should_print = should_print or []
-        self.should_not_print = should_not_print or []
+        self.should_match_regex = should_match_regex
+        self.should_not_match_regex = should_not_match_regex
         self.run_on_host = run_on_host
         self.timeout = timeout if timeout is not None else 5
         self.runs_in_shell = runs_in_shell
@@ -71,8 +74,10 @@ class ShellTest(TestBase):
             output = CommandRunner.run_raw(test_name=self._test_name, console=console,
                                            command=script, timeout=timeout)
 
-        if self.should_print or self.should_not_print:
+        if self.should_match_regex or self.should_not_match_regex:
             CommandRunner.check_output(test_name=self._test_name, command=script, output=output,
-                                       should_print=self.should_print,
-                                       should_not_print=self.should_not_print)
+                                       match_regex=self.should_match_regex,
+                                       error_regex=self.should_not_match_regex)
+
+        log.log(CommandRunner.format_command_log(sent=script, output=output))
         return output
