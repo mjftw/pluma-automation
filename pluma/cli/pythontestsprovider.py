@@ -1,6 +1,5 @@
-import importlib
-import re
 import inspect
+from typing import List
 from operator import attrgetter
 
 import pluma.plugins
@@ -26,15 +25,18 @@ class PythonTestsProvider(TestsProvider):
         if not config:
             return []
 
-        include = config.pop('include') or []
-        exclude = config.pop('exclude') or []
+        includes = config.pop('include') or []
+        excludes = config.pop('exclude') or []
         parameters = config.pop('parameters') or Configuration()
         all_tests = self.find_python_tests()
 
+        PythonTestsProvider.validate_match_strings(all_tests,
+                                                   includes+excludes)
+
         # Instantiate tests selected
         for test in all_tests:
-            test.selected = PythonTestsProvider.test_matches(
-                test.name, include, exclude)
+            test.selected = PythonTestsProvider.test_selected(test.name,
+                                                              includes, excludes)
 
             test_parameters_list = parameters.pop_raw(test.name)
             # If no parameters used, just create one empty set
@@ -66,16 +68,33 @@ class PythonTestsProvider(TestsProvider):
         return sorted(all_tests, key=attrgetter('name'))
 
     @staticmethod
-    def test_matches(test_name: str, include: list, exclude: list) -> bool:
-        # Very suboptimal way of doing it.
-        for regex_string in exclude:
-            regex = re.compile(regex_string)
-            if re.match(regex, test_name):
+    def test_selected(test_name: str, includes: List[str], excludes: List[str]) -> bool:
+        for exclude in excludes:
+            if PythonTestsProvider.test_match(test_name, match_string=exclude):
                 return False
 
-        for regex_string in include:
-            regex = re.compile(regex_string)
-            if re.match(regex, test_name):
+        for include in includes:
+            if PythonTestsProvider.test_match(test_name, match_string=include):
                 return True
 
         return False
+
+    @staticmethod
+    def test_match(test_name: str, match_string: str):
+        test_name_list = test_name.split('.')
+        match_string_list = match_string.split('.')
+
+        return all(name == match for name, match in
+                   zip(test_name_list, match_string_list))
+
+    @staticmethod
+    def validate_match_strings(all_tests: List[TestDefinition], match_strings: List[str]):
+        '''Error if any match_string matches no test'''
+        not_matched = match_strings
+        for test in all_tests:
+            for match_string in match_strings:
+                if PythonTestsProvider.test_match(test.name, match_string):
+                    not_matched.remove(match_string)
+
+        if not_matched:
+            raise ValueError(f'Some include/exclude rules matched no tests: {not_matched}')
