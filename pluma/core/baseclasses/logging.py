@@ -25,6 +25,8 @@ DEFAULT_LOG_TIME = False
 """ Add log name to logs """
 DEFAULT_LOG_NAME = None
 
+STYLE_NORMAL = '\033[0m'
+STYLE_BOLD = '\033[1m'
 COLOR_STYLES = {
     'black': '\033[30m',
     'red': '\033[31m',
@@ -33,10 +35,9 @@ COLOR_STYLES = {
     'blue': '\033[34m',
     'purple': '\033[35m',
     'cyan': '\033[36m',
-    'white': '\033[3m'
+    'white': '\033[3m',
+    'normal': STYLE_NORMAL,
 }
-STYLE_NORMAL = '\033[0m'
-STYLE_BOLD = '\033[1m'
 
 
 class LogLevel(IntEnum):
