@@ -1,16 +1,16 @@
-import os
-import re
-
-from pluma.core.baseclasses import ConsoleBase, Logger
+from pluma.core.baseclasses import Logger
 from pluma import HostConsole, Board
-from .test import TestBase, TaskFailed
+from pluma.test import CommandRunner, TestBase, TaskFailed
+
+log = Logger()
 
 
 class ShellTest(TestBase):
     shell_test_index = 0
 
-    def __init__(self, board: Board, script: str, name: str = None, should_print: list = None, should_not_print: list = None,
-                 run_on_host: bool = False, timeout: int = None, runs_in_shell: bool = True, login_automatically: bool = True):
+    def __init__(self, board: Board, script: str, name: str = None, should_print: list = None,
+                 should_not_print: list = None, run_on_host: bool = False, timeout: int = None,
+                 runs_in_shell: bool = True, login_automatically: bool = True):
         super().__init__(board)
         self.should_print = should_print or []
         self.should_not_print = should_not_print or []
@@ -52,117 +52,14 @@ class ShellTest(TestBase):
             self.run_command(console, script)
 
     def run_command(self, console, script):
-        CommandRunner.run(test_name=self._test_name, console=console, command=script,
-                          timeout=self.timeout, should_print=self.should_print, should_not_print=self.should_not_print,
-                          runs_in_shell=self.runs_in_shell)
-
-
-class CommandRunner():
-    @staticmethod
-    def run(test_name: str, console: ConsoleBase, command: str,
-            timeout: int = None, should_print: list = None, should_not_print: list = None, runs_in_shell: bool = True):
-        should_print = should_print or []
-        should_not_print = should_not_print or []
-        log = Logger()
-
-        output = console.send_and_read(command, timeout=timeout, quiet_time=timeout)
-
-        command_end = None
-        # Look for 2 instances of the command max, as it may echo twice,
-        # once as a console echo, and once after the prompt.
-        i = 0
-        for match in re.finditer(command, output):
-            i += 1
-            if i > 2:
-                break
-
-            command_end = match.end(0)
-
-        if command_end:
-            output = output[command_end:]
-
-        output = output.strip()
-        prefix = f'Script test "{test_name}":'
-        if not output:
-            raise TaskFailed(
-                f'{prefix} No response received after sending command')
-
-        formatted_output = ''
-        first_line = True
-        for line in output.splitlines():
-            if not first_line:
-                formatted_output += '            '
-            formatted_output += f'{line}{os.linesep}'
-            first_line = False
-
-        sent_line = f'  Sent:     $ {command}{os.linesep}'
-        should_print_line = f'  Expected: {should_print}{os.linesep}'
-        should_not_print_line = f'  Errors:   {should_not_print}{os.linesep}'
-        output_line = f'  Output:   {formatted_output}'
-
-        if CommandRunner.output_matches_pattern(should_not_print, output):
-            raise TaskFailed(
-                f'{prefix} Response matched error condition:{os.linesep}' +
-                sent_line + should_not_print_line + output_line)
-
-        if should_print:
-            response_valid = CommandRunner.output_matches_pattern(
-                should_print, output)
-
-            if not response_valid:
-                raise TaskFailed(
-                    f'{prefix} Response did not match expected:{os.linesep}' +
-                    sent_line + should_print_line + output_line)
-            else:
-                log.log(
-                    f'{prefix} Matching response found:{os.linesep}' +
-                    sent_line + should_print_line + output_line)
+        if self.runs_in_shell:
+            output = CommandRunner.run(test_name=self._test_name, console=console,
+                                       command=script, timeout=self.timeout)
         else:
-            log.log(f'{prefix}{os.linesep}' + sent_line + output_line)
+            output = CommandRunner.run_raw(test_name=self._test_name, console=console,
+                                           command=script, timeout=self.timeout)
 
-        if runs_in_shell:
-            retcode = CommandRunner.query_return_code(console)
-            if retcode == 0:
-                error = None
-            elif retcode is None:
-                error = 'failed to retrieve return code for command'
-            else:
-                error = f'returned with exit code {retcode}'
-
-            if error:
-                error = f'{prefix} Command "{command}" {error}{os.linesep}' + \
-                    sent_line + output_line
-                raise TaskFailed(error)
-
-        return output
-
-    @staticmethod
-    def query_return_code(console: ConsoleBase):
-        '''Query and return the return code of the last command ran.'''
-        retcode_output = console.send_and_read('echo retcode=$?')
-        if not retcode_output:
-            return None
-
-        retcode_match = re.search(r'retcode=(-?\d+)\b', retcode_output,
-                                  re.MULTILINE)
-        if not retcode_match:
-            return None
-
-        return int(retcode_match.group(1))
-
-    @staticmethod
-    def output_matches_pattern(patterns, output):
-        '''Return wether the output matches any of the pattern or not.'''
-        if patterns is None:
-            raise ValueError('None pattern provided')
-
-        if not isinstance(patterns, list):
-            patterns = [patterns]
-
-        for pattern in patterns:
-            regexp = re.compile(pattern)
-            for line in output.splitlines():
-                if regexp.search(line):
-                    return True
-
-        return False
+        if self.should_print or self.should_not_print:
+            CommandRunner.check_output(test_name=self._test_name, command=script, output=output,
+                                       should_print=self.should_print,
+                                       should_not_print=self.should_not_print)
