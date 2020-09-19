@@ -99,27 +99,27 @@ class CommandRunner():
 
     @staticmethod
     def check_output(test_name: str, command: str, output: str,
-                     should_print: list, should_not_print: list):
+                     match_regex: list, error_regex: list):
         '''Check that command output includes expected content, and no error content'''
-        should_print = should_print or []
-        should_not_print = should_not_print or []
+        match_regex = match_regex or []
+        error_regex = error_regex or []
 
-        if should_not_print:
-            if not CommandRunner.output_matches_pattern(should_not_print, output):
+        if error_regex:
+            if not CommandRunner.output_matches_pattern(error_regex, output):
                 CommandRunner.log_error(test_name=test_name, sent=command, output=output,
-                                        should_not_print=should_not_print,
+                                        should_not_print=error_regex,
                                         error='Response matched error condition')
 
-        if should_print:
-            pattern_matched = CommandRunner.output_matches_pattern(should_print, output)
+        if match_regex:
+            pattern_matched = CommandRunner.output_matches_pattern(match_regex, output)
 
             if not pattern_matched:
                 CommandRunner.log_error(test_name=test_name, sent=command, output=output,
-                                        should_print=should_print,
+                                        should_print=match_regex,
                                         error='Response did not match expected')
             else:
                 message = CommandRunner.format_command_log(sent=command, output=output,
-                                                           should_print=should_print)
+                                                           should_print=match_regex)
                 log.log(message)
 
     @staticmethod
