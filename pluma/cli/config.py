@@ -139,7 +139,9 @@ class PlumaConfig:
                 f'{name} "{yaml_file_path}" does not exist') from e
         except yaml.parser.ParserError as e:
             raise ConfigurationError(
-                f'Error while parsing {name} "{yaml_file_path}"') from e
+                f'Error while parsing {name} "{yaml_file_path}":'
+                f'{os.linesep}{e}') from e
         except Exception as e:
             raise ConfigurationError(
-                f'An error occured while opening/parsing {name} "{yaml_file_path}"') from e
+                f'An error occurred while opening/parsing {name} "{yaml_file_path}":'
+                f'{os.linesep}{e}') from e
