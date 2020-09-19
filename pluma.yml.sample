@@ -27,7 +27,7 @@ sequence:
       # should_not_print: ['error', 'unknown']
       timeout: 2
 - core_tests:
-    include: [testsuite.memory, testsuite.kernel]
+    include: [testsuite.memory, testsuite.kernel, testsuite.networking]
     exclude: []
     parameters:
       testsuite.memory.MemorySize:
