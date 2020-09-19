@@ -1,5 +1,6 @@
 from pluma.core.baseclasses import Logger
 from pluma import HostConsole, Board
+from pluma.core.baseclasses import ConsoleBase
 from pluma.test import CommandRunner, TestBase, TaskFailed
 
 log = Logger()
@@ -36,22 +37,36 @@ class ShellTest(TestBase):
                 ' "run_on_host" test attribute to run on the host instead.')
 
     def test_body(self):
-        console = None
-        if self.run_on_host:
-            console = HostConsole('sh')
-        else:
-            console = self.board.console
-            if not console:
-                raise TaskFailed(
-                    f'Failed to run script test "{self._test_name}": no console available')
+        self.run_commands()
 
-            if self.runs_in_shell and self.login_automatically and console.requires_login:
-                self.board.login()
+    def run_commands(self, console: ConsoleBase = None,
+                     scripts: str = None, timeout: int = None) -> str:
+        timeout = timeout or self.timeout
+        scripts = scripts or self.scripts
 
-        for script in self.scripts:
-            self.run_command(console, script)
+        if console is None:
+            if self.run_on_host:
+                console = HostConsole('sh')
+            else:
+                console = self.board.console
+                if not console:
+                    raise TaskFailed(f'Failed to run script test "{self._test_name}": '
+                                     'no console available')
 
-    def run_command(self, console, script):
+        if self.runs_in_shell and self.login_automatically and console.requires_login:
+            self.board.login()
+
+        output = ''
+        for script in scripts:
+            output += self.run_command(console=console, command=script)
+
+        if self.should_print or self.should_not_print:
+            CommandRunner.check_output(test_name=self._test_name, command=script, output=output,
+                                       should_print=self.should_print,
+                                       should_not_print=self.should_not_print)
+        return output
+
+    def run_command(self, console: ConsoleBase, script: str) -> str:
         if self.runs_in_shell:
             output = CommandRunner.run(test_name=self._test_name, console=console,
                                        command=script, timeout=self.timeout)
@@ -59,7 +74,4 @@ class ShellTest(TestBase):
             output = CommandRunner.run_raw(test_name=self._test_name, console=console,
                                            command=script, timeout=self.timeout)
 
-        if self.should_print or self.should_not_print:
-            CommandRunner.check_output(test_name=self._test_name, command=script, output=output,
-                                       should_print=self.should_print,
-                                       should_not_print=self.should_not_print)
+        return output
