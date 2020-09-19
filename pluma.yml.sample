@@ -35,6 +35,8 @@ sequence:
         available_mb: 500
       testsuite.kernel.KernelModulesLoaded:
         modules: [wlan, galcore]
+      testsuite.networking.IperfBandwidth:
+        minimum_mbps: 10
 # - c_tests:
 #     yocto_sdk: /home/aleravat/witekio/mturbo-yocto/yocto/oecore-x86_64-armv5-toolchain-nodistro.0.sh
 #     tests:

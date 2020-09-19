@@ -41,7 +41,6 @@ class ShellTest(TestBase):
 
     def run_commands(self, console: ConsoleBase = None,
                      scripts: str = None, timeout: int = None) -> str:
-        timeout = timeout or self.timeout
         scripts = scripts or self.scripts
 
         if console is None:
@@ -58,20 +57,22 @@ class ShellTest(TestBase):
 
         output = ''
         for script in scripts:
-            output += self.run_command(console=console, command=script)
+            output += self.run_command(console=console, command=script, timeout=timeout)
+
+        return output
+
+    def run_command(self, console: ConsoleBase, script: str, timeout: int = None) -> str:
+        timeout = timeout or self.timeout
+
+        if self.runs_in_shell:
+            output = CommandRunner.run(test_name=self._test_name, console=console,
+                                       command=script, timeout=timeout)
+        else:
+            output = CommandRunner.run_raw(test_name=self._test_name, console=console,
+                                           command=script, timeout=timeout)
 
         if self.should_print or self.should_not_print:
             CommandRunner.check_output(test_name=self._test_name, command=script, output=output,
                                        should_print=self.should_print,
                                        should_not_print=self.should_not_print)
-        return output
-
-    def run_command(self, console: ConsoleBase, script: str) -> str:
-        if self.runs_in_shell:
-            output = CommandRunner.run(test_name=self._test_name, console=console,
-                                       command=script, timeout=self.timeout)
-        else:
-            output = CommandRunner.run_raw(test_name=self._test_name, console=console,
-                                           command=script, timeout=self.timeout)
-
         return output

@@ -1,8 +1,16 @@
-from pluma.test import ShellTest
-from pluma import Board
+import os
+import re
+import concurrent.futures
+
+from pluma.core.baseclasses import Logger
+from pluma.test import ShellTest, TaskFailed
+from pluma import Board, HostConsole
 
 
-class RespondsToPing(ShellTest):
+log = Logger()
+
+
+class NetworkingTestBase(ShellTest):
     def __init__(self, board: Board, target: str = None):
         super().__init__(board, script='')
 
@@ -13,5 +21,46 @@ class RespondsToPing(ShellTest):
                                  'or an SSH console to get the target host from.')
             target = ssh_console.target
 
-        self.scripts = [f'ping -c 1 {target}']
+        self.target = target
+
+
+class RespondsToPing(NetworkingTestBase):
+    def __init__(self, board: Board, target: str = None):
+        super().__init__(board, target)
         self.run_on_host = True
+        self.scripts = [f'ping -c 1 {self.target}']
+
+
+class IperfBandwidth(NetworkingTestBase):
+    def __init__(self, board: Board, minimum_mbps: float, target: str = None, duration: int = None):
+        super().__init__(board, target)
+        self.duration = int(duration) if duration else 10
+        self.timeout = 10 + self.duration * 1.1
+        self.minimum_mbps = float(minimum_mbps)
+        # Use `runs_in_shell=False` to disable retcode check
+        self.runs_in_shell = False
+
+    def run_iperf_server(self) -> str:
+        return self.run_commands(scripts=['iperf -s'])
+
+    def test_body(self):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            iperf_server = executor.submit(self.run_iperf_server)
+
+            command = f'iperf -c {self.target} --time {self.duration}'
+            self.run_commands(console=HostConsole('sh'), scripts=[command])
+
+            target_output = iperf_server.result()
+
+        bandwidth_regex = r'sec\s+(\d+\.\d+) MBytes'
+        match = re.search(bandwidth_regex, target_output, re.MULTILINE)
+        if not match:
+            raise TaskFailed('Failed to match iperf bandwidth regex for '
+                             f'output:{os.linesep}{target_output}')
+
+        bandwidth = float(match.group(1))
+        if bandwidth < self.minimum_mbps:
+            raise TaskFailed('Bandwidth is lower than the minimum expected of '
+                             f'{self.minimum_mbps} MBps with {bandwidth} MBps.')
+
+        log.info(f'Bandwidth: {bandwidth} MBps')

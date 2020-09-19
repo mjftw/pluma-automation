@@ -1,3 +1,3 @@
 from .kernel import KernelModulesLoaded
 from .memory import MemorySize
-from .networking import RespondsToPing
+from .networking import RespondsToPing, IperfBandwidth
