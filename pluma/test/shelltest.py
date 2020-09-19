@@ -65,7 +65,7 @@ class CommandRunner():
         should_not_print = should_not_print or []
         log = Logger()
 
-        output = console.send_and_read(command, timeout=timeout)
+        output = console.send_and_read(command, timeout=timeout, quiet_time=timeout)
 
         command_end = None
         # Look for 2 instances of the command max, as it may echo twice,
