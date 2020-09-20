@@ -28,8 +28,7 @@ class TargetConfig:
 
     @staticmethod
     def _create_board(config: Configuration) -> Board:
-        credentials = TargetFactory.parse_credentials(config.pop('credentials'))
-        system = TargetFactory.parse_system_context(config.pop('system'), credentials)
+        system = TargetFactory.parse_system_context(config.pop('system'))
         serial, ssh = TargetFactory.create_consoles(config.pop('console'), system)
 
         if not serial and not ssh:
@@ -93,15 +92,14 @@ class TargetFactory:
         return credentials
 
     @staticmethod
-    def parse_system_context(system_config: Configuration, credentials: Credentials) \
-            -> SystemContext:
-        if system_config:
-            system = SystemContext(prompt_regex=system_config.pop(
-                'prompt_regex'), credentials=credentials)
-            system_config.ensure_consumed()
-        else:
-            system = SystemContext(credentials=credentials)
+    def parse_system_context(system_config: Configuration) -> SystemContext:
+        if not system_config:
+            return SystemContext()
 
+        credentials = TargetFactory.parse_credentials(system_config.pop('credentials'))
+        system = SystemContext(prompt_regex=system_config.pop('prompt_regex'),
+                               credentials=credentials)
+        system_config.ensure_consumed()
         return system
 
     @staticmethod

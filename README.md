@@ -126,11 +126,13 @@ While a minimal configuration to connect via SSH would be:
 
 ```yml
 #pluma-target.yml
-credentials:
-  # Hardcoded credentials. Can be removed entirely if authenticating
-  # with a public key
-  login: root
-  password: 12345
+system:
+  prompt_regex: "\\S+@\\S+: "
+  credentials:
+    # Hardcoded credentials. Can be removed entirely if authenticating
+    # with a public key
+    login: root
+    password: 12345
 
 console:
   # Use an SSH connection to the target
@@ -142,10 +144,9 @@ Supported attributes:
 
 * `system:` System configuration
   * `prompt_regex: <regex>` - The regex used to detected the system prompt
-
-* `credentials:` Credentials common to serial and SSH console
-  * `login: <login>`
-  * `password: <password>`
+  * `credentials:` Credentials common to serial and SSH console
+    * `login: <login>`
+    * `password: <password>`
 
 * `console:`
   * `serial:`

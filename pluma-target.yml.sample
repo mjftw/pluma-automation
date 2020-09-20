@@ -1,9 +1,8 @@
-credentials:
-  login: mendel
-  password: mendel
-
 system:
   prompt_regex: "\\S+@\\S+:"
+  credentials:
+    login: mendel
+    password: mendel
 
 console:
   serial:
