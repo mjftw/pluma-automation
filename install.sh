@@ -34,8 +34,7 @@ function support_serial {
 }
 
 function support_sdwire {
-    $SUDO apt update && \
-        $SUDO apt install -y libusb-1.0 libftdi-dev
+    $SUDO apt install -y libusb-1.0 libftdi-dev
 
     # LibUSB required for PyFTDI library used by SDWire
     echo
@@ -53,6 +52,13 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
 
     echo "Adding user to plugev group (Required for FTDI device control E.g. SD Wire)"
     add_group plugdev
+}
+
+function support_uhubctl {
+    $SUDO apt install -y uhubctl
+    echo 'Consider adding a udev rule in "/etc/udev/rules.d/50-uhubctl.rules"
+(SUBSYSTEM=="usb", ATTR{idVendor}=="<your_device_vendor>", MODE="0666"),
+or running pluma as root/sudo, if required.'
 }
 
 function install_python_packages {
@@ -126,21 +132,30 @@ if [ "$answer_all" ==  "n" ]; then
 elif [ "$answer_all" ==  "y" ]; then
     support_serial
     support_sdwire
+    support_uhubctl
 else
     echo
     read -p 'USB Serial support required? (Y/n): ' require_serial
     if [ "$require_serial" == "n" -o "$require_serial" == "N" ]; then
-        echo "Serial support not added. Script can be rerun to enable this."
+        echo "USB Serial support not added. Script can be rerun to enable this."
     else
         support_serial
     fi
 
     echo
-    read -p 'SD-Wire support required? (Y/n): ' require_sdwire
+    read -p 'SD-Wire support required? This will add new udev rules (Y/n): ' require_sdwire
     if [ "$require_sdwire" == "n" -o "$require_sdwire" == "N" ]; then
-        echo "Serial support not added. Script can be rerun to enable this."
+        echo "SD-Wire support not added. Script can be rerun to enable this."
     else
         support_sdwire
+    fi
+
+    echo
+    read -p 'uhubctl support required (USB HUB power control)? This will add new udev rules (Y/n): ' require_uhubctl
+    if [ "$require_uhubctl" == "n" -o "$require_uhubctl" == "N" ]; then
+        echo "SD-Wire support not added. Script can be rerun to enable this."
+    else
+        support_uhubctl
     fi
 fi
 

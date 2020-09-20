@@ -5,6 +5,7 @@ from copy import deepcopy
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
 from pluma.cli import Configuration, ConfigurationError, TargetConfigError
+from pluma.core.power import Uhubctl
 from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase
 from pluma.core.dataclasses import SystemContext, Credentials
 
@@ -159,7 +160,8 @@ class TargetFactory:
 
         POWER_SOFT = 'soft'
         POWER_IPPOWER9258 = 'ippower9258'
-        POWER_LIST = [POWER_SOFT, POWER_IPPOWER9258]
+        POWER_UHUBCTL = 'uhubctl'
+        POWER_LIST = [POWER_SOFT, POWER_IPPOWER9258, POWER_UHUBCTL]
 
         if len(power_config) > 1:
             raise TargetConfigError(
@@ -198,6 +200,9 @@ class TargetFactory:
             password = power_config.pop('password')
             power = IPPowerPDU(outlet, host, netport=port,
                                username=login, password=password)
+        elif control_type == POWER_UHUBCTL:
+            power = Uhubctl(location=power_config.pop('location'),
+                            port=power_config.pop('port'))
         else:
             raise Exception('Unreachable, unknown power controller')
 
