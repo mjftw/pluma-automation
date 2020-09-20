@@ -1,0 +1,11 @@
+system:
+  credentials:
+    login: mendel
+
+console:
+  serial:
+    port: /dev/ttyUSB0
+
+variables:
+  myscript: script
+  mymessage: echo hello script!

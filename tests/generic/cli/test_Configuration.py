@@ -19,13 +19,15 @@ def minimal_config():
     return Configuration(copy.deepcopy(MINIMAL_CONFIG_DICT))
 
 
+def test_Configuration_create_from_none():
+    Configuration(None)
+
+
 def test_Configuration_create(minimal_config):
     pass
 
 
 def test_Configuration_create_invalid():
-    with pytest.raises(ValueError):
-        Configuration(None)
     with pytest.raises(ValueError):
         Configuration(['a', 'b'])
     with pytest.raises(ValueError):

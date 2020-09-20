@@ -21,7 +21,8 @@ class TestsConfigError(Exception):
 
 
 class Configuration:
-    def __init__(self, config: dict = {}):
+    def __init__(self, config: dict = None):
+        config = config or {}
         if not isinstance(config, dict):
             raise ValueError('Configuration class requires a "dict" object')
 

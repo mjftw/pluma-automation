@@ -1,0 +1,40 @@
+settings:
+  continue_on_fail: true
+  iterations: 1
+
+sequence:
+- set:
+    device_console: serial
+- shell_tests:
+    target_setup:
+      script: echo "setting things up on the target"
+    host_setup:
+      script: echo "setting things up locally"
+      run_on_host: true
+- set:
+    device_console: ssh
+- wait:
+    duration: 2
+- shell_tests:
+    multiple_commands:
+      script:
+      - ls
+      - echo $USER
+      timeout: 2
+    cat_meminfo:
+      script: cat /proc/meminfo
+      should_print: ['MemFree:']
+      should_not_print: ['error', 'unknown']
+      timeout: 2
+- core_tests:
+    include: [testsuite.memory, testsuite.kernel]
+    exclude: []
+    parameters:
+      testsuite.memory.MemorySize:
+        total_mb: 985
+        available_mb: 500
+      testsuite.kernel.KernelModulesLoaded:
+        modules: [wlan, galcore]
+- shell_tests:
+    cleanup:
+      script: echo "Cleaning up!"

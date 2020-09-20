@@ -1,0 +1,3 @@
+sequence:
+- does_not_exist:
+    value: 'abc'

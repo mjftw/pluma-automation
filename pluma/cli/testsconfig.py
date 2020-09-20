@@ -27,7 +27,7 @@ class TestsConfig:
         if not isinstance(test_providers, list):
             test_providers = [test_providers]
 
-        self.settings_config = config.pop(SETTINGS_SECTION)
+        self.settings_config = config.pop(SETTINGS_SECTION, Configuration())
         self.test_providers = test_providers
         self.tests = None
 

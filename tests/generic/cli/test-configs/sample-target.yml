@@ -1,0 +1,11 @@
+system:
+  prompt_regex: "\\S+@\\S+:"
+  credentials:
+    login: mendel
+    password: mendel
+
+console:
+  serial:
+    port: /dev/ttyUSB0
+  ssh:
+    target: 192.168.0.25

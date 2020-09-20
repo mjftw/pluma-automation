@@ -1,0 +1,4 @@
+sequence:
+- shell_tests:
+    target_setup:
+      ${myscript}: ${mymessage}
