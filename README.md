@@ -252,6 +252,7 @@ Supported attributes:
   * `- poweron:` Use the power controller defined to power on the board
   * `- poweroff:` Use the power controller defined to power off the board
   * `- powercycle:` Use the power controller defined to power cycle the board (off and on)
+    * `off_duration_ms:` Duration for which the device is powered off. Actual duration may be longer
 
 ### Complete list of CLI options
 

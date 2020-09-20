@@ -23,9 +23,13 @@ class PowerOffAction(DeviceActionBase):
 
 @DeviceActionRegistry.register()
 class PowerCycleAction(DeviceActionBase):
+    def __init__(self, board: Board, off_duration_ms: float = None):
+        super().__init__(board)
+        self.off_duration_ms = off_duration_ms or 1000
+
     def execute(self):
         self.board.power.off()
-        time.sleep(1)
+        time.sleep(self.off_duration_ms / 1000)
         self.board.power.on()
 
 
