@@ -7,16 +7,16 @@ from pluma.cli import TargetConfig, TargetFactory, TargetConfigError, \
 from pluma import IPPowerPDU, SoftPower
 
 
-def test_TargetConfig_create_board_should_work_with_minimal_config(target_config):
-    TargetConfig.create_board(Configuration(target_config))
+def test_TargetConfig_create_context_should_work_with_minimal_config(target_config):
+    TargetConfig.create_context(Configuration(target_config))
 
 
-def test_TargetConfig_create_board_should_error_on_unconsumed(target_config):
+def test_TargetConfig_create_context_should_error_on_unconsumed(target_config):
     invalid_config = target_config
     invalid_config['abc'] = 'value'
 
     with pytest.raises(TargetConfigError):
-        TargetConfig.create_board(Configuration(invalid_config))
+        TargetConfig.create_context(Configuration(invalid_config))
 
 
 def test_TargetFactory_parse_credentials():
@@ -141,3 +141,15 @@ def test_TargetFactory_create_power_control_should_create_ipp9258(mock_console):
     assert power.port == outlet
     assert power.username == login
     assert power.password == password
+
+
+def test_TargetFactory_parse_variables_should_allow_variables_access():
+    var1 = 'abc'
+    var1_value = 'def'
+    var2 = 'def'
+    var2_value = 3
+
+    variables = TargetFactory.parse_variables(variables_config=Configuration({var1: var1_value,
+                                                                              var2: var2_value}))
+    assert variables.get(var1) == var1_value
+    assert variables.get(var2) == var2_value

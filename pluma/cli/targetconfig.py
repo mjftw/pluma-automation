@@ -4,7 +4,8 @@ from typing import List
 from copy import deepcopy
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
-from pluma.cli import Configuration, ConfigurationError, TargetConfigError
+from pluma.cli import Configuration, ConfigurationError, TargetConfigError, \
+    PlumaContext
 from pluma.core.power import Uhubctl
 from pluma.core.baseclasses import Logger, ConsoleBase, PowerBase
 from pluma.core.dataclasses import SystemContext, Credentials
@@ -14,21 +15,22 @@ log = Logger()
 
 class TargetConfig:
     @staticmethod
-    def create_board(config: Configuration) -> Board:
+    def create_context(config: Configuration) -> PlumaContext:
         if not isinstance(config, Configuration):
             raise ValueError('Invalid configuration: The configuration passed '
                              'should be a Configuration instance.')
         try:
-            board = TargetConfig._create_board(config)
+            context = TargetConfig._create_context(config)
         except ConfigurationError as e:
             raise TargetConfigError(e)
         else:
-            TargetConfig.print_board_settings(board)
+            TargetConfig.print_context_settings(context)
             config.ensure_consumed()
-            return board
+            return context
 
     @staticmethod
-    def _create_board(config: Configuration) -> Board:
+    def _create_context(config: Configuration) -> PlumaContext:
+        variables = TargetFactory.parse_variables(config.pop('variables'))
         system = TargetFactory.parse_system_context(config.pop('system'))
         serial, ssh = TargetFactory.create_consoles(config.pop('console'), system)
 
@@ -46,28 +48,29 @@ class TargetConfig:
         if ssh:
             consoles['ssh'] = ssh
 
-        return Board('Test board', console=consoles, power=power,
-                     system=system)
+        board = Board('Test board', console=consoles, power=power,
+                      system=system)
+        return PlumaContext(board, variables=variables)
 
     @staticmethod
-    def print_board_settings(board: Board):
+    def print_context_settings(context: PlumaContext):
         log.log('Components:', bold=True)
 
-        serial = board.get_console('serial')
-        suffix = 'Default' if serial and board.console is serial else None
+        serial = context.board.get_console('serial')
+        suffix = 'Default' if serial and context.board.console is serial else None
         TargetConfig.print_component('Serial', serial, suffix)
 
-        ssh = board.get_console('ssh')
-        suffix = 'Default' if ssh and board.console is ssh else None
+        ssh = context.board.get_console('ssh')
+        suffix = 'Default' if ssh and context.board.console is ssh else None
         TargetConfig.print_component('SSH', ssh, suffix)
 
-        TargetConfig.print_component('Prompt', board.system.prompt_regex)
-        TargetConfig.print_component('Login', board.system.credentials.login)
+        TargetConfig.print_component('Prompt', context.board.system.prompt_regex)
+        TargetConfig.print_component('Login', context.board.system.credentials.login)
         TargetConfig.print_component(
-            'Password', '******' if board.system.credentials.password else None)
-        TargetConfig.print_component('Power control', board.power)
-        TargetConfig.print_component('Storage', board.storage)
-        TargetConfig.print_component('USB Hub', board.hub)
+            'Password', '******' if context.board.system.credentials.password else None)
+        TargetConfig.print_component('Power control', context.board.power)
+        TargetConfig.print_component('Storage', context.board.storage)
+        TargetConfig.print_component('USB Hub', context.board.hub)
         log.log('')
 
     @staticmethod
@@ -81,6 +84,13 @@ class TargetConfig:
 
 
 class TargetFactory:
+    @staticmethod
+    def parse_variables(variables_config: Configuration) -> dict:
+        if not variables_config:
+            return {}
+
+        return variables_config.content()
+
     @staticmethod
     def parse_credentials(credentials_config: Configuration) -> Credentials:
         if not credentials_config:

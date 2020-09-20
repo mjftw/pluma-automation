@@ -52,7 +52,8 @@ class Configuration:
             unconsumed_data = self.config
             self.config = {}
             raise ConfigurationError(
-                f'The following configuration attributes were not recognized or not used:{os.linesep}{unconsumed_data}')
+                'The following configuration attributes were not recognized or not used:'
+                f'{os.linesep}{unconsumed_data}')
 
     def content(self):
         return self.config
@@ -67,7 +68,8 @@ class Configuration:
 class TestDefinition():
     '''Data class representing a test, its class, and parameters.'''
 
-    def __init__(self, name: str, testclass: type, test_provider: object, parameter_sets: list = None, selected: bool = False):
+    def __init__(self, name: str, testclass: type, test_provider: object,
+                 parameter_sets: list = None, selected: bool = False):
         if not name or name == '':
             raise ValueError('Test name cannot be empty')
 
@@ -119,21 +121,29 @@ class TestsProvider(ABC):
         return list(filter(lambda test: (test.selected), self.all_tests(config)))
 
 
+class ConfigPreprocessor(ABC):
+    @abstractmethod
+    def preprocess(self, raw_config: str) -> str:
+        '''Return an updated configuration from raw text'''
+        pass
+
+
 class PlumaConfig:
     @staticmethod
-    def load_configurations(tests_config_path, target_config_path):
-        tests_config = PlumaConfig.load_yaml(
-            "Tests file", tests_config_path)
-        target_config = PlumaConfig.load_yaml(
-            "Target file", target_config_path)
-
-        return Configuration(tests_config), Configuration(target_config)
+    def load_configuration(name: str, config_path: str,
+                           preprocessor: ConfigPreprocessor = None) -> Configuration:
+        return Configuration(PlumaConfig.load_yaml(name, config_path, preprocessor))
 
     @staticmethod
-    def load_yaml(name, yaml_file_path):
+    def load_yaml(name: str, yaml_file_path: str,
+                  preprocessor: ConfigPreprocessor = None) -> dict:
         try:
             with open(yaml_file_path, 'r') as config:
-                return yaml.load(config, Loader=yaml.FullLoader)
+                content = config.read()
+                if preprocessor:
+                    content = preprocessor.preprocess(content)
+
+                return yaml.load(content, Loader=yaml.FullLoader)
         except FileNotFoundError as e:
             raise ConfigurationError(
                 f'{name} "{yaml_file_path}" does not exist') from e

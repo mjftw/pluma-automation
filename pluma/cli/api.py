@@ -4,10 +4,13 @@ import os
 
 from pluma.core.baseclasses import Logger, LogLevel
 from pluma.test import TestController
-from pluma.cli import PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
+from pluma.cli import PlumaContext, PlumaConfig, TestsConfig, TestsBuilder, TargetConfig
 from pluma.cli import TestsBuildError
-from pluma.cli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, DeviceActionProvider
+from pluma.cli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, \
+    DeviceActionProvider
 from pkg_resources import get_distribution
+
+from .configpreprocessor import PlumaConfigPreprocessor
 
 log = Logger()
 
@@ -20,7 +23,8 @@ class Pluma:
                 CTestsProvider(), DeviceActionProvider()]
 
     @staticmethod
-    def execute_run(tests_config_path: str, target_config_path: str, check_only: bool = False) -> bool:
+    def execute_run(tests_config_path: str, target_config_path: str,
+                    check_only: bool = False) -> bool:
         '''Execute the "run" command, and allow checking only ("check" command).'''
         controller = Pluma.build_test_controller(tests_config_path,
                                                  target_config_path, show_tests_list=check_only)
@@ -42,13 +46,12 @@ class Pluma:
     @staticmethod
     def execute_tests(tests_config_path: str, target_config_path: str):
         '''Execute the "tests" command, listing all tests.'''
-        tests_config, _ = PlumaConfig.load_configurations(
-            tests_config_path, target_config_path)
+        context = Pluma.create_target_context(target_config_path)
+        tests_config = Pluma.create_tests_config(tests_config_path, context)
 
         log.log(
             'List of core and script tests available, based on the current configuration.')
-        testsConfig = TestsConfig(tests_config, Pluma.tests_providers())
-        testsConfig.print_tests(log_level=LogLevel.IMPORTANT)
+        tests_config.print_tests(log_level=LogLevel.IMPORTANT)
 
     @staticmethod
     def execute_clean(force: bool = False):
@@ -68,20 +71,31 @@ class Pluma:
         TestsBuilder.clean(force)
 
     @staticmethod
-    def build_test_controller(tests_config_path: str, target_config_path: str, show_tests_list: bool) -> TestController:
-        tests_config, target_config = PlumaConfig.load_configurations(
-            tests_config_path, target_config_path)
+    def create_target_context(target_config_path: str) -> PlumaContext:
+        target_config = PlumaConfig.load_configuration('Target config', target_config_path)
+        context = TargetConfig.create_context(target_config)
+        return context
 
-        board = TargetConfig.create_board(target_config)
+    @staticmethod
+    def create_tests_config(tests_config_path: str, context: PlumaContext) -> TestsConfig:
+        tests_config = PlumaConfig.load_configuration('Tests config', tests_config_path,
+                                                      PlumaConfigPreprocessor(context.variables))
+
         default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
-        board.log_file = tests_config.pop('log') or default_log
+        context.board.log_file = tests_config.pop('log') or default_log
 
-        testsConfig = TestsConfig(tests_config, Pluma.tests_providers())
+        return TestsConfig(tests_config, Pluma.tests_providers())
+
+    @staticmethod
+    def build_test_controller(tests_config_path: str, target_config_path: str,
+                              show_tests_list: bool) -> TestController:
+        context = Pluma.create_target_context(target_config_path)
+        tests_config = Pluma.create_tests_config(tests_config_path, context)
 
         tests_list_log_level = LogLevel.INFO if show_tests_list else LogLevel.NOTICE
-        testsConfig.print_tests(tests_list_log_level)
+        tests_config.print_tests(tests_list_log_level)
 
-        return testsConfig.create_test_controller(board)
+        return tests_config.create_test_controller(context.board)
 
     @staticmethod
     def version() -> str:

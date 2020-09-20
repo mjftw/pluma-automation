@@ -156,6 +156,9 @@ Supported attributes:
     * `login: <login>` - SSH specific login
     * `password: <password>` - SSH specific password
 
+* `variables:` User defined variables, substituted in the **tests configuration** (pluma.yml) file only.
+  * `my_var: my_value` - A sample variable, usable as `${my_var}`
+
 ### Tests definition YAML
 
 The tests definition (pluma.yml) contains all information related to the tests to be run on the target.
