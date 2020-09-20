@@ -280,6 +280,7 @@ class TestRunner():
         }
 
     def run(self):
+        self.board.log('Running tests', bold=True)
         self.test_fails = []
 
         # Init data
@@ -295,11 +296,11 @@ class TestRunner():
             self._init_test_data(test)
 
         self.board.log("Running tests: {}".format(
-            list(map(lambda t: str(t), self.tests))))
+            list(map(lambda t: str(t), self.tests))), level=LogLevel.DEBUG)
 
         if self.sequential:
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
-                           color='blue', bold=True)
+                           color='blue', bold=True, level=LogLevel.DEBUG)
 
             completed = 0
             total = len(self.tests)
@@ -319,11 +320,11 @@ class TestRunner():
             self.progress = None
         else:
             self.board.log('== TESTING MODE: PARALLEL ==',
-                           color='blue', bold=True)
+                           color='blue', bold=True, level=LogLevel.DEBUG)
             self._run_tasks()
 
         self.board.log("\n== ALL TESTS COMPLETED ==",
-                       color='blue', bold=True)
+                       color='blue', bold=True, level=LogLevel.DEBUG)
 
         # Check if any tasks failed
         if self.test_fails:

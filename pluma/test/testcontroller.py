@@ -107,7 +107,7 @@ class TestController():
                  run_condition=None, name=None, report_n_iterations=None,
                  continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
                  setup_n_iterations=None, force_initial_run=False, email_on_except=True,
-                 log_func=None, verbose_log_func=None):
+                 log_func=None, verbose_log_func=None, debug_log_func=None):
         assert isinstance(testrunner, TestRunner)
 
         self.testrunner = testrunner
@@ -117,6 +117,7 @@ class TestController():
 
         self.log_func = log_func or print
         self.verbose_log_func = verbose_log_func
+        self.debug_log_func = debug_log_func
 
         self.name = name
 
@@ -269,6 +270,11 @@ class TestController():
         ''' Logging function wrapper for verbose content '''
         if self.verbose_log_func:
             self.verbose_log_func(message)
+
+    def debug_log(self, message):
+        ''' Logging function wrapper for debug content '''
+        if self.debug_log_func:
+            self.debug_log_func(message)
 
     def get_results_summary(self):
         ''' Get a summary of test results data values,
@@ -616,7 +622,7 @@ class TestController():
 
         self._init_iteration()
 
-        self.verbose_log(f'Running TestRunner: {self.testrunner}')
+        self.debug_log(f'Running TestRunner: {self.testrunner}')
         success = self.testrunner.run()
 
         self._finalise_iteration(success)
@@ -649,13 +655,11 @@ class TestController():
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_total'] = 0
 
-        self.verbose_log(
-            f'Starting TestController with settings: {self.settings}')
-
-        self.verbose_log(f'Test settings: {self.test_settings}')
+        self.debug_log(f'Starting TestController with settings: {self.settings}')
+        self.debug_log(f'Test settings: {self.test_settings}')
 
         if self.setup and not self.settings['setup_n_iterations']:
-            self.verbose_log(f"Running setup function: {self.setup}")
+            self.debug_log(f"Running setup function: {self.setup}")
             self.setup.run(self)
 
         success = True
@@ -664,36 +668,31 @@ class TestController():
             if self.run_condition:
                 if (self.settings['force_initial_run'] and
                         self.stats['num_iterations_run'] == 0):
-                    self.verbose_log('Ignoring run condition for first run')
+                    self.debug_log('Ignoring run condition for first run')
                     run_now = True
                 else:
-                    self.verbose_log(
-                        f'Checking run condition function: {self.run_condition}')
+                    self.debug_log(f'Checking run condition function: {self.run_condition}')
                     run_now = self.run_condition.run(self)
 
                 while run_now:
                     if (self.settings['setup_n_iterations'] and
                             self.stats['num_iterations_run'] % self.settings['setup_n_iterations'] == 0):
                         if self.setup:
-                            self.verbose_log(
-                                f'Running setup function: {self.setup}')
+                            self.debug_log(f'Running setup function: {self.setup}')
                             self.setup.run(self)
                     success &= self.run_iteration()
                     if not success and not self.settings['continue_on_fail']:
                         if self.report:
-                            self.verbose_log(
-                                f'Running report function: {self.report}')
+                            self.debug_log(f'Running report function: {self.report}')
                             self.report.run(self)
                         return False
                     if (self.settings['report_n_iterations'] and
                             self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
                         if self.report:
-                            self.verbose_log(
-                                f'Running report function: {self.report}')
+                            self.debug_log(f'Running report function: {self.report}')
                             self.report.run(self)
 
-                    self.verbose_log(
-                        f'Checking run condition function: {self.run_condition}')
+                    self.debug_log(f'Checking run condition function: {self.run_condition}')
                     run_now = self.run_condition.run(self)
             else:
                 self.run_iteration()
