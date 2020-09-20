@@ -23,6 +23,7 @@ class TargetConfig:
             raise TargetConfigError(e)
         else:
             TargetConfig.print_board_settings(board)
+            config.ensure_consumed()
             return board
 
     @staticmethod
