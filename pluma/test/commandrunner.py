@@ -40,13 +40,7 @@ class CommandRunner():
                                     error=f'Command "{command}" {error}')
 
         output = CommandRunner.cleanup_command_output(command, output)
-
-        if not output:
-            CommandRunner.log_error(test_name=test_name, sent=command, output=output,
-                                    error='No response received after sending command')
-        else:
-            message = CommandRunner.format_command_log(sent=command, output=output)
-            log.log(message)
+        log.log(CommandRunner.format_command_log(sent=command, output=output))
 
         return output
 
