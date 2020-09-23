@@ -8,6 +8,7 @@
   - [Power](#power)
     - [IP Power](#ip-power)
     - [APC](#apc)
+    - [Uhubctl](#Uhubctl)
   - [Storage](#storage)
     - [SD Wire](#sd-wire)
   - [Relays](#relays)
@@ -33,6 +34,10 @@ IP Power 9258S
 The APC AP7920 is a switched rack Power Distribution Unit.  
 It is controlled over the network using the [Telnet protocol](https://en.wikipedia.org/wiki/Telnet), and is capable of independently controlling whether each of it's 8 output ports provide power.  
 [Documentation](http://www.apc.com/salestools/ASTE-6Z6K56/ASTE-6Z6K56_R0_EN.pdf).
+
+### Uhubctl
+Uhubctl is a utility to control USB power per-port on compatible USB hubs.
+[Documentation](https://github.com/mvp/uhubctl).
 
 ## Storage
 ### SD Wire
