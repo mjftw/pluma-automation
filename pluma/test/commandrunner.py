@@ -2,6 +2,7 @@ import os
 import re
 
 from pluma.core.baseclasses import ConsoleBase, Logger
+from pluma.test import TestingException
 from .test import TaskFailed
 
 log = Logger()
@@ -25,7 +26,7 @@ class CommandRunner():
         output = re.sub(re.escape(matched) + r'$', '', output)
         retcode_match = re.search(retcode_token+r'(-?\d+)', matched)
         if not retcode_match:
-            raise Exception('Failed to find return code value')
+            raise TestingException('Failed to find return code value')
 
         retcode = int(retcode_match.group(1))
         if retcode == 0:
