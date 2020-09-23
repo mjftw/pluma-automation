@@ -57,7 +57,7 @@ class ShellTest(TestBase):
 
         output = ''
         for script in scripts:
-            output += self.run_command(console=console, command=script, timeout=timeout)
+            output += self.run_command(console=console, script=script, timeout=timeout)
 
         return output
 
