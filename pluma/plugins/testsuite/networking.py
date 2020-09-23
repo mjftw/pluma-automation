@@ -1,5 +1,6 @@
 import os
 import re
+import time
 import concurrent.futures
 
 from pluma.core.baseclasses import Logger
@@ -47,6 +48,8 @@ class IperfBandwidth(NetworkingTestBase):
         with concurrent.futures.ThreadPoolExecutor() as executor:
             iperf_server = executor.submit(self.run_iperf_server)
 
+            # Wait for the server to start
+            time.sleep(2)
             command = f'iperf -c {self.target} --time {self.duration}'
             self.run_commands(console=HostConsole('sh'), scripts=[command])
 
