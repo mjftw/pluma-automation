@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from pytest import fixture
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import traceback
 
 from utils import OsFile
@@ -117,20 +117,20 @@ def pluma_cli(capsys):
         assert isinstance(args, Iterable)
 
         # Override actual CLI arguments with supplied
-        sys.argv = [sys.argv[0], *args]
-        try:
-            __main__.main()
-        except SystemExit as e:
-            if e.code != 0:
-                readouterr = capsys.readouterr()
-                e_msg = f'Pluma CLI exited with code {e.code}'
-                print(
-                    f'{e_msg}',
-                    f'{os.linesep}stdout: {readouterr.out}' if readouterr.out else '',
-                    f'{os.linesep}stderr: {readouterr.err}' if readouterr.err else '',
-                )
-                traceback.print_exc()
+        with patch.object(sys, 'argv', [sys.argv[0], *args]):
+            try:
+                __main__.main()
+            except SystemExit as e:
+                if e.code != 0:
+                    readouterr = capsys.readouterr()
+                    e_msg = f'Pluma CLI exited with code {e.code}'
+                    print(
+                        f'{e_msg}',
+                        f'{os.linesep}stdout: {readouterr.out}' if readouterr.out else '',
+                        f'{os.linesep}stderr: {readouterr.err}' if readouterr.err else '',
+                    )
+                    traceback.print_exc()
 
-                raise RuntimeError(e_msg)
+                    raise RuntimeError(e_msg)
 
     return pluma_cli
