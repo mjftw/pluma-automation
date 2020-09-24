@@ -5,7 +5,9 @@ from .config import ConfigPreprocessor
 
 class PlumaConfigPreprocessor(ConfigPreprocessor):
     def __init__(self, variables: dict):
-        self.variables = variables
+        self.variables = variables or {}
+        if not isinstance(self.variables, dict):
+            raise ValueError('Variables must be a dictionary')
 
     def preprocess(self, raw_config: str) -> str:
         def token_to_variable(token):

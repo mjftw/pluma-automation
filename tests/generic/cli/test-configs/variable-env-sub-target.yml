@@ -1,0 +1,11 @@
+system:
+  credentials:
+    login: mendel
+
+${console}:
+  serial:
+    port: ${port}
+
+variables:
+  myscript: script
+  mymessage: echo hello script!

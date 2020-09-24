@@ -257,6 +257,14 @@ Supported attributes:
   * `- powercycle:` Use the power controller defined to power cycle the board (off and on)
     * `off_duration_ms:` Duration for which the device is powered off. Actual duration may be longer
 
+### Variables and substitution
+
+Variables are used in both the target and tests configuration files as `${my_var}`. Variables can be defined either:
+* In the target configuration
+  * These are defined, under `variables` (see target definition), and substituted only in the tests configuration
+* As environment environment variables
+  * Environment variables always take precedence over target definition variables, and can be used in both the target, and test configuration files. These are typically set with `EXPORT my_var=value` on Linux platforms.
+
 ### Complete list of CLI options
 
 ```preformatted-text

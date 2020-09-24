@@ -72,8 +72,11 @@ class Pluma:
 
     @staticmethod
     def create_target_context(target_config_path: str) -> PlumaContext:
-        target_config = PlumaConfig.load_configuration('Target config', target_config_path)
+        env_vars = dict(os.environ)
+        target_config = PlumaConfig.load_configuration('Target config', target_config_path,
+                                                       PlumaConfigPreprocessor(env_vars))
         context = TargetConfig.create_context(target_config)
+        context.variables.update(env_vars)
         return context
 
     @staticmethod

@@ -1,0 +1,6 @@
+sequence:
+- shell_tests:
+    target_setup:
+      ${myscript}:
+        - ${mymessage}
+        - ${some_env_var}
