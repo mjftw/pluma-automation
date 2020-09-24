@@ -1,16 +1,19 @@
+from traceback import format_exc
+from typing import Iterable
 import pty
 import os
+import sys
 import time
-from collections import namedtuple
 from pytest import fixture
 from unittest.mock import MagicMock
+import traceback
 
 from utils import OsFile
 from pluma import Board, SerialConsole, SoftPower, SSHConsole
 from pluma.core.baseclasses import ConsoleBase
 from pluma.core.dataclasses import SystemContext, Credentials
 from pluma.core.mocks import ConsoleMock
-
+from pluma import __main__
 
 @fixture
 def soft_power():
@@ -105,3 +108,29 @@ def serial_config():
         'port': 'abc',
         'baud': 123,
     }
+
+
+@fixture
+def pluma_cli(capsys):
+    '''Get a function that can be used to call the Pluma CLI with given args and catches exits'''
+    def pluma_cli(args: Iterable[str] = []):
+        assert isinstance(args, Iterable)
+
+        # Override actual CLI arguments with supplied
+        sys.argv = [sys.argv[0], *args]
+        try:
+            __main__.main()
+        except SystemExit as e:
+            if e.code != 0:
+                readouterr = capsys.readouterr()
+                e_msg = f'Pluma CLI exited with code {e.code}'
+                print(
+                    f'{e_msg}',
+                    f'{os.linesep}stdout: {readouterr.out}' if readouterr.out else '',
+                    f'{os.linesep}stderr: {readouterr.err}' if readouterr.err else '',
+                )
+                traceback.print_exc()
+
+                raise RuntimeError(e_msg)
+
+    return pluma_cli
