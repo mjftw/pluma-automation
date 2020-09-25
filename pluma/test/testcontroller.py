@@ -1,16 +1,16 @@
 import time
 import json
-import pygal
 from datetime import datetime
 from copy import deepcopy
-from statistics import mean, median_grouped, mode, stdev, variance,\
-    StatisticsError
 
 from pluma.utils import send_exception_email, datetime_to_timestamp, \
     regex_filter_list
 
 from .unittest import deferred_function
-from .test import TestRunner
+from pluma.test import TestRunner
+
+from .resultsplotter import DefaultResultsPlotter
+from .resultsprocessor import DefaultResultsProcessor
 
 
 class TestController():
@@ -152,6 +152,8 @@ class TestController():
         self.stats['num_tests_total'] = 0
 
         self.results = []
+        self.plotter = DefaultResultsPlotter()
+        self.processor = DefaultResultsProcessor()
 
     @property
     def settings(self):
@@ -279,98 +281,7 @@ class TestController():
     def get_results_summary(self):
         ''' Get a summary of test results data values,
             with some numerical analysis '''
-        def chunks(l, n):
-            '''Yield successive n-sized chunks from l'''
-            for i in range(0, len(l), n):
-                yield l[i:i + n]
-
-        def chunked_mean(l, n, sigfig=2):
-            '''Chunk the list l into n equal chunks, and calculate the mean of
-            each chunk. If n > length of l, then the length of l is used instead.
-            This gives the mean for first x values, then next x values etc.'''
-            chunked_list = chunks(l, min(round(len(l)/n) or 1, len(l)))
-            chunked_mean_list = list(map(
-                lambda x: round(mean(x), sigfig),
-                chunked_list
-            ))
-            if len(chunked_mean_list) > n:
-                chunked_mean_list = chunked_mean_list[0: n]
-            return chunked_mean_list
-
-        results_summary = {}
-        for test in [str(t) for t in self.testrunner.tests]:
-            # Collect data
-            if test not in results_summary:
-                results_summary[test] = {}
-
-            for iteration, result in enumerate(self.results):
-                for data_key in self.results[iteration]['TestRunner'][test]['data']:
-                    if data_key not in results_summary[test]:
-                        results_summary[test][data_key] = {}
-                    data_value = self.results[iteration]['TestRunner'][test]['data'][data_key]
-
-                    # Collect values in list
-                    if 'values' not in results_summary[test][data_key]:
-                        results_summary[test][data_key]['values'] = []
-                    results_summary[test][data_key]['values'].append(
-                        data_value)
-
-                    # Count of data value
-                    if 'count' not in results_summary[test][data_key]:
-                        results_summary[test][data_key]['count'] = {}
-                    if str(data_value) not in results_summary[test][data_key]['count']:
-                        results_summary[test][data_key]['count'][str(
-                            data_value)] = 0
-                    results_summary[test][data_key]['count'][str(
-                        data_value)] += 1
-
-            # Calculate statistical data
-            for data_key in results_summary[test]:
-                n_values = len(results_summary[test][data_key]['values'])
-                # Can't generate statistics from a single data point
-                if n_values >= 2:
-                    # Statistics calculated for numbers only
-                    if all((isinstance(d, int) or isinstance(d, float))
-                            and not isinstance(d, bool)
-                            for d in results_summary[test][data_key]['values']):
-                        results_summary[test][data_key]['max'] = max(
-                            results_summary[test][data_key]['values'])
-
-                        results_summary[test][data_key]['min'] = min(
-                            results_summary[test][data_key]['values'])
-
-                        try:
-                            results_summary[test][data_key]['mode'] = mode(
-                                results_summary[test][data_key]['values'])
-                        except StatisticsError:
-                            # This happens when there is no unique mode
-                            results_summary[test][data_key]['mode'] = None
-
-                        results_summary[test][data_key]['mean'] = round(mean(
-                            results_summary[test][data_key]['values']), 2)
-
-                        results_summary[test][data_key]['median'] = round(median_grouped(
-                            results_summary[test][data_key]['values']), 2)
-
-                        results_summary[test][data_key]['stdev'] = round(stdev(
-                            results_summary[test][data_key]['values']), 2)
-
-                        results_summary[test][data_key]['variance'] = round(variance(
-                            results_summary[test][data_key]['values']), 2)
-
-                    # Statistics calculated for numbers or booleans
-                    if all(isinstance(d, int) or isinstance(d, float)
-                            or isinstance(d, bool)
-                            for d in results_summary[test][data_key]['values']):
-                        # Chunk the data into equal chunks, and calculate the chunks mean
-                        # This gives the mean for first x values, then next x values etc.
-                        # Number of chunks is lowest of 10 and the length of the dataset
-                        results_summary[test][data_key]['chunked_mean'] = chunked_mean(
-                            results_summary[test][data_key]['values'], 10)
-                # We do not want all the data duplicated in the summary
-                del(results_summary[test][data_key]['values'])
-
-        return results_summary
+        return self.results_processor.generate_summary(self.testrunner.tests, self.results)
 
     def collect_test_settings(self):
         ''' Get a summary of the settings for tests in the TestRunner '''
@@ -465,160 +376,21 @@ class TestController():
 
     def graph_test_results(self, file, test_names=None, fields=None, vs_type=None,
                            title=None, format=None, config=None):
-        '''Create a graph of data fields from the test results data.
-
-        Args:
-            file (str): Output file path.
-            test_names (str, list(str)): Name of Tests to read data from.
-                Can specify a one test name or a list of test names.
-                All tests are selected if set to None.
-            fields (str, list(str): List of data fields to plot from Test data.
-                Default: all fields are plotted.
-            vs_type (str): Specifies what should be on graph axis:
-                "iteration": graph data values over test iterations.
-                "fields": Graph the fields in fields argument with one on each axis.
-                    If this option is selected, fileds must be exactly 2 fields.
-                Default: "iteration"
-            title (str): Optionally a title can be supplied for the chart.
-                If a tile is not specified, one will be generated according to
-                the test data.
-            format (str): Specifies output format.
-                Options: "svg" or "png"
-                Default: "svg"
-            config (pygal.Config): Optionally supply a option.
-                This allows rendering with custom configuration and styles.
-        '''
-
-        vs_type = vs_type or 'iteration'
-        format = format or 'svg'
-
-        if fields and not isinstance(fields, list):
-            fields = [fields]
-
-        if test_names and not isinstance(test_names, list):
-            test_names = [test_names]
-
-        vs_types = ['iteration', 'cumulative', 'fields']
-        if vs_type not in vs_types:
-            raise AttributeError(f'vs_type must be in {vs_types}')
-        elif (vs_type == 'fields' and
-                (not isinstance(fields, list) or len(fields) != 2)):
-            raise AttributeError(
-                'fields must be a list of exactly 2 fields for "fields" vs_type')
-        formats = ['svg', 'png']
-        if format not in formats:
-            raise AttributeError(f'Format must be one of {formats}')
-
-        results = list(self.get_test_results(
-            test_names=test_names, fields=fields))
-
-        # Find any tests that do not have any data for fields specified
-        empty_tests = set([test for r in results for test,
-                           data in r.items() if not data])
-
-        if results:
-            # Get a list of test names whose tests have data
-            tests_found = sorted(
-                list(set(test for r in results for test in r if test not in empty_tests)))
-        else:
-            tests_found = []
-
-        if tests_found:
-            # Get a list of all fields accross all test data found
-            fields_found = list(
-                set(key for r in results for test, data in r.items() for key in data))
-        else:
-            fields_found = []
-
-        # If no results match, or all test names missing from from first result
-        if not fields_found:
-            plural_or_not = 's' if len(tests_found) > 1 else ''
-            raise RuntimeError(
-                f'No results found for test{plural_or_not}{test_names}, fields{fields}')
-
-        chart = pygal.XY(truncate_legend=-1)
-        chart.title = title
-
-        # Default style to fix svg black background rendering issue
-        chart.config.style = pygal.style.Style(
-            background='#FFFFFF',
-            plot_background='#FFFFFF'
-        )
-
-        if config:
-            if not isinstance(config, pygal.Config):
-                raise AttributeError('config must be of type pygal.Config')
-            chart.config = config
-
-        points = {}
-
-        if vs_type in ['iteration', 'cumulative']:
-            vs_str = '{}{} vs iteration'.format(
-                'cumulative ' if vs_type == 'cumulative' else '',
-                ', '.join(fields_found))
-
-            # Build list of points with dataset labels
-            for tf in tests_found:
-                points[tf] = {f'{tf}: {k}': [] for k in results[0][tf]}
-                last_v = 0
-                for i, r in enumerate(results):
-                    # Filter out None results as these are not numbers and will break graphing.
-                    for k, v in ((k, v) for k, v in r[tf].items() if v is not None):
-                        if isinstance(v, bool):
-                            v = int(v)
-                        if vs_type == 'cumulative':
-                            v += last_v
-                            last_v = v
-
-                        points[tf][f'{tf}: {k}'].append((i, v))
-
-        elif vs_type == 'fields':
-            tests_with_fields = [
-                tf for tf in tests_found for r in results
-                if fields[0] in r[tf] and fields[1] in r[tf]
-            ]
-            vs_str = f'{fields[0]} vs {fields[1]}'
-
-            for tf in tests_with_fields:
-                points[tf] = {
-                    tf: [(r[tf][fields[0]], r[tf][fields[1]]) for r in results]}
-
-        chart.title = chart.title or '{} for{} {}'.format(
-            vs_str,
-            ' tests:' if len(tests_found) > 1 else '',
-            ', '.join(tests_found))
-
-        if not points:
-            raise RuntimeError(
-                'No results found for test{}{}, fields{}'.format(
-                    's' if len(tests_found) > 1 else '',
-                    test_names,
-                    fields))
-
-        # Combine points for each test into one set
-        points_combined = {}
-        for _, points_v in points.items():
-            for k, v in points_v.items():
-                points_combined[k] = v
-
-        # Add points to chart
-        for k, v in points_combined.items():
-            chart.add(k, v)
-
-        if format == 'svg':
-            chart.render_to_file(file)
-        elif format == 'png':
-            chart.render_to_png(file)
+        '''Create a graph of data fields from the test results data'''
+        results = list(self.get_test_results(test_names=test_names, fields=fields))
+        self.plotter.plot(file, results=results, test_names=test_names, fields=fields,
+                          vs_type=vs_type, title=title, output_format=format, config=config)
 
     def run_iteration(self):
         ''' Run all tests in TestRunner '''
         iteration = self.stats['num_iterations_run']
         if iteration > 0:
             self.log(f'Starting iteration #{iteration+1}')
-            self.log("Current stats:\n\tIterations passed/total: {}/{} , Tests pass/run/total: {}/{}/{} ".format(
-                self.stats['num_iterations_pass'], iteration,
-                self.stats['num_tests_pass'], self.stats['num_tests_run'],
-                self.stats['num_tests_total']))
+            self.log('Current stats:\n\tIterations passed/total: {}/{},'
+                     ' Tests pass/run/total: {}/{}/{} '.format(
+                         self.stats['num_iterations_pass'], iteration,
+                         self.stats['num_tests_pass'], self.stats['num_tests_run'],
+                         self.stats['num_tests_total']))
 
         self._init_iteration()
 
@@ -675,8 +447,10 @@ class TestController():
                     run_now = self.run_condition.run(self)
 
                 while run_now:
+                    num_iterations = self.stats['num_iterations_run']
+
                     if (self.settings['setup_n_iterations'] and
-                            self.stats['num_iterations_run'] % self.settings['setup_n_iterations'] == 0):
+                            num_iterations % self.settings['setup_n_iterations'] == 0):
                         if self.setup:
                             self.debug_log(f'Running setup function: {self.setup}')
                             self.setup.run(self)
@@ -687,7 +461,7 @@ class TestController():
                             self.report.run(self)
                         return False
                     if (self.settings['report_n_iterations'] and
-                            self.stats['num_iterations_run'] % self.settings['report_n_iterations'] == 0):
+                            num_iterations % self.settings['report_n_iterations'] == 0):
                         if self.report:
                             self.debug_log(f'Running report function: {self.report}')
                             self.report.run(self)
