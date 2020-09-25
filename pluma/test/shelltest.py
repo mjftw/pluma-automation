@@ -14,7 +14,7 @@ class ShellTest(TestBase):
     def __init__(self, board: Board, script: str, name: str = None,
                  should_match_regex: List[str] = None,  should_not_match_regex: List[str] = None,
                  run_on_host: bool = False, timeout: int = None,  runs_in_shell: bool = True,
-                 login_automatically: bool = True):
+                 login_automatically: bool = False):
         super().__init__(board)
         self.should_match_regex = should_match_regex
         self.should_not_match_regex = should_not_match_regex
