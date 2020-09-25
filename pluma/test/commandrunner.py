@@ -14,7 +14,8 @@ class CommandRunner():
     def run(test_name: str, console: ConsoleBase, command: str, timeout: int = None) -> str:
         '''Run a command in a Shell context'''
         retcode_token = 'pluma-retcode='
-        command += " ; echo pluma-retcode=$?"
+        base_command = command
+        command += f' ; echo {retcode_token}$?'
         output, matched = console.send_and_expect(
             command, timeout=10, match=retcode_token+r'-?\d+')
 
@@ -42,7 +43,7 @@ class CommandRunner():
                                     error=f'Command "{command}" {error}')
 
         output = CommandRunner.cleanup_command_output(command, output)
-        log.log(CommandRunner.format_command_log(sent=command, output=output))
+        log.log(CommandRunner.format_command_log(sent=base_command, output=output))
 
         return output
 
