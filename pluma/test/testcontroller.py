@@ -75,6 +75,12 @@ class TestController():
             See :func:`~pluma.utils.email.send_exception_email`
         log_func (function): Log function to use.
             Default: print
+        results_plotter (:class:`~pluma.test.resultsplotter.ResultsPlotter`): Plotter to be used
+            to graph test results.
+            Defaults to :class:`~pluma.test.resultsplotter.DefaultResultsPlotter`
+        results_processor (:class:`~pluma.test.resultsprocessor.ResultsProcessor`): Processor to be used
+            to format test results.
+            Defaults to :class:`~pluma.test.resultsprocessor.DefaultResultsProcessor`
 
     Attributes:
         settings (dict): Controls the behaviour of the TestController.
@@ -107,7 +113,8 @@ class TestController():
                  run_condition=None, name=None, report_n_iterations=None,
                  continue_on_fail=True, run_forever=False, condition_check_interval_s=0,
                  setup_n_iterations=None, force_initial_run=False, email_on_except=True,
-                 log_func=None, verbose_log_func=None, debug_log_func=None):
+                 log_func=None, verbose_log_func=None, debug_log_func=None,
+                 results_plotter=None, results_processor=None):
         assert isinstance(testrunner, TestRunner)
 
         self.testrunner = testrunner
@@ -120,6 +127,9 @@ class TestController():
         self.debug_log_func = debug_log_func
 
         self.name = name
+
+        self.results_plotter = results_plotter or DefaultResultsPlotter()
+        self.results_processor = results_processor or DefaultResultsProcessor()
 
         # Global data to be used by tests
         # Save TestController data here too
@@ -152,8 +162,6 @@ class TestController():
         self.stats['num_tests_total'] = 0
 
         self.results = []
-        self.plotter = DefaultResultsPlotter()
-        self.processor = DefaultResultsProcessor()
 
     @property
     def settings(self):
@@ -378,7 +386,7 @@ class TestController():
                            title=None, format=None, config=None):
         '''Create a graph of data fields from the test results data'''
         results = list(self.get_test_results(test_names=test_names, fields=fields))
-        self.plotter.plot(file, results=results, test_names=test_names, fields=fields,
+        self.results_plotter.plot(file, results=results, test_names=test_names, fields=fields,
                           vs_type=vs_type, title=title, output_format=format, config=config)
 
     def run_iteration(self):

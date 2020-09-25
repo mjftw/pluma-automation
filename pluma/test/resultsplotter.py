@@ -6,7 +6,7 @@ class ResultsPlotter(ABC):
     @abstractmethod
     def plot(self, file, results: list, test_names=None, fields=None, vs_type=None,
              title=None, output_format=None, config=None):
-        pass
+        '''Create a graph of test results passed in'''
 
 
 class DefaultResultsPlotter(ResultsPlotter):

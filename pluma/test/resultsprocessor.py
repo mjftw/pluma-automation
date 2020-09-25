@@ -6,19 +6,19 @@ from statistics import mean, median_grouped, mode, stdev, variance,\
 
 class ResultsProcessor(ABC):
     @abstractmethod
-    def generate_summary(tests: list, results: list) -> dict:
-        pass
+    def generate_summary(self, tests: list, results: list) -> dict:
+        '''Generate a summary of the test results passed in.'''
 
 
 class DefaultResultsProcessor(ResultsProcessor):
-    def generate_summary(tests: list, results: list) -> dict:
+    def generate_summary(self, tests: list, results: list) -> dict:
         """Get a summary of test results data values, with some numerical analysis"""
         def chunks(results_list, n):
             """Yield successive n-sized chunks from results_list"""
             for i in range(0, len(results_list), n):
                 yield results_list[i:i + n]
 
-        def chunked_mean(results_list, n, sigfig=2):
+        def chunked_mean(self, results_list, n, sigfig=2):
             """Chunk the list results_list into n equal chunks, and calculate the mean of
             each chunk. If n > length of results_list, then the length of results_list is
             used instead. This gives the mean for first x values, then next x values etc."""
