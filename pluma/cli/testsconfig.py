@@ -56,7 +56,7 @@ class TestsConfig:
             board=board,
             tests=TestsConfig.create_tests(
                 self.selected_tests(), board),
-            sequential=settings.pop('sequential', default=True),
+            sequential=True,
             email_on_fail=settings.pop('email_on_fail', default=False),
             continue_on_fail=settings.pop(
                 'continue_on_fail',  default=True),
