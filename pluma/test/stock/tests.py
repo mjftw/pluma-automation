@@ -1,4 +1,4 @@
-from ..test import TestBase
+from ..testbase import TestBase
 
 
 class StockSensorsTest(TestBase):

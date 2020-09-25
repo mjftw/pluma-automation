@@ -78,8 +78,8 @@ class TestController():
         results_plotter (:class:`~pluma.test.resultsplotter.ResultsPlotter`): Plotter to be used
             to graph test results.
             Defaults to :class:`~pluma.test.resultsplotter.DefaultResultsPlotter`
-        results_processor (:class:`~pluma.test.resultsprocessor.ResultsProcessor`): Processor to be used
-            to format test results.
+        results_processor (:class:`~pluma.test.resultsprocessor.ResultsProcessor`): Processor to
+            be used to format test results.
             Defaults to :class:`~pluma.test.resultsprocessor.DefaultResultsProcessor`
 
     Attributes:
@@ -387,7 +387,7 @@ class TestController():
         '''Create a graph of data fields from the test results data'''
         results = list(self.get_test_results(test_names=test_names, fields=fields))
         self.results_plotter.plot(file, results=results, test_names=test_names, fields=fields,
-                          vs_type=vs_type, title=title, output_format=format, config=config)
+                                  vs_type=vs_type, title=title, output_format=format, config=config)
 
     def run_iteration(self):
         ''' Run all tests in TestRunner '''

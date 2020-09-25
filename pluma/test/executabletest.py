@@ -2,8 +2,7 @@ import os
 import string
 import random
 
-from .test import TestBase, TaskFailed
-from .shelltest import CommandRunner
+from pluma.test import TestBase, TaskFailed, CommandRunner
 from pluma import HostConsole
 
 

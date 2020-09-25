@@ -3,8 +3,7 @@ import re
 from typing import List
 
 from pluma.core.baseclasses import ConsoleBase, Logger
-from pluma.test import TestingException
-from .test import TaskFailed
+from pluma.test import TestingException, TaskFailed
 
 log = Logger()
 

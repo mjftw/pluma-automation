@@ -1,2 +1,14 @@
-from .test import TestingException, TaskFailed, AbortTesting,\
-    AbortTestingAndReport
+class TestingException(Exception):
+    pass
+
+
+class TaskFailed(TestingException):
+    pass
+
+
+class AbortTesting(TestingException):
+    pass
+
+
+class AbortTestingAndReport(AbortTesting):
+    pass

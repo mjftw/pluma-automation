@@ -1,5 +1,8 @@
-from .exceptions import *
-from .test import TestBase, TestCore, TestRunner
+from .exceptions import TestingException, TaskFailed, AbortTesting, \
+    AbortTestingAndReport
+from .testbase import TestBase
+from .testcore import TestCore
+from .testrunner import TestRunner
 from .unittest import deferred_function
 from .testcontroller import TestController
 from .commandrunner import CommandRunner
