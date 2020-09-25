@@ -58,8 +58,8 @@ class PythonTestsProvider(TestsProvider):
 
         modules = {module_name: module
                    for module_name, module in inspect.getmembers(pluma.plugins, inspect.ismodule)}
-        submodules = {submodule_name: submodule
-                      for module in modules.values()
+        submodules = {f'{module_name}.{submodule_name}': submodule
+                      for module_name, module in modules.items()
                       for submodule_name, submodule in inspect.getmembers(module, inspect.ismodule)}
 
         test_classes = {}

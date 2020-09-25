@@ -1,6 +1,7 @@
 sequence:
 - core_tests:
-    include: [example_plugin.mytests]
+    include: [example_plugin.mytests, topleveltests]
     parameters:
       example_plugin.mytests.Hello:
         name: Merlin
+      topleveltests.World:

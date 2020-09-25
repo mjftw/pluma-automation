@@ -16,6 +16,14 @@ def test_load_plugin_should_run_module_init(capsys):
     assert 'hello from module init\n' == capsys.readouterr().out
 
 
+def test_tests_should_be_findable_in_files_in_plugin_dir_root(pluma_cli):
+    pluma_cli(['--config', TEST_YAML, '--target', TARGET_YAML, '--plugin', PLUGIN_DIR, 'check'])
+
+
+def test_tests_should_be_findable_without_needing_import_in_module_init(pluma_cli):
+    pluma_cli(['--config', TEST_YAML, '--target', TARGET_YAML, '--plugin', PLUGIN_DIR, 'check'])
+
+
 def test_cli_should_error_on_missing_test_config(pluma_cli):
     with pytest.raises(RuntimeError):
         pluma_cli(['--config', '/this-file-doesnt-exist!'])
