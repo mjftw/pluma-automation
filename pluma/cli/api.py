@@ -73,6 +73,7 @@ class Pluma:
     @staticmethod
     def create_target_context(target_config_path: str) -> PlumaContext:
         env_vars = dict(os.environ)
+        log.debug(f'Parsing target configuration "{target_config_path}"...')
         target_config = PlumaConfig.load_configuration('Target config', target_config_path,
                                                        PlumaConfigPreprocessor(env_vars))
         context = TargetConfig.create_context(target_config)
@@ -81,6 +82,7 @@ class Pluma:
 
     @staticmethod
     def create_tests_config(tests_config_path: str, context: PlumaContext) -> TestsConfig:
+        log.debug(f'Parsing tests configuration "{tests_config_path}"...')
         tests_config = PlumaConfig.load_configuration('Tests config', tests_config_path,
                                                       PlumaConfigPreprocessor(context.variables))
 

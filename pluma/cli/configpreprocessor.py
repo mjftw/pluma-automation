@@ -1,6 +1,9 @@
 import re
 
 from .config import ConfigPreprocessor
+from pluma.core.baseclasses import Logger
+
+log = Logger()
 
 
 class PlumaConfigPreprocessor(ConfigPreprocessor):
@@ -29,6 +32,7 @@ class PlumaConfigPreprocessor(ConfigPreprocessor):
                             f'{missing_variables}')
 
         for variable in unique_vars:
+            log.debug(f'${{{variable}}}={self.variables[variable]}')
             raw_config = re.sub(r'\${'+variable+'}', self.variables[variable],
                                 raw_config)
 
