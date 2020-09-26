@@ -55,7 +55,7 @@ requires = [
     'nanocom',
     'requests',
     'pytest',
-    'pytest-cov',
+    'coverage',
     'pyyaml>=5.1',
     'deprecated'
 ]

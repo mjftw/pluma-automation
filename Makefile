@@ -31,10 +31,10 @@ test-all:: ## Run all Pluma Automation tests (generic and RPi specific)
 		@./tests/scripts/run_tests.sh
 
 test-coverage:: ## Check the code coverage for all tests that don't require hardware
-		@./tests/scripts/check_test_coverage.sh generic
+		@./tests/scripts/run_tests.sh generic --coverage
 
 test-all-coverage:: ## Check the code coverage for all tests (generic and RPi specific)
-		@./tests/scripts/check_test_coverage.sh
+		@./tests/scripts/run_tests.sh --coverage
 
 docker-build:: ## Build the docker image
 		@echo Building $(IMAGE_TAG)

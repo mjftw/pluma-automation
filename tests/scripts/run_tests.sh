@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eu
 this_dir="$(dirname $0)"
 
 test_dir="$(readlink -f $this_dir/..)"
@@ -15,4 +16,13 @@ else
     echo "Running all tests in $test_dir"
 fi
 
-python3 -m pytest "$test_dir" -v
+test_command="-m pytest "$test_dir
+
+if [[ $@ == "--coverage" ]]; then
+    echo "Running tests"
+    python3 $test_command -v
+else
+    echo "Running coverage"
+    coverage run --source=pluma $test_command
+    coverage xml
+fi
