@@ -3,46 +3,14 @@
 ![Native installation and tests](https://github.com/Witekio/pluma-automation/workflows/Native%20installation%20and%20tests/badge.svg)
 ![Docker Image CI](https://github.com/Witekio/pluma-automation/workflows/Docker%20Image%20CI/badge.svg)
 
-Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https://www.witekio.com) to perform black box testing of embedded hardware; designed to be as lightweight as possible!
+Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https://www.witekio.com) to perform automated testing on embedded devices. This framework has no requirements on the device side. This tools is can be used in two different ways:
 
-At it's core it enables programmatic hardware control of many supported devices to control a board's power, console, storage, and more.
-This package is named `pluma.core` (accessible as `pluma` top level package).
-
-On top of the hardware control library sits a testing framework `pluma.test`, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
-`pluma.core` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
-
-Finally we have `pluma.utils`, a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
-
-System features include:
-
-* [Automated testing framework](docs/tutorials/3-tutorial-test-framework.md)
-* [A Docker container to run your tests in](docs/quick-start-guide/2-install-and-run.md)
-* [Draw a plot of your USB tree](docs/tutorials/2-2-tutorial-usb.md)
-* [Email reporting](docs/tutorials/4-1-tutorial-email.md)
-* Flexible and extensible test scheduler
-* Generate test reports with automatically formatted results and graphs
-* Make and receive phone calls and text messages
-* Read in-circuit voltage and current values
-
-Hardware control features include:
-
-* [Turn boards on and off remotely](docs/tutorials/2-3-tutorial-power.md)
-* [Built-in boot test](docs/tutorials/2-5-tutorial-board.md)
-* [Send commands to a board's console](docs/tutorials/2-5-tutorial-board.md)
-* [USB relay control](docs/tutorials/2-3-tutorial-power.md)
-* [SD card multiplexing](docs/tutorials/2-4-tutorial-storage.md)
-* [Smart USB device detection](docs/tutorials/2-2-tutorial-usb.md)
-* ... and much more!
-
-Pluma Automation is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.
-Just be sure to raise a pull request with your shiny new feature ;).
-
-![System Diagram](docs/quick-start-guide/automation_lab_system_diagram.png)
+* As a command line interface tool (`pluma run`), designed with ease of use, and extensibility in mind
+  * Relies on a target configuration file (`pluma-target.yml`) and a test definition file (`pluma.yml`)
+* As python library, enabling programmatic hardware control of many supported devices to control a board's power, console, storage, and more
+  * The main package for library use is named `pluma.core` (accessible as `pluma` top level package).
 
 ## Getting Started
-
-To get up and running quickly, check out the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md).  
-Look at the [Tutorials](./docs/tutorials/1-tutorial-introduction.md) for guidance and examples on how to use Pluma Automation in your project.
 
 ## Installation
 
@@ -333,31 +301,72 @@ settings:
   iterations: 20
 ```
 
-## Using the Packages
+## Using the Python packages
 
-You can make use of the packages provided outside of the CLI, once you've installed Pluma (or run the Docker container). You should be able to import and use the `pluma` modules in your Python scripts.
+### Features
 
+System features include:
+
+* [Automated testing framework](docs/tutorials/3-tutorial-test-framework.md)
+* [A Docker container to run your tests in](docs/quick-start-guide/2-install-and-run.md)
+* [Draw a plot of your USB tree](docs/tutorials/2-2-tutorial-usb.md)
+* [Email reporting](docs/tutorials/4-1-tutorial-email.md)
+* Flexible and extensible test scheduler
+* Generate test reports with automatically formatted results and graphs
+* Make and receive phone calls and text messages
+* Read in-circuit voltage and current values
+
+Hardware control features include:
+
+* [Turn boards on and off remotely](docs/tutorials/2-3-tutorial-power.md)
+* [Built-in boot test](docs/tutorials/2-5-tutorial-board.md)
+* [Send commands to a board's console](docs/tutorials/2-5-tutorial-board.md)
+* [USB relay control](docs/tutorials/2-3-tutorial-power.md)
+* [SD card multiplexing](docs/tutorials/2-4-tutorial-storage.md)
+* [Smart USB device detection](docs/tutorials/2-2-tutorial-usb.md)
+* ... and much more!
+
+Pluma Automation is designed to be easily extensible. If your smart plug, clever kettle, or hardware doodar isn't supported then you can probably integrate it without too much work.
+Just be sure to raise a pull request with your shiny new feature ;).
+
+![System Diagram](docs/quick-start-guide/automation_lab_system_diagram.png)
+
+### Overview
+
+Pluma is composed of the following packages:
+* `pluma.core` (or `pluma`): the library main package for hardware and device control
+* `pluma.test`: a testing framework, which automates the hardware control to run testing of many flavours (regression, soak, feature, etc). This package is entirely optional.
+`pluma.core` still works well without it, and can be easily integrated with other testing frameworks and CI/CD tools such as [Pytest](https://docs.pytest.org/) or [Buildbot](https://buildbot.net/).
+* `pluma.utils`: a utilities library to provide additional features such as email reporting or downloading code from `git` repositories.
+
+You can make use of these packages once you have installed Pluma, or within the Docker container.
 ```python
 # my_project_file.py
-import pluma
-from pluma import test
-from pluma import utils
+from pluma import SerialConsole, Board
+from pluma.core.power import Uhubctl
 
-# Create a Board (full Board arguments not shown)
-my_board = pluma.Board('My board')
+# Set up device control
+console = SerialConsole(port='/dev/ttyUSB0', baud=115200)
+power = Uhubctl(location='1-6.4', port=4)
+my_board = Board('My board', console=console, power=power)
 
-# Send a command to the board
-my_board.console.send('uname -a')
+# Wait for it to boot
+my_board.power.reboot()
+my_board.console.wait_for_match(match='login:', timeout=60)
+print(my_board.console.send_and_read('mendel'))
+print(my_board.console.send_and_read('mendel'))
+print(my_board.console.send_and_read('uname -a'))
 
 # Turn the board off
 my_board.power.off()
 ```
 
-The above code is just for demonstration, for working code examples check out the [Tutorials](docs/tutorials/1-tutorial-introduction.md).
+For more examples check out the [Tutorials](docs/tutorials/1-tutorial-introduction.md).
+To get up and running quickly, check out the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md).
 
 ## Running the Tests
 
-The project's tests are split into two groups.
+The project's unit tests are split into two groups.
 Those that do not require a specific hardware setup and those that do.
 
 ### Generic tests
