@@ -1,5 +1,4 @@
 import time
-from enum import Enum
 
 from pluma.core.baseclasses import Logger
 from pluma import Board
@@ -47,7 +46,8 @@ class WaitAction(DeviceActionBase):
 
         if self.duration < 0:
             DeviceActionBase.parsing_error(self.__class__,
-                                           'Wait duration must be a positive number, but got "{self.duration}" instead.')
+                                           'Wait duration must be a positive number, '
+                                           'but got "{self.duration}" instead.')
 
     def validate(self):
         return self.duration >= 0

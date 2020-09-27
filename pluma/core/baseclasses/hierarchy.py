@@ -2,7 +2,7 @@ class Hierarchy():
     """ This class is inherited in order add Hierarchy to a class """
 
     def __init__(self):
-        if type(self) is Hierarchy:
+        if isinstance(self, Hierarchy):
             raise AttributeError(
                 'This is a base class, and must be inherited')
 
@@ -37,9 +37,9 @@ class Hierarchy():
             setattr(child, attr, value)
             child._children_set_attr(attr, value)
 
-    def show_hier(self, indent_level=1, indent_size=4, recurse=True,
-                  exclude=[]):
+    def show_hier(self, indent_level=1, indent_size=4, recurse=True, exclude=None):
         """ Return string containing all local vars, and get children to do the same """
+        exclude = exclude or []
         children = {}
         attrs = {}
         hier_str = ''

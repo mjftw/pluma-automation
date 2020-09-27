@@ -174,10 +174,10 @@ class ModemSim868(HardwareBase):
 
         self.log('Calling {}'.format(number))
 
-        received, matched = self.AT_send('ATD{};'.format(number),
-                                         match=['OK', 'NO DIALTONE', 'BUSY',
-                                                'NO CARRIER', 'NO ANSWER'],
-                                         excepts='ERROR')
+        _, matched = self.AT_send('ATD{};'.format(number),
+                                  match=['OK', 'NO DIALTONE', 'BUSY',
+                                         'NO CARRIER', 'NO ANSWER'],
+                                  excepts='ERROR')
         if not matched:
             self.error('Unexpected response from modem: {}'.format(received),
                        ModemError)

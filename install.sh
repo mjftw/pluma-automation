@@ -24,7 +24,7 @@ function add_group {
     group="$1"
     if [ -z "$(groups | grep $group)" ]; then
         $SUDO groupadd $group
-        $SUDO usermod -aG $group `whoami`
+        $SUDO usermod -aG $group $(whoami)
     fi
 }
 
@@ -71,7 +71,7 @@ function install_python_packages {
         #   scripts here WILL be picked up by installed package.
         # This option is to be used when developing the pluma packages.
 
-        python3 -m pip install --upgrade --editable $PROJECT_ROOT
+        python3 -m pip install --upgrade --editable "$PROJECT_ROOT"
         echo
         echo "=== Installed pluma package, editable from $PROJECT_ROOT (dev mode) ==="
     else
@@ -80,7 +80,7 @@ function install_python_packages {
         #   package must be reinstalled using script to track these changes.
         # This is what we would want for a normal user.
 
-        python3 -m pip install --upgrade $PROJECT_ROOT
+        python3 -m pip install --upgrade "$PROJECT_ROOT"
         echo
         echo "=== Installed pluma package ==="
     fi

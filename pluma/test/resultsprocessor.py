@@ -18,7 +18,7 @@ class DefaultResultsProcessor(ResultsProcessor):
             for i in range(0, len(results_list), n):
                 yield results_list[i:i + n]
 
-        def chunked_mean(self, results_list, n, sigfig=2):
+        def chunked_mean(results_list, n, sigfig=2):
             """Chunk the list results_list into n equal chunks, and calculate the mean of
             each chunk. If n > length of results_list, then the length of results_list is
             used instead. This gives the mean for first x values, then next x values etc."""

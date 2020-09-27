@@ -83,7 +83,7 @@ class TestRunner():
             self._init_test_data(test)
 
         self.board.log("Running tests: {}".format(
-            list(map(lambda t: str(t), self.tests))), level=LogLevel.DEBUG)
+            list(map(str, self.tests))), level=LogLevel.DEBUG)
 
         if self.sequential:
             self.board.log('== TESTING MODE: SEQUENTIAL ==',
@@ -292,7 +292,7 @@ class TestRunner():
                     str(test), task_name, str(e)))
                 if (isinstance(e, AbortTestingAndReport) and
                         'report' in self.tasks):
-                    self._run_task('report')
+                    self._run_task('report', test_name)
                 raise e
 
             abort_testing = not self.continue_on_fail

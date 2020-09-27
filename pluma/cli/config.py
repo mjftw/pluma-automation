@@ -100,7 +100,6 @@ class TestsProvider(ABC):
     @abstractmethod
     def display_name(self) -> str:
         '''Return a human-friendly name for the provider'''
-        pass
 
     @abstractmethod
     def configuration_key(self) -> str:
@@ -110,16 +109,10 @@ class TestsProvider(ABC):
         this provider will be used when creating the tests definition by
         calling "all_tests" and "selected_tests".
         '''
-        pass
 
     @abstractmethod
     def all_tests(self, key: str, config: Configuration) -> list:
         '''Return all TestDefinition from the "config" provided by the sequence key "key"'''
-        pass
-
-    def selected_tests(self, config: Configuration) -> list:
-        '''Return selected tests from the "config" provided, as a list of TestDefinition'''
-        return list(filter(lambda test: (test.selected), self.all_tests(config)))
 
 
 class ConfigPreprocessor(ABC):

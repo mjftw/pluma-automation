@@ -148,7 +148,7 @@ class Logger(Singleton):
 
 class Logging():
     def __init__(self):
-        if type(self) is Logging:
+        if isinstance(self, Logging):
             raise AttributeError(
                 'This is a base class, and must be inherited')
 

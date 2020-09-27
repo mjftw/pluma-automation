@@ -7,6 +7,8 @@ import os
 from deprecated import deprecated
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
+from typing import Callable
+
 from functools import wraps
 from pluma.utils import datetime_to_timestamp
 from pluma.core.dataclasses import SystemContext
@@ -64,7 +66,6 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
     @abstractmethod
     def is_open(self):
         """ Check if the transport layer is ready to send and receive"""
-        pass
 
     @abstractmethod
     def open(f):
@@ -83,7 +84,7 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         return wrap
 
     @abstractmethod
-    def close(f):
+    def close(f: Callable[[object], None]):
         @wraps(f)
         def wrap(self):
             f(self)
@@ -332,7 +333,6 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         watches.extend(match)
         watches.extend(excepts)
 
-        """ Assign default timeout and sleep values if unassigned """
         data_timeout = timeout if timeout is not None else 5
         quiet_timeout = timeout if timeout is not None else 3
         quiet_sleep = sleep_time if sleep_time is not None else 0.1

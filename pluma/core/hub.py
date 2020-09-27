@@ -63,11 +63,16 @@ class Hub(HardwareBase, USB):
 
         return devinfo
 
-    def filter_downstream(self, filters={}, excludes={}):
+    def filter_downstream(self, filters: list = None, excludes: list = None) -> list:
         return self._filter_dictarr(
             filters=filters, excludes=excludes, dictarr=self.downstream)
 
-    def _filter_dictarr(self, filters={}, excludes={}, dictarr=[{}]):
+    def _filter_dictarr(self, filters: list = None, excludes: list = None,
+                        dictarr: list = None) -> list:
+        filters = filters or []
+        excludes = excludes or []
+        dictarr = dictarr or [{}]
+
         match_vals = []
         for d in dictarr:
             match = True

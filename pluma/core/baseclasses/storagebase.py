@@ -25,12 +25,10 @@ class StorageBase(HardwareBase, metaclass=ABCMeta):
     @abstractmethod
     def to_host(self):
         ''' Switch storage to the host '''
-        pass
 
     @abstractmethod
     def to_board(self):
         ''' Switch storage to the board '''
-        pass
 
     def mount_host(self, devnode, mountpoint=None, max_tries=5):
         mountpoint = mountpoint or self.host_mountpoint

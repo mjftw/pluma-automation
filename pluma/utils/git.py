@@ -46,7 +46,7 @@ def reset_repos(base_dir, repos, tag, default_tag=None, log_func=print):
 def get_latest_tag(srcdir, branch):
     chdir(srcdir)
     run_git_cmd("git fetch --all")
-    tag, rc = run_git_cmd("git describe origin/{}".format(branch))
+    tag, _ = run_git_cmd("git describe origin/{}".format(branch))
     return tag.rstrip()
 
 
@@ -171,7 +171,8 @@ def filter_versions(versions, v_filter):
                     versions = versions[:int(v_cond)]
 
     # convert version tuple list back to version strings
-    versions = None if not versions else list(map(lambda v: '{}.{}.{}'.format(v[0], v[1], v[2]), versions))
+    versions = None if not versions else list(
+        map(lambda v: '{}.{}.{}'.format(v[0], v[1], v[2]), versions))
 
     return versions
 
