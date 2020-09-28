@@ -124,3 +124,47 @@ class ManualDeviceAction(DeviceActionBase):
                 f'{os.linesep}Press ENTER when done',
                 level=LogLevel.INFO, bypass_hold=True, newline=False)
         input()
+
+
+@DeviceActionRegistry.register('manual_test')
+class ManualTestDeviceAction(DeviceActionBase):
+    '''Print a message, expected behavior, and wait for user's feedback'''
+
+    def __init__(self, board: Board, message: str, expected: str, name: str = None):
+        super().__init__(board)
+        if name:
+            self._test_name += f'[{name}]'
+        self.manual_test_name = name
+        self.message = message
+
+        if not sys.__stdin__.isatty():
+            raise ValueError('Non-interactive shell detected: '
+                             'Manual actions must be used in an interactive shell')
+
+    def execute(self):
+        entered = None
+
+        if self.manual_test_name:
+            test_title = f'Manual test "{self.manual_test_name}"'
+        else:
+            test_title = 'Manual test'
+
+        while (entered not in ['y', 'n']):
+            log.log(f'{os.linesep}{test_title}:'
+                    f'{os.linesep}  > {self.message}'
+                    f'{os.linesep}  > Expected: {self.message}'
+                    f'{os.linesep}Was the test successful? [y/n]: ',
+                    level=LogLevel.INFO, bypass_hold=True, newline=False)
+            entered = input().lower()
+
+        log.log(f'The user entered: "{entered}"',
+                level=LogLevel.INFO, bypass_hold=True)
+
+        log.log(f'Comments: ', level=LogLevel.INFO,
+                bypass_hold=True, newline=False)
+        comments = input()
+        log.log(f'The user entered: "{comments}"',
+                level=LogLevel.INFO, bypass_hold=True)
+
+        if entered != 'y':
+            raise TaskFailed('Manual test failed')

@@ -231,6 +231,10 @@ Supported attributes:
   * `- manual_action:` Prints a message and wait for the user to press ENTER
     * `name: <test_name>` Optional test name
     * `message: <message>`
+  * `- manual_test:` Prints a message, expected behavior, and wait user's feedback
+    * `name: <test_name>` Optional test name
+    * `message: <message>`
+    * `expected: <expected_result>` The expected result the user should check
 
 ### Variables and substitution
 
