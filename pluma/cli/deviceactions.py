@@ -1,6 +1,8 @@
+import os
+import sys
 import time
 
-from pluma.core.baseclasses import Logger
+from pluma.core.baseclasses import Logger, LogLevel
 from pluma import Board
 from pluma.test import TaskFailed
 from pluma.cli import DeviceActionBase, DeviceActionRegistry
@@ -100,3 +102,25 @@ class CopyToDeviceAction(DeviceActionBase):
     def execute(self):
         log.log(f'Copying {self.file} to target device destination {self.destination}')
         self.board.console.copy_to_target(self.file, self.destination, self.timeout)
+
+
+@DeviceActionRegistry.register('manual_action')
+class ManualDeviceAction(DeviceActionBase):
+    '''Print a message, and wait for the user to press ENTER'''
+
+    def __init__(self, board: Board, message: str, name: str = None):
+        super().__init__(board)
+        if name:
+            self._test_name += f'[{name}]'
+        self.message = message
+
+        if not sys.__stdin__.isatty():
+            raise ValueError('Non-interactive shell detected: '
+                             'Manual actions must be used in an interactive shell')
+
+    def execute(self):
+        log.log(f'{os.linesep}Manual action:'
+                f'{os.linesep}  > {self.message}'
+                f'{os.linesep}Press ENTER when done',
+                level=LogLevel.INFO, bypass_hold=True, newline=False)
+        input()

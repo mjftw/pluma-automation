@@ -228,6 +228,9 @@ Supported attributes:
   * `- poweroff:` Use the power controller defined to power off the board
   * `- powercycle:` Use the power controller defined to power cycle the board (off and on)
     * `off_duration_ms:` Duration for which the device is powered off. Actual duration may be longer
+  * `- manual_action:` Prints a message and wait for the user to press ENTER
+    * `name: <test_name>` Optional test name
+    * `message: <message>`
 
 ### Variables and substitution
 
