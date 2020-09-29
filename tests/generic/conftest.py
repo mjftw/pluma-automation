@@ -1,5 +1,6 @@
 from traceback import format_exc
-from typing import Iterable
+from types import ModuleType
+from typing import Dict, Iterable, List, Tuple, Union
 import pty
 import os
 import sys
@@ -10,6 +11,7 @@ import traceback
 import tempfile
 import textwrap
 import shutil
+import pluma.plugins
 
 from utils import OsFile
 from pluma import Board, SerialConsole, SoftPower, SSHConsole
@@ -167,3 +169,66 @@ def temp_file():
 
     # Cleanup
     shutil.rmtree(tempdir)
+
+
+def child_path(obj: Union[type, ModuleType, str], parent: Union[type, ModuleType]) -> str:
+    def get_name(to_check):
+        if isinstance(to_check, type):
+            return f'{to_check.__module__}.{to_check.__name__}'
+        elif isinstance(to_check, ModuleType):
+            return f'{to_check.__name__}'
+        elif isinstance(to_check, str):
+            return to_check
+        else:
+            raise AttributeError(f'{to_check} must be a class, module or module path str')
+
+    obj_name = get_name(obj)
+    parent_name = get_name(parent)
+
+    if not obj_name.startswith(parent_name):
+        raise AttributeError(f'{obj_name} is not a child of {parent_name}')
+
+    # Add 1 to jump over the dot between parent name and child
+    return obj_name[len(parent_name) + 1:]
+
+
+@fixture
+def pluma_config_file(temp_file):
+    '''Return a function to create a temporary pluma test config file'''
+    plugins_root = pluma.plugins
+
+    def pluma_config_file(core_tests_params: List[Tuple[type, Dict[str, str]]]) -> str:
+        '''Create a temporary pluma config file and return its path.
+        `core_tests_params` should be a list of tuples of test class and test params.
+        E.g. (test_class, {param1: value1, param_2: value2})
+        '''
+        if not isinstance(core_tests_params, Iterable):
+            core_tests_params = [core_tests_params]
+
+        includes = [child_path(cls.__module__, plugins_root) for cls, _ in core_tests_params]
+        # Get unique includes, preserving order
+        includes = list(dict.fromkeys(includes))
+        includes = f'[{", ".join((includes))}]'
+        tab = ' '*4
+
+        config_lines = []
+        config_lines.append('- core_tests:')
+        config_lines.append(f'{tab}include: {includes}')
+        config_lines.append(f'{tab}parameters:')
+
+        for cls, params in core_tests_params:
+            assert isinstance(cls, type)
+            assert isinstance(params, dict)
+
+            config_lines.append(f'{tab*2}{child_path(cls, plugins_root)}:')
+            for key, val in params.items():
+                if isinstance(val, list):
+                    val = f'[{", ".join(val)}]'
+
+                config_lines.append(f'{tab*3}{key}: {val}')
+
+        file_content = os.linesep.join(config_lines)
+
+        return temp_file(file_content)
+
+    return pluma_config_file
