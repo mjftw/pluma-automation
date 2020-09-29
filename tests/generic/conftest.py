@@ -7,6 +7,9 @@ import time
 from pytest import fixture
 from unittest.mock import MagicMock, patch
 import traceback
+import tempfile
+import textwrap
+import shutil
 
 from utils import OsFile
 from pluma import Board, SerialConsole, SoftPower, SSHConsole
@@ -134,3 +137,33 @@ def pluma_cli(capsys):
                     raise RuntimeError(e_msg)
 
     return pluma_cli
+
+
+@fixture
+def temp_file():
+    '''Return a function that creates temporary files with content and returns their names.'''
+    tempdir = tempfile.mkdtemp()
+
+    def temp_file(content: str = None, dedent: bool = True) -> str:
+        '''Create a temporary file with the given content and return its name.
+        Set dedent to allow natural indentation in multiline strings.
+        '''
+        _, filename = tempfile.mkstemp(dir=tempdir)
+
+        if content:
+            if dedent:
+                # Remove leading newlines and global indent
+                content = textwrap.dedent(content)
+                content = content.lstrip(os.linesep)
+
+            with open(filename, 'w') as f:
+                f.write(content)
+
+        return filename
+
+    # Return the function used to create temporary files
+    yield temp_file
+
+    # Cleanup
+    shutil.rmtree(tempdir)
+
