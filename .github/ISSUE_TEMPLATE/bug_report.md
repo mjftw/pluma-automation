@@ -10,6 +10,9 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**Logs**
+Any logs or pasted terminal output that shows the problem.
+
 **To Reproduce**
 Steps to reproduce the behaviour:
 1. Go to '...'
@@ -19,7 +22,8 @@ Steps to reproduce the behaviour:
 **Expected behaviour**
 A clear and concise description of what you expected to happen.
 
-**System info
+**System info**
+- Platform
 - OS and version
 - Python version
 
