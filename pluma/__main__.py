@@ -1,6 +1,7 @@
 import argparse
 import traceback
 import os
+from typing import Any, Callable, Optional
 
 from .core.baseclasses import Logger, LogMode, LogLevel
 from .cli import Pluma, TestsConfigError, TestsBuildError, TargetConfigError
@@ -17,11 +18,20 @@ COMMANDS = [RUN_COMMAND, CHECK_COMMAND,
             TESTS_COMMAND, CLEAN_COMMAND, VERSION_COMMAND]
 
 
-def arg_is_file(path, file_info=None):
-    if not os.path.isfile(path):
-        raise argparse.ArgumentTypeError(f'No such {f"{file_info} " or ""}file: {path}')
+def arg_is_x(arg: Any, predicate: Callable, err_msg: Optional[str] = None):
+    if not predicate(arg):
+        raise argparse.ArgumentTypeError(err_msg or "")
 
-    return path
+    return arg
+
+
+def arg_is_file(path, info=None):
+    arg_is_x(path, os.path.isfile, f'{f"{info} " or ""}file does not exist: {path}')
+
+
+def arg_is_dir(path, info=None):
+    arg_is_x(path, os.path.isdir, f'{f"{info} " or ""}directory does not exist: {path}')
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -39,14 +49,16 @@ def parse_arguments():
         help='print only test progress and results')
     parser.add_argument(
         '-c', '--config', default='pluma.yml',
-        type=lambda arg: arg_is_file(arg, 'config'),
+        type=lambda arg: arg_is_file(arg, 'Config'),
         help='path to the tests configuration file. Default: "pluma.yml"')
     parser.add_argument(
         '-t', '--target', default='pluma-target.yml',
-        type=lambda arg: arg_is_file(arg, 'target config'),
+        type=lambda arg: arg_is_file(arg, 'Target config'),
         help='path to the target configuration file. Default: "pluma-target.yml"')
-    parser.add_argument('--plugin', action='append',
-                        help='load plugin modules from directory path')
+    parser.add_argument(
+        '--plugin', action='append',
+        type=lambda arg: arg_is_dir(arg, 'Plugins'),
+        help='load plugin modules from directory path')
     parser.add_argument(
         '-f', '--force', action='store_const', const=True,
         help='force operation instead of prompting')
