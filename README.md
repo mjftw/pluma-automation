@@ -217,6 +217,10 @@ Supported attributes:
   * `- waitforpattern:` Wait for a specific pattern on the console
     * `pattern: <pattern>`
     * `timeout: <timeout_in_seconds>`
+  * `- copytodevice:` Copies a single file to the target device
+    * `file: <file_path>`
+    * `destination: <device_target_path>`
+    * `timeout: <timeout_in_seconds>`
   * `- login:` Attempt to login on the active console. Typically used for Serial
   * `- set:`
     * `device_console: <ssh/serial>` Set the default console to be used for communication with the device
