@@ -262,35 +262,28 @@ class ConsoleBase(HardwareBase, metaclass=ABCMeta):
         timeout = timeout if timeout is not None else 10.0
 
         last_read_buffer_size = 0
-        read_buffer_size = 0
-        elapsed = 0.0
-        time_quiet = 0.0
-
         start = time.time()
-        elapsed = 0
-        while(elapsed < timeout):
+        now = start
+        quiet_start = start
+        while(now - start < timeout):
             time.sleep(sleep_time)
-            prev_elapsed = elapsed
-            elapsed = time.time() - start
-            delta_time = elapsed - prev_elapsed
 
             self.read_all(preserve_read_buffer=True)
             read_buffer_size = self._buffer_size
 
             # Check if more data was received
+            now = time.time()
             if read_buffer_size == last_read_buffer_size:
-                time_quiet += delta_time
-                if time_quiet > quiet:
+                if now - quiet_start > quiet:
                     return True
             else:
-                time_quiet = 0
-
-            log_string = ("Waiting for quiet... Waited[{:.1f}/{:.1f}s] "
-                          "Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...")
-            self.log(log_string.format(elapsed, timeout, time_quiet,
-                                       quiet, read_buffer_size), level=LogLevel.DEBUG)
+                quiet_start = now
 
             last_read_buffer_size = read_buffer_size
+            log_string = ("Waiting for quiet... Waited[{:.1f}/{:.1f}s] "
+                          "Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...")
+            self.log(log_string.format(now - start, timeout, now - quiet_start,
+                                       quiet, read_buffer_size), level=LogLevel.DEBUG)
 
         # Timeout
         return False
