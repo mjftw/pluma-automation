@@ -569,7 +569,7 @@ def test_ConsoleBase_wait_for_quiet_should_return_when_quiet(serial_console_prox
     data_start = time.time()
     data_end = data_start + non_quiet_time
     while(time.time() < data_end):
-        serial_console_proxy.fake_reception('abc')
+        serial_console_proxy.fake_reception('abc', wait_time=0.02)
 
     success = async_result.get()
     elapsed = time.time() - start

@@ -18,6 +18,7 @@ from pluma.core.dataclasses import SystemContext, Credentials
 from pluma.core.mocks import ConsoleMock
 from pluma import __main__
 
+
 @fixture
 def soft_power():
     mock_console = MagicMock(ConsoleMock())
@@ -34,8 +35,8 @@ class SerialConsoleProxy:
         self.proxy = proxy
         self.console = console
 
-    def fake_reception(self, message: str):
-        time.sleep(0.1)
+    def fake_reception(self, message: str, wait_time: int = 0.1):
+        time.sleep(wait_time)
         self.proxy.write(message)
 
     def read_serial_output(self):
@@ -166,4 +167,3 @@ def temp_file():
 
     # Cleanup
     shutil.rmtree(tempdir)
-
