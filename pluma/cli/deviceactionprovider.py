@@ -23,5 +23,5 @@ class DeviceActionProvider(TestsProvider):
             else:
                 parameter_set = config.content()
 
-        return [TestDefinition({key}, testclass=DeviceActionRegistry.action_class(key), test_provider=self,
-                               parameter_sets=[parameter_set], selected=True)]
+        return [TestDefinition(key, testclass=DeviceActionRegistry.action_class(key),
+                               test_provider=self, parameter_sets=[parameter_set], selected=True)]
