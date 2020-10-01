@@ -18,11 +18,12 @@ fi
 
 test_command="-m pytest "$test_dir
 
-if [[ $@ == "--coverage" ]]; then
-    echo "Running tests"
-    python3 $test_command -v
-else
+echo $@
+if [[ $@ == *--coverage* ]]; then
     echo "Running coverage"
     coverage run --source=pluma $test_command
     coverage xml
+else
+    echo "Running tests"
+    python3 $test_command -v
 fi
