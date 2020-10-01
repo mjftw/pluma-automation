@@ -33,7 +33,21 @@ def soft_power():
     )
 
 
-class SerialConsoleProxy:
+class ConsoleProxy:
+    def __init__(self, proxy, console: ConsoleBase):
+        self.proxy = proxy
+        self.console = console
+
+    def fake_reception(self, message: str, wait_time: int = 0.1):
+        time.sleep(wait_time)
+        self.proxy.write(message)
+
+    def read_serial_output(self):
+        # Give time for the data written to propagate
+        return self.proxy.read(timeout=0.2)
+
+
+class SerialConsoleProxy(ConsoleProxy):
     def __init__(self, proxy, console: ConsoleBase):
         self.proxy = proxy
         self.console = console
@@ -60,7 +74,7 @@ def serial_console_proxy():
         encoding='utf-8'
     )
 
-    proxy = OsFile(master, console.encoding)
+    proxy = OsFile(master, console.interactor.encoding)
 
     # Clear master file just in case
     proxy.read(timeout=0)

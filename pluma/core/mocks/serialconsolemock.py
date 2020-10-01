@@ -1,4 +1,3 @@
-import pexpect
 import pty
 import os
 import atexit
@@ -13,9 +12,6 @@ class SerialConsoleMock(ConsoleBase):
             assert callable(child_function)
 
         self.child_function = child_function or self._default_child_function
-
-        # _pex is transport later specific
-        self._pex = None
         self._child_pid = None
         self._child_fd = None
 
@@ -25,7 +21,6 @@ class SerialConsoleMock(ConsoleBase):
     def is_open(self):
         return True if self._child_pid else False
 
-    @ConsoleBase.open
     def open(self):
         if not self.is_open:
             # Spawn child process with a pseudo tty to communicate
@@ -45,10 +40,8 @@ class SerialConsoleMock(ConsoleBase):
                 self.child_function()
                 sys.exit()
 
-            self._pex = pexpect.fdpexpect.fdspawn(
-                fd=self._child_fd, timeout=0.001)
+            self.interactor.open(console_fd=self._child_fd)
 
-    @ConsoleBase.close
     def close(self):
         # Kill child process to close pseudo terminal
         if self.is_open:

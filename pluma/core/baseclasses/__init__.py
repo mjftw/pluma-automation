@@ -1,4 +1,7 @@
 from .hardwarebase import HardwareBase
+from .consoleexceptions import *
+from .consoleinteractor import ConsoleInteractor, ConsoleType
+from .pexpectinteractor import PexpectInteractor
 from .consolebase import ConsoleBase
 from .powerbase import PowerBase
 from .relaybase import RelayBase

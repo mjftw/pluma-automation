@@ -1,5 +1,4 @@
 import time
-from pexpect import TIMEOUT, EOF
 
 from .baseclasses import HardwareBase, ConsoleBase
 from .dataclasses import SystemContext
@@ -137,13 +136,12 @@ class Board(HardwareBase):
             raise BoardBootValidationError('Matched exception keyword: {}'.format(
                 str(e)))
 
-        if matched is False or matched is TIMEOUT or matched is EOF:
+        if not matched:
             raise BoardBootValidationError(
                 "Did not get bootstring: {}".format(bootstr))
 
         self.last_boot_len = round(time.time() - start_time, 2)
-
-        self.log('Boot success. Matched [{}]'.format(matched))
+        self.log(f'Boot success. Matched [{matched}]')
 
         prompt = self.system.prompt_regex
         if prompt and matched == prompt:

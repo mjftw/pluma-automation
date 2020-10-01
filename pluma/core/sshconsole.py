@@ -1,6 +1,7 @@
 import subprocess
 
-from .hostconsole import HostConsole, ConsoleCannotOpenError
+from pluma.core.baseclasses import ConsoleCannotOpenError
+from .hostconsole import HostConsole
 from .dataclasses import SystemContext
 
 

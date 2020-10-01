@@ -20,7 +20,7 @@ def test_SerialConsole_send_sends_correct_data(serial_console_proxy):
 
     written = serial_console_proxy.read_serial_output()
 
-    assert written == '{}{}'.format(msg, serial_console_proxy.console.linesep)
+    assert written == f'{msg}{serial_console_proxy.console.interactor.linesep}'
 
 
 def test_SerialConsole_send_doesnt_send_newline_when_send_newline_arg_false(serial_console_proxy):
@@ -32,39 +32,23 @@ def test_SerialConsole_send_doesnt_send_newline_when_send_newline_arg_false(seri
     assert written == msg
 
 
-def test_SerialConsole_send_returns_tuple(serial_console_proxy):
-    returned = serial_console_proxy.console.send()
-
-    assert isinstance(returned, tuple)
-
-
-def test_SerialConsole_send_returns_tuple_length_2(serial_console_proxy):
-    returned = serial_console_proxy.console.send()
-
-    assert len(returned) == 2
-
-
-def test_SerialConsole_send_returns_data_when_receive_arg_true(serial_console_proxy):
+def test_SerialConsole_read_all_returns_all_data(serial_console_proxy):
     msg = 'Bar'
 
-    async_result = nonblocking(serial_console_proxy.console.send,
-                               receive=True)
-
-    # Wait short time for function to start
-    time.sleep(0.1)
-
+    serial_console_proxy.console.open()
     serial_console_proxy.fake_reception(msg)
+    received = serial_console_proxy.console.read_all()
 
-    received, __ = async_result.get()
     assert received == msg
 
 
-def test_SerialConsole_send_returns_matched_when_match_available(serial_console_proxy):
+def test_SerialConsole_send_and_expect_returns_matched_when_match_available(
+        serial_console_proxy):
     before_match, to_match = 'Foo', 'Bar'
     msg = before_match + to_match
 
-    async_result = nonblocking(serial_console_proxy.console.send,
-                               match=to_match)
+    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                               cmd='', match=to_match)
 
     # Wait short time for function to start
     time.sleep(0.1)
@@ -75,12 +59,13 @@ def test_SerialConsole_send_returns_matched_when_match_available(serial_console_
     assert matched == to_match
 
 
-def test_SerialConsole_send_returns_received_when_match_available(serial_console_proxy):
+def test_SerialConsole_send_and_expect_returns_received_when_match_available(
+        serial_console_proxy):
     before_match, to_match = 'Foo', 'Bar'
     msg = before_match + to_match
 
-    async_result = nonblocking(serial_console_proxy.console.send,
-                               match=to_match)
+    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                               cmd='', match=to_match)
 
     # Wait short time for function to start
     time.sleep(0.1)
@@ -88,28 +73,29 @@ def test_SerialConsole_send_returns_received_when_match_available(serial_console
     serial_console_proxy.fake_reception(msg)
 
     received, __ = async_result.get()
-    assert received == before_match
+    assert received == msg
 
 
-def test_SerialConsole_send_returns_received_false_when_no_match_available(serial_console_proxy):
+def test_SerialConsole_send_and_expect_returns_received_none_when_no_match_available(
+        serial_console_proxy):
     msg = loremipsum
     wont_match = 'Baz'
 
-    async_result = nonblocking(serial_console_proxy.console.send,
-                               match=wont_match, timeout=0.5)
+    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                               cmd='', match=wont_match, timeout=0.5)
 
     serial_console_proxy.fake_reception(msg)
 
     __, matched = async_result.get()
-    assert matched is False
+    assert matched is None
 
 
-def test_SerialConsole_send_returns_received_when_no_match_available(serial_console_proxy):
+def test_SerialConsole_send_and_expect_returns_received_when_no_match_available(serial_console_proxy):
     msg = loremipsum
     wont_match = 'Baz'
 
-    async_result = nonblocking(serial_console_proxy.console.send,
-                               match=wont_match, timeout=0.5)
+    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                               cmd='', match=wont_match, timeout=0.5)
 
     serial_console_proxy.fake_reception(msg)
 
@@ -122,8 +108,8 @@ def test_SerialConsole_send_matches_regex(serial_console_proxy):
     regex = '[0-3]+Foo'
     expected_match = '123Foo'
 
-    async_result = nonblocking(serial_console_proxy.console.send,
-                               match=regex)
+    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
+                               cmd='', match=regex)
 
     serial_console_proxy.fake_reception(msg)
 
@@ -212,7 +198,7 @@ def test_SerialConsole_check_alive_returns_true_when_target_responds(serial_cons
         serial_console_proxy.console.check_alive)
 
     # Send console a newline char
-    serial_console_proxy.fake_reception(serial_console_proxy.console.linesep)
+    serial_console_proxy.fake_reception(serial_console_proxy.console.interactor.linesep)
 
     assert async_result.get() is True
 
@@ -237,7 +223,7 @@ def test_SerialConsole_login_finds_user_match_sends_correct_username(serial_cons
 
     # Expect line break, to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.linesep}'
+    expected = f'{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -249,7 +235,7 @@ def test_SerialConsole_login_finds_user_match_sends_correct_username(serial_cons
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.linesep}'
+    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -265,7 +251,7 @@ def test_SerialConsole_login_success_with_no_password(serial_console_proxy):
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.linesep}'
+    expected = f'{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -277,7 +263,7 @@ def test_SerialConsole_login_success_with_no_password(serial_console_proxy):
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.linesep}'
+    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -303,7 +289,7 @@ def test_SerialConsole_login_finds_pass_match_sends_correct_pass(serial_console_
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.linesep}'
+    expected = f'{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -315,14 +301,14 @@ def test_SerialConsole_login_finds_pass_match_sends_correct_pass(serial_console_
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.linesep}'
+    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.linesep}'
+    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -342,7 +328,7 @@ def test_SerialConsole_login_no_exception_on_success_no_success_match(serial_con
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.linesep}'
+    expected = f'{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -354,14 +340,14 @@ def test_SerialConsole_login_no_exception_on_success_no_success_match(serial_con
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.linesep}'
+    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.linesep}'
+    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -389,7 +375,7 @@ def test_SerialConsole_login_no_exception_on_success_with_success_match(serial_c
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.linesep}'
+    expected = f'{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -401,14 +387,14 @@ def test_SerialConsole_login_no_exception_on_success_with_success_match(serial_c
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.linesep}'
+    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.linesep}'
+    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -444,7 +430,7 @@ def test_SerialConsole_login_except_on_wrong_success_match(serial_console_proxy)
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.linesep}'
+    expected = f'{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -456,14 +442,14 @@ def test_SerialConsole_login_except_on_wrong_success_match(serial_console_proxy)
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.linesep}'
+    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.linesep}'
+    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
 
     assert received == expected
 
@@ -496,26 +482,35 @@ def test_SerialConsole_login_except_on_wrong_username_match(serial_console_proxy
         async_result.get()
 
 
-def test_SerialConsole_flush_clears_buffer(serial_console_proxy):
+def test_SerialConsole_read_all_clears_buffer(serial_console_proxy):
     # Send console a newline char
-    serial_console_proxy.fake_reception(serial_console_proxy.console.linesep)
+    serial_console_proxy.fake_reception(serial_console_proxy.console.interactor.linesep)
 
     time.sleep(0.01)
 
-    serial_console_proxy.console.flush()
+    serial_console_proxy.console.read_all()
 
-    data_received = serial_console_proxy.console.wait_for_data(timeout=0.5)
+    data_received = serial_console_proxy.console.wait_for_bytes(timeout=0.5)
 
     assert data_received is False
 
 
-def test_SerialConsole_read_all(serial_console_proxy):
+def test_SerialConsole_read_all_returns_received(serial_console_proxy):
     data1 = 'Line1'
 
     serial_console_proxy.console.open()
     serial_console_proxy.fake_reception(data1)
 
     assert serial_console_proxy.console.read_all() == data1
+
+
+def test_SerialConsole_read_all_clears_received(serial_console_proxy):
+    data1 = 'Line1'
+
+    serial_console_proxy.console.open()
+    serial_console_proxy.fake_reception(data1)
+
+    assert serial_console_proxy.console.read_all() != ''
     assert serial_console_proxy.console.read_all() == ''
 
 

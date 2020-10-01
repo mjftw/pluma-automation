@@ -1,9 +1,7 @@
 from serial import Serial
 from nanocom import Nanocom
 
-import pexpect.fdpexpect
-
-from .baseclasses import ConsoleBase
+from .baseclasses import ConsoleBase, LogLevel
 from .dataclasses import SystemContext
 
 
@@ -13,9 +11,7 @@ class SerialConsole(ConsoleBase):
         self.port = port
         self.baud = baud
         self._timeout = 0.001
-        self._serial_logfile_fd = None
         self._ser = None
-        self._pex = None
         super().__init__(encoding=encoding, linesep=linesep,
                          raw_logfile=raw_logfile, system=system)
 
@@ -24,40 +20,33 @@ class SerialConsole(ConsoleBase):
 
     @property
     def is_open(self):
-        if not self._ser or not self._pex:
-            return False
-        else:
-            return self._ser.isOpen()
+        return super().is_open and self._ser and self._ser.isOpen()
 
-    @ConsoleBase.open
     def open(self):
-        self.log("Trying to open serial port {}".format(self.port))
+        self.log(f'Trying to open serial port {self.port}', level=LogLevel.DEBUG)
         self._ser = Serial(
             port=self.port,
             baudrate=self.baud,
             timeout=self._timeout
         )
 
-        self._pex = pexpect.fdpexpect.fdspawn(
-            fd=self._ser.fileno(), timeout=self._timeout)
-        self._pex.timeout = 0.5
+        self.interactor.open(console_fd=self._ser.fileno())
 
         if not self.is_open:
-            raise RuntimeError(
-                "Failed to open serial port {} and init pexpect".format(self.port))
+            raise RuntimeError(f'Failed to open serial port {self.port}')
 
-        self.log("Init serial {} success".format(self.port))
+        self.log(f'Init serial {self.port} success', level=LogLevel.DEBUG)
         return
 
-    @ConsoleBase.close
     def close(self):
-        if self.is_open:
-            self._ser.flush()
-            self._ser.close()
-            self._ser = None
-            self.log("Closed serial")
-        else:
-            self.log("Cannot close serial as it is not open")
+        if not self.is_open:
+            return
+
+        self._ser.flush()
+        super().close()
+        self._ser.close()
+        self._ser = None
+        self.log("Closed serial", level=LogLevel.DEBUG)
 
     def interact(self, exit_char=None):
         '''
