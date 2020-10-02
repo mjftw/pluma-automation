@@ -54,16 +54,21 @@ class PythonTestsProvider(TestsProvider):
         return all_tests
 
     def find_python_tests(self):
-        # Find all tests
-        all_tests = []
+        '''Search plugins module for classes inheriting TestBase and create TestDefinitions'''
 
-        for module_name, module in inspect.getmembers(pluma.plugins, inspect.ismodule):
+        modules = {module_name: module
+                   for module_name, module in inspect.getmembers(pluma.plugins, inspect.ismodule)}
+
+        test_classes = {}
+        for module_name, module in modules.items():
             for class_name, cls in inspect.getmembers(module, inspect.isclass):
-                if issubclass(cls, TestBase):
-                    all_tests.append(TestDefinition(
-                        name=f'{cls.__module__[cls.__module__.index(module_name):]}.{class_name}',
-                        testclass=cls,
-                        test_provider=self))
+                # Exclude TestBase classes imported in but not defined in module
+                if issubclass(cls, TestBase) and cls.__module__.startswith(module.__name__):
+                    full_name = f'{cls.__module__[cls.__module__.index(module_name):]}.{class_name}'
+                    test_classes[full_name] = cls
+
+        all_tests = [TestDefinition(name=class_name, testclass=cls, test_provider=self)
+                     for class_name, cls in test_classes.items()]
 
         return sorted(all_tests, key=attrgetter('name'))
 
