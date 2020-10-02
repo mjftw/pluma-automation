@@ -6,8 +6,9 @@ from pluma.plugins.testsuite.kernel import KernelModulesLoaded
 def test_pluma_config_file_should_create_config_with_one_core_test(pluma_config_file):
 
     expected_content = '''\
+sequence:
 - core_tests:
-    include: [testsuite.memory]
+    include: [testsuite.memory.MemorySize]
     parameters:
         testsuite.memory.MemorySize:
             total_mb: 985
@@ -28,8 +29,9 @@ def test_pluma_config_file_should_create_config_with_one_core_test(pluma_config_
 
 def test_pluma_config_file_should_create_config_with_multiple_core_tests(pluma_config_file):
     expected_content = '''\
+sequence:
 - core_tests:
-    include: [testsuite.memory, testsuite.networking, testsuite.kernel]
+    include: [testsuite.memory.MemorySize, testsuite.networking.IperfBandwidth, testsuite.kernel.KernelModulesLoaded]
     parameters:
         testsuite.memory.MemorySize:
             total_mb: 985
@@ -59,10 +61,10 @@ def test_pluma_config_file_should_create_config_with_multiple_core_tests(pluma_c
 
 
 def test_pluma_config_file_should_create_config_with_multiple_same_core_tests(pluma_config_file):
-
     expected_content = '''\
+sequence:
 - core_tests:
-    include: [testsuite.memory]
+    include: [testsuite.memory.MemorySize]
     parameters:
         testsuite.memory.MemorySize:
             total_mb: 985
@@ -89,10 +91,10 @@ def test_pluma_config_file_should_create_config_with_multiple_same_core_tests(pl
 
 
 def test_pluma_config_file_should_create_config_with_parameter_lists(pluma_config_file):
-
     expected_content = '''\
+sequence:
 - core_tests:
-    include: [testsuite.kernel]
+    include: [testsuite.kernel.KernelModulesLoaded]
     parameters:
         testsuite.kernel.KernelModulesLoaded:
             modules: [wlan, galcore]\
