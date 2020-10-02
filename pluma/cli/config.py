@@ -89,6 +89,9 @@ class TestDefinition():
             raise ValueError(
                 f'Parameter sets for test "{name}" should be a list of dictionaries')
 
+    def __repr__(self):
+        return f'[{self.__class__.__name__}] {self.name}: {self.parameter_sets}'
+
 
 class TestsProvider(ABC):
     '''Abstract base class that provides TestDefinition from the configuration
