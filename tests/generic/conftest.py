@@ -205,13 +205,15 @@ def pluma_config_file(temp_file):
         if not isinstance(core_tests_params, Iterable):
             core_tests_params = [core_tests_params]
 
-        includes = [child_path(cls.__module__, plugins_root) for cls, _ in core_tests_params]
+        includes = [f'{child_path(cls.__module__, plugins_root)}.{cls.__name__}'
+                    for cls, _ in core_tests_params]
         # Get unique includes, preserving order
         includes = list(dict.fromkeys(includes))
         includes = f'[{", ".join((includes))}]'
         tab = ' '*4
 
         config_lines = []
+        config_lines.append('sequence:')
         config_lines.append('- core_tests:')
         config_lines.append(f'{tab}include: {includes}')
         config_lines.append(f'{tab}parameters:')
