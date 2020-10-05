@@ -191,7 +191,7 @@ Sending a command is also optional, and a newline will be sent by default if no 
 ```python
 received, matched = console.send_and_expect(flush_before=False, send_newline=False, match=['expected output'])
 received = console.send_and_read(flush_before=False, send_newline=False)
-console.send(flush_before=False, send_newline=False)
+console.send('', flush_before=False, send_newline=False)
 
 print(received)
 # 5 < 6\r\n
