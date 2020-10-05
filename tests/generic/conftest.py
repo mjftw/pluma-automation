@@ -1,3 +1,8 @@
+from pluma import __main__
+from pluma.core.dataclasses import SystemContext, Credentials
+from pluma.core.baseclasses import ConsoleBase, ConsoleEngine, MatchResult
+from pluma import Board, SerialConsole, SoftPower, SSHConsole
+from utils import OsFile
 import os
 import pluma.plugins
 import pty
@@ -15,12 +20,6 @@ from serial import Serial
 from types import ModuleType
 from typing import Dict, Iterable, List, Tuple, Union
 from unittest.mock import MagicMock, patch
-
-from utils import OsFile
-from pluma import Board, SerialConsole, SoftPower, SSHConsole
-from pluma.core.baseclasses import ConsoleBase, ConsoleEngine, MatchResult
-from pluma.core.dataclasses import SystemContext, Credentials
-from pluma import __main__
 
 
 class MockConsoleEngine(ConsoleEngine):
