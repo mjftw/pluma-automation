@@ -86,6 +86,12 @@ class Pluma:
         target_config = PlumaConfig.load_configuration('Target config', target_config_path,
                                                        PlumaConfigPreprocessor(env_vars))
         context = TargetConfig.create_context(target_config)
+
+        for variable, env_value in ((var, val) for var, val in env_vars.items()
+                                    if var in context.variables):
+            log.warning(f'"{variable}" defined in environment variables and target config.'
+                        f'{os.linesep}Using environment: {env_value}')
+
         context.variables.update(env_vars)
         return context
 

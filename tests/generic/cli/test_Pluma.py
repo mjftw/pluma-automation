@@ -60,6 +60,18 @@ def test_Pluma_create_target_context_env_vars_should_override_target_variables()
         os.environ.update(env)
 
 
+def test_Pluma_create_target_context_should_warn_if_variable_overwritten_by_env(capsys):
+    env = dict(os.environ)
+    try:
+        os.environ['mymessage'] = 'env message'
+        context = Pluma.create_target_context(config_file_path('variable-sub-target'))
+        stdout = capsys.readouterr().out
+        assert f'"mymessage" defined in environment variables and target config.{os.linesep}Using environment: env message' in stdout
+    finally:
+        os.environ.clear()
+        os.environ.update(env)
+
+
 def test_Pluma_env_substitution_should_read_from_env_vars():
     env = dict(os.environ)
     try:
