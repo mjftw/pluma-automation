@@ -198,10 +198,10 @@ print(received)
 ```
 
 Here we can see the answer we were looking for.  
-The same result can be achieved more simply by reading the console's receive buffer using the `flush` method, but without clearing it.
+The same result can be achieved more simply by reading the console's receive buffer using the `read_all` method, but without clearing it.
 
 ```python
-buffer_contents = console.flush(clear_buf=False)
+buffer_contents = console.read_all(preserve_read_buffer=True)
 
 print(buffer_contents)
 # 5 < 6\r\n
@@ -282,7 +282,7 @@ received, matched = console.send_and_expect(command, match=answers)
 print(console.log_file)
 
 # Flush the receive buffer so we can see all received data in the console log
-console.flush(clear_buf=True)
+console.read_all()
 
 print(console.log_file)
 #/tmp/pluma/HostConsole_2020-05-07-19-25-04.log

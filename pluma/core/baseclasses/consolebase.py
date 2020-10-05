@@ -2,9 +2,6 @@ import time
 import json
 import os
 
-from deprecated import deprecated
-from abc import ABC, abstractmethod
-
 from pluma.core.dataclasses import SystemContext
 
 from .hardwarebase import HardwareBase
@@ -17,7 +14,7 @@ from .consoleexceptions import (ConsoleError, ConsoleCannotOpenError,
                                 ConsoleLoginFailedError)
 
 
-class ConsoleBase(HardwareBase, ABC):
+class ConsoleBase(HardwareBase):
     """ Implements the console functionality not specific to a given transport layer """
 
     def __init__(self, encoding: str = None, linesep: str = None,
@@ -58,22 +55,9 @@ class ConsoleBase(HardwareBase, ABC):
     def raw_logfile_clear(self):
         open(self.raw_logfile, 'w').close()
 
-    @deprecated(version='2.0', reason='Use "read_all" instead')
-    def flush(self, clear_buf=False):
-        if clear_buf:
-            # Preserve behavior of returning nothing when clearing
-            self.read_all(preserve_read_buffer=False)
-        else:
-            return self.read_all(preserve_read_buffer=True)
-
     def read_all(self, preserve_read_buffer: bool = False) -> str:
         self.require_open()
         return self.interactor.read_all(preserve_read_buffer=preserve_read_buffer)
-
-    @deprecated(version='2.0', reason='You should use "read_all" and "_buffer_size" instead')
-    def _flush_get_size(self, clear_buf=False):
-        self.flush(clear_buf)
-        return self._buffer_size
 
     def wait_for_match(self, match, timeout=None):
         '''Wait a maximum duration of 'timeout' for a matching regex'''
