@@ -211,8 +211,10 @@ class TestsConfig:
 
                     if isinstance(parameters, dict):
                         test_object = test.testclass(board, **parameters)
+                        test_object.settings = parameters
                     else:
                         test_object = test.testclass(board, parameters)
+                        test_object.settings = {parameters}
 
                     test_objects.append(test_object)
             except Exception as e:

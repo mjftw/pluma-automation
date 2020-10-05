@@ -54,7 +54,6 @@ class TestRunner():
         return len(self.tests)
 
     def _init_test_data(self, test):
-        test.settings = {}
         test.data = {}
         self.data[str(test)] = {
             'tasks': {
