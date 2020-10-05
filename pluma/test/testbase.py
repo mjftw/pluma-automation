@@ -23,6 +23,13 @@ class TestBase():
         # Output data to be saved during the test
         self.data = {}
 
+    def save_data(self, data: dict = None, **data_kwargs: dict):
+        '''Save some test data'''
+        if data:
+            self.data.update(data)
+        if data_kwargs:
+            self.data.update(data_kwargs)
+
     def __repr__(self):
         """Return a human-readable name for the test"""
         return self._test_name
