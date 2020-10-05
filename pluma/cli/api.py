@@ -1,6 +1,8 @@
+from pluma.cli.resultsconfig import ResultsConfig
 import sys
 import time
 import os
+import json
 
 from pluma.core.baseclasses import Logger, LogLevel
 from pluma.test import TestController
@@ -14,6 +16,7 @@ from .configpreprocessor import PlumaConfigPreprocessor
 
 log = Logger()
 
+START_TIMESTAMP = time.strftime('%Y%m%d-%H%M%S')
 
 class Pluma:
     '''Top level API class for Pluma'''
@@ -26,8 +29,12 @@ class Pluma:
     def execute_run(tests_config_path: str, target_config_path: str,
                     check_only: bool = False) -> bool:
         '''Execute the "run" command, and allow checking only ("check" command).'''
-        controller = Pluma.build_test_controller(tests_config_path,
-                                                 target_config_path, show_tests_list=check_only)
+
+        context = Pluma.create_target_context(target_config_path)
+        tests_config = Pluma.create_tests_config(tests_config_path, context)
+        results_config = Pluma.create_results_config(tests_config)
+
+        controller = Pluma.build_test_controller(tests_config, context, show_tests_list=check_only)
         if check_only:
             log.log('Configuration and tests successfully validated.',
                     level=LogLevel.IMPORTANT)
@@ -40,6 +47,8 @@ class Pluma:
         else:
             log.log('One of more test failed.',
                     level=LogLevel.IMPORTANT, color='red', bold=True)
+
+        Pluma.save_results(controller, results_config)
 
         return success
 
@@ -85,25 +94,34 @@ class Pluma:
         log.debug(f'Parsing tests configuration "{tests_config_path}"...')
         tests_config = PlumaConfig.load_configuration('Tests config', tests_config_path,
                                                       PlumaConfigPreprocessor(context.variables))
-
-        default_log = 'pluma-{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
-        context.board.log_file = tests_config.pop('log') or default_log
+        default_log = f'pluma-{START_TIMESTAMP}.log'
+        context.board.log_file = tests_config.pop('log', default_log)
 
         return TestsConfig(tests_config, Pluma.tests_providers())
 
     @staticmethod
-    def build_test_controller(tests_config_path: str, target_config_path: str,
+    def create_results_config(tests_config: TestsConfig) -> ResultsConfig:
+        defaults = {
+            'file': f'pluma-results-{START_TIMESTAMP}.json'
+        }
+        return tests_config.create_results_config(defaults)
+
+    @staticmethod
+    def build_test_controller(tests_config: TestsConfig, target_context: TargetConfig,
                               show_tests_list: bool) -> TestController:
-        context = Pluma.create_target_context(target_config_path)
-        tests_config = Pluma.create_tests_config(tests_config_path, context)
 
         tests_list_log_level = LogLevel.INFO if show_tests_list else LogLevel.NOTICE
         tests_config.print_tests(tests_list_log_level)
 
-        return tests_config.create_test_controller(context.board)
+        return tests_config.create_test_controller(target_context.board)
 
     @staticmethod
     def version() -> str:
         '''Return the version string of Pluma'''
         top_level_package = __package__.split('.')[0]
         return get_distribution(top_level_package).version
+
+    @staticmethod
+    def save_results(controller: TestController, results_config: ResultsConfig):
+        with open(results_config.path, 'w') as f:
+            json.dump(controller.results, f, indent=4)

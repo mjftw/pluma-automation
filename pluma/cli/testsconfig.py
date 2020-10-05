@@ -1,6 +1,7 @@
 import json
 import os
 from functools import partial
+from pluma.cli.resultsconfig import ResultsConfig
 from typing import List, Union
 
 from pluma.core.baseclasses import Logger, LogLevel
@@ -13,6 +14,7 @@ from pluma import Board
 log = Logger()
 
 SETTINGS_SECTION = 'settings'
+RESULTS_SECTION = 'results'
 
 
 class TestsConfig:
@@ -28,6 +30,7 @@ class TestsConfig:
             test_providers = [test_providers]
 
         self.settings_config = config.pop(SETTINGS_SECTION, Configuration())
+        self.results_config = self.settings_config.pop(RESULTS_SECTION, Configuration())
         self.test_providers = test_providers
         self.tests = None
 
@@ -76,6 +79,12 @@ class TestsConfig:
             controller.run_condition = sc_run_n_iterations(ntimes=int(iterations))
 
         return controller
+
+    def create_results_config(self, defaults: dict) -> ResultsConfig:
+        path = self.results_config.pop('file', defaults.get('file', None))
+        self.results_config.ensure_consumed()
+
+        return ResultsConfig(path=path)
 
     def __populate_tests(self, tests_config: Configuration):
         self.tests = []
