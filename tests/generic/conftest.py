@@ -11,6 +11,7 @@ import traceback
 import tempfile
 import textwrap
 import shutil
+import yaml
 import pluma.plugins
 
 from utils import OsFile
@@ -197,37 +198,45 @@ def pluma_config_file(temp_file):
     '''Return a function to create a temporary pluma test config file'''
     plugins_root = pluma.plugins
 
-    def pluma_config_file(core_tests_params: List[Tuple[type, Dict[str, str]]]) -> str:
+    def pluma_config_file(core_tests_params: List[Tuple[type, Dict[str, str]]] = None,
+                          settings: dict = None) -> str:
         '''Create a temporary pluma config file and return its path.
         `core_tests_params` should be a list of tuples of test class and test params.
         E.g. (test_class, {param1: value1, param_2: value2})
         '''
-        if not isinstance(core_tests_params, Iterable):
+        if core_tests_params and not isinstance(core_tests_params, Iterable):
             core_tests_params = [core_tests_params]
 
-        includes = [f'{child_path(cls.__module__, plugins_root)}.{cls.__name__}'
-                    for cls, _ in core_tests_params]
-        # Get unique includes, preserving order
-        includes = list(dict.fromkeys(includes))
-        includes = f'[{", ".join((includes))}]'
         tab = ' '*4
-
         config_lines = []
+
+        if settings:
+            settings = {'settings': {**settings}}
+            settings_lines = yaml.dump(settings).split(os.linesep)
+            config_lines.extend(settings_lines)
+
         config_lines.append('sequence:')
-        config_lines.append('- core_tests:')
-        config_lines.append(f'{tab}include: {includes}')
-        config_lines.append(f'{tab}parameters:')
+        if core_tests_params:
+            includes = [f'{child_path(cls.__module__, plugins_root)}.{cls.__name__}'
+                        for cls, _ in core_tests_params]
+            # Get unique includes, preserving order
+            includes = list(dict.fromkeys(includes))
+            includes = f'[{", ".join((includes))}]'
 
-        for cls, params in core_tests_params:
-            assert isinstance(cls, type)
-            assert isinstance(params, dict)
+            config_lines.append('- core_tests:')
+            config_lines.append(f'{tab}include: {includes}')
+            config_lines.append(f'{tab}parameters:')
 
-            config_lines.append(f'{tab*2}{child_path(cls, plugins_root)}:')
-            for key, val in params.items():
-                if isinstance(val, list):
-                    val = f'[{", ".join(val)}]'
+            for cls, params in core_tests_params:
+                assert isinstance(cls, type)
+                assert isinstance(params, dict)
 
-                config_lines.append(f'{tab*3}{key}: {val}')
+                config_lines.append(f'{tab*2}{child_path(cls, plugins_root)}:')
+                for key, val in params.items():
+                    if isinstance(val, list):
+                        val = f'[{", ".join(val)}]'
+
+                    config_lines.append(f'{tab*3}{key}: {val}')
 
         file_content = os.linesep.join(config_lines)
 
