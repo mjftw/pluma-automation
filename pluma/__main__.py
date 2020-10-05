@@ -26,11 +26,11 @@ def arg_is_x(arg: Any, predicate: Callable, err_msg: Optional[str] = None):
 
 
 def arg_is_file(path, info=None):
-    arg_is_x(path, os.path.isfile, f'{f"{info} " or ""}file does not exist: {path}')
+    return arg_is_x(path, os.path.isfile, f'{f"{info} " or ""}file does not exist: {path}')
 
 
 def arg_is_dir(path, info=None):
-    arg_is_x(path, os.path.isdir, f'{f"{info} " or ""}directory does not exist: {path}')
+    return arg_is_x(path, os.path.isdir, f'{f"{info} " or ""}directory does not exist: {path}')
 
 
 def parse_arguments():
