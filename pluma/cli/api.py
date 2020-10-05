@@ -123,5 +123,13 @@ class Pluma:
 
     @staticmethod
     def save_results(controller: TestController, results_config: ResultsConfig):
+        settings_summary = controller.collect_test_settings()
+        data_summary = controller.get_test_data_summary()
+        results = {
+            'data': data_summary,
+            'settings': settings_summary,
+            'results': controller.results
+        }
+
         with open(results_config.path, 'w') as f:
-            json.dump(controller.results, f, indent=4)
+            json.dump(results, f, indent=4)

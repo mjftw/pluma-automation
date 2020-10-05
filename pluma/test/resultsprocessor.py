@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+from typing import List
+from pluma.test.testbase import TestBase
 
 from statistics import mean, median_grouped, mode, stdev, variance,\
     StatisticsError
@@ -11,7 +13,7 @@ class ResultsProcessor(ABC):
 
 
 class DefaultResultsProcessor(ResultsProcessor):
-    def generate_summary(self, tests: list, results: list) -> dict:
+    def generate_summary(self, tests: List[TestBase], results: list) -> dict:
         """Get a summary of test results data values, with some numerical analysis"""
         def chunks(results_list, n):
             """Yield successive n-sized chunks from results_list"""
@@ -33,76 +35,77 @@ class DefaultResultsProcessor(ResultsProcessor):
             return chunked_mean_list
 
         results_summary = {}
-        for test in [str(t) for t in tests]:
+        for test in (t for t in tests if t.data):
+            testname = str(test)
             # Collect data
-            if test not in results_summary:
-                results_summary[test] = {}
+            if testname not in results_summary:
+                results_summary[testname] = {}
 
             for iteration, _ in enumerate(results):
-                for data_key in results[iteration]['TestRunner'][test]['data']:
-                    if data_key not in results_summary[test]:
-                        results_summary[test][data_key] = {}
-                    data_value = results[iteration]['TestRunner'][test]['data'][data_key]
+                for data_key in results[iteration]['TestRunner'][testname]['data']:
+                    if data_key not in results_summary[testname]:
+                        results_summary[testname][data_key] = {}
+                    data_value = results[iteration]['TestRunner'][testname]['data'][data_key]
 
                     # Collect values in list
-                    if 'values' not in results_summary[test][data_key]:
-                        results_summary[test][data_key]['values'] = []
-                    results_summary[test][data_key]['values'].append(
+                    if 'values' not in results_summary[testname][data_key]:
+                        results_summary[testname][data_key]['values'] = []
+                    results_summary[testname][data_key]['values'].append(
                         data_value)
 
                     # Count of data value
-                    if 'count' not in results_summary[test][data_key]:
-                        results_summary[test][data_key]['count'] = {}
-                    if str(data_value) not in results_summary[test][data_key]['count']:
-                        results_summary[test][data_key]['count'][str(
+                    if 'count' not in results_summary[testname][data_key]:
+                        results_summary[testname][data_key]['count'] = {}
+                    if str(data_value) not in results_summary[testname][data_key]['count']:
+                        results_summary[testname][data_key]['count'][str(
                             data_value)] = 0
-                    results_summary[test][data_key]['count'][str(
+                    results_summary[testname][data_key]['count'][str(
                         data_value)] += 1
 
             # Calculate statistical data
-            for data_key in results_summary[test]:
-                n_values = len(results_summary[test][data_key]['values'])
+            for data_key in results_summary[testname]:
+                n_values = len(results_summary[testname][data_key]['values'])
                 # Can't generate statistics from a single data point
                 if n_values >= 2:
                     # Statistics calculated for numbers only
                     if all((isinstance(d, int) or isinstance(d, float))
                             and not isinstance(d, bool)
-                            for d in results_summary[test][data_key]['values']):
-                        results_summary[test][data_key]['max'] = max(
-                            results_summary[test][data_key]['values'])
+                            for d in results_summary[testname][data_key]['values']):
+                        results_summary[testname][data_key]['max'] = max(
+                            results_summary[testname][data_key]['values'])
 
-                        results_summary[test][data_key]['min'] = min(
-                            results_summary[test][data_key]['values'])
+                        results_summary[testname][data_key]['min'] = min(
+                            results_summary[testname][data_key]['values'])
 
                         try:
-                            results_summary[test][data_key]['mode'] = mode(
-                                results_summary[test][data_key]['values'])
+                            results_summary[testname][data_key]['mode'] = mode(
+                                results_summary[testname][data_key]['values'])
                         except StatisticsError:
                             # This happens when there is no unique mode
-                            results_summary[test][data_key]['mode'] = None
+                            results_summary[testname][data_key]['mode'] = None
 
-                        results_summary[test][data_key]['mean'] = round(mean(
-                            results_summary[test][data_key]['values']), 2)
+                        results_summary[testname][data_key]['mean'] = round(mean(
+                            results_summary[testname][data_key]['values']), 2)
 
-                        results_summary[test][data_key]['median'] = round(median_grouped(
-                            results_summary[test][data_key]['values']), 2)
+                        results_summary[testname][data_key]['median'] = round(median_grouped(
+                            results_summary[testname][data_key]['values']), 2)
 
-                        results_summary[test][data_key]['stdev'] = round(stdev(
-                            results_summary[test][data_key]['values']), 2)
+                        results_summary[testname][data_key]['stdev'] = round(stdev(
+                            results_summary[testname][data_key]['values']), 2)
 
-                        results_summary[test][data_key]['variance'] = round(variance(
-                            results_summary[test][data_key]['values']), 2)
+                        results_summary[testname][data_key]['variance'] = round(variance(
+                            results_summary[testname][data_key]['values']), 2)
 
                     # Statistics calculated for numbers or booleans
                     if all(isinstance(d, int) or isinstance(d, float)
                             or isinstance(d, bool)
-                            for d in results_summary[test][data_key]['values']):
+                            for d in results_summary[testname][data_key]['values']):
                         # Chunk the data into equal chunks, and calculate the chunks mean
                         # This gives the mean for first x values, then next x values etc.
                         # Number of chunks is lowest of 10 and the length of the dataset
-                        results_summary[test][data_key]['chunked_mean'] = chunked_mean(
-                            results_summary[test][data_key]['values'], 10)
+                        results_summary[testname][data_key]['chunked_mean'] = chunked_mean(
+                            results_summary[testname][data_key]['values'], 10)
                 # We do not want all the data duplicated in the summary
-                del(results_summary[test][data_key]['values'])
+                del(results_summary[testname][data_key]['values'])
 
         return results_summary

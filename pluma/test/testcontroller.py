@@ -21,14 +21,14 @@ class TestController():
     All data saved by tests run by the TestRunner on each iteration are saved
     to the "data" dict.
     This data is readily filtered, accessed and graphed using the
-    :meth:`get_test_results` and :meth:`graph_test_results` functions.
+    :meth:`get_test_data` and :meth:`graph_test_results` functions.
     The TestController's behaviour is defined by the settings stored in the
     "settings" dict, which is populated with the arguments below.
 
     Example:
         >>> tc = TestController(my_testrunner)
         >>> tc.run()
-        >>> my_data = tc.get_test_results(format='csv')
+        >>> my_data = tc.get_test_data(format='csv')
         >>> with open('mydata.csv', 'w') as f:
                 f.write(my_data)
         >>> tc.graph_test_results('mygraph.svg')
@@ -286,9 +286,8 @@ class TestController():
         if self.debug_log_func:
             self.debug_log_func(message)
 
-    def get_results_summary(self):
-        ''' Get a summary of test results data values,
-            with some numerical analysis '''
+    def get_test_data_summary(self):
+        ''' Get a summary of test results data values, with some numerical analysis '''
         return self.results_processor.generate_summary(self.testrunner.tests, self.results)
 
     def collect_test_settings(self):
@@ -306,7 +305,7 @@ class TestController():
 
         return settings
 
-    def get_test_results(self, test_names=None, fields=None, format=None,
+    def get_test_data(self, test_names=None, fields=None, format=None,
                          settings=None):
         '''Get test data from the global data dictionary.
 
@@ -385,7 +384,7 @@ class TestController():
     def graph_test_results(self, file, test_names=None, fields=None, vs_type=None,
                            title=None, format=None, config=None):
         '''Create a graph of data fields from the test results data'''
-        results = list(self.get_test_results(test_names=test_names, fields=fields))
+        results = list(self.get_test_data(test_names=test_names, fields=fields))
         self.results_plotter.plot(file, results=results, test_names=test_names, fields=fields,
                                   vs_type=vs_type, title=title, output_format=format, config=config)
 
@@ -533,5 +532,5 @@ class TestController():
 
         self.stats['num_iterations_run'] += 1
 
-        self.results_summary = self.get_results_summary()
+        self.results_summary = self.get_test_data_summary()
         self.test_settings = self.collect_test_settings()
