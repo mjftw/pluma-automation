@@ -37,51 +37,37 @@ def test_Pluma_create_target_context_should_parse_target_variables():
     assert context.variables['mymessage'] == 'echo hello script!'
 
 
-def test_Pluma_create_target_context_variables_should_reflect_env_vars():
-    env = dict(os.environ)
-    try:
-        os.environ['abc'] = 'def'
-        context = Pluma.create_target_context(config_file_path('minimal-target'))
+def test_Pluma_create_target_context_variables_should_reflect_env_vars(monkeypatch):
+    monkeypatch.setenv('abc', 'def')
 
-        assert context.variables['abc'] == 'def'
-    finally:
-        os.environ.clear()
-        os.environ.update(env)
+    context = Pluma.create_target_context(config_file_path('minimal-target'))
+
+    assert context.variables['abc'] == 'def'
 
 
-def test_Pluma_create_target_context_env_vars_should_override_target_variables():
-    env = dict(os.environ)
-    try:
-        os.environ['mymessage'] = 'env message'
-        context = Pluma.create_target_context(config_file_path('variable-sub-target'))
-        assert context.variables['mymessage'] == 'env message'
-    finally:
-        os.environ.clear()
-        os.environ.update(env)
+def test_Pluma_create_target_context_env_vars_should_override_target_variables(monkeypatch):
+    monkeypatch.setenv('mymessage', 'env message')
+
+    context = Pluma.create_target_context(config_file_path('variable-sub-target'))
+
+    assert context.variables['mymessage'] == 'env message'
 
 
-def test_Pluma_create_target_context_should_warn_if_variable_overwritten_by_env(capsys):
-    env = dict(os.environ)
-    try:
-        os.environ['mymessage'] = 'env message'
-        context = Pluma.create_target_context(config_file_path('variable-sub-target'))
-        stdout = capsys.readouterr().out
-        assert f'"mymessage" defined in environment variables and target config.{os.linesep}Using environment: env message' in stdout
-    finally:
-        os.environ.clear()
-        os.environ.update(env)
+def test_Pluma_create_target_context_should_warn_if_variable_overwritten_by_env(capsys, monkeypatch):
+    monkeypatch.setenv('mymessage', 'env message')
+
+    Pluma.create_target_context(config_file_path('variable-sub-target'))
+    stdout = capsys.readouterr().out
+
+    assert f'"mymessage" defined in environment variables and target config.{os.linesep}Using environment: env message' in stdout
 
 
-def test_Pluma_env_substitution_should_read_from_env_vars():
-    env = dict(os.environ)
-    try:
-        os.environ['console'] = 'console'
-        os.environ['port'] = '/dev/random'
-        os.environ['some_env_var'] = 'echo "from env var"'
-        run_all('variable-env-sub-tests', 'variable-env-sub-target')
-    finally:
-        os.environ.clear()
-        os.environ.update(env)
+def test_Pluma_env_substitution_should_read_from_env_vars(monkeypatch):
+    monkeypatch.setenv('console', 'console')
+    monkeypatch.setenv('port', '/dev/random')
+    monkeypatch.setenv('some_env_var', 'echo "from env var"')
+
+    run_all('variable-env-sub-tests', 'variable-env-sub-target')
 
 
 def test_Pluma_env_vars_substitution_should_error_if_var_not_set():
@@ -89,17 +75,14 @@ def test_Pluma_env_vars_substitution_should_error_if_var_not_set():
         run_all('variable-env-sub-tests', 'variable-env-sub-target')
 
 
-def test_Pluma_env_vars_substitution_should_error_on_invalid_config():
-    env = dict(os.environ)
-    try:
-        os.environ['console'] = 'not good'
-        os.environ['port'] = '/dev/random'
-        os.environ['some_env_var'] = 'echo "from env var"'
-        with pytest.raises(TargetConfigError):
-            run_all('variable-env-sub-tests', 'variable-env-sub-target')
-    finally:
-        os.environ.clear()
-        os.environ.update(env)
+def test_Pluma_env_vars_substitution_should_error_on_invalid_config(monkeypatch):
+    monkeypatch.setenv('console', 'not good')
+    monkeypatch.setenv('port', '/dev/random')
+    monkeypatch.setenv('some_env_var', 'echo "from env var"')
+
+    with pytest.raises(TargetConfigError):
+        run_all('variable-env-sub-tests', 'variable-env-sub-target')
+
 
 
 def test_Pluma_tests_error_on_unknown_action():
