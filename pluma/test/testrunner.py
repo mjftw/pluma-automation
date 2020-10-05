@@ -59,7 +59,7 @@ class TestRunner():
         self.data[str(test)] = {
             'tasks': {
                 'ran': [],
-                'failed': []
+                'failed': {}
             },
             'data': test.data,
             'settings': test.settings,
@@ -280,7 +280,7 @@ class TestRunner():
         except InterruptedError as e:
             raise e
         except Exception as e:
-            self.data[str(test)]['tasks']['failed'].append(task_name)
+            self.data[str(test)]['tasks']['failed'][task_name] = str(e)
 
             if print_test:
                 self.board.log('FAIL', color='red',
