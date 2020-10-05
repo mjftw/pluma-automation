@@ -2,7 +2,7 @@ settings:
   continue_on_fail: true
   iterations: 1
   results:
-    path: test-results.json
+    file: test-results.json
 
 sequence:
 - set:
