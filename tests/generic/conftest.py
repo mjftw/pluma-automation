@@ -187,7 +187,8 @@ def child_path(obj: Union[type, ModuleType, str], parent: Union[type, ModuleType
     parent_name = get_name(parent)
 
     if not obj_name.startswith(parent_name):
-        raise AttributeError(f'{obj_name} is not a child of {parent_name}')
+        # If obj is not a child of parent, return its full path
+        return obj_name
 
     # Add 1 to jump over the dot between parent name and child
     return obj_name[len(parent_name) + 1:]
