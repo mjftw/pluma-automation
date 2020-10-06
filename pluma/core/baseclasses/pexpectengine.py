@@ -49,11 +49,11 @@ class PexpectEngine(ConsoleEngine):
         self._pex.send(data)
 
     @property
-    def read_buffer_size(self) -> int:
+    def reception_buffer_size(self) -> int:
         return len(self._read_buffer)
 
     @property
-    def read_buffer(self) -> str:
+    def reception_buffer(self) -> str:
         return self._read_buffer
 
     def read_all(self, preserve_read_buffer: bool = False) -> str:
@@ -68,10 +68,10 @@ class PexpectEngine(ConsoleEngine):
         except pexpect.EOF:
             pass
 
-        buffer = self.read_buffer
+        buffer = self.reception_buffer
         if not preserve_read_buffer:
-            if self.read_buffer.strip():
-                log.debug(f'<<flushed>>{self.read_buffer}<</flushed>>')
+            if self.reception_buffer.strip():
+                log.debug(f'<<flushed>>{self.reception_buffer}<</flushed>>')
             self._read_buffer = ''
 
         return buffer

@@ -72,12 +72,12 @@ class ConsoleBase(HardwareBase):
         self.require_open()
 
         self.engine.read_all(preserve_read_buffer=True)
-        initial_byte_count = start_bytes or self.engine.read_buffer_size
+        initial_byte_count = start_bytes or self.engine.reception_buffer_size
 
         start_time = time.time()
         while(time.time()-start_time < timeout):
             self.engine.read_all(preserve_read_buffer=True)
-            byte_count = self.engine.read_buffer_size
+            byte_count = self.engine.reception_buffer_size
 
             self.log(f'Waiting for data: Waited[{time.time()-start_time:.1f}/{timeout:.1f}s] '
                      'Received[{byte_count-initial_byte_count}B]...',
@@ -105,21 +105,21 @@ class ConsoleBase(HardwareBase):
             time.sleep(sleep_time)
 
             self.read_all(preserve_read_buffer=True)
-            read_buffer_size = self.engine.read_buffer_size
+            reception_buffer_size = self.engine.reception_buffer_size
 
             # Check if more data was received
             now = time.time()
-            if read_buffer_size == last_read_buffer_size:
+            if reception_buffer_size == last_read_buffer_size:
                 if now - quiet_start > quiet:
                     return True
             else:
                 quiet_start = now
 
-            last_read_buffer_size = read_buffer_size
+            last_read_buffer_size = reception_buffer_size
             log_string = ("Waiting for quiet... Waited[{:.1f}/{:.1f}s] "
                           "Quiet[{:.1f}/{:.1f}s] Received[{:.0f}B]...")
             self.log(log_string.format(now - start, timeout, now - quiet_start,
-                                       quiet, read_buffer_size), level=LogLevel.DEBUG)
+                                       quiet, reception_buffer_size), level=LogLevel.DEBUG)
 
         # Timeout
         return False
@@ -198,7 +198,7 @@ class ConsoleBase(HardwareBase):
         '''Return True if the console responds to <Enter>'''
 
         self.read_all(preserve_read_buffer=True)
-        start_bytes = self.engine.read_buffer_size
+        start_bytes = self.engine.reception_buffer_size
         self.send_nonblocking('', flush_before=False)
         alive = self.wait_for_bytes(timeout=timeout, start_bytes=start_bytes)
 

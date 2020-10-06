@@ -105,13 +105,13 @@ class ConsoleEngine(ABC):
 
     @property
     @abstractmethod
-    def read_buffer_size(self) -> int:
-        '''Size of the read buffer for the console'''
+    def reception_buffer_size(self) -> int:
+        '''Size of the reception buffer for the console'''
 
     @property
     @abstractmethod
-    def read_buffer(self) -> str:
-        '''Content of the read buffer'''
+    def reception_buffer(self) -> str:
+        '''Content of the reception buffer'''
 
     @abstractmethod
     def interact(self):
