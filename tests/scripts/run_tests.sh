@@ -3,7 +3,7 @@ set -eu
 this_dir="$(dirname $0)"
 
 test_dir="$(readlink -f $this_dir/..)"
-if [ ! -z "$1" ]; then
+if [ "$#" -ge 1 ]; then
     test_dir="$(readlink -f $this_dir/../$1)"
 
     if [ ! -e "$test_dir" ]; then

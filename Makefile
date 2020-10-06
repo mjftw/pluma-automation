@@ -24,16 +24,10 @@ DOCKER_RUN_PRIVILEGED_ARGS := $(DOCKER_RUN_ARGS) --privileged -v /dev:/dev
 install:: ## Install Pluma
 		@./install.sh
 
-test:: ## Run the all Pluma Automation tests that don't require hardware
-		@./tests/scripts/run_tests.sh generic
-
-test-all:: ## Run all Pluma Automation tests (generic and RPi specific)
+test:: ## Run the Pluma Automation tests. Tests in tests/rpi are ignored if not on Raspberry Pi
 		@./tests/scripts/run_tests.sh
 
-test-coverage:: ## Check the code coverage for all tests that don't require hardware
-		@./tests/scripts/run_tests.sh generic --coverage
-
-test-all-coverage:: ## Check the code coverage for all tests (generic and RPi specific)
+test-coverage:: ## Check the code test coverage. Tests in tests/rpi are ignored if not on Raspberry Pi
 		@./tests/scripts/run_tests.sh --coverage
 
 docker-build:: ## Build the docker image

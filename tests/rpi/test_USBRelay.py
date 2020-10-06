@@ -40,7 +40,6 @@ When all switches are set to port A, a connection is made between the
 output GPIO on 1_common and the input GPIO on 4_B.
 '''
 
-import RPi.GPIO as GPIO
 import time
 
 from fixtures import relay_pins, usb_relay
@@ -50,6 +49,7 @@ def assert_continuity(output_pin, input_pin, repititions=100):
     ''' Toggle output and check input matches to assert continuity
     Repeat many times to rule out floating input matching output by chance
     '''
+    import RPi.GPIO as GPIO
 
     for __ in range(0, repititions):
         GPIO.output(output_pin, GPIO.HIGH)
@@ -62,6 +62,8 @@ def assert_continuity(output_pin, input_pin, repititions=100):
 
 
 def setup_gpios(inputs, outputs):
+    import RPi.GPIO as GPIO
+
     GPIO.setmode(GPIO.BOARD)
     for i in inputs:
         GPIO.setup(i, GPIO.IN, pull_up_down=GPIO.PUD_OFF)
