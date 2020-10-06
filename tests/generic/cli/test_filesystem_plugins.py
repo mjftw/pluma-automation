@@ -2,7 +2,6 @@ import os
 import stat
 import re
 from pathlib import Path
-import pytest
 
 from pluma.plugins.testsuite import filesystem
 
@@ -26,7 +25,8 @@ def test_filesystem_FileExists_should_pass_when_true(pluma_cli, temp_file, pluma
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileExists_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileExists_should_fail_when_false(pluma_cli, temp_file,
+                                                      pluma_config_file, capsys):
     test_config = pluma_config_file([
         (filesystem.FileExists, {
             'path': '/theres/no/way/this/file/actually/exists!',
@@ -39,7 +39,8 @@ def test_filesystem_FileExists_should_fail_when_false(pluma_cli, temp_file, plum
     assert check_capsys_for_test_fail(filesystem.FileExists, capsys)
 
 
-def test_filesystem_FileIsRegular_should_pass_when_true(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_FileIsRegular_should_pass_when_true(pluma_cli, temp_file,
+                                                        pluma_config_file):
     test_config = pluma_config_file([
         (filesystem.FileIsRegular, {
             'path': __file__,
@@ -51,7 +52,8 @@ def test_filesystem_FileIsRegular_should_pass_when_true(pluma_cli, temp_file, pl
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsRegular_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsRegular_should_fail_when_false(pluma_cli, temp_file,
+                                                         pluma_config_file, capsys):
     test_config = pluma_config_file([
         (filesystem.FileIsRegular, {
             'path': Path(__file__).parent,
@@ -76,7 +78,8 @@ def test_filesystem_FileIsDir_should_pass_when_true(pluma_cli, temp_file, pluma_
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsDir_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsDir_should_fail_when_false(pluma_cli, temp_file,
+                                                     pluma_config_file, capsys):
     test_config = pluma_config_file([
         (filesystem.FileIsDir, {
             'path': __file__,
@@ -89,7 +92,8 @@ def test_filesystem_FileIsDir_should_fail_when_false(pluma_cli, temp_file, pluma
     assert check_capsys_for_test_fail(filesystem.FileIsDir, capsys)
 
 
-def test_filesystem_FileIsNotEmpty_should_pass_when_true(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_FileIsNotEmpty_should_pass_when_true(pluma_cli, temp_file,
+                                                         pluma_config_file):
     test_config = pluma_config_file([
         (filesystem.FileIsNotEmpty, {
             'path': temp_file('Foobar'),
@@ -101,7 +105,8 @@ def test_filesystem_FileIsNotEmpty_should_pass_when_true(pluma_cli, temp_file, p
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsNotEmpty_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsNotEmpty_should_fail_when_false(pluma_cli, temp_file,
+                                                          pluma_config_file, capsys):
     test_config = pluma_config_file([
         (filesystem.FileIsNotEmpty, {
             'path': temp_file(),
@@ -114,7 +119,8 @@ def test_filesystem_FileIsNotEmpty_should_fail_when_false(pluma_cli, temp_file, 
     assert check_capsys_for_test_fail(filesystem.FileIsNotEmpty, capsys)
 
 
-def test_filesystem_FileIsEmpty_should_pass_when_true(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_FileIsEmpty_should_pass_when_true(pluma_cli, temp_file,
+                                                      pluma_config_file):
     test_config = pluma_config_file([
         (filesystem.FileIsEmpty, {
             'path': temp_file(),
@@ -126,7 +132,8 @@ def test_filesystem_FileIsEmpty_should_pass_when_true(pluma_cli, temp_file, plum
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsEmpty_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsEmpty_should_fail_when_false(pluma_cli, temp_file,
+                                                       pluma_config_file, capsys):
     test_config = pluma_config_file([
         (filesystem.FileIsEmpty, {
             'path': temp_file('Foobar'),
@@ -139,7 +146,8 @@ def test_filesystem_FileIsEmpty_should_fail_when_false(pluma_cli, temp_file, plu
     assert check_capsys_for_test_fail(filesystem.FileIsEmpty, capsys)
 
 
-def test_filesystem_FileIsReadable_should_pass_when_true(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_FileIsReadable_should_pass_when_true(pluma_cli, temp_file,
+                                                         pluma_config_file):
     test_config = pluma_config_file([
         (filesystem.FileIsReadable, {
             'path': __file__,
@@ -151,7 +159,8 @@ def test_filesystem_FileIsReadable_should_pass_when_true(pluma_cli, temp_file, p
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsReadable_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsReadable_should_fail_when_false(pluma_cli, temp_file,
+                                                          pluma_config_file, capsys):
     filename = temp_file()
     perms = os.stat(filename)
     os.chmod(filename, perms.st_mode & ~stat.S_IREAD)
@@ -167,7 +176,9 @@ def test_filesystem_FileIsReadable_should_fail_when_false(pluma_cli, temp_file, 
     pluma_cli(['-c', test_config, '-t', target_config])
     assert check_capsys_for_test_fail(filesystem.FileIsReadable, capsys)
 
-def test_filesystem_FileIsWritable_should_pass_when_true(pluma_cli, temp_file, pluma_config_file):
+
+def test_filesystem_FileIsWritable_should_pass_when_true(pluma_cli, temp_file,
+                                                         pluma_config_file):
     test_config = pluma_config_file([
         (filesystem.FileIsWritable, {
             'path': temp_file(),
@@ -179,7 +190,8 @@ def test_filesystem_FileIsWritable_should_pass_when_true(pluma_cli, temp_file, p
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsWritable_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsWritable_should_fail_when_false(pluma_cli, temp_file,
+                                                          pluma_config_file, capsys):
     filename = temp_file()
     perms = os.stat(filename)
     os.chmod(filename, perms.st_mode & ~stat.S_IWRITE)
@@ -195,7 +207,9 @@ def test_filesystem_FileIsWritable_should_fail_when_false(pluma_cli, temp_file, 
     pluma_cli(['-c', test_config, '-t', target_config])
     assert check_capsys_for_test_fail(filesystem.FileIsWritable, capsys)
 
-def test_filesystem_FileIsExecutable_should_pass_when_true(pluma_cli, temp_file, pluma_config_file):
+
+def test_filesystem_FileIsExecutable_should_pass_when_true(pluma_cli, temp_file,
+                                                           pluma_config_file):
     filename = temp_file()
     perms = os.stat(filename)
     os.chmod(filename, perms.st_mode | stat.S_IEXEC)
@@ -211,7 +225,8 @@ def test_filesystem_FileIsExecutable_should_pass_when_true(pluma_cli, temp_file,
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_FileIsExecutable_should_fail_when_false(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_FileIsExecutable_should_fail_when_false(pluma_cli, temp_file,
+                                                            pluma_config_file, capsys):
     filename = temp_file()
 
     test_config = pluma_config_file([
@@ -226,7 +241,8 @@ def test_filesystem_FileIsExecutable_should_fail_when_false(pluma_cli, temp_file
     assert check_capsys_for_test_fail(filesystem.FileIsExecutable, capsys)
 
 
-def test_filesystem_CheckFileSize_should_pass_when_file_over_min(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_CheckFileSize_should_pass_when_file_over_min(pluma_cli, temp_file,
+                                                                 pluma_config_file):
     filename = temp_file('The quick brown fox jumped over the lazy dog')
 
     test_config = pluma_config_file([
@@ -241,7 +257,8 @@ def test_filesystem_CheckFileSize_should_pass_when_file_over_min(pluma_cli, temp
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_CheckFileSize_should_fail_when_file_under_min(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_CheckFileSize_should_fail_when_file_under_min(pluma_cli, temp_file,
+                                                                  pluma_config_file, capsys):
     filename = temp_file('The quick brown fox jumped over the lazy dog')
 
     test_config = pluma_config_file([
@@ -257,7 +274,8 @@ def test_filesystem_CheckFileSize_should_fail_when_file_under_min(pluma_cli, tem
     assert check_capsys_for_test_fail(filesystem.CheckFileSize, capsys)
 
 
-def test_filesystem_CheckFileSize_should_pass_when_file_under_max(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_CheckFileSize_should_pass_when_file_under_max(pluma_cli, temp_file,
+                                                                  pluma_config_file):
     filename = temp_file('The quick brown fox jumped over the lazy dog')
 
     test_config = pluma_config_file([
@@ -272,7 +290,8 @@ def test_filesystem_CheckFileSize_should_pass_when_file_under_max(pluma_cli, tem
     pluma_cli(['-c', test_config, '-t', target_config])
 
 
-def test_filesystem_CheckFileSize_should_fail_when_file_over_max(pluma_cli, temp_file, pluma_config_file, capsys):
+def test_filesystem_CheckFileSize_should_fail_when_file_over_max(pluma_cli, temp_file,
+                                                                 pluma_config_file, capsys):
     filename = temp_file('The quick brown fox jumped over the lazy dog')
 
     test_config = pluma_config_file([
@@ -288,7 +307,8 @@ def test_filesystem_CheckFileSize_should_fail_when_file_over_max(pluma_cli, temp
     assert check_capsys_for_test_fail(filesystem.CheckFileSize, capsys)
 
 
-def test_filesystem_CheckFileSize_should_pass_when_file_in_range(pluma_cli, temp_file, pluma_config_file):
+def test_filesystem_CheckFileSize_should_pass_when_file_in_range(pluma_cli, temp_file,
+                                                                 pluma_config_file):
     filename = temp_file('The quick brown fox jumped over the lazy dog')
 
     test_config = pluma_config_file([
