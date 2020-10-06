@@ -1,6 +1,7 @@
 import time
 import json
 import os
+from typing import List
 
 from pluma.core.dataclasses import SystemContext
 from pluma.core.baseclasses import ConsoleEngine, PexpectEngine
@@ -55,16 +56,18 @@ class ConsoleBase(HardwareBase):
         open(self.raw_logfile, 'w').close()
 
     def read_all(self, preserve_read_buffer: bool = False) -> str:
+        '''Read and return all data available on the console'''
         self.require_open()
         return self.engine.read_all(preserve_read_buffer=preserve_read_buffer)
 
-    def wait_for_match(self, match, timeout=None):
-        '''Wait a maximum duration of 'timeout' for a matching regex'''
+    def wait_for_match(self, match: List[str], timeout=None) -> str:
+        '''Wait a maximum duration of 'timeout' for a matching regex, and returns matched text'''
         _, matched_text, _ = self.engine.wait_for_match(match=match,
                                                         timeout=timeout)
         return matched_text
 
-    def wait_for_bytes(self, timeout: int = None, sleep_time: int = None, start_bytes: int = None):
+    def wait_for_bytes(self, timeout: int = None, sleep_time: int = None,
+                       start_bytes: int = None) -> bool:
         '''Wait for data to be received on the console.'''
         timeout = timeout or 10.0
         sleep_time = sleep_time or 0.1
@@ -92,6 +95,7 @@ class ConsoleBase(HardwareBase):
 
     def wait_for_quiet(self, quiet: float = None, sleep_time: float = None,
                        timeout: float = None) -> bool:
+        '''Wait at most "timeout" for no activity during "quiet" consecutive seconds'''
         self.require_open()
         quiet = quiet if quiet is not None else 0.5
         sleep_time = sleep_time if sleep_time is not None else 0.1
@@ -127,6 +131,7 @@ class ConsoleBase(HardwareBase):
     def send_and_read(self, cmd: str, timeout: int = None,
                       sleep_time: int = None, quiet_time: int = None,
                       send_newline: bool = True, flush_before: bool = True) -> str:
+        '''Send a command/data on the console, wait for quiet and return the data received'''
         timeout = timeout if timeout is not None else 3
         sleep_time = sleep_time if sleep_time is not None else 0.1
         quiet_time = quiet_time if quiet_time is not None else 0.3
@@ -140,6 +145,7 @@ class ConsoleBase(HardwareBase):
     def send_and_expect(self, cmd: str, match: list,
                         excepts: list = None, timeout: int = None,
                         send_newline: bool = True, flush_before: bool = True) -> (str, str):
+        '''Send a command/data on the console, and wait for one of "expects" patterns.'''
         match = match or []
         excepts = excepts or []
         timeout = timeout if timeout is not None else 5
@@ -176,6 +182,7 @@ class ConsoleBase(HardwareBase):
     def send_nonblocking(self, cmd: str,
                          send_newline: bool = True,
                          flush_before: bool = True):
+        '''Send a command/data and return immediately. Identical to ConsoleBase.send()'''
         self.require_open()
         self.log(f'Sending command: \'{cmd}\'', force_log_file=None,
                  level=LogLevel.DEBUG)
@@ -192,6 +199,7 @@ class ConsoleBase(HardwareBase):
                  force_echo=False, level=LogLevel.DEBUG)
 
     def send(self, cmd: str, send_newline: bool = True, flush_before: bool = True):
+        '''Send a command/data. Identical to ConsoleBase.send_nonblocking()'''
         self.send_nonblocking(cmd=cmd, send_newline=send_newline, flush_before=flush_before)
 
     def check_alive(self, timeout=10.0):
@@ -211,6 +219,7 @@ class ConsoleBase(HardwareBase):
 
     def login(self, username, username_match,
               password=None, password_match=None, success_match=None):
+        '''Attempt to login on the console using "username" and "password".'''
         matches = [username_match]
         if password_match:
             matches.append(password_match)
