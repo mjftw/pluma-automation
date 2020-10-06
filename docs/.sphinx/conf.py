@@ -28,12 +28,19 @@ author = 'Witekio'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinxcontrib.apidoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'recommonmark'
 ]
+
+# API docs generation
+apidoc_module_dir = '../../pluma'
+apidoc_output_dir = 'api'
+# apidoc_excluded_paths = ['tests']
+apidoc_separate_modules = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
