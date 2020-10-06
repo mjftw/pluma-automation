@@ -141,7 +141,7 @@ class CommandRunner():
 
     @staticmethod
     def output_matches_all_patterns(patterns: List[str], output: str) -> bool:
-        '''Return wether the output matches all patterns or not.'''
+        '''Return whether the output matches all patterns or not.'''
         if not patterns:
             return True
 
@@ -156,7 +156,7 @@ class CommandRunner():
 
     @staticmethod
     def output_matches_any_pattern(patterns: List[str], output: str) -> bool:
-        '''Return wether the output matches any of the pattern or not.'''
+        '''Return whether the output matches any of the pattern or not.'''
         if not patterns:
             return False
 

@@ -64,7 +64,7 @@ class ConsoleEngine(ABC):
     @property
     @abstractmethod
     def is_open(self):
-        '''Return wether the console is open or not'''
+        '''Return whether the console is open or not'''
 
     def close(self):
         '''Close the console.'''

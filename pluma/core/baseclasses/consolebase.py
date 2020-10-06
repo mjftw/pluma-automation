@@ -34,7 +34,7 @@ class ConsoleBase(HardwareBase):
 
     @property
     def is_open(self):
-        '''Return wether the console is opened or not'''
+        '''Return whether the console is opened or not'''
         return self.engine.is_open
 
     def close(self):
