@@ -1,6 +1,7 @@
 import os
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import List
@@ -12,6 +13,13 @@ from .consoleexceptions import ConsoleCannotOpenError
 class ConsoleType(Enum):
     Process = 0
     FileDescriptor = 1
+
+
+@dataclass(frozen=True)
+class MatchResult:
+    regex_matched: str
+    text_matched: str
+    text_received: str
 
 
 class ConsoleEngine(ABC):
@@ -99,8 +107,7 @@ class ConsoleEngine(ABC):
         self.send(data+self.linesep)
 
     @abstractmethod
-    def wait_for_match(self, match: List[str], timeout: int = None) \
-            -> (str, str, str):
+    def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
 
     @property

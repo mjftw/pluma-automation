@@ -62,9 +62,8 @@ class ConsoleBase(HardwareBase):
 
     def wait_for_match(self, match: List[str], timeout=None) -> str:
         '''Wait a maximum duration of 'timeout' for a matching regex, and returns matched text'''
-        _, matched_text, _ = self.engine.wait_for_match(match=match,
-                                                        timeout=timeout)
-        return matched_text
+        match_result = self.engine.wait_for_match(match=match, timeout=timeout)
+        return match_result.text_matched
 
     def wait_for_bytes(self, timeout: int = None, sleep_time: int = None,
                        start_bytes: int = None) -> bool:
@@ -162,22 +161,21 @@ class ConsoleBase(HardwareBase):
         self.send_nonblocking(cmd, send_newline=send_newline,
                               flush_before=flush_before)
 
-        matched_regex, matched_text, received = self.engine.wait_for_match(timeout=timeout,
-                                                                           match=watches)
+        match = self.engine.wait_for_match(timeout=timeout, match=watches)
 
-        if matched_regex:
-            debug_match_str = f'<<matched expects={watches}>>{matched_regex}<</matched>>'
+        if match.regex_matched:
+            debug_match_str = f'<<matched expects={watches}>>{match.regex_matched}<</matched>>'
         else:
             debug_match_str = f'<<not_matched expects={watches}>>'
 
-        self.log(f'<<received>>{received}{debug_match_str}<</received>>',
+        self.log(f'<<received>>{match.text_received}{debug_match_str}<</received>>',
                  force_echo=False, level=LogLevel.DEBUG)
 
-        if matched_regex in excepts:
-            self.error(f'Matched [{matched_regex}] is in exceptions list {excepts}',
+        if match.regex_matched in excepts:
+            self.error(f'Matched [{match.regex_matched}] is in exceptions list {excepts}',
                        exception=ConsoleExceptionKeywordReceivedError)
 
-        return (received, matched_text)
+        return (match.text_received, match.text_matched)
 
     def send_nonblocking(self, cmd: str,
                          send_newline: bool = True,
@@ -292,6 +290,6 @@ class ConsoleBase(HardwareBase):
 
         prompt_regex = self.system.prompt_regex
         self.log(f'Waiting for prompt "{prompt_regex}" for {timeout}s')
-        matched_regex, _, _ = self.engine.wait_for_match(match=prompt_regex, timeout=timeout)
-        if not matched_regex:
+        match_result = self.engine.wait_for_match(match=prompt_regex, timeout=timeout)
+        if not match_result.regex_matched:
             raise ConsoleError('No prompt detected.')

@@ -3,7 +3,7 @@ import pexpect.fdpexpect
 
 from typing import List
 
-from pluma.core.baseclasses import ConsoleEngine
+from pluma.core.baseclasses import ConsoleEngine, MatchResult
 from .logging import Logger
 
 log = Logger()
@@ -76,8 +76,7 @@ class PexpectEngine(ConsoleEngine):
 
         return buffer
 
-    def wait_for_match(self, match: List[str], timeout: int = None) \
-            -> (str, str, str):
+    def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
         assert self.is_open
 
@@ -111,7 +110,9 @@ class PexpectEngine(ConsoleEngine):
             matched_regex = None
             matched_text = None
 
-        return (matched_regex, self.decode(matched_text), self.decode(received))
+        return MatchResult(regex_matched=matched_regex,
+                           text_matched=self.decode(matched_text),
+                           text_received=self.decode(received))
 
     def interact(self):
         assert self.is_open

@@ -1,6 +1,6 @@
 from .hardwarebase import HardwareBase
 from .consoleexceptions import *
-from .consoleengine import ConsoleEngine, ConsoleType
+from .consoleengine import ConsoleEngine, ConsoleType, MatchResult
 from .pexpectengine import PexpectEngine
 from .consolebase import ConsoleBase
 from .powerbase import PowerBase
