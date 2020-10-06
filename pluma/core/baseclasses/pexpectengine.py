@@ -3,13 +3,13 @@ import pexpect.fdpexpect
 
 from typing import List
 
-from pluma.core.baseclasses import ConsoleInteractor
+from pluma.core.baseclasses import ConsoleEngine
 from .logging import Logger
 
 log = Logger()
 
 
-class PexpectInteractor(ConsoleInteractor):
+class PexpectEngine(ConsoleEngine):
     def __init__(self, linesep: str = None, encoding: str = None, raw_logfile: str = None):
         super().__init__(linesep=linesep, encoding=encoding,
                          raw_logfile=raw_logfile)

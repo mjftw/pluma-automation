@@ -40,7 +40,7 @@ class SerialConsoleMock(ConsoleBase):
                 self.child_function()
                 sys.exit()
 
-            self.interactor.open(console_fd=self._child_fd)
+            self.engine.open(console_fd=self._child_fd)
 
     def close(self):
         # Kill child process to close pseudo terminal

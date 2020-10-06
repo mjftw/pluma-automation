@@ -20,7 +20,7 @@ def test_SerialConsole_send_sends_correct_data(serial_console_proxy):
 
     written = serial_console_proxy.read_serial_output()
 
-    assert written == f'{msg}{serial_console_proxy.console.interactor.linesep}'
+    assert written == f'{msg}{serial_console_proxy.console.engine.linesep}'
 
 
 def test_SerialConsole_send_doesnt_send_newline_when_send_newline_arg_false(serial_console_proxy):
@@ -198,7 +198,7 @@ def test_SerialConsole_check_alive_returns_true_when_target_responds(serial_cons
         serial_console_proxy.console.check_alive)
 
     # Send console a newline char
-    serial_console_proxy.fake_reception(serial_console_proxy.console.interactor.linesep)
+    serial_console_proxy.fake_reception(serial_console_proxy.console.engine.linesep)
 
     assert async_result.get() is True
 
@@ -223,7 +223,7 @@ def test_SerialConsole_login_finds_user_match_sends_correct_username(serial_cons
 
     # Expect line break, to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -235,7 +235,7 @@ def test_SerialConsole_login_finds_user_match_sends_correct_username(serial_cons
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{username}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -251,7 +251,7 @@ def test_SerialConsole_login_success_with_no_password(serial_console_proxy):
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -263,7 +263,7 @@ def test_SerialConsole_login_success_with_no_password(serial_console_proxy):
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{username}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -289,7 +289,7 @@ def test_SerialConsole_login_finds_pass_match_sends_correct_pass(serial_console_
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -301,14 +301,14 @@ def test_SerialConsole_login_finds_pass_match_sends_correct_pass(serial_console_
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{username}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{password}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -328,7 +328,7 @@ def test_SerialConsole_login_no_exception_on_success_no_success_match(serial_con
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -340,14 +340,14 @@ def test_SerialConsole_login_no_exception_on_success_no_success_match(serial_con
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{username}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{password}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -375,7 +375,7 @@ def test_SerialConsole_login_no_exception_on_success_with_success_match(serial_c
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -387,14 +387,14 @@ def test_SerialConsole_login_no_exception_on_success_with_success_match(serial_c
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{username}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{password}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -430,7 +430,7 @@ def test_SerialConsole_login_except_on_wrong_success_match(serial_console_proxy)
 
     # Expect line break, used to force printing the prompt
     received = serial_console_proxy.read_serial_output()
-    expected = f'{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -442,14 +442,14 @@ def test_SerialConsole_login_except_on_wrong_success_match(serial_console_proxy)
     serial_console_proxy.fake_reception(user_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{username}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{username}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
     serial_console_proxy.fake_reception(pass_match)
 
     received = serial_console_proxy.read_serial_output()
-    expected = f'{password}{serial_console_proxy.console.interactor.linesep}'
+    expected = f'{password}{serial_console_proxy.console.engine.linesep}'
 
     assert received == expected
 
@@ -484,7 +484,7 @@ def test_SerialConsole_login_except_on_wrong_username_match(serial_console_proxy
 
 def test_SerialConsole_read_all_clears_buffer(serial_console_proxy):
     # Send console a newline char
-    serial_console_proxy.fake_reception(serial_console_proxy.console.interactor.linesep)
+    serial_console_proxy.fake_reception(serial_console_proxy.console.engine.linesep)
 
     time.sleep(0.01)
 

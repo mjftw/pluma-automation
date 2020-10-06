@@ -74,7 +74,7 @@ def serial_console_proxy():
         encoding='utf-8'
     )
 
-    proxy = OsFile(master, console.interactor.encoding)
+    proxy = OsFile(master, console.engine.encoding)
 
     # Clear master file just in case
     proxy.read(timeout=0)

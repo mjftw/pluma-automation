@@ -30,7 +30,7 @@ class SerialConsole(ConsoleBase):
             timeout=self._timeout
         )
 
-        self.interactor.open(console_fd=self._ser.fileno())
+        self.engine.open(console_fd=self._ser.fileno())
 
         if not self.is_open:
             raise RuntimeError(f'Failed to open serial port {self.port}')

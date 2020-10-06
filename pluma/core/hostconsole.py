@@ -17,9 +17,9 @@ class HostConsole(ConsoleBase):
         return f'{self.__class__.__name__}[{command}]'
 
     def open(self):
-        self.interactor.open(console_cmd=self.command)
+        self.engine.open(console_cmd=self.command)
 
     def interact(self):
         if not self.is_open:
             self.open()
-        self.interactor.interact()
+        self.engine.interact()

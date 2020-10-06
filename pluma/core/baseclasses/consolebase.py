@@ -3,11 +3,10 @@ import json
 import os
 
 from pluma.core.dataclasses import SystemContext
+from pluma.core.baseclasses import ConsoleEngine, PexpectEngine
 
 from .hardwarebase import HardwareBase
 from .logging import LogLevel
-from .consoleinteractor import ConsoleInteractor
-from .pexpectinteractor import PexpectInteractor
 from .consoleexceptions import (ConsoleError, ConsoleCannotOpenError,
                                 ConsoleExceptionKeywordReceivedError,
                                 ConsoleInvalidJSONReceivedError,
@@ -19,16 +18,16 @@ class ConsoleBase(HardwareBase):
 
     def __init__(self, encoding: str = None, linesep: str = None,
                  raw_logfile: str = None, system: SystemContext = None,
-                 interactor: ConsoleInteractor = None):
-        self.interactor = interactor or PexpectInteractor(linesep=linesep,
-                                                          encoding=encoding,
-                                                          raw_logfile=raw_logfile)
+                 engine: ConsoleEngine = None):
+        self.engine = engine or PexpectEngine(linesep=linesep,
+                                              encoding=encoding,
+                                              raw_logfile=raw_logfile)
         self.system = system or SystemContext()
         self._requires_login = True
 
     def open(self):
         '''Open a console.'''
-        self.interactor.open()
+        self.engine.open()
 
     def _on_opened(self):
         '''Executed after the console is opened.'''
@@ -36,11 +35,11 @@ class ConsoleBase(HardwareBase):
     @property
     def is_open(self):
         '''Return wether the console is opened or not'''
-        return self.interactor.is_open
+        return self.engine.is_open
 
     def close(self):
         '''Close the console.'''
-        self.interactor.close()
+        self.engine.close()
 
     def _on_closed(self):
         '''Executed after the console is closed.'''
@@ -57,12 +56,12 @@ class ConsoleBase(HardwareBase):
 
     def read_all(self, preserve_read_buffer: bool = False) -> str:
         self.require_open()
-        return self.interactor.read_all(preserve_read_buffer=preserve_read_buffer)
+        return self.engine.read_all(preserve_read_buffer=preserve_read_buffer)
 
     def wait_for_match(self, match, timeout=None):
         '''Wait a maximum duration of 'timeout' for a matching regex'''
-        _, matched_text, _ = self.interactor.wait_for_match(match=match,
-                                                            timeout=timeout)
+        _, matched_text, _ = self.engine.wait_for_match(match=match,
+                                                        timeout=timeout)
         return matched_text
 
     def wait_for_bytes(self, timeout: int = None, sleep_time: int = None, start_bytes: int = None):
@@ -72,13 +71,13 @@ class ConsoleBase(HardwareBase):
 
         self.require_open()
 
-        self.interactor.read_all(preserve_read_buffer=True)
-        initial_byte_count = start_bytes or self.interactor.read_buffer_size
+        self.engine.read_all(preserve_read_buffer=True)
+        initial_byte_count = start_bytes or self.engine.read_buffer_size
 
         start_time = time.time()
         while(time.time()-start_time < timeout):
-            self.interactor.read_all(preserve_read_buffer=True)
-            byte_count = self.interactor.read_buffer_size
+            self.engine.read_all(preserve_read_buffer=True)
+            byte_count = self.engine.read_buffer_size
 
             self.log(f'Waiting for data: Waited[{time.time()-start_time:.1f}/{timeout:.1f}s] '
                      'Received[{byte_count-initial_byte_count}B]...',
@@ -106,7 +105,7 @@ class ConsoleBase(HardwareBase):
             time.sleep(sleep_time)
 
             self.read_all(preserve_read_buffer=True)
-            read_buffer_size = self.interactor.read_buffer_size
+            read_buffer_size = self.engine.read_buffer_size
 
             # Check if more data was received
             now = time.time()
@@ -157,8 +156,8 @@ class ConsoleBase(HardwareBase):
         self.send_nonblocking(cmd, send_newline=send_newline,
                               flush_before=flush_before)
 
-        matched_regex, matched_text, received = self.interactor.wait_for_match(timeout=timeout,
-                                                                               match=watches)
+        matched_regex, matched_text, received = self.engine.wait_for_match(timeout=timeout,
+                                                                           match=watches)
 
         if matched_regex:
             debug_match_str = f'<<matched expects={watches}>>{matched_regex}<</matched>>'
@@ -185,9 +184,9 @@ class ConsoleBase(HardwareBase):
             self.read_all()
 
         if send_newline:
-            self.interactor.send_line(cmd)
+            self.engine.send_line(cmd)
         else:
-            self.interactor.send(cmd)
+            self.engine.send(cmd)
 
         self.log(f'<<sent>>{cmd}<</sent>>',
                  force_echo=False, level=LogLevel.DEBUG)
@@ -199,7 +198,7 @@ class ConsoleBase(HardwareBase):
         '''Return True if the console responds to <Enter>'''
 
         self.read_all(preserve_read_buffer=True)
-        start_bytes = self.interactor.read_buffer_size
+        start_bytes = self.engine.read_buffer_size
         self.send_nonblocking('', flush_before=False)
         alive = self.wait_for_bytes(timeout=timeout, start_bytes=start_bytes)
 
@@ -284,6 +283,6 @@ class ConsoleBase(HardwareBase):
 
         prompt_regex = self.system.prompt_regex
         self.log(f'Waiting for prompt "{prompt_regex}" for {timeout}s')
-        matched_regex, _, _ = self.interactor.wait_for_match(match=prompt_regex, timeout=timeout)
+        matched_regex, _, _ = self.engine.wait_for_match(match=prompt_regex, timeout=timeout)
         if not matched_regex:
             raise ConsoleError('No prompt detected.')

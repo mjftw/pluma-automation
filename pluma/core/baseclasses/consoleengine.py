@@ -14,7 +14,7 @@ class ConsoleType(Enum):
     FileDescriptor = 1
 
 
-class ConsoleInteractor(ABC):
+class ConsoleEngine(ABC):
     def __init__(self, linesep: str = None, encoding: str = None,
                  raw_logfile: str = None):
         timestamp = datetime_to_timestamp(datetime.now())
@@ -118,7 +118,7 @@ class ConsoleInteractor(ABC):
         '''Let the user interact with console'''
 
     def decode(self, text: bytes) -> str:
-        '''Decode text using the interactor's encoding'''
+        '''Decode text using the engine's encoding'''
         if not text:
             return text
 
@@ -128,7 +128,7 @@ class ConsoleInteractor(ABC):
         return text.decode(self.encoding, 'replace')
 
     def encode(self, text: str) -> bytes:
-        '''Encode text using the interactor's encoding'''
+        '''Encode text using the engine's encoding'''
         if not text:
             return text
 
