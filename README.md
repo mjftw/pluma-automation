@@ -13,6 +13,8 @@ Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https:
 
 ## Getting Started
 
+Full documentation on [Read The Docs](https://pluma-automation.readthedocs.io/en/latest/)
+
 ## Installation
 
 Pluma Automation can be run natively, or using Docker.
