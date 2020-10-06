@@ -33,7 +33,7 @@ class ConsoleEngine(ABC):
         return self._console_type
 
     def open(self, console_cmd: str = None, console_fd=None):
-        if (not console_cmd and not console_fd) or (
+        if (console_cmd is None and console_fd is None) or (
                 console_cmd and console_fd):
             raise ValueError('Either "console_cmd" or "console_fd" must be provided.')
 
