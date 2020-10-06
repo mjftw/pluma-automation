@@ -143,6 +143,8 @@ The following is a basic tests definition example, that runs all tests in the or
 settings:
   continue_on_fail: true
   iterations: 3
+  results:
+    file: my-results-file.json
 
 sequence:
 # Power on, wait for prompt and login
@@ -194,7 +196,8 @@ Supported attributes:
 * `settings:`
   * `continue_on_fail: <bool>` - Continue or stop when a test/task fails
   * `iterations: <int>` - Number of times the test sequence is executed
-
+  * `results:`
+    * `file: <filename>` - File to save the test results to. Defaults to `pluma-results-<timestamp>.json`
 * `sequence:` Ordered list of action to perform. Each elements can be one of [`shell_tests`, `core_test`, `c_tests`]. Elements can be repeated, but test names must be unique.
   * `- core_tests:` Test to be used from the common test suite
     * `include: <list_of_tests>` - Will match exact names, and tests starting from the name used. Full list of tests visible with `pluma tests` commands, and in the plugins folders (from `--plugin` CLI option).
