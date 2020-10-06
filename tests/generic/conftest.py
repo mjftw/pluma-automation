@@ -17,19 +17,7 @@ from utils import OsFile
 from pluma import Board, SerialConsole, SoftPower, SSHConsole
 from pluma.core.baseclasses import ConsoleBase, ConsoleEngine, MatchResult
 from pluma.core.dataclasses import SystemContext, Credentials
-from pluma.core.mocks import ConsoleMock
 from pluma import __main__
-
-
-@fixture
-def soft_power():
-    mock_console = MagicMock(ConsoleMock())
-
-    return SoftPower(
-        console=mock_console,
-        on_cmd='MOCK ON',
-        off_cmd='MOCK OFF'
-    )
 
 
 class MockConsoleEngine(ConsoleEngine):
@@ -90,6 +78,17 @@ class SerialConsoleProxy:
     def read_serial_output(self):
         # Give time for the data written to propagate
         return self.proxy.read(timeout=0.2)
+
+
+@fixture
+def soft_power():
+    mock_console = MagicMock(BasicConsole())
+
+    return SoftPower(
+        console=mock_console,
+        on_cmd='MOCK ON',
+        off_cmd='MOCK OFF'
+    )
 
 
 @fixture
