@@ -14,6 +14,8 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
 
+import recommonmark
+from recommonmark.transform import AutoStructify
 
 # -- Project information -----------------------------------------------------
 
@@ -33,17 +35,20 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.autosectionlabel',
     'recommonmark'
 ]
 
+
 # API docs generation
-apidoc_module_dir = '../../pluma'
-apidoc_output_dir = 'api'
+apidoc_module_dir = '../pluma'
+apidoc_output_dir = '_api'
 # apidoc_excluded_paths = ['tests']
 apidoc_separate_modules = True
 
-# Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+# Recommonmark
+autosectionlabel_prefix_document = True
+
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -60,8 +65,9 @@ html_theme = 'sphinx_rtd_theme'
 
 master_doc = 'index'
 
-
-# Add any paths that contain custom static files (such as style sheets) here,
-# relative to this directory. They are copied after the builtin static files,
-# so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# Recommonark
+def setup(app):
+    app.add_config_value('recommonmark_config', {
+            'auto_toc_tree_section': 'Contents',
+            }, True)
+    app.add_transform(AutoStructify)
