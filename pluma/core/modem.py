@@ -174,13 +174,12 @@ class ModemSim868(HardwareBase):
 
         self.log('Calling {}'.format(number))
 
-        _, matched = self.AT_send('ATD{};'.format(number),
-                                  match=['OK', 'NO DIALTONE', 'BUSY',
-                                         'NO CARRIER', 'NO ANSWER'],
-                                  excepts='ERROR')
+        received, matched = self.AT_send('ATD{};'.format(number),
+                                         match=['OK', 'NO DIALTONE', 'BUSY',
+                                                'NO CARRIER', 'NO ANSWER'],
+                                         excepts='ERROR')
         if not matched:
-            self.error('Unexpected response from modem: {}'.format(received),
-                       ModemError)
+            self.error(f'Unexpected response from modem: {received}', ModemError)
 
         if matched == 'OK':
             if not self.ongoing_call():
@@ -327,16 +326,14 @@ class ModemSim868(HardwareBase):
             self.error('Failed to start recording', ModemError)
 
         # Flush serial input buffer
-        self.console.flush(True)
+        self.console.read_all()
 
         # From this point, directly interact with Serial Object
         self._recording_lock = True
         self._recording_paused = False
 
     def send_sms(self, number, message):
-        '''
-        Send the SMS message @message to @number
-        '''
+        '''Send the SMS message @message to @number'''
         if not self.ready():
             self.hardware_reset()
 
@@ -373,9 +370,7 @@ class ModemSim868(HardwareBase):
         raise NotImplementedError
 
     def sms_received(self):
-        '''
-        Returns the number of SMS received
-        '''
+        '''Returns the number of SMS received'''
         raise NotImplementedError
 
     def hardware_reset(self):
@@ -397,8 +392,8 @@ class ModemSim868(HardwareBase):
             GPIO.cleanup()
 
             if not reset_successful:
-                raise ModemError('\
-                    Failed to reset modem after {} attempts!'.format(self.hardware_reset_max_attempts))
+                raise ModemError('Failed to reset modem after '
+                                 f'{self.hardware_reset_max_attempts} attempts!')
         else:
             self.log('RPi GPIO library is not loaded, skipping hardware reset.')
             if not self.ready():
