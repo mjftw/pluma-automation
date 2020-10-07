@@ -90,7 +90,7 @@ class TestDefinition():
                 f'Parameter sets for test "{name}" should be a list of dictionaries')
 
     def __repr__(self):
-        return f'[{self.__class__.__name__}] {self.name}: {self.parameter_sets}'
+        return f'{self.__module__}.{self.__class__.__name__}{self.parameter_sets or ""}'
 
 
 class TestsProvider(ABC):
