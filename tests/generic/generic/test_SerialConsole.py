@@ -90,7 +90,8 @@ def test_SerialConsole_send_and_expect_returns_received_none_when_no_match_avail
     assert matched is None
 
 
-def test_SerialConsole_send_and_expect_returns_received_when_no_match_available(serial_console_proxy):
+def test_SerialConsole_send_and_expect_returns_received_when_no_match_available(
+        serial_console_proxy):
     msg = loremipsum
     wont_match = 'Baz'
 
@@ -525,53 +526,6 @@ def test_SerialConsole_read_all_preserve_buffer(serial_console_proxy):
         preserve_read_buffer=True) == data2
     assert serial_console_proxy.console.read_all() == data2
     assert serial_console_proxy.console.read_all() == ''
-
-
-@pytest.mark.parametrize('sleep_time', [0.2, 1])
-def test_ConsoleBase_wait_for_quiet_should_wait_at_least_sleep_time(serial_console_proxy,
-                                                                    sleep_time):
-    serial_console_proxy.console.open()
-
-    start = time.time()
-    success = serial_console_proxy.console.wait_for_quiet(quiet=0, sleep_time=sleep_time, timeout=2)
-    elapsed = time.time() - start
-
-    assert success is True
-    assert 0.8*sleep_time < elapsed < 1.2*sleep_time
-
-
-@pytest.mark.parametrize('timeout', [0.2, 1])
-def test_ConsoleBase_wait_for_quiet_should_wait_at_most_timeout(serial_console_proxy, timeout):
-    serial_console_proxy.console.open()
-
-    start = time.time()
-    success = serial_console_proxy.console.wait_for_quiet(quiet=timeout*2, timeout=timeout)
-    elapsed = time.time() - start
-
-    assert success is False
-    assert 0.8*timeout < elapsed < 1.2*timeout
-
-
-@pytest.mark.parametrize('quiet_time, non_quiet_time', [(0.2, 0.5), (0.5, 1)])
-def test_ConsoleBase_wait_for_quiet_should_return_when_quiet(serial_console_proxy,
-                                                             quiet_time, non_quiet_time):
-    serial_console_proxy.console.open()
-
-    start = time.time()
-    async_result = nonblocking(serial_console_proxy.console.wait_for_quiet,
-                               quiet=quiet_time, timeout=5)
-
-    data_start = time.time()
-    data_end = data_start + non_quiet_time
-    while(time.time() < data_end):
-        serial_console_proxy.fake_reception('abc', wait_time=0.02)
-
-    success = async_result.get()
-    elapsed = time.time() - start
-
-    assert success is True
-    total_time = non_quiet_time+quiet_time
-    assert 0.8*total_time < elapsed < 1.2*total_time
 
 
 def test_SerialConsole_does_not_require_login(serial_console_proxy):
