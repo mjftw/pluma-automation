@@ -14,8 +14,6 @@ class PexpectEngine(ConsoleEngine):
         super().__init__(linesep=linesep, encoding=encoding,
                          raw_logfile=raw_logfile)
         self._pex = None
-        self._read_buffer = ''
-        self._raw_logfile_fd = None
 
     def _open_process(self, command: str):
         self._pex = pexpect.spawn(command, timeout=0.01)
@@ -47,14 +45,6 @@ class PexpectEngine(ConsoleEngine):
     def send(self, data: str):
         assert self.is_open
         self._pex.send(data)
-
-    @property
-    def reception_buffer_size(self) -> int:
-        return len(self._read_buffer)
-
-    @property
-    def reception_buffer(self) -> str:
-        return self._read_buffer
 
     def read_all(self, preserve_read_buffer: bool = False) -> str:
         assert self.is_open

@@ -32,9 +32,10 @@ class ConsoleEngine(ABC):
 
         self.linesep = linesep or '\n'
         self.encoding = encoding or 'ascii'
-        self._console_type = None
         self.raw_logfile = raw_logfile or default_raw_logfile
         self._raw_logfile_fd = None
+        self._console_type = None
+        self._read_buffer = ''
 
     @property
     def console_type(self):
@@ -111,14 +112,14 @@ class ConsoleEngine(ABC):
         '''Wait a maximum duration of 'timeout' for a matching regex'''
 
     @property
-    @abstractmethod
     def reception_buffer_size(self) -> int:
         '''Size of the reception buffer for the console'''
+        return len(self._read_buffer)
 
     @property
-    @abstractmethod
     def reception_buffer(self) -> str:
         '''Content of the reception buffer'''
+        return self._read_buffer
 
     @abstractmethod
     def interact(self):
