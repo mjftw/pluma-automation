@@ -1,8 +1,8 @@
 # Pluma Automation
 
-![Native installation and tests](https://github.com/Witekio/pluma-automation/workflows/Native%20installation%20and%20tests/badge.svg)
-![Docker Image CI](https://github.com/Witekio/pluma-automation/workflows/Docker%20Image%20CI/badge.svg)
-![ReadTheDocs](https://readthedocs.org/projects/pluma-automation/badge/?version=latest)
+![](https://github.com/Witekio/pluma-automation/workflows/Native%20installation%20and%20tests/badge.svg)
+![](https://github.com/Witekio/pluma-automation/workflows/Docker%20Image%20CI/badge.svg)
+![](https://readthedocs.org/projects/pluma-automation/badge/?version=latest)
 ![](https://app.codacy.com/project/badge/Grade/0c2f740819084c61962c0c2c772468cf)
 
 Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https://www.witekio.com) to perform automated testing on embedded devices. This framework has no requirements on the device side. This tools is can be used in two different ways:
