@@ -59,7 +59,7 @@ def test_Pluma_create_target_context_should_warn_if_variable_overwritten_by_env(
     Pluma.create_target_context(config_file_path('variable-sub-target'))
     stdout = capsys.readouterr().out
 
-    assert f'"mymessage" defined in environment variables and target config.{os.linesep}Using environment: env message' in stdout
+    assert f'"mymessage" defined in both environment variables and target config.{os.linesep}    Using environment: env message' in stdout
 
 
 def test_Pluma_env_substitution_should_read_from_env_vars(monkeypatch):
