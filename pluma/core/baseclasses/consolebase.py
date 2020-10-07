@@ -2,6 +2,7 @@ import time
 import json
 import os
 from typing import List
+from abc import ABC, abstractmethod
 
 from pluma.core.dataclasses import SystemContext
 from pluma.core.baseclasses import ConsoleEngine, PexpectEngine
@@ -14,7 +15,7 @@ from .consoleexceptions import (ConsoleError, ConsoleCannotOpenError,
                                 ConsoleLoginFailedError)
 
 
-class ConsoleBase(HardwareBase):
+class ConsoleBase(HardwareBase, ABC):
     """ Implements the console functionality not specific to a given transport layer """
 
     def __init__(self, encoding: str = None, linesep: str = None,
@@ -26,9 +27,9 @@ class ConsoleBase(HardwareBase):
         self.system = system or SystemContext()
         self._requires_login = True
 
+    @abstractmethod
     def open(self):
         '''Open a console.'''
-        self.engine.open()
 
     def _on_opened(self):
         '''Executed after the console is opened.'''
@@ -265,7 +266,7 @@ class ConsoleBase(HardwareBase):
 
         if not matched:
             raise ConsoleInvalidJSONReceivedError(
-                f'Received is not JSON: {received}')
+                f'No JSON found in command output: {received}')
 
         data = json.loads(matched)
         return data

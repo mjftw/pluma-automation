@@ -1,4 +1,3 @@
-from traceback import format_exc
 from types import ModuleType
 from typing import Dict, Iterable, List, Tuple, Union
 import pty
@@ -16,7 +15,7 @@ import pluma.plugins
 
 from utils import OsFile
 from pluma import Board, SerialConsole, SoftPower, SSHConsole
-from pluma.core.baseclasses import ConsoleBase
+from pluma.core.baseclasses import ConsoleBase, ConsoleEngine, MatchResult
 from pluma.core.dataclasses import SystemContext, Credentials
 from pluma.core.mocks import ConsoleMock
 from pluma import __main__
@@ -33,21 +32,56 @@ def soft_power():
     )
 
 
-class ConsoleProxy:
-    def __init__(self, proxy, console: ConsoleBase):
-        self.proxy = proxy
-        self.console = console
+class MockConsoleEngine(ConsoleEngine):
+    def __init__(self):
+        super().__init__()
+        self._is_open = False
+        self.sent = ''
+        self.received = ''
 
-    def fake_reception(self, message: str, wait_time: int = 0.1):
-        time.sleep(wait_time)
-        self.proxy.write(message)
+    def _open_process(self, command: str):
+        self._is_open = True
 
-    def read_serial_output(self):
-        # Give time for the data written to propagate
-        return self.proxy.read(timeout=0.2)
+    def _open_fd(self, fd):
+        self._is_open = True
+
+    @property
+    def is_open(self):
+        return self._is_open
+
+    def read_all(self, preserve_read_buffer=False):
+        received = self.received
+
+        if not preserve_read_buffer:
+            self.received = ''
+
+        return received
+
+    def _close_fd(self):
+        self._is_open = False
+
+    def _close_process(self):
+        self._is_open = False
+
+    def send(self, data: str):
+        self.sent += data
+
+    def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
+        return MatchResult(None, None, '')
+
+    def interact(self):
+        raise NotImplementedError()
 
 
-class SerialConsoleProxy(ConsoleProxy):
+class BasicConsole(ConsoleBase):
+    def __init__(self, system=None, engine: ConsoleEngine = None):
+        super().__init__(engine=engine or MockConsoleEngine(), system=system)
+
+    def open(self):
+        self.engine.open(console_cmd='bash')
+
+
+class SerialConsoleProxy:
     def __init__(self, proxy, console: ConsoleBase):
         self.proxy = proxy
         self.console = console
@@ -90,6 +124,21 @@ def serial_console_proxy():
             os.close(fd)
         except OSError:
             pass
+
+
+@fixture
+def mock_console_engine():
+    return MockConsoleEngine()
+
+
+@fixture
+def basic_console():
+    return BasicConsole()
+
+
+@fixture
+def basic_console_class():
+    return BasicConsole
 
 
 @fixture

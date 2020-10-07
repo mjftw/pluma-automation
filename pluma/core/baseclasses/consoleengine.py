@@ -108,6 +108,10 @@ class ConsoleEngine(ABC):
         self.send(data+self.linesep)
 
     @abstractmethod
+    def read_all(self, preserve_read_buffer: bool = False):
+        '''Read and return all data available on the console'''
+
+    @abstractmethod
     def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
 
