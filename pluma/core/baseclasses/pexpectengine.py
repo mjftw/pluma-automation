@@ -46,25 +46,18 @@ class PexpectEngine(ConsoleEngine):
         assert self.is_open
         self._pex.send(data)
 
-    def read_all(self, preserve_read_buffer: bool = False) -> str:
-        assert self.is_open
-
+    def _read_from_console(self) -> str:
+        received = ''
         try:
             while 1:
-                self._read_buffer += self.decode(
+                received += self.decode(
                     self._pex.read_nonblocking(1, 0.01))
         except pexpect.TIMEOUT:
             pass
         except pexpect.EOF:
             pass
 
-        buffer = self.reception_buffer
-        if not preserve_read_buffer:
-            if self.reception_buffer.strip():
-                log.debug(f'<<flushed>>{self.reception_buffer}<</flushed>>')
-            self._read_buffer = ''
-
-        return buffer
+        return received
 
     def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''

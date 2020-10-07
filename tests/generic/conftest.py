@@ -49,12 +49,9 @@ class MockConsoleEngine(ConsoleEngine):
     def is_open(self):
         return self._is_open
 
-    def read_all(self, preserve_read_buffer=False):
+    def _read_from_console(self):
         received = self.received
-
-        if not preserve_read_buffer:
-            self.received = ''
-
+        self.received = ''
         return received
 
     def _close_fd(self):

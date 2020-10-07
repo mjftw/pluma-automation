@@ -8,6 +8,9 @@ from typing import List
 
 from pluma.utils import datetime_to_timestamp
 from .consoleexceptions import ConsoleCannotOpenError
+from .logging import Logger
+
+log = Logger()
 
 
 class ConsoleType(Enum):
@@ -35,7 +38,7 @@ class ConsoleEngine(ABC):
         self.raw_logfile = raw_logfile or default_raw_logfile
         self._raw_logfile_fd = None
         self._console_type = None
-        self._read_buffer = ''
+        self._reception_buffer = ''
 
     @property
     def console_type(self):
@@ -107,8 +110,22 @@ class ConsoleEngine(ABC):
         '''Send data and a line break on the console.'''
         self.send(data+self.linesep)
 
-    @abstractmethod
     def read_all(self, preserve_read_buffer: bool = False):
+        '''Read and return all data available on the console'''
+        assert self.is_open
+
+        self._reception_buffer += self._read_from_console()
+        received = self._reception_buffer
+
+        if not preserve_read_buffer:
+            if self._reception_buffer.strip():
+                log.debug(f'<<flushed>>{self._reception_buffer}<</flushed>>')
+            self._reception_buffer = ''
+
+        return received
+
+    @abstractmethod
+    def _read_from_console(self) -> str:
         '''Read and return all data available on the console'''
 
     @abstractmethod
@@ -118,12 +135,12 @@ class ConsoleEngine(ABC):
     @property
     def reception_buffer_size(self) -> int:
         '''Size of the reception buffer for the console'''
-        return len(self._read_buffer)
+        return len(self._reception_buffer)
 
     @property
     def reception_buffer(self) -> str:
         '''Content of the reception buffer'''
-        return self._read_buffer
+        return self._reception_buffer
 
     @abstractmethod
     def interact(self):
