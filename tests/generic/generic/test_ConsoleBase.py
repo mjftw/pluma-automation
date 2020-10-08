@@ -69,6 +69,36 @@ def test_ConsoleBase_send_and_read_sends_data(basic_console):
     assert basic_console.engine.sent == sent
 
 
+def test_ConsoleBase_send_and_expect_returns_received_and_none_when_no_match_available(
+        basic_console):
+    match_result = MatchResult(regex_matched=None,
+                               text_matched=None,
+                               text_received='abc\ndef')
+    basic_console.engine.wait_for_match = MagicMock(return_value=match_result)
+
+    async_result = nonblocking(basic_console.send_and_expect,
+                               cmd='', match='anything', timeout=0.2)
+
+    received, matched = async_result.get()
+    assert received == match_result.text_received
+    assert matched is None
+
+
+def test_ConsoleBase_send_and_expect_returns_received_and_matched_text_when_match_available(
+        basic_console):
+    match_result = MatchResult(regex_matched='ab*c',
+                               text_matched='abc',
+                               text_received='abc\ndef')
+    basic_console.engine.wait_for_match = MagicMock(return_value=match_result)
+
+    async_result = nonblocking(basic_console.send_and_expect,
+                               cmd='', match='anything', timeout=0.2)
+
+    received, matched = async_result.get()
+    assert received == match_result.text_received
+    assert matched == match_result.text_matched
+
+
 def test_ConsoleBase_wait_for_prompt_should_error_if_not_detected(basic_console_class):
     prompt = 'user@host'
     console = basic_console_class(system=SystemContext(prompt_regex=prompt))

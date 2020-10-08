@@ -42,69 +42,7 @@ def test_SerialConsole_read_all_returns_all_data(serial_console_proxy):
     assert received == msg
 
 
-def test_SerialConsole_send_and_expect_returns_matched_when_match_available(
-        serial_console_proxy):
-    before_match, to_match = 'Foo', 'Bar'
-    msg = before_match + to_match
-
-    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
-                               cmd='', match=to_match)
-
-    # Wait short time for function to start
-    time.sleep(0.1)
-
-    serial_console_proxy.fake_reception(msg)
-
-    __, matched = async_result.get()
-    assert matched == to_match
-
-
-def test_SerialConsole_send_and_expect_returns_received_when_match_available(
-        serial_console_proxy):
-    before_match, to_match = 'Foo', 'Bar'
-    msg = before_match + to_match
-
-    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
-                               cmd='', match=to_match)
-
-    # Wait short time for function to start
-    time.sleep(0.1)
-
-    serial_console_proxy.fake_reception(msg)
-
-    received, __ = async_result.get()
-    assert received == msg
-
-
-def test_SerialConsole_send_and_expect_returns_received_none_when_no_match_available(
-        serial_console_proxy):
-    msg = loremipsum
-    wont_match = 'Baz'
-
-    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
-                               cmd='', match=wont_match, timeout=0.5)
-
-    serial_console_proxy.fake_reception(msg)
-
-    __, matched = async_result.get()
-    assert matched is None
-
-
-def test_SerialConsole_send_and_expect_returns_received_when_no_match_available(
-        serial_console_proxy):
-    msg = loremipsum
-    wont_match = 'Baz'
-
-    async_result = nonblocking(serial_console_proxy.console.send_and_expect,
-                               cmd='', match=wont_match, timeout=0.5)
-
-    serial_console_proxy.fake_reception(msg)
-
-    received, __ = async_result.get()
-    assert received == msg
-
-
-def test_SerialConsole_send_matches_regex(serial_console_proxy):
+def test_SerialConsole_send_and_expect_matches_regex(serial_console_proxy):
     msg = 'Hello World! 123FooBarBaz'
     regex = '[0-3]+Foo'
     expected_match = '123Foo'
