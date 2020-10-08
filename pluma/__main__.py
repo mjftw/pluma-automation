@@ -113,15 +113,15 @@ def main():
             log.log(Pluma.version(), level=LogLevel.IMPORTANT)
     except TestsConfigError as e:
         log.error(
-            f'Error while parsing the tests configuration ({tests_config_path}):{os.linesep}  {e}')
+            [f'Error while parsing the tests configuration ({tests_config_path}):', str(e)])
         exit(-2)
     except TargetConfigError as e:
         log.error(
-            f'Error while parsing the target configuration ({target_config_path}):{os.linesep}  {e}')
+            [f'Error while parsing the target configuration ({target_config_path}):', str(e)])
         exit(-3)
     except TestsBuildError as e:
         log.error(
-            f'Error while building tests:\n  {e}')
+            [f'Error while building tests:', str(e)])
         exit(-4)
     except Exception as e:
         if log.mode in [LogMode.VERBOSE, LogMode.DEBUG]:

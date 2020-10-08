@@ -69,9 +69,9 @@ class TestsConfig:
         )
 
         controller = TestController(
-            testrunner, log_func=partial(log.log, level=LogLevel.INFO),
-            verbose_log_func=partial(log.log, level=LogLevel.NOTICE),
-            debug_log_func=partial(log.log, level=LogLevel.DEBUG)
+            testrunner, log_func=log.info,
+            verbose_log_func=log.notice,
+            debug_log_func=log.debug
         )
 
         iterations = settings.pop('iterations')

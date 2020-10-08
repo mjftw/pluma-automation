@@ -48,8 +48,9 @@ class TestsBuilder:
         install_dir = os.path.abspath(install_dir)
         TestsBuilder.create_directory(install_dir)
 
-        log.log('Installing Yocto SDK...', level=LogLevel.INFO)
-        log.log(f'  SDK: "{yocto_sdk}"\n  Destination: "{install_dir}"')
+        log.info('Installing Yocto SDK...')
+        log.log([f'SDK: "{yocto_sdk}"',
+                 'Destination: "{install_dir}"'])
 
         try:
             command = [yocto_sdk, '-y', '-d', install_dir]
@@ -92,7 +93,7 @@ class TestsBuilder:
         TestsBuilder.create_directory(install_dir)
         target_filepath = os.path.join(install_dir, target_name)
 
-        log.log(f'Cross compiling "{target_name}"...', level=LogLevel.INFO)
+        log.info(f'Cross compiling "{target_name}"...')
         command = f'. {env_file} && $CC {sources} {flags} -o {target_filepath}'
         log.debug(f'Build command = {command}')
 

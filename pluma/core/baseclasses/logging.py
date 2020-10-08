@@ -2,6 +2,7 @@ import datetime
 import os
 
 from enum import Enum, IntEnum
+from typing import Iterable
 from pluma.utils import datetime_to_timestamp
 
 from .hierarchy import hier_setter
@@ -114,6 +115,10 @@ class Logger(Singleton):
         self.log(message, color='red', level=LogLevel.ERROR)
 
     def _log(self, message, color=None, bold=False, newline=True, bypass_hold=False):
+        # Use message in list form for consistent multiline messages
+        if not isinstance(message, str) and isinstance(message, Iterable):
+            message = f'{os.linesep}    '.join(message)
+
         style_reset = STYLE_NORMAL
         if color:
             if color in COLOR_STYLES:

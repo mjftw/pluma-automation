@@ -18,6 +18,7 @@ log = Logger()
 
 START_TIMESTAMP = time.strftime('%Y%m%d-%H%M%S')
 
+
 class Pluma:
     '''Top level API class for Pluma'''
     @staticmethod
@@ -89,8 +90,8 @@ class Pluma:
 
         for variable, env_value in ((var, val) for var, val in env_vars.items()
                                     if var in context.variables):
-            log.warning(f'"{variable}" defined in both environment variables and target config.'
-                        f'{os.linesep}    Using environment: {env_value}')
+            log.warning([f'"{variable}" defined in both environment variables and target config.',
+                         f'Using environment: {env_value}'])
 
         context.variables.update(env_vars)
         return context
