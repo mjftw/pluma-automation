@@ -43,7 +43,8 @@ test_command="-m pytest "$test_dir
 echo $@
 if [ $COVERAGE -eq 1 ]; then
     echo "Running coverage"
-    coverage run --source=pluma $test_command
+    # Don't fail coverage if some test fail
+    coverage run --source=pluma $test_command || true
     coverage xml
 else
     echo "Running tests"
