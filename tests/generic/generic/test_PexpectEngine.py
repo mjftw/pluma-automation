@@ -33,7 +33,7 @@ def test_PexpectEngine_send_line_write_content_and_line_break(pty_pair):
 
 
 def test_PexpectEngine_read_all_reads_from_console(pty_pair):
-    received = 'abc\ndef'
+    received = 'abcdef'
     engine = PexpectEngine()
     engine.open(console_fd=pty_pair.main.fd)
 
@@ -44,7 +44,7 @@ def test_PexpectEngine_read_all_reads_from_console(pty_pair):
 
 
 def test_PexpectEngine_read_all_returns_received_only_once(pty_pair):
-    received = 'abc\ndef'
+    received = 'abcdef'
     engine = PexpectEngine()
     engine.open(console_fd=pty_pair.main.fd)
 
@@ -54,6 +54,21 @@ def test_PexpectEngine_read_all_returns_received_only_once(pty_pair):
 
     assert received1_actual == received
     assert received2_actual == ''
+
+
+def test_PexpectEngine_read_all_can_preserve_buffer(pty_pair):
+    received = 'abcdef'
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair.main.fd)
+
+    pty_pair.secondary.write(received)
+    received1_actual = engine.read_all(preserve_read_buffer=True)
+    received2_actual = engine.read_all()
+    received3_actual = engine.read_all()
+
+    assert received1_actual == received
+    assert received2_actual == received
+    assert received3_actual == ''
 
 
 def test_PexpectEngine_wait_for_match_return_match_and_if_matched(pty_pair):

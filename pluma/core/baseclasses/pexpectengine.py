@@ -32,7 +32,7 @@ class PexpectEngine(ConsoleEngine):
 
     @property
     def is_open(self):
-        return (self._pex and self._pex.isalive()) is True
+        return bool(self._pex and self._pex.isalive())
 
     def _close_fd(self):
         # Nothing to do, FD closed at a higher level

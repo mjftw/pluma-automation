@@ -312,50 +312,5 @@ def test_SerialConsole_login_except_on_wrong_username_match(serial_console_proxy
         async_result.get()
 
 
-def test_SerialConsole_read_all_clears_buffer(serial_console_proxy):
-    # Send console a newline char
-    serial_console_proxy.fake_reception(serial_console_proxy.console.engine.linesep)
-
-    time.sleep(0.01)
-
-    serial_console_proxy.console.read_all()
-
-    data_received = serial_console_proxy.console.wait_for_bytes(timeout=0.5)
-
-    assert data_received is False
-
-
-def test_SerialConsole_read_all_returns_received(serial_console_proxy):
-    data1 = 'Line1'
-
-    serial_console_proxy.console.open()
-    serial_console_proxy.fake_reception(data1)
-
-    assert serial_console_proxy.console.read_all() == data1
-
-
-def test_SerialConsole_read_all_clears_received(serial_console_proxy):
-    data1 = 'Line1'
-
-    serial_console_proxy.console.open()
-    serial_console_proxy.fake_reception(data1)
-
-    assert serial_console_proxy.console.read_all() != ''
-    assert serial_console_proxy.console.read_all() == ''
-
-
-def test_SerialConsole_read_all_preserve_buffer(serial_console_proxy):
-    data2 = 'Line2'
-    serial_console_proxy.console.open()
-    serial_console_proxy.fake_reception(data2)
-
-    assert serial_console_proxy.console.read_all(
-        preserve_read_buffer=True) == data2
-    assert serial_console_proxy.console.read_all(
-        preserve_read_buffer=True) == data2
-    assert serial_console_proxy.console.read_all() == data2
-    assert serial_console_proxy.console.read_all() == ''
-
-
 def test_SerialConsole_does_not_require_login(serial_console_proxy):
     assert serial_console_proxy.console.requires_login is True
