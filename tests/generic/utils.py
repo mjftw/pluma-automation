@@ -9,9 +9,9 @@ def fd_has_data(fd, timeout=0):
 
 
 class OsFile:
-    def __init__(self, fd, encoding):
+    def __init__(self, fd, encoding=None):
         self.fd = fd
-        self.encoding = encoding
+        self.encoding = encoding or 'ascii'
 
     def read(self, n=None, timeout=None):
         if timeout is not None and not fd_has_data(self.fd, timeout):
