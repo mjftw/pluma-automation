@@ -34,7 +34,7 @@ function support_serial {
 }
 
 function support_sdwire {
-    $SUDO apt install -y libusb-1.0 libftdi-dev
+    $SUDO apt install -y --no-install-recommends libusb-1.0 libftdi-dev
 
     # LibUSB required for PyFTDI library used by SDWire
     echo
@@ -55,7 +55,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
 }
 
 function support_uhubctl {
-    $SUDO apt install -y uhubctl
+    $SUDO apt install -y --no-install-recommends uhubctl
     echo 'Consider adding a udev rule in "/etc/udev/rules.d/50-uhubctl.rules"
 (SUBSYSTEM=="usb", ATTR{idVendor}=="<your_device_vendor>", MODE="0666"),
 or running pluma as root/sudo, if required.'
@@ -125,7 +125,8 @@ shift $((OPTIND -1))
 PROJECT_ROOT="$(realpath $(dirname "$0"))"
 
 $SUDO apt update && \
-  $SUDO apt install -y python3 python3-pip graphviz git sshpass
+  $SUDO apt install -y --no-install-recommends \
+    python3 python3-pip graphviz git sshpass
 
 if [ "$answer_all" ==  "n" ]; then
     echo "Skipping optional config..."
