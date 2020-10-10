@@ -22,6 +22,15 @@ def test_ConsoleBase_send_with_newline_sends_newline(basic_console):
     assert basic_console.engine.sent == sent+basic_console.engine.linesep
 
 
+def test_ConsoleBase_send_should_discard_reception_with_read_all(
+        basic_console):
+    basic_console.engine.read_all = MagicMock()
+
+    basic_console.send(cmd='abc', send_newline=True)
+
+    basic_console.engine.read_all.assert_called_once_with(preserve_read_buffer=False)
+
+
 @pytest.mark.parametrize('sleep_time', [0.2, 1])
 def test_ConsoleBase_wait_for_quiet_should_wait_at_least_sleep_time(basic_console,
                                                                     sleep_time):
@@ -99,11 +108,27 @@ def test_ConsoleBase_send_and_expect_returns_received_and_matched_text_when_matc
     assert matched == match_result.text_matched
 
 
+def test_ConsoleBase_send_and_expect_match_multiline_reception(
+        basic_console):
+    match_result = MatchResult(regex_matched='de*f',
+                               text_matched='abc',
+                               text_received='abc\ndef')
+    basic_console.engine.wait_for_match = MagicMock(return_value=match_result)
+
+    async_result = nonblocking(basic_console.send_and_expect,
+                               cmd='', match='anything', timeout=0.2)
+
+    received, matched = async_result.get()
+    assert received == match_result.text_received
+    assert matched == match_result.text_matched
+
+
 def test_ConsoleBase_wait_for_prompt_should_error_if_not_detected(basic_console_class):
     prompt = 'user@host'
     console = basic_console_class(system=SystemContext(prompt_regex=prompt))
 
-    console.engine.wait_for_match = MagicMock(return_value=MatchResult(None, None, ''))
+    console.engine.wait_for_match = MagicMock(
+        return_value=MatchResult(None, None, ''))
     with pytest.raises(ConsoleError):
         console.wait_for_prompt(timeout=0.1)
 

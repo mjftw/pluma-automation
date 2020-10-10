@@ -103,3 +103,26 @@ def test_PexpectEngine_wait_for_match_should_match_only_once(pty_pair):
     match = engine.wait_for_match(match=[pattern], timeout=0.5)
 
     assert match.regex_matched is None
+
+
+@pytest.mark.parametrize('timeout', [0.2, 1])
+def test_PexpectEngine_wait_for_match_should_return_after_timeout(pty_pair, timeout):
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair.main.fd)
+
+    start_time = time.time()
+    engine.wait_for_match(match=['abc'], timeout=timeout)
+
+    assert 0.8 * timeout < time.time() - start_time < 1.2*timeout
+
+
+def test_PexpectEngine_wait_for_match_should_return_immediately_on_match(pty_pair):
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair.main.fd)
+    received = 'abc'
+    pty_pair.secondary.write(received+'\n')
+
+    start_time = time.time()
+    engine.wait_for_match(match=[received], timeout=2)
+
+    assert time.time() - start_time < 0.2
