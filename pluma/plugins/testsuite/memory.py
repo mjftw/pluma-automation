@@ -29,8 +29,11 @@ class MemorySize(TestBase):
                     available_mb = math.floor(int(line.split()[1]) / 1024)
                 if line.startswith('MemTotal:'):
                     total_mb = math.floor(int(line.split()[1]) / 1024)
-        except Exception:
-            # Handled just after
+        except ValueError:
+            # Failed to convert to integer
+            pass
+        except IndexError:
+            # Unexpected format
             pass
 
         if not available_mb or not total_mb:
@@ -43,4 +46,5 @@ class MemorySize(TestBase):
 
         if self.available_mb and available_mb < self.available_mb:
             raise TaskFailed(
-                f'The system has {available_mb} MB of RAM available, but expected at least {self.available_mb} MB')
+                f'The system has {available_mb} MB of RAM available, but expected '
+                f'at least {self.available_mb} MB')
