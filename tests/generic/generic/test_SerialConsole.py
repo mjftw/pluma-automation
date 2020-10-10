@@ -89,20 +89,6 @@ def test_SerialConsole_send_and_expect_matches_regex_with_previous_content(
     assert matched == expected_match
 
 
-def test_SerialConsole_send_and_expect_returns_received_if_no_match(serial_console_proxy):
-    expected_received = 'Not really matching.'
-    regex = 'A regex'
-
-    send_and_expect_result = nonblocking(serial_console_proxy.console.send_and_expect,
-                                         cmd='abc', match=regex, timeout=0.5)
-
-    serial_console_proxy.fake_reception(expected_received)
-
-    received, matched = send_and_expect_result.get()
-    assert received == expected_received
-    assert matched is None
-
-
 def test_SerialConsole_send_and_expect_ignores_previous_content(serial_console_proxy):
     expected_received = 'Not really matching.'
     regex = '[0-3]+Match'
