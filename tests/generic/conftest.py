@@ -1,17 +1,20 @@
-from types import ModuleType
-from typing import Dict, Iterable, List, Tuple, Union
-import pty
 import os
+import pluma.plugins
+import pty
+import shutil
 import sys
-import time
-from pytest import fixture
-from unittest.mock import MagicMock, patch
-import traceback
 import tempfile
 import textwrap
-import shutil
+import time
+import traceback
 import yaml
-import pluma.plugins
+
+from collections import namedtuple
+from pytest import fixture
+from serial import Serial
+from types import ModuleType
+from typing import Dict, Iterable, List, Tuple, Union
+from unittest.mock import MagicMock, patch
 
 from utils import OsFile
 from pluma import Board, SerialConsole, SoftPower, SSHConsole
@@ -120,6 +123,15 @@ def serial_console_proxy():
             os.close(fd)
         except OSError:
             pass
+
+
+PtyPair = namedtuple('PtyPair', ['main', 'secondary'])
+
+
+@fixture
+def pty_pair() -> PtyPair:
+    main, secondary = pty.openpty()
+    return PtyPair(OsFile(main), OsFile(secondary))
 
 
 @fixture
