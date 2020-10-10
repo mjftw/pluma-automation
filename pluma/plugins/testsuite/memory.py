@@ -19,7 +19,6 @@ class MemorySize(TestBase):
         if not console:
             raise TaskFailed('No console available')
 
-        self.board.login()
         received = console.send_and_read('cat /proc/meminfo')
         available_mb = None
         total_mb = None
