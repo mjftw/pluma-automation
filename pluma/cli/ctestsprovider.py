@@ -41,7 +41,8 @@ class CTestsProvider(TestsProvider):
                 test_parameters = tests_config[test_name]
                 test_executable = TestsBuilder.build_c_test(
                     target_name=test_name, env_file=env_file,
-                    sources=test_parameters.pop('sources'), flags=test_parameters.pop('flags', None))
+                    sources=test_parameters.pop('sources'),
+                    flags=test_parameters.pop('flags', None))
 
                 test_parameters['executable_file'] = test_executable
 

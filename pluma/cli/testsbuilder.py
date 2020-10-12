@@ -2,7 +2,7 @@ import subprocess
 import os.path
 import sys
 import shutil
-from pluma.core.baseclasses import Logger, LogLevel
+from pluma.core.baseclasses import Logger
 
 log = Logger()
 
@@ -70,7 +70,8 @@ class TestsBuilder:
                 return os.path.abspath(os.path.join(install_dir, file))
 
         raise TestsBuildError(
-            f'No environment file ({env_file_pattern}) found in the toolchain installation folder ({install_dir})')
+            f'No environment file ({env_file_pattern}) found in the toolchain '
+            f'installation folder ({install_dir})')
 
     @staticmethod
     def build_c_test(target_name, env_file, sources, flags=None, install_dir=None):

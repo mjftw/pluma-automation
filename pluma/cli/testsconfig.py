@@ -1,6 +1,5 @@
 import json
 import os
-from functools import partial
 from pluma.cli.resultsconfig import ResultsConfig
 from typing import List, Union
 

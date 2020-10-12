@@ -25,12 +25,14 @@ class DeviceActionRegistry():
 
         if not issubclass(action_class, DeviceActionBase):
             raise Exception(
-                f'Error trying to register Action class "{action_class.__name__}" which does not inherit DeviceActionBase')
+                f'Error trying to register Action class "{action_class.__name__}" '
+                'which does not inherit DeviceActionBase')
 
         if action_key in cls.action_classes_dict:
             raise Exception(
-                f'Error registering DeviceAction subclass "{action_class}": Action key {action_key} is already'
-                ' registered for {cls.action_classes_dict[action_key].__name__}')
+                f'Error registering DeviceAction subclass "{action_class}": '
+                f'Action key {action_key} is already'
+                f' registered for {cls.action_classes_dict[action_key].__name__}')
 
         cls.action_classes_dict[action_key] = action_class
 
@@ -53,7 +55,8 @@ class DeviceActionRegistry():
 
         if action not in cls.action_classes_dict:
             raise ValueError(
-                f'Invalid device action command "{action}". Supported commands: {cls.all_actions()}')
+                f'Invalid device action command "{action}". '
+                f'Supported commands: {cls.all_actions()}')
 
         aclass = cls.action_class(action)
         if not aclass:
