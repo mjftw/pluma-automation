@@ -4,6 +4,7 @@ import re
 from abc import ABC, abstractmethod
 import inspect
 from copy import copy
+from typing import Iterable, List, Union
 
 from pluma.utils import send_exception_email
 from pluma.core.baseclasses import LogLevel
@@ -19,20 +20,17 @@ class TestRunnerBase(ABC):
         self.continue_on_fail = continue_on_fail if continue_on_fail is not None else False
         self.test_fails = []
 
-        if not isinstance(tests, list):
+        if not isinstance(tests, Iterable):
             tests = [tests]
         self.tests = tests
 
-        self.tasks = TestBase.task_hooks
-
-        self.progress = None
+        self.known_tasks = TestBase.task_hooks
 
         # General purpose data for use globally between tests
         self.data = {}
 
-
     @abstractmethod
-    def _run(self):
+    def _run(self, tests: List[TestBase]) -> bool:
         '''Run the tests and return True or False to indicate whether all tests passed'''
 
     def run(self) -> bool:
@@ -50,7 +48,7 @@ class TestRunnerBase(ABC):
             list(map(str, self.tests))), level=LogLevel.DEBUG)
 
         # Defer the actual test running to classes that inherit this base
-        self._run()
+        self._run(self.tests)
 
         self.board.log("\n== ALL TESTS COMPLETED ==",
                        color='blue', bold=True, level=LogLevel.DEBUG)
@@ -60,7 +58,6 @@ class TestRunnerBase(ABC):
             return False
         else:
             return True
-
 
     def __call__(self):
         return self.run()
@@ -150,49 +147,24 @@ class TestRunnerBase(ABC):
 
         return None if not tests else tests[0]
 
-    def get_tests_with_task(self, task_name):
-        tests = [t for t in self.tests if hasattr(t, task_name)]
-
-        return None if not tests else tests
-
-    def _run_tasks(self, task_names=None, test_names=None):
-        # If task_names not specified, run all tasks
-        if not task_names:
-            task_names = self.tasks
-        if not isinstance(task_names, list):
+    def _run_tasks(self, tests: Union[TestBase, List[TestBase]], task_names: Union[str, List[str]]):
+        if isinstance(task_names, str):
             task_names = [task_names]
 
-        # If test_names not specified, run tasks for all tests
-        if not test_names:
-            test_names = [str(test) for test in self.tests]
-        if not isinstance(test_names, list):
-            test_names = [test_names]
+        if not isinstance(tests, Iterable):
+            tests = [tests]
 
         try:
-            for task_name in task_names:
-                tests_with_task = self.get_tests_with_task(task_name)
-
-                # If no tests have this task, do not attempt to run it
-                if not tests_with_task:
-                    continue
-
-                tests_names_with_task = [str(t) for t in tests_with_task]
-
-                if not tests_names_with_task:
-                    continue
-
-                for test_name in test_names:
-                    self._run_task(task_name, test_name)
+            for test, task in ((test, task)
+                               for task in task_names
+                               for test in tests
+                               if hasattr(test, task)):
+                self._run_task(task, test)
         except AbortTesting:
             self.board.log("\n== TESTING ABORTED EARLY ==",
                            color='red', bold=True)
 
-    def _run_task(self, task_name, test_name):
-        test = self._get_test_by_name(test_name)
-        if not test:
-            self.board.error(f'Cannot run specified test {test_name}'
-                             ' as it is not in test list', TestingException)
-
+    def _run_task(self, task_name, test):
         task_func = getattr(test, task_name, None)
         if not task_func:
             # If test does not have this task, then skip
@@ -202,10 +174,6 @@ class TestRunnerBase(ABC):
 
         # Print test message
         test_message = f'{str(test)} - {task_name}'
-
-        if self.progress is not None:
-            percent_text = f'{int(100 * self.progress)}%'.center(3)
-            test_message = f'[{percent_text}] {test_message}'
 
         column_limit = 75
         if len(test_message) > column_limit:
@@ -232,8 +200,8 @@ class TestRunnerBase(ABC):
                 self.board.log('Testing aborted by task {} - {}: {}'.format(
                     str(test), task_name, str(e)))
                 if (isinstance(e, AbortTestingAndReport) and
-                        'report' in self.tasks):
-                    self._run_task('report', test_name)
+                        'report' in self.known_tasks):
+                    self._run_task('report', test)
                 raise e
 
             abort_testing = not self.continue_on_fail
@@ -268,7 +236,7 @@ class TestRunnerBase(ABC):
             raise AbortTesting(str(exception))
 
     def send_fail_email(self, exception, test_failed, task_failed):
-        subject = 'TestRunner Exception Occured: [{}: {}] [{}]'.format(
+        subject = 'TestRunner Exception Occurred: [{}: {}] [{}]'.format(
             str(test_failed), task_failed, self.board.name)
         body = '''
         <b>Tests:</b> {}<br>
@@ -290,23 +258,19 @@ class TestRunnerBase(ABC):
 class TestRunner(TestRunnerBase):
     '''Run a set of tests sequentially'''
 
-    def _run(self):
+    def _run(self, tests):
         self.board.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
                        level=LogLevel.DEBUG)
 
-        completed = 0
-        total = len(self.tests)
-        for test_name in (map(str, self.tests)):
-            self.progress = completed / total
-            completed += 1
-            for task_name in self.tasks:
-                self._run_tasks(task_name, test_name)
+        for test in tests:
+            for task_name in self.known_tasks:
+                self._run_tasks(test, task_name)
 
 
 class TestRunnerParallel(TestRunnerBase):
     '''Run a set of tests in parallel'''
 
-    def _run(self):
+    def _run(self, tests):
         self.board.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
                        level=LogLevel.DEBUG)
-        self._run_tasks()
+        self._run_tasks(tests, self.known_tasks)
