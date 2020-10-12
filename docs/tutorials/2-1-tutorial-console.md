@@ -244,14 +244,13 @@ All Pluma hardware control classes have a log file, but only the console classes
 Both default to being stored in a temporary file in `/tmp/pluma`, but you can change the logfile locations by setting the attributes on the console instance.
 
 ```python
-console.raw_logfile = './raw_console_data.log'
+console.engine.raw_logfile = './raw_console_data.log'
 console.log_file = './console_control.log'
 ```
 
 If setting a logfile in a non default location, it is useful to clear the logs at the start of your test script as the old data from previous tests is not cleared by default.
 
 ```python
-console.raw_logfile_clear()
 console.log_file_clear()
 ```
 

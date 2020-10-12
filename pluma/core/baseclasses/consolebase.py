@@ -53,9 +53,6 @@ class ConsoleBase(HardwareBase, ABC):
         if not self.is_open:
             raise ConsoleCannotOpenError
 
-    def raw_logfile_clear(self):
-        open(self.raw_logfile, 'w').close()
-
     def read_all(self, preserve_read_buffer: bool = False) -> str:
         '''Read and return all data available on the console'''
         self.require_open()
