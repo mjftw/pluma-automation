@@ -58,11 +58,9 @@ class TestsConfig:
             board=board,
             tests=TestsConfig.create_tests(
                 self.selected_tests(), board),
-            sequential=True,
             email_on_fail=settings.pop('email_on_fail', default=False),
             continue_on_fail=settings.pop(
-                'continue_on_fail',  default=True),
-            skip_tasks=settings.pop('skip_tasks',  default=[])
+                'continue_on_fail',  default=True)
         )
 
         controller = TestController(

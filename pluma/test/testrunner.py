@@ -1,7 +1,7 @@
 import traceback
 import time
 import re
-import os
+from abc import ABC, abstractmethod
 import inspect
 from copy import copy
 
@@ -11,16 +11,12 @@ from pluma.test import TestBase, TestingException, \
     AbortTesting, AbortTestingAndReport
 
 
-class TestRunner():
-    """Runs a set of tests once"""
-
-    def __init__(self, board, tests=None, skip_tasks=None, email_on_fail=True, sequential=False,
-                 failed_bootlogs_dir=None, continue_on_fail=False):
+class TestRunnerBase(ABC):
+    def __init__(self, board, tests=None, email_on_fail=None,
+                 continue_on_fail=None):
         self.board = board
-        self.email_on_fail = email_on_fail
-        self.continue_on_fail = continue_on_fail
-        self.failed_bootlogs_dir = failed_bootlogs_dir or '/tmp/pluma'
-        self.skip_tasks = skip_tasks or []
+        self.email_on_fail = email_on_fail if email_on_fail is not None else False
+        self.continue_on_fail = continue_on_fail if continue_on_fail is not None else False
         self.test_fails = []
 
         if not isinstance(tests, list):
@@ -28,19 +24,43 @@ class TestRunner():
         self.tests = tests
 
         self.tasks = TestBase.task_hooks
-        self.sequential = sequential
 
         self.progress = None
 
         # General purpose data for use globally between tests
         self.data = {}
 
-        # Validate 'skip_tasks'
-        for task_to_skip in self.skip_tasks:
-            if task_to_skip not in self.tasks:
-                raise ValueError(
-                    f'The tasks "{task_to_skip}" in the tasks to skip is not a valid task.'
-                    f'{os.linesep}Valid tasks are: {self.tasks}')
+
+    @abstractmethod
+    def _run(self):
+        '''Run the tests and return True or False to indicate whether all tests passed'''
+
+    def run(self) -> bool:
+        self.board.log('Running tests', bold=True)
+        self.test_fails = []
+
+        # Init data
+        self.data = {}
+
+        # Init test data
+        for test in self.tests:
+            self._init_test_data(test)
+
+        self.board.log("Running tests: {}".format(
+            list(map(str, self.tests))), level=LogLevel.DEBUG)
+
+        # Defer the actual test running to classes that inherit this base
+        self._run()
+
+        self.board.log("\n== ALL TESTS COMPLETED ==",
+                       color='blue', bold=True, level=LogLevel.DEBUG)
+
+        # Check if any tasks failed
+        if self.test_fails:
+            return False
+        else:
+            return True
+
 
     def __call__(self):
         return self.run()
@@ -63,47 +83,6 @@ class TestRunner():
             'settings': test.settings,
             'order': self.tests.index(test)
         }
-
-    def run(self):
-        self.board.log('Running tests', bold=True)
-        self.test_fails = []
-
-        # Init data
-        self.data = {}
-
-        # Init test data
-        for test in self.tests:
-            self._init_test_data(test)
-
-        self.board.log("Running tests: {}".format(
-            list(map(str, self.tests))), level=LogLevel.DEBUG)
-
-        if self.sequential:
-            self.board.log('== TESTING MODE: SEQUENTIAL ==',
-                           color='blue', bold=True, level=LogLevel.DEBUG)
-
-            completed = 0
-            total = len(self.tests)
-            for test_name in (map(str, self.tests)):
-                self.progress = completed / total
-                completed += 1
-                for task_name in self.tasks:
-                    self._run_tasks(task_name, test_name)
-
-            self.progress = None
-        else:
-            self.board.log('== TESTING MODE: PARALLEL ==',
-                           color='blue', bold=True, level=LogLevel.DEBUG)
-            self._run_tasks()
-
-        self.board.log("\n== ALL TESTS COMPLETED ==",
-                       color='blue', bold=True, level=LogLevel.DEBUG)
-
-        # Check if any tasks failed
-        if self.test_fails:
-            return False
-        else:
-            return True
 
     def add_test(self, test, index=None):
         # Check if user accidentally passed in a class inheriting
@@ -200,22 +179,6 @@ class TestRunner():
                 tests_names_with_task = [str(t) for t in tests_with_task]
 
                 if not tests_names_with_task:
-                    continue
-
-                # Check if task should not be run
-                skip_message = f'Skipping task: {task_name}'
-                if "mount" in task_name and not self.board.storage:
-                    self.board.log(skip_message + '. Board does not have storage',
-                                   color='green', bold=True)
-                    continue
-                if ((task_name in ['_board_on_and_validate', '_board_off'])
-                        and not self.board.power):
-                    self.board.log(skip_message + '. Board does '
-                                   'not have power control', color='green', bold=True)
-                    continue
-
-                if task_name in self.skip_tasks:
-                    self.board.log(skip_message, color='green', bold=True)
                     continue
 
                 for test_name in test_names:
@@ -322,3 +285,28 @@ class TestRunner():
             subject=subject,
             prepend_body=body
         )
+
+
+class TestRunner(TestRunnerBase):
+    '''Run a set of tests sequentially'''
+
+    def _run(self):
+        self.board.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
+                       level=LogLevel.DEBUG)
+
+        completed = 0
+        total = len(self.tests)
+        for test_name in (map(str, self.tests)):
+            self.progress = completed / total
+            completed += 1
+            for task_name in self.tasks:
+                self._run_tasks(task_name, test_name)
+
+
+class TestRunnerParallel(TestRunnerBase):
+    '''Run a set of tests in parallel'''
+
+    def _run(self):
+        self.board.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
+                       level=LogLevel.DEBUG)
+        self._run_tasks()
