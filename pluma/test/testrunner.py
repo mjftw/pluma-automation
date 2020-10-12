@@ -14,6 +14,7 @@ from pluma.test import TestBase, TestingException, AbortTesting
 global_logger = Logger()
 
 class TestRunnerBase(ABC):
+    '''Run a set of tests a single time and collect their settings and saved data'''
     def __init__(self, board: Board = None, tests: Iterable[TestBase] = None,
                  email_on_fail: bool = None, continue_on_fail: bool = None):
         self.board = board
@@ -39,6 +40,7 @@ class TestRunnerBase(ABC):
         '''Run the tests'''
 
     def run(self) -> bool:
+        '''Run all tasks for all tests. Returns True if all succes and False otherwise'''
         self.log('Running tests', bold=True)
         self.test_fails = []
 
@@ -80,6 +82,7 @@ class TestRunnerBase(ABC):
         return len(self.tests)
 
     def _init_test_data(self, test: TestBase):
+        '''Initialise the test data. Required for integration with TestController'''
         test.data = {}
         self.data[str(test)] = {
             'tasks': {
@@ -101,6 +104,7 @@ class TestRunnerBase(ABC):
             self.add_test(test)
 
     def add_test(self, test: TestBase):
+        '''Add a test to the test list. Handles tests with same name by appending a number'''
         # Check if user accidentally passed in a class inheriting
         # TestBase, instead of an instance of that class.
         if inspect.isclass(test) and (test is TestBase or issubclass(test, TestBase)):
@@ -148,6 +152,7 @@ class TestRunnerBase(ABC):
         self._tests.append(test)
 
     def rm_test(self, test: TestBase):
+        '''Remove a test from the test list'''
         if test in self.tests:
             self.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
@@ -161,6 +166,7 @@ class TestRunnerBase(ABC):
         return None if not tests else tests[0]
 
     def _run_tasks(self, tests: Union[TestBase, List[TestBase]], task_names: Union[str, List[str]]):
+        '''Run all tasks in task_names on test in tests if the test has a task with that name'''
         if isinstance(task_names, str):
             task_names = [task_names]
 
@@ -174,6 +180,7 @@ class TestRunnerBase(ABC):
             self._run_task(task, test)
 
     def _run_task(self, task_name, test: TestBase):
+        '''Run a single task from a test'''
         task_func = getattr(test, task_name, None)
         if not task_func:
             # If test does not have this task, then skip
@@ -227,6 +234,7 @@ class TestRunnerBase(ABC):
                 self.board.release_log()
 
     def _failed_task_side_effects(self, test: TestBase, task_name: str, exception: Exception):
+        '''Run any side effects for a task failure, such as writing logs or sending emails'''
         failed = {
             'time': time.time(),
             'test': test,
@@ -248,6 +256,7 @@ class TestRunnerBase(ABC):
         self.log(f'Details: {failed}', color='yellow')
 
     def send_fail_email(self, exception: Exception, test_failed: TestBase, task_failed: str):
+        '''Send an email to the default email address explaining the test failure'''
         subject = 'TestRunner Exception Occurred: [{}: {}] [{}]'.format(
             str(test_failed), task_failed, self.board.name if self.board else 'No Board')
         body = '''
