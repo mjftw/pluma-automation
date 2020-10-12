@@ -6,7 +6,7 @@ import inspect
 from copy import copy
 from typing import Iterable, List, Union
 
-from pluma.utils import send_exception_email
+from pluma import utils
 from pluma.core.baseclasses import LogLevel
 from pluma.test import TestBase, TestingException, AbortTesting
 
@@ -249,7 +249,7 @@ class TestRunnerBase(ABC):
             str(test_failed),
             task_failed)
 
-        send_exception_email(
+        utils.send_exception_email(
             exception=exception,
             board=self.board,
             subject=subject,

@@ -162,6 +162,7 @@ def mock_console():
 def mock_board(mock_console):
     mock_board = MagicMock(Board)
     mock_board.console = mock_console
+    mock_board.name = 'mock'
 
     return mock_board
 
