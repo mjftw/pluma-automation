@@ -535,13 +535,13 @@ def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
     assert runner.data == expected_data
 
 
-def test_TestRunner_board_should_be_optional(mock_board):
+def test_TestRunner_board_should_be_optional():
     class MyTest(TestBase):
         def test_body(self):
             pass
 
     runner = TestRunner(
-        tests=MyTest(mock_board)
+        tests=MyTest()
     )
 
     runner.run()
