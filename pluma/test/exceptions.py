@@ -8,7 +8,3 @@ class TaskFailed(TestingException):
 
 class AbortTesting(TestingException):
     pass
-
-
-class AbortTestingAndReport(AbortTesting):
-    pass

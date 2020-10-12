@@ -115,3 +115,53 @@ def test_TestRunnerParallel_should_run_hook_tasks_from_all_tests(mock_board):
     test1.setup.assert_called_once()
     test2.test_body.assert_called_once()
     test3.teardown.assert_called_once()
+
+
+def test_TestRunner_should_run_teardown_if_test_body_raises_exception(mock_board):
+    class MyTest(TestBase):
+        def test_body(self):
+            raise RuntimeError
+
+        def teardown(self):
+            pass
+
+    test = MyTest(mock_board)
+    test.teardown = Mock()
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=test
+    )
+
+    # Not checking for exceptions in this test
+    try:
+        runner.run()
+    except Exception:
+        pass
+
+    test.teardown.assert_called_once()
+
+
+def test_TestRunner_should_not_run_teardown_if_setup_raises_exception(mock_board):
+    class MyTest(TestBase):
+        def setup(self):
+            raise RuntimeError
+
+        def teardown(self):
+            pass
+
+    test = MyTest(mock_board)
+    test.teardown = Mock()
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=test
+    )
+
+    # Not checking for exceptions in this test
+    try:
+        runner.run()
+    except Exception:
+        pass
+
+    test.teardown.assert_not_called()

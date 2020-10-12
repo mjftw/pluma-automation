@@ -8,8 +8,7 @@ from typing import Iterable, List, Union
 
 from pluma.utils import send_exception_email
 from pluma.core.baseclasses import LogLevel
-from pluma.test import TestBase, TestingException, \
-    AbortTesting, AbortTestingAndReport
+from pluma.test import TestBase, TestingException, AbortTesting
 
 
 class TestRunnerBase(ABC):
@@ -163,6 +162,7 @@ class TestRunnerBase(ABC):
         except AbortTesting:
             self.board.log("\n== TESTING ABORTED EARLY ==",
                            color='red', bold=True)
+            raise
 
     def _run_task(self, task_name, test):
         task_func = getattr(test, task_name, None)
@@ -195,13 +195,15 @@ class TestRunnerBase(ABC):
 
             self.board.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
 
+            # Run teardown for test if test_body raises an exception
+            test_teardown_func = getattr(test, 'teardown', None)
+            if test_teardown_func and task_name == 'test_body':
+                test_teardown_func()
+
             # If request to abort testing, do so
             if isinstance(e, AbortTesting):
                 self.board.log('Testing aborted by task {} - {}: {}'.format(
                     str(test), task_name, str(e)))
-                if (isinstance(e, AbortTestingAndReport) and
-                        'report' in self.known_tasks):
-                    self._run_task('report', test)
                 raise e
 
             abort_testing = not self.continue_on_fail
