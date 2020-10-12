@@ -306,7 +306,7 @@ class TestController():
         return settings
 
     def get_test_data(self, test_names=None, fields=None, output_format=None,
-                         settings=None):
+                      settings=None):
         '''Get test data from the global data dictionary.
 
         Args:
@@ -385,7 +385,8 @@ class TestController():
         '''Create a graph of data fields from the test results data'''
         results = list(self.get_test_data(test_names=test_names, fields=fields))
         self.results_plotter.plot(file, results=results, test_names=test_names, fields=fields,
-                                  vs_type=vs_type, title=title, output_format=output_format, config=config)
+                                  vs_type=vs_type, title=title, output_format=output_format,
+                                  config=config)
 
     def run_iteration(self):
         ''' Run all tests in TestRunner '''

@@ -33,7 +33,8 @@ class ExecutableTest(TestBase):
         if self.run_on_host:
             if not self.host_file:
                 raise ValueError(
-                    f'Cannot run an executable for test "{self}" on host that is not present on the host machine')
+                    f'Cannot run an executable for test "{self}" on host that '
+                    'is not present on the host machine')
         else:
             if not self.board.console:
                 raise ValueError(
@@ -43,8 +44,8 @@ class ExecutableTest(TestBase):
 
             if not self.board.console.support_file_copy():
                 raise ValueError(
-                    f'The console used ({self.board.console}) does not support file copy. Use a different console'
-                    ' like SSH, or run the test on the host')
+                    f'The console used ({self.board.console}) does not support file copy. '
+                    'Use a different console like SSH, or run the test on the host')
 
     def test_body(self):
         filepath = ''

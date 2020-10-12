@@ -400,7 +400,8 @@ class Hub(HardwareBase, USB):
         for device in self.downstream:
             if device not in categorised:
                 matching = [c for c in categorised
-                            if c['usbpath'] == device['usbpath'] and c['serial'] == device['serial']]
+                            if (c['usbpath'] == device['usbpath'] and
+                                c['serial'] == device['serial'])]
                 if not matching:
                     uncategorised.append(device)
 

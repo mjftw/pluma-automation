@@ -120,8 +120,8 @@ def filter_versions(versions, v_filter):
         else:
             cond_pattern = r'^[!\-+][0-9]*$'
             if not re.match(cond_pattern, v_cond):
-                raise GitInvalidVersionSpecifierError('Invalid condition [{}] in filter [{}]'.format(
-                    v_cond, v_filter))
+                raise GitInvalidVersionSpecifierError(f'Invalid condition [{v_cond}] '
+                                                      f'in filter [{v_filter}]')
 
             # 'x.x.x !': match all versions except x.x.x
             if v_cond == '!' and v_ref in versions:
