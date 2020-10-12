@@ -1,5 +1,5 @@
 from pluma.test.testrunner import TestRunnerParallel
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 from pluma.test import TestRunner, TestBase
 
 
@@ -501,7 +501,6 @@ def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
 
 
 def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
-    # This test checks a bit much, but at least ensures data structure matches
     class MyTest(TestBase):
         def setup(self):
             pass
@@ -533,3 +532,15 @@ def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
     runner.run()
 
     assert runner.data == expected_data
+
+
+def test_TestRunner_board_should_be_optional(mock_board):
+    class MyTest(TestBase):
+        def test_body(self):
+            pass
+
+    runner = TestRunner(
+        tests=MyTest(mock_board)
+    )
+
+    runner.run()

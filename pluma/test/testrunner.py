@@ -7,17 +7,20 @@ from copy import copy
 from typing import Iterable, List, Union
 
 from pluma import utils
-from pluma.core.baseclasses import LogLevel
+from pluma.core.baseclasses import LogLevel, Logger
 from pluma.test import TestBase, TestingException, AbortTesting
 
+global_logger = Logger()
 
 class TestRunnerBase(ABC):
-    def __init__(self, board, tests=None, email_on_fail=None,
-                 continue_on_fail=None):
+    def __init__(self, board=None, tests=None, email_on_fail=None, continue_on_fail=None):
         self.board = board
         self.email_on_fail = email_on_fail if email_on_fail is not None else False
         self.continue_on_fail = continue_on_fail if continue_on_fail is not None else False
         self.test_fails = []
+
+        # Use global logger if no board available
+        self.log = self.board.log if board else global_logger.log
 
         self._tests = []
         if not isinstance(tests, Iterable):
@@ -34,7 +37,7 @@ class TestRunnerBase(ABC):
         '''Run the tests'''
 
     def run(self) -> bool:
-        self.board.log('Running tests', bold=True)
+        self.log('Running tests', bold=True)
         self.test_fails = []
 
         # Init data
@@ -44,7 +47,7 @@ class TestRunnerBase(ABC):
         for test in self.tests:
             self._init_test_data(test)
 
-        self.board.log("Running tests: {}".format(
+        self.log("Running tests: {}".format(
             list(map(str, self.tests))), level=LogLevel.DEBUG)
 
         try:
@@ -53,9 +56,9 @@ class TestRunnerBase(ABC):
 
         # Prevent exceptions from leaving test runner
         except Exception:
-            self.board.log("\n== TESTING ABORTED EARLY ==", color='red', bold=True)
+            self.log("\n== TESTING ABORTED EARLY ==", color='red', bold=True)
         else:
-            self.board.log("\n== ALL TESTS COMPLETED ==", color='blue', bold=True,
+            self.log("\n== ALL TESTS COMPLETED ==", color='blue', bold=True,
                            level=LogLevel.DEBUG)
 
         # Check if any tasks failed
@@ -128,7 +131,7 @@ class TestRunnerBase(ABC):
             old_name = test._test_name
             test._test_name = f'{stripped_name}_{i}'
 
-            self.board.log(
+            self.log(
                 'Test [{}] already added. Renaming to [{}]'.format(
                     old_name, test._test_name))
 
@@ -139,12 +142,12 @@ class TestRunnerBase(ABC):
 
         test = copy(test)
 
-        self.board.log("Appending test: {}".format(str(test)))
+        self.log("Appending test: {}".format(str(test)))
         self._tests.append(test)
 
     def rm_test(self, test):
         if test in self.tests:
-            self.board.log("Removed test: {}".format(str(test)))
+            self.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
     def _get_test_by_name(self, test_name):
@@ -183,9 +186,10 @@ class TestRunnerBase(ABC):
         if len(test_message) > column_limit:
             test_message = f'{test_message[:column_limit-3]}...'
 
-        self.board.log(test_message.ljust(column_limit) + ' ',
+        self.log(test_message.ljust(column_limit) + ' ',
                        level=LogLevel.IMPORTANT, newline=False)
-        self.board.hold_log()
+        if self.board:
+            self.board.hold_log()
 
         try:
             task_func()
@@ -197,7 +201,7 @@ class TestRunnerBase(ABC):
         except Exception as e:
             self.data[str(test)]['tasks']['failed'][task_name] = str(e)
 
-            self.board.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
+            self.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
 
             # Run teardown for test if test_body raises an exception
             if hasattr(test, 'teardown') and task_name == 'test_body':
@@ -205,7 +209,7 @@ class TestRunnerBase(ABC):
 
             # If request to abort testing, do so but don't run side effects and always reraise
             if isinstance(e, AbortTesting):
-                self.board.log('Testing aborted by task {} - {}: {}'.format(
+                self.log('Testing aborted by task {} - {}: {}'.format(
                     str(test), task_name, str(e)))
                 raise e
 
@@ -215,9 +219,10 @@ class TestRunnerBase(ABC):
                 raise e
 
         else:
-            self.board.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
+            self.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
         finally:
-            self.board.release_log()
+            if self.board:
+                self.board.release_log()
 
     def _failed_task_side_effects(self, test, task_name, exception):
         failed = {
@@ -236,13 +241,13 @@ class TestRunnerBase(ABC):
         if not error:
             error = exception.__class__.__name__
 
-        self.board.log(f'Task failed: {error}', level=LogLevel.ERROR,
+        self.log(f'Task failed: {error}', level=LogLevel.ERROR,
                        bold=True, color='red')
-        self.board.log(f'Details: {failed}', color='yellow')
+        self.log(f'Details: {failed}', color='yellow')
 
     def send_fail_email(self, exception, test_failed, task_failed):
         subject = 'TestRunner Exception Occurred: [{}: {}] [{}]'.format(
-            str(test_failed), task_failed, self.board.name)
+            str(test_failed), task_failed, self.board.name if self.board else 'No Board')
         body = '''
         <b>Tests:</b> {}<br>
         <b>Test Failed:</b> {}<br>
@@ -264,7 +269,7 @@ class TestRunner(TestRunnerBase):
     '''Run a set of tests sequentially'''
 
     def _run(self, tests):
-        self.board.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
+        self.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
                        level=LogLevel.DEBUG)
 
         for test in tests:
@@ -276,6 +281,6 @@ class TestRunnerParallel(TestRunnerBase):
     '''Run a set of tests in parallel'''
 
     def _run(self, tests):
-        self.board.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
+        self.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
                        level=LogLevel.DEBUG)
         self._run_tasks(tests, self.known_tasks)
