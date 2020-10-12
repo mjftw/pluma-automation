@@ -30,6 +30,8 @@ class TestRunner():
         self.tasks = TestBase.task_hooks
         self.sequential = sequential
 
+        self.progress = None
+
         # General purpose data for use globally between tests
         self.data = {}
 
