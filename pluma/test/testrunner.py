@@ -1,3 +1,4 @@
+from pluma.core.board import Board
 import traceback
 import time
 import re
@@ -13,7 +14,8 @@ from pluma.test import TestBase, TestingException, AbortTesting
 global_logger = Logger()
 
 class TestRunnerBase(ABC):
-    def __init__(self, board=None, tests=None, email_on_fail=None, continue_on_fail=None):
+    def __init__(self, board: Board = None, tests: Iterable[TestBase] = None,
+                 email_on_fail: bool = None, continue_on_fail: bool = None):
         self.board = board
         self.email_on_fail = email_on_fail if email_on_fail is not None else False
         self.continue_on_fail = continue_on_fail if continue_on_fail is not None else False
@@ -33,7 +35,7 @@ class TestRunnerBase(ABC):
         self.data = {}
 
     @abstractmethod
-    def _run(self, tests: List[TestBase]) -> bool:
+    def _run(self, tests: Iterable[TestBase]) -> bool:
         '''Run the tests'''
 
     def run(self) -> bool:
@@ -77,7 +79,7 @@ class TestRunnerBase(ABC):
     def num_tests(self):
         return len(self.tests)
 
-    def _init_test_data(self, test):
+    def _init_test_data(self, test: TestBase):
         test.data = {}
         self.data[str(test)] = {
             'tasks': {
@@ -98,7 +100,7 @@ class TestRunnerBase(ABC):
         for test in tests:
             self.add_test(test)
 
-    def add_test(self, test):
+    def add_test(self, test: TestBase):
         # Check if user accidentally passed in a class inheriting
         # TestBase, instead of an instance of that class.
         if inspect.isclass(test) and (test is TestBase or issubclass(test, TestBase)):
@@ -145,12 +147,12 @@ class TestRunnerBase(ABC):
         self.log("Appending test: {}".format(str(test)))
         self._tests.append(test)
 
-    def rm_test(self, test):
+    def rm_test(self, test: TestBase):
         if test in self.tests:
             self.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
-    def _get_test_by_name(self, test_name):
+    def _get_test_by_name(self, test_name: str) -> TestBase:
         tests = [t for t in self.tests if str(t) == test_name]
         if len(tests) > 1:
             raise TestingException('Found multiple tests with name {}'.format(
@@ -171,7 +173,7 @@ class TestRunnerBase(ABC):
                            if hasattr(test, task)):
             self._run_task(task, test)
 
-    def _run_task(self, task_name, test):
+    def _run_task(self, task_name, test: TestBase):
         task_func = getattr(test, task_name, None)
         if not task_func:
             # If test does not have this task, then skip
@@ -224,7 +226,7 @@ class TestRunnerBase(ABC):
             if self.board:
                 self.board.release_log()
 
-    def _failed_task_side_effects(self, test, task_name, exception):
+    def _failed_task_side_effects(self, test: TestBase, task_name: str, exception: Exception):
         failed = {
             'time': time.time(),
             'test': test,
@@ -245,7 +247,7 @@ class TestRunnerBase(ABC):
                        bold=True, color='red')
         self.log(f'Details: {failed}', color='yellow')
 
-    def send_fail_email(self, exception, test_failed, task_failed):
+    def send_fail_email(self, exception: Exception, test_failed: TestBase, task_failed: str):
         subject = 'TestRunner Exception Occurred: [{}: {}] [{}]'.format(
             str(test_failed), task_failed, self.board.name if self.board else 'No Board')
         body = '''
@@ -268,7 +270,7 @@ class TestRunnerBase(ABC):
 class TestRunner(TestRunnerBase):
     '''Run a set of tests sequentially'''
 
-    def _run(self, tests):
+    def _run(self, tests: Iterable[TestBase]):
         self.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
                        level=LogLevel.DEBUG)
 
@@ -280,7 +282,7 @@ class TestRunner(TestRunnerBase):
 class TestRunnerParallel(TestRunnerBase):
     '''Run a set of tests in parallel'''
 
-    def _run(self, tests):
+    def _run(self, tests: Iterable[TestBase]):
         self.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
                        level=LogLevel.DEBUG)
         self._run_tasks(tests, self.known_tasks)
