@@ -19,6 +19,7 @@ class TestRunnerBase(ABC):
         self.continue_on_fail = continue_on_fail if continue_on_fail is not None else False
         self.test_fails = []
 
+        self._tests = []
         if not isinstance(tests, Iterable):
             tests = [tests]
         self.tests = tests
@@ -30,7 +31,7 @@ class TestRunnerBase(ABC):
 
     @abstractmethod
     def _run(self, tests: List[TestBase]) -> bool:
-        '''Run the tests and return True or False to indicate whether all tests passed'''
+        '''Run the tests'''
 
     def run(self) -> bool:
         self.board.log('Running tests', bold=True)
@@ -85,7 +86,16 @@ class TestRunnerBase(ABC):
             'order': self.tests.index(test)
         }
 
-    def add_test(self, test, index=None):
+    @property
+    def tests(self):
+        return self._tests
+
+    @tests.setter
+    def tests(self, tests: List[TestBase]):
+        for test in tests:
+            self.add_test(test)
+
+    def add_test(self, test):
         # Check if user accidentally passed in a class inheriting
         # TestBase, instead of an instance of that class.
         if inspect.isclass(test) and (test is TestBase or issubclass(test, TestBase)):
@@ -109,8 +119,7 @@ class TestRunnerBase(ABC):
 
         max_duplicate_tests = 500
         original_name = test._test_name
-        stripped_name = re.sub(
-            r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
+        stripped_name = re.sub(r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
 
         for i in range(1, max_duplicate_tests+1):
             if not self._get_test_by_name(str(test._test_name)):
@@ -130,13 +139,8 @@ class TestRunnerBase(ABC):
 
         test = copy(test)
 
-        if index is None:
-            self.board.log("Appending test: {}".format(str(test)))
-            self.tests.append(test)
-        else:
-            self.board.log("Inserting test at position {}: {} ".format(
-                index, str(test)))
-            self.tests.insert(index, test)
+        self.board.log("Appending test: {}".format(str(test)))
+        self._tests.append(test)
 
     def rm_test(self, test):
         if test in self.tests:
@@ -196,9 +200,8 @@ class TestRunnerBase(ABC):
             self.board.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
 
             # Run teardown for test if test_body raises an exception
-            test_teardown_func = getattr(test, 'teardown', None)
-            if test_teardown_func and task_name == 'test_body':
-                test_teardown_func()
+            if hasattr(test, 'teardown') and task_name == 'test_body':
+                self._run_task('teardown', test)
 
             # If request to abort testing, do so but don't run side effects and always reraise
             if isinstance(e, AbortTesting):

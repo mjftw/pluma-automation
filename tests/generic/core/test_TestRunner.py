@@ -8,7 +8,8 @@ def test_TestRunner_should_run_setup_task_if_present(mock_board):
         def setup(self):
             pass
 
-    test = MagicMock(MyTest(mock_board))
+    test = MyTest(mock_board)
+    test.setup = Mock(test.setup)
 
     TestRunner(
         board=mock_board,
@@ -23,7 +24,8 @@ def test_TestRunner_should_run_test_body_task_if_present(mock_board):
         def test_body(self):
             pass
 
-    test = MagicMock(MyTest(mock_board))
+    test = MyTest(mock_board)
+    test.test_body = Mock(test.test_body)
 
     TestRunner(
         board=mock_board,
@@ -38,7 +40,8 @@ def test_TestRunner_should_run_teardown_task_if_present(mock_board):
         def teardown(self):
             pass
 
-    test = MagicMock(MyTest(mock_board))
+    test = MyTest(mock_board)
+    test.teardown = Mock(test.teardown)
 
     TestRunner(
         board=mock_board,
@@ -53,7 +56,8 @@ def test_TestRunner_should_not_non_hook_functions(mock_board):
         def foobar(self):
             pass
 
-    test = MagicMock(MyTest(mock_board))
+    test = MyTest(mock_board)
+    test.foobar = Mock(test.foobar)
 
     TestRunner(
         board=mock_board,
@@ -76,9 +80,14 @@ def test_TestRunner_should_run_hook_tasks_from_all_tests(mock_board):
         def teardown(self):
             pass
 
-    test1 = MagicMock(MyTest1(mock_board))
-    test2 = MagicMock(MyTest2(mock_board))
-    test3 = MagicMock(MyTest3(mock_board))
+    test1 = MyTest1(mock_board)
+    test1.setup = Mock(test1.setup)
+
+    test2 = MyTest2(mock_board)
+    test2.test_body = Mock(test2.test_body)
+
+    test3 = MyTest3(mock_board)
+    test3.teardown = Mock(test3.teardown)
 
     TestRunner(
         board=mock_board,
@@ -103,9 +112,14 @@ def test_TestRunnerParallel_should_run_hook_tasks_from_all_tests(mock_board):
         def teardown(self):
             pass
 
-    test1 = MagicMock(MyTest1(mock_board))
-    test2 = MagicMock(MyTest2(mock_board))
-    test3 = MagicMock(MyTest3(mock_board))
+    test1 = MyTest1(mock_board)
+    test1.setup = Mock(test1.setup)
+
+    test2 = MyTest2(mock_board)
+    test2.test_body = Mock(test2.test_body)
+
+    test3 = MyTest3(mock_board)
+    test3.teardown = Mock(test3.teardown)
 
     TestRunnerParallel(
         board=mock_board,
@@ -186,7 +200,8 @@ def test_TestRunner_should_not_run_more_tests_if_failure_and_no_continue_on_fail
             pass
 
     test1 = MyTest1(mock_board)
-    test2 = MagicMock(MyTest2(mock_board))
+    test2 = MyTest2(mock_board)
+    test2.test_body = Mock(test2.test_body)
 
     TestRunner(
         board=mock_board,
@@ -207,7 +222,8 @@ def test_TestRunner_should_run_more_tests_if_failure_but_continue_on_fail(mock_b
             pass
 
     test1 = MyTest1(mock_board)
-    test2 = MagicMock(MyTest2(mock_board))
+    test2 = MyTest2(mock_board)
+    test2.test_body = Mock(test2.test_body)
 
     TestRunner(
         board=mock_board,
@@ -282,6 +298,230 @@ def test_TestRunner_should_have_expected_data_single_test(mock_board):
             'tasks': {
                 'failed': {},
                 'ran': ['test_body', 'teardown']}
+        }
+    }
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=MyTest(mock_board)
+    )
+
+    runner.run()
+
+    assert runner.data == expected_data
+
+
+def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_board):
+    # This test checks a bit much, but at least ensures data structure matches
+    class MyTest(TestBase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.settings['hello'] = 'world'
+
+        def test_body(self):
+            self.save_data({'foo': 'bar'})
+
+        def teardown(self):
+            pass
+
+        def random_func_not_hook(self):
+            pass
+
+    expected_data = {
+        'test_TestRunner.MyTest': {
+            'data': {
+                'foo': 'bar'
+            },
+            'order': 0,
+            'settings': {
+                'hello': 'world'
+            },
+            'tasks': {
+                'failed': {},
+                'ran': ['test_body', 'teardown']}
+        },
+        'test_TestRunner.MyTest_1': {
+            'data': {
+                'foo': 'bar'
+            },
+            'order': 1,
+            'settings': {
+                'hello': 'world'
+            },
+            'tasks': {
+                'failed': {},
+                'ran': ['test_body', 'teardown']}
+        }
+    }
+
+    test1 = MyTest(mock_board)
+    test2 = MyTest(mock_board)
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=[test1, test2]
+    )
+
+    runner.run()
+
+    assert runner.data == expected_data
+
+
+def test_TestRunner_should_have_expected_data_multiple_tests_different_class(mock_board):
+    class MyFirstTest(TestBase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.settings['hello'] = 'world'
+
+        def test_body(self):
+            self.save_data({'foo': 'bar'})
+
+        def teardown(self):
+            pass
+
+    class MySecondTest(TestBase):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.settings['fizz'] = 'buzz'
+
+        def setup(self):
+            pass
+
+        def test_body(self):
+            self.save_data(the_answer=42, the_question='Ask again in ten million years')
+
+    expected_data = {
+        'test_TestRunner.MyFirstTest': {
+            'data': {
+                'foo': 'bar'
+            },
+            'order': 0,
+            'settings': {
+                'hello': 'world'
+            },
+            'tasks': {
+                'failed': {},
+                'ran': ['test_body', 'teardown']}
+        },
+        'test_TestRunner.MySecondTest': {
+            'data': {
+                'the_answer': 42,
+                'the_question': 'Ask again in ten million years'
+            },
+            'order': 1,
+            'settings': {
+                'fizz': 'buzz'
+            },
+            'tasks': {
+                'failed': {},
+                'ran': ['setup', 'test_body']}
+        }
+    }
+
+    test1 = MyFirstTest(mock_board)
+    test2 = MySecondTest(mock_board)
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=[test1, test2]
+    )
+
+    runner.run()
+
+    assert runner.data == expected_data
+
+
+def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(mock_board):
+    class MyTest(TestBase):
+        def setup(self):
+            pass
+
+        def test_body(self):
+            raise Exception('Foobar')
+
+        def teardown(self):
+            raise Exception('Baz')
+
+    expected_data = {
+        'test_TestRunner.MyTest': {
+            'data': {},
+            'order': 0,
+            'settings': {},
+            'tasks': {
+                'failed': {
+                    'test_body': 'Foobar',
+                    'teardown': 'Baz'
+                },
+                'ran': ['setup', 'test_body', 'teardown']}
+        }
+    }
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=MyTest(mock_board)
+    )
+
+    runner.run()
+
+    assert runner.data == expected_data
+
+
+def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
+    class MyTest(TestBase):
+        def setup(self):
+            raise Exception('Hello')
+
+        def test_body(self):
+            pass
+
+        def teardown(self):
+            pass
+
+    expected_data = {
+        'test_TestRunner.MyTest': {
+            'data': {},
+            'order': 0,
+            'settings': {},
+            'tasks': {
+                'failed': {
+                    'setup': 'Hello'
+                },
+                'ran': ['setup']}
+        }
+    }
+
+    runner = TestRunner(
+        board=mock_board,
+        tests=MyTest(mock_board)
+    )
+
+    runner.run()
+
+    assert runner.data == expected_data
+
+
+def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
+    # This test checks a bit much, but at least ensures data structure matches
+    class MyTest(TestBase):
+        def setup(self):
+            pass
+
+        def test_body(self):
+            raise Exception('Foobar')
+
+        def teardown(self):
+            pass
+
+    expected_data = {
+        'test_TestRunner.MyTest': {
+            'data': {},
+            'order': 0,
+            'settings': {},
+            'tasks': {
+                'failed': {
+                    'test_body': 'Foobar'
+                },
+                'ran': ['setup', 'test_body', 'teardown']}
         }
     }
 
