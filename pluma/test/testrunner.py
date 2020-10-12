@@ -46,11 +46,16 @@ class TestRunnerBase(ABC):
         self.board.log("Running tests: {}".format(
             list(map(str, self.tests))), level=LogLevel.DEBUG)
 
-        # Defer the actual test running to classes that inherit this base
-        self._run(self.tests)
+        try:
+            # Defer the actual test running to classes that inherit this base
+            self._run(self.tests)
 
-        self.board.log("\n== ALL TESTS COMPLETED ==",
-                       color='blue', bold=True, level=LogLevel.DEBUG)
+        # Prevent exceptions from leaving test runner
+        except Exception:
+            self.board.log("\n== TESTING ABORTED EARLY ==", color='red', bold=True)
+        else:
+            self.board.log("\n== ALL TESTS COMPLETED ==", color='blue', bold=True,
+                           level=LogLevel.DEBUG)
 
         # Check if any tasks failed
         if self.test_fails:
@@ -153,16 +158,11 @@ class TestRunnerBase(ABC):
         if not isinstance(tests, Iterable):
             tests = [tests]
 
-        try:
-            for test, task in ((test, task)
-                               for task in task_names
-                               for test in tests
-                               if hasattr(test, task)):
-                self._run_task(task, test)
-        except AbortTesting:
-            self.board.log("\n== TESTING ABORTED EARLY ==",
-                           color='red', bold=True)
-            raise
+        for test, task in ((test, task)
+                           for task in task_names
+                           for test in tests
+                           if hasattr(test, task)):
+            self._run_task(task, test)
 
     def _run_task(self, task_name, test):
         task_func = getattr(test, task_name, None)
@@ -200,20 +200,23 @@ class TestRunnerBase(ABC):
             if test_teardown_func and task_name == 'test_body':
                 test_teardown_func()
 
-            # If request to abort testing, do so
+            # If request to abort testing, do so but don't run side effects and always reraise
             if isinstance(e, AbortTesting):
                 self.board.log('Testing aborted by task {} - {}: {}'.format(
                     str(test), task_name, str(e)))
                 raise e
 
-            abort_testing = not self.continue_on_fail
-            self._handle_failed_task(test, task_name, e, abort_testing)
+            self._failed_task_side_effects(test, task_name, e)
+
+            if not self.continue_on_fail:
+                raise e
+
         else:
             self.board.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
         finally:
             self.board.release_log()
 
-    def _handle_failed_task(self, test, task_name, exception, abort=True):
+    def _failed_task_side_effects(self, test, task_name, exception):
         failed = {
             'time': time.time(),
             'test': test,
@@ -233,9 +236,6 @@ class TestRunnerBase(ABC):
         self.board.log(f'Task failed: {error}', level=LogLevel.ERROR,
                        bold=True, color='red')
         self.board.log(f'Details: {failed}', color='yellow')
-
-        if abort:
-            raise AbortTesting(str(exception))
 
     def send_fail_email(self, exception, test_failed, task_failed):
         subject = 'TestRunner Exception Occurred: [{}: {}] [{}]'.format(
