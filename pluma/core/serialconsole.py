@@ -63,7 +63,7 @@ class SerialConsole(ConsoleBase):
         self.log('Starting interactive console')
         print(f'Press {exit_char} to exit')
 
-        com = self._logging_Nanocom(self.raw_logfile, self._ser,
+        com = self._logging_Nanocom(self.engine.raw_logfile, self._ser,
                                     exit_character=exit_char)
 
         com.start()
