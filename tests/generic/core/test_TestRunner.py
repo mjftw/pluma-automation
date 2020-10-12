@@ -1,3 +1,4 @@
+from subprocess import run
 from pluma.test.testrunner import TestRunnerParallel
 from unittest.mock import Mock, patch
 from pluma.test import TestRunner, TestBase
@@ -544,3 +545,22 @@ def test_TestRunner_board_should_be_optional(mock_board):
     )
 
     runner.run()
+
+
+def test_TestRunner_rm_test_should_remove_test(mock_board):
+    class MyTest1(TestBase):
+        def test_body(self):
+            pass
+
+    class MyTest2(TestBase):
+        def test_body(self):
+            pass
+
+    runner = TestRunner(
+        tests=[MyTest1(mock_board), MyTest2(mock_board)]
+    )
+
+    test = runner.tests[0]
+    runner.rm_test(test)
+
+    assert test not in runner.tests
