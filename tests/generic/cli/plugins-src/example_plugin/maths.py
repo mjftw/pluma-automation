@@ -7,7 +7,7 @@ class Maths(TestBase):
         TestBase.__init__(self, board)
         self.x = x
 
-    def prepare(self):
+    def test_body(self):
         self.save_data({
             'x_square': math.pow(self.x, 2),
             'sqrt_x': math.sqrt(self.x),

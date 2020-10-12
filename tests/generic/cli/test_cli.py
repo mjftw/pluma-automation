@@ -179,7 +179,7 @@ def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, 
         "example_plugin.maths.Maths": {
             "tasks": {
                 "ran": [
-                    "prepare"
+                    "test_body"
                 ],
                 "failed": {}
             },

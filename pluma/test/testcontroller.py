@@ -317,7 +317,6 @@ class TestController():
                 E.g.
                     >>> test_names=[MyTest.*, Test2]
                 Default: match all test names.
-                Tip: test_names='^(?!TestCore).*$' will filter out TestCore.
             fields (list(str)): A list of the names of data fields to extract.
                 Default: all fields are returned.
             settings (dict): Optional. Specify a dict of

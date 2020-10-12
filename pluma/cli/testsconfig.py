@@ -63,9 +63,7 @@ class TestsConfig:
             email_on_fail=settings.pop('email_on_fail', default=False),
             continue_on_fail=settings.pop(
                 'continue_on_fail',  default=True),
-            skip_tasks=settings.pop('skip_tasks',  default=[]),
-            use_testcore=settings.pop(
-                'board_test_sequence', default=False)
+            skip_tasks=settings.pop('skip_tasks',  default=[])
         )
 
         controller = TestController(

@@ -4,6 +4,8 @@ from pluma.core import Board
 class TestBase():
     """Base class for tests"""
 
+    task_hooks = ['setup', 'test_body', 'teardown']
+
     def __init__(self, board: Board, test_name_suffix: str = None):
         """Construct a TestBase with a board, and test suffix"""
         self.board = board

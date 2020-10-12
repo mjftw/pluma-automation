@@ -7,17 +7,15 @@ from copy import copy
 
 from pluma.utils import send_exception_email
 from pluma.core.baseclasses import LogLevel
-from pluma.test import TestCore, TestBase, TestingException, \
+from pluma.test import TestBase, TestingException, \
     AbortTesting, AbortTestingAndReport
 
 
 class TestRunner():
     """Runs a set of tests once"""
 
-    def __init__(self, board, tests=None,
-                 skip_tasks=None, email_on_fail=True, use_testcore=True,
-                 sequential=False, failed_bootlogs_dir=None,
-                 continue_on_fail=False):
+    def __init__(self, board, tests=None, skip_tasks=None, email_on_fail=True, sequential=False,
+                 failed_bootlogs_dir=None, continue_on_fail=False):
         self.board = board
         self.email_on_fail = email_on_fail
         self.continue_on_fail = continue_on_fail
@@ -29,8 +27,7 @@ class TestRunner():
             tests = [tests]
         self.tests = tests
 
-        self.tasks = TestCore.tasks
-        self.use_testcore = use_testcore
+        self.tasks = TestBase.task_hooks
         self.sequential = sequential
 
         # General purpose data for use globally between tests
@@ -72,11 +69,6 @@ class TestRunner():
         # Init data
         self.data = {}
 
-        # Add TestCore to run standard testing sequence of boots & mounts etc.
-        if (self.use_testcore and "TestCore" not in
-                (str(t) for t in self.tests)):
-            self.add_test(TestCore(self.board, self.failed_bootlogs_dir), 0)
-
         # Init test data
         for test in self.tests:
             self._init_test_data(test)
@@ -90,18 +82,11 @@ class TestRunner():
 
             completed = 0
             total = len(self.tests)
-            for test_name in (str(test) for test in self.tests
-                              if str(test) != "TestCore"):
+            for test_name in (map(str, self.tests)):
                 self.progress = completed / total
                 completed += 1
                 for task_name in self.tasks:
-                    # Run TestCore tasks for every test
-                    tests_to_run = []
-                    if self.use_testcore:
-                        tests_to_run.append("TestCore")
-                    tests_to_run.append(test_name)
-
-                    self._run_tasks(task_name, tests_to_run)
+                    self._run_tasks(task_name, test_name)
 
             self.progress = None
         else:
@@ -212,11 +197,6 @@ class TestRunner():
 
                 tests_names_with_task = [str(t) for t in tests_with_task]
 
-                # If only TestCore has task, and it is not an action
-                #   (starts with '_'), do not run this task
-                if ('TestCore' in tests_names_with_task and
-                        not task_name.startswith('_')):
-                    tests_names_with_task.remove('TestCore')
                 if not tests_names_with_task:
                     continue
 
@@ -255,21 +235,20 @@ class TestRunner():
 
         self.data[str(test)]['tasks']['ran'].append(task_name)
 
-        print_test = test.__class__ != TestCore
-        if print_test:
-            test_message = f'{str(test)} - {task_name}'
+        # Print test message
+        test_message = f'{str(test)} - {task_name}'
 
-            if self.progress is not None:
-                percent_text = f'{int(100 * self.progress)}%'.center(3)
-                test_message = f'[{percent_text}] {test_message}'
+        if self.progress is not None:
+            percent_text = f'{int(100 * self.progress)}%'.center(3)
+            test_message = f'[{percent_text}] {test_message}'
 
-            column_limit = 75
-            if len(test_message) > column_limit:
-                test_message = f'{test_message[:column_limit-3]}...'
+        column_limit = 75
+        if len(test_message) > column_limit:
+            test_message = f'{test_message[:column_limit-3]}...'
 
-            self.board.log(test_message.ljust(column_limit) + ' ',
-                           level=LogLevel.IMPORTANT, newline=False)
-            self.board.hold_log()
+        self.board.log(test_message.ljust(column_limit) + ' ',
+                       level=LogLevel.IMPORTANT, newline=False)
+        self.board.hold_log()
 
         try:
             task_func()
@@ -281,9 +260,7 @@ class TestRunner():
         except Exception as e:
             self.data[str(test)]['tasks']['failed'][task_name] = str(e)
 
-            if print_test:
-                self.board.log('FAIL', color='red',
-                               level=LogLevel.IMPORTANT, bypass_hold=True)
+            self.board.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
 
             # If request to abort testing, do so
             if isinstance(e, AbortTesting):
@@ -297,12 +274,9 @@ class TestRunner():
             abort_testing = not self.continue_on_fail
             self._handle_failed_task(test, task_name, e, abort_testing)
         else:
-            if print_test:
-                self.board.log('PASS', color='green',
-                               level=LogLevel.IMPORTANT, bypass_hold=True)
+            self.board.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
         finally:
-            if print_test:
-                self.board.release_log()
+            self.board.release_log()
 
     def _handle_failed_task(self, test, task_name, exception, abort=True):
         failed = {
