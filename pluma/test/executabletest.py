@@ -2,7 +2,8 @@ import os
 import string
 import random
 
-from pluma.test import TestBase, TaskFailed, CommandRunner
+from pluma.test import TestBase, CommandRunner
+from pluma.core.baseclasses import ConsoleBase
 from pluma import HostConsole
 
 
@@ -36,16 +37,19 @@ class ExecutableTest(TestBase):
                     f'Cannot run an executable for test "{self}" on host that '
                     'is not present on the host machine')
         else:
-            if not self.board.console:
-                raise ValueError(
-                    f'Cannot run executable test "{self}" on target: no console'
-                    ' was defined. Define a console in "pluma-target.yml", or use '
-                    ' "run_on_host" test attribute to run on the host instead.')
+            self.check_console_supports_copy(self.board.console)
 
-            if not self.board.console.support_file_copy():
-                raise ValueError(
-                    f'The console used ({self.board.console}) does not support file copy. '
-                    'Use a different console like SSH, or run the test on the host')
+    def check_console_supports_copy(self, console: ConsoleBase):
+        if not console:
+            raise ValueError(
+                f'Cannot run executable test "{self}" on target: no console'
+                ' was defined or set. Define a console in "pluma-target.yml", or use '
+                ' "run_on_host" test attribute to run on the host instead.')
+
+        if not console.support_file_copy:
+            raise ValueError(
+                f'The console used ({console}) does not support file copy. '
+                'Use a different console like SSH, or run the test on the host')
 
     def test_body(self):
         filepath = ''
@@ -56,20 +60,13 @@ class ExecutableTest(TestBase):
             filepath = self.executable_file
         else:
             console = self.board.console
+
             if self.host_file:
-                temp_folder = self.random_folder_name()
-                CommandRunner.run(test_name=self._test_name, command=f'mkdir {temp_folder}',
-                                  console=console, timeout=self.timeout)
-                destination = os.path.join(
-                    temp_folder, os.path.basename(self.executable_file))
-                console.copy_to_target(self.executable_file, destination)
-                filepath = destination
+                self.check_console_supports_copy(console)
+                filepath = self.deploy_executable(executable_file=self.executable_file,
+                                                  console=console)
             else:
                 filepath = self.executable_file
-
-        if not console:
-            raise TaskFailed(
-                f'Failed to run script test "{self}": no console available')
 
         try:
             CommandRunner.run(test_name=self, command=filepath,
@@ -79,6 +76,20 @@ class ExecutableTest(TestBase):
                 CommandRunner.run(test_name=self, command=f'rm -r {temp_folder}',
                                   console=console, timeout=self.timeout)
 
-    def random_folder_name(self):
+    def deploy_executable(self, console: ConsoleBase) -> str:
+        '''Deploy the executable, and returns its full path'''
+        temp_folder = ExecutableTest.random_folder_name()
+        CommandRunner.run(test_name=self._test_name,
+                          command=f'mkdir {temp_folder}',
+                          console=console, timeout=self.timeout)
+        destination = os.path.join(temp_folder,
+                                   os.path.basename(self.executable_file))
+        console.copy_to_target(self.executable_file, destination)
+
+        return destination
+
+    @staticmethod
+    def random_folder_name():
+        '''Return a random folder name'''
         characters = string.ascii_letters + string.digits
         return 'pluma-' + ''.join(random.choice(characters) for i in range(10))

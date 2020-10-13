@@ -36,6 +36,7 @@ class SSHConsole(HostConsole):
             self.close()
             raise ConsoleCannotOpenError
 
+    @property
     def support_file_copy(self):
         return True
 

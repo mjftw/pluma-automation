@@ -268,6 +268,7 @@ class ConsoleBase(HardwareBase, ABC):
         data = json.loads(matched)
         return data
 
+    @property
     def support_file_copy(self):
         return False
 
