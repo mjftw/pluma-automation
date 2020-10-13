@@ -13,8 +13,10 @@ from pluma.test import TestBase, TestingException, AbortTesting
 
 global_logger = Logger()
 
+
 class TestRunnerBase(ABC):
     '''Run a set of tests a single time and collect their settings and saved data'''
+
     def __init__(self, board: Board = None, tests: Iterable[TestBase] = None,
                  email_on_fail: bool = None, continue_on_fail: bool = None):
         self.board = board
@@ -23,7 +25,14 @@ class TestRunnerBase(ABC):
         self.test_fails = []
 
         # Use global logger if no board available
-        self.log = self.board.log if board else global_logger.log
+        if board:
+            self.log = self.board.log
+            self.hold_log = self.board.hold_log
+            self.release_log = self.board.release_log
+        else:
+            self.log = global_logger.log
+            self.hold_log = global_logger.hold
+            self.release_log = global_logger.release
 
         self._tests = []
         if not isinstance(tests, Iterable):
@@ -63,7 +72,7 @@ class TestRunnerBase(ABC):
             self.log("\n== TESTING ABORTED EARLY ==", color='red', bold=True)
         else:
             self.log("\n== ALL TESTS COMPLETED ==", color='blue', bold=True,
-                           level=LogLevel.DEBUG)
+                     level=LogLevel.DEBUG)
 
         # Check if any tasks failed
         if self.test_fails:
@@ -197,9 +206,8 @@ class TestRunnerBase(ABC):
             test_message = f'{test_message[:column_limit-3]}...'
 
         self.log(test_message.ljust(column_limit) + ' ',
-                       level=LogLevel.IMPORTANT, newline=False)
-        if self.board:
-            self.board.hold_log()
+                 level=LogLevel.IMPORTANT, newline=False)
+        self.hold_log()
 
         try:
             task_func()
@@ -231,8 +239,7 @@ class TestRunnerBase(ABC):
         else:
             self.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
         finally:
-            if self.board:
-                self.board.release_log()
+            self.board.release_log()
 
     def _failed_task_side_effects(self, test: TestBase, task_name: str, exception: Exception):
         '''Run any side effects for a task failure, such as writing logs or sending emails'''
@@ -253,7 +260,7 @@ class TestRunnerBase(ABC):
             error = exception.__class__.__name__
 
         self.log(f'Task failed: {error}', level=LogLevel.ERROR,
-                       bold=True, color='red')
+                 bold=True, color='red')
         self.log(f'Details: {failed}', color='yellow')
 
     def send_fail_email(self, exception: Exception, test_failed: TestBase, task_failed: str):
@@ -282,7 +289,7 @@ class TestRunner(TestRunnerBase):
 
     def _run(self, tests: Iterable[TestBase]):
         self.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
-                       level=LogLevel.DEBUG)
+                 level=LogLevel.DEBUG)
 
         for test in tests:
             for task_name in self.known_tasks:
@@ -294,5 +301,5 @@ class TestRunnerParallel(TestRunnerBase):
 
     def _run(self, tests: Iterable[TestBase]):
         self.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
-                       level=LogLevel.DEBUG)
+                 level=LogLevel.DEBUG)
         self._run_tasks(tests, self.known_tasks)
