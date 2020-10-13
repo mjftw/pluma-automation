@@ -51,7 +51,7 @@ class ConsoleEngine(ABC):
 
         if self.raw_logfile:
             os.makedirs(os.path.dirname(self.raw_logfile), exist_ok=True)
-            self._raw_logfile_fd = open(self.raw_logfile, 'ab')
+            self._raw_logfile_fd = open(self.raw_logfile, 'wb')
 
         try:
             if console_cmd:
