@@ -100,6 +100,7 @@ class TestRunnerBase(ABC):
 
     @tests.setter
     def tests(self, tests: List[TestBase]):
+        self._tests = []
         for test in tests:
             self.add_test(test)
 
