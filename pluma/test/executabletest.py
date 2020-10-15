@@ -63,9 +63,8 @@ class ExecutableTest(TestBase):
 
             if self.host_file:
                 self.check_console_supports_copy(console)
-                filepath, temp_folder = self.deploy_executable_in_tmp_folder(
-                    executable_file=self.executable_file,
-                    console=console)
+                filepath, temp_folder = self.deploy_file_in_tmp_folder(
+                    file=self.executable_file, console=console)
             else:
                 filepath = self.executable_file
 
@@ -77,15 +76,15 @@ class ExecutableTest(TestBase):
                 CommandRunner.run(test_name=self, command=f'rm -r {temp_folder}',
                                   console=console, timeout=self.timeout)
 
-    def deploy_executable_in_tmp_folder(self, console: ConsoleBase) -> (str, str):
-        '''Deploy the executable, and returns its full path'''
+    def deploy_file_in_tmp_folder(self, file: str, console: ConsoleBase) -> (str, str):
+        '''Deploy the file, and returns its full path and containing temporary folder'''
         temp_folder = ExecutableTest.random_folder_name()
         CommandRunner.run(test_name=self._test_name,
                           command=f'mkdir {temp_folder}',
                           console=console, timeout=self.timeout)
         destination = os.path.join(temp_folder,
-                                   os.path.basename(self.executable_file))
-        console.copy_to_target(source=self.executable_file,
+                                   os.path.basename(file))
+        console.copy_to_target(source=file,
                                destination=destination)
 
         return destination, temp_folder
