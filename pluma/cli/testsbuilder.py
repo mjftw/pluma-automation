@@ -18,8 +18,9 @@ class TestsBuildError(Exception):
 class FileBuilder(ABC):
     '''Generic builder class to generate an output file from inputs.'''
 
-    def __init__(self, target_name: str):
+    def __init__(self, target_name: str, install_dir: str = None):
         self.target_name = target_name
+        self.install_dir = os.path.abspath(install_dir)
 
     @abstractmethod
     def build(self) -> str:
@@ -29,6 +30,11 @@ class FileBuilder(ABC):
     def clean(self, force: bool = False):
         '''Clean build and output files.'''
 
+    @property
+    def output_filepath(self):
+        '''Return output file path'''
+        return os.path.join(self.install_dir, self.target_name)
+
     @staticmethod
     def create_directory(directory: str):
         '''Create the directory or raise an error'''
@@ -37,6 +43,35 @@ class FileBuilder(ABC):
         except Exception as e:
             raise TestsBuildError(
                 f'Failed to create build directory {directory}: {e}')
+
+
+class CommandFileBuilder(FileBuilder):
+    '''Generic builder class to generate an output file from inputs.'''
+
+    def __init__(self, target_name: str, build_command: str, install_dir: str = None):
+        super().__init__(target_name, install_dir)
+        self.build_command = build_command
+
+    def build(self) -> str:
+        log.info(f'Build "{self.target_name}"...')
+        FileBuilder.create_directory(self.install_dir)
+
+        log.debug(f'Build command = {self.build_command}')
+
+        try:
+            out = subprocess.check_output(
+                self.build_command, shell=True, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            raise TestsBuildError(
+                f'Failed to build "{self.target_name}": {e.output.decode()}')
+
+        log.debug(f'Build output = {out.decode()}')
+
+        if not os.path.isfile(self.output_filepath):
+            raise TestsBuildError(f'The build generated no output for target "{self.target_name}": '
+                                  f'Expected file "{self.output_filepath}" does not exist.')
+
+        return self.output_filepath
 
 
 class YoctoCCrossCompiler(FileBuilder):
@@ -132,10 +167,18 @@ class YoctoCCrossCompiler(FileBuilder):
             f'No environment file ({env_file_pattern}) found in the toolchain '
             f'installation folder ({install_dir})')
 
-    @staticmethod
-    def cross_compile(target_name: str, env_file: str, sources: List[str],
+    @classmethod
+    def cross_compile(cls, target_name: str, env_file: str, sources: List[str],
                       flags: List[str] = None, install_dir: str = None) -> str:
         '''Cross-compile a C application with a Yocto SDK environment file and return its path'''
+        return cls.create_builder(target_name=target_name, env_file=env_file,
+                                  sources=sources, flags=flags,
+                                  install_dir=install_dir).build()
+
+    @staticmethod
+    def create_builder(target_name: str, env_file: str, sources: List[str],
+                       flags: List[str] = None, install_dir: str = None) -> FileBuilder:
+        '''Return a builder to cross-compile a C application with a Yocto SDK'''
         if not target_name or not env_file or not sources:
             raise ValueError('Null target, environment or sources passed')
 
@@ -150,21 +193,7 @@ class YoctoCCrossCompiler(FileBuilder):
         elif isinstance(flags, list):
             flags = ' '.join(flags)
 
-        install_dir = os.path.abspath(install_dir)
-        YoctoCCrossCompiler.create_directory(install_dir)
-        target_filepath = os.path.join(install_dir, target_name)
-
-        log.info(f'Cross compiling "{target_name}"...')
-        command = f'. {env_file} && $CC {sources} {flags} -o {target_filepath}'
-        log.debug(f'Build command = {command}')
-
-        try:
-            out = subprocess.check_output(
-                command, shell=True, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError as e:
-            raise TestsBuildError(
-                f'Failed to build "{target_name}": {e.output.decode()}')
-
-        log.debug(f'Build output = {out.decode()}')
-
-        return target_filepath
+        output_filepath = os.path.join(install_dir, target_name)
+        command = f'. {env_file} && $CC {sources} {flags} -o {output_filepath}'
+        return CommandFileBuilder(target_name=target_name, build_command=command,
+                                  install_dir=install_dir)
