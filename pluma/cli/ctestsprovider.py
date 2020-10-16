@@ -32,7 +32,7 @@ class CTestsProvider(TestsProvider):
             install_dir = TestsBuilder.install_yocto_sdk(toolchain_file)
 
         if not env_file:
-            env_file = TestsBuilder.find_yocto_sdk_env_file(install_dir)
+            env_file = TestsBuilder.get_yocto_sdk_env_file(install_dir)
 
         all_tests = []
         tests_config = config.pop('tests', default={}).content()

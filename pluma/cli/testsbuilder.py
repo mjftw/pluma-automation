@@ -2,6 +2,9 @@ import subprocess
 import os.path
 import sys
 import shutil
+
+from typing import List
+
 from pluma.core.baseclasses import Logger
 
 log = Logger()
@@ -25,7 +28,8 @@ class TestsBuilder:
     DEFAULT_EXEC_INSTALL_DIR = os.path.join(DEFAULT_BUILD_ROOT, 'ctests')
 
     @staticmethod
-    def create_directory(directory):
+    def create_directory(directory: str):
+        '''Create the directory or raise an error'''
         try:
             os.makedirs(directory, exist_ok=True)
         except Exception as e:
@@ -33,7 +37,8 @@ class TestsBuilder:
                 f'Failed to create build directory {directory}: {e}')
 
     @staticmethod
-    def install_yocto_sdk(yocto_sdk, install_dir=None):
+    def install_yocto_sdk(yocto_sdk: str, install_dir: str = None) -> str:
+        '''Install the Yocto SDK in a directory and return the directory used'''
         if not yocto_sdk or not isinstance(yocto_sdk, str):
             raise ValueError('Null Yocto SDK file path provided')
 
@@ -62,8 +67,8 @@ class TestsBuilder:
         return install_dir
 
     @staticmethod
-    def find_yocto_sdk_env_file(install_dir):
-        '''Search for a Yocto SDK environment file in a folder.'''
+    def get_yocto_sdk_env_file(install_dir: str) -> str:
+        '''Return the path to the Yocto SDK environment file in a folder or raise an error.'''
         env_file_pattern = 'environment-'
         for file in os.listdir(install_dir):
             if file.startswith(env_file_pattern):
@@ -74,8 +79,9 @@ class TestsBuilder:
             f'installation folder ({install_dir})')
 
     @staticmethod
-    def build_c_test(target_name, env_file, sources, flags=None, install_dir=None):
-        '''Cross-compile a C application with a Yocto SDK environment file.'''
+    def build_c_test(target_name: str, env_file: str, sources: List[str],
+                     flags: List[str] = None, install_dir: str = None) -> str:
+        '''Cross-compile a C application with a Yocto SDK environment file and return its path'''
         if not target_name or not env_file or not sources:
             raise ValueError('Null target, environment or sources passed')
 
@@ -110,7 +116,7 @@ class TestsBuilder:
         return target_filepath
 
     @staticmethod
-    def clean(force=False):
+    def clean(force: bool = False):
         '''Clean build files.'''
         try:
             # TODO: Would need to use actual build folder and list of built/installed
