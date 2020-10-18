@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-from pluma.core.build import FileBuilder, CommandFileBuilder, TestsBuildError
+from pluma.core.builder import FileBuilder, CommandFileBuilder, TestsBuildError
 from pluma.core.baseclasses import Logger
 
 log = Logger()
@@ -63,12 +63,14 @@ class YoctoCCrossCompiler(FileBuilder):
         return install_dir
 
     @staticmethod
-    def get_yocto_sdk_env_file(install_dir: str) -> str:
+    def get_yocto_sdk_env_file(install_dir: str) -> Path:
         '''Return the path to the Yocto SDK environment file in a folder or raise an error.'''
+        install_dir = Path(install_dir)
+
         env_file_pattern = 'environment-'
         for file in install_dir.iterdir():
-            if str(file).startswith(env_file_pattern):
-                return install_dir.pathjoin(file).resolve()
+            if file.name.startswith(env_file_pattern) and file.suffix == '':
+                return install_dir.joinpath(file).resolve()
 
         raise TestsBuildError(
             f'No environment file ({env_file_pattern}) found in the toolchain '

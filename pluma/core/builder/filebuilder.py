@@ -3,7 +3,6 @@ import subprocess
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List
 
 from pluma.core.baseclasses import Logger
 
@@ -79,7 +78,7 @@ class CommandFileBuilder(FileBuilder):
         log.info(f'Build "{self.target_name}"...')
         FileBuilder.create_directory(self.install_dir)
 
-        log.debug(f'Build command = {self.build_command}')
+        log.debug(f'Build command = "{self.build_command}"')
 
         try:
             out = subprocess.check_output(
@@ -88,10 +87,10 @@ class CommandFileBuilder(FileBuilder):
             raise TestsBuildError(
                 f'Failed to build "{self.target_name}": {e.output.decode()}')
 
-        log.debug(f'Build output = {out.decode()}')
+        log.debug(f'Build output = "{out.decode()}"')
 
         if not self.output_filepath.is_file():
             raise TestsBuildError(f'The build generated no output for target "{self.target_name}": '
                                   f'Expected file "{self.output_filepath}" does not exist.')
 
-        return self.output_filepath
+        return str(self.output_filepath)

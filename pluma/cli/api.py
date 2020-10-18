@@ -5,7 +5,7 @@ import os
 import json
 
 from pluma.core.baseclasses import Logger, LogLevel
-from pluma.core.build import TestsBuildError,  YoctoCCrossCompiler
+from pluma.core.builder import TestsBuildError,  YoctoCCrossCompiler
 from pluma.test import TestController
 from pluma.cli import PlumaContext, PlumaConfig, TestsConfig, TargetConfig
 from pluma.cli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, \

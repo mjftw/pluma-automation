@@ -1,10 +1,9 @@
-import time
 import pytest
-import os
+import tempfile
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-from pluma.core.build import CommandFileBuilder, TestsBuildError
+from pluma.core.builder import CommandFileBuilder, TestsBuildError
 
 
 def test_CommandFileBuilder_output_filepath_use_target_and_install_dir():
@@ -21,40 +20,43 @@ def test_CommandFileBuilder_build_should_error_if_file_not_built():
 
 
 def test_CommandFileBuilder_build_should_return_path_to_file():
-    builder = CommandFileBuilder(target_name='any_name', build_command='')
+    with tempfile.NamedTemporaryFile() as tmpfile:
+        tmpfilepath = Path(tmpfile.name)
+        builder = CommandFileBuilder(install_dir=tmpfilepath.parent,
+                                     target_name=tmpfilepath.name,
+                                     build_command='')
 
-    # Create output file to ignore build error
-    with open(builder.output_filepath, 'w') as output_file:
         output_path = builder.build()
-        assert output_path == builder.output_filepath
-        os.remove(output_file.name)
+        assert output_path == str(builder.output_filepath)
 
 
 def test_CommandFileBuilder_build_runs_build_command():
-    output = 'myfile'
     build_cmd = 'some-build command'
-    builder = CommandFileBuilder(target_name=output, build_command=build_cmd)
 
-    with open(builder.output_filepath, 'w') as output_file:
+    with tempfile.NamedTemporaryFile() as tmpfile:
+        tmpfilepath = Path(tmpfile.name)
+        builder = CommandFileBuilder(install_dir=tmpfilepath.parent,
+                                     target_name=tmpfilepath.name,
+                                     build_command=build_cmd)
+
         with patch('subprocess.check_output') as check_output:
             builder.build()
 
             check_output.assert_called_once()
             assert build_cmd in check_output.call_args[0]
 
-        os.remove(output_file.name)
-
 
 def test_CommandFileBuilder_build_should_error_on_command_error():
-    output = 'myfile'
     build_cmd = 'some-non-existant-build command'
-    builder = CommandFileBuilder(target_name=output, build_command=build_cmd)
 
-    with open(builder.output_filepath, 'w') as output_file:
+    with tempfile.NamedTemporaryFile() as tmpfile:
+        tmpfilepath = Path(tmpfile.name)
+        builder = CommandFileBuilder(install_dir=tmpfilepath.parent,
+                                     target_name=tmpfilepath.name,
+                                     build_command=build_cmd)
+
         with pytest.raises(TestsBuildError):
             builder.build()
-
-        os.remove(output_file.name)
 
 
 def test_CommandFileBuilder_install_folder_should_be_local():

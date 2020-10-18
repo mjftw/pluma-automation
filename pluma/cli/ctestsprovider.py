@@ -1,5 +1,5 @@
 from pluma.core.baseclasses import Logger
-from pluma.core.build import YoctoCCrossCompiler
+from pluma.core.builder import YoctoCCrossCompiler
 from pluma.test import ExecutableTest
 from pluma.cli import TestsConfigError
 from .config import TestDefinition, TestsProvider

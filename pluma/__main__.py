@@ -4,7 +4,7 @@ import os
 from typing import Any, Callable, Optional
 
 from pluma.core.baseclasses import Logger, LogMode, LogLevel
-from pluma.core.build import TestsBuildError
+from pluma.core.builder import TestsBuildError
 from pluma.cli import Pluma, TestsConfigError, TargetConfigError
 from pluma.cli.plugins import load_plugin_modules
 
