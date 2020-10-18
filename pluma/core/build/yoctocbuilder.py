@@ -15,8 +15,8 @@ class YoctoCCrossCompiler(FileBuilder):
     source a Yocto SDK environment, and to cross compile a C
     application locally.
     '''
-    DEFAULT_TOOLCHAIN_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto_toolchain'
-    DEFAULT_EXEC_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto_c'
+    DEFAULT_TOOLCHAIN_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto-toolchain'
+    DEFAULT_EXEC_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto-c'
 
     def __init__(self, target_name: str, env_file: str, sources: List[str],
                  flags: List[str] = None, install_dir: str = None):
@@ -41,7 +41,7 @@ class YoctoCCrossCompiler(FileBuilder):
         yocto_sdk = Path(yocto_sdk).resolve()
         if not yocto_sdk.is_file():
             raise TestsBuildError(
-                f'Failed to locate Yocto SDK "{yocto_sdk}" for C tests')
+                f'Yocto SDK "{yocto_sdk}" does not exist.')
 
         if not install_dir:
             install_dir = YoctoCCrossCompiler.DEFAULT_TOOLCHAIN_INSTALL_DIR
@@ -51,7 +51,7 @@ class YoctoCCrossCompiler(FileBuilder):
 
         log.info('Installing Yocto SDK...')
         log.log([f'SDK: "{yocto_sdk}"',
-                 'Destination: "{install_dir}"'])
+                 f'Destination: "{install_dir}"'])
 
         try:
             command = [yocto_sdk, '-y', '-d', install_dir]

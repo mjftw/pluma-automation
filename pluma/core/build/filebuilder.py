@@ -62,7 +62,7 @@ class FileBuilder(ABC):
             raise ValueError('Expected a Path object')
 
         try:
-            Path(directory).mkdir(exist_ok=True)
+            Path(directory).mkdir(parents=True, exist_ok=True)
         except Exception as e:
             raise TestsBuildError(
                 f'Failed to create build directory {directory}: {e}')
