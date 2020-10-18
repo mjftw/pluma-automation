@@ -1,6 +1,6 @@
-import os
 import pytest
 import tempfile
+from pathlib import Path
 
 from pytest import fixture
 from unittest.mock import MagicMock, patch
@@ -57,15 +57,6 @@ def test_ExecutableTest_check_console_supports_copy_error_ok_if_console_compatib
     executable_test.check_console_supports_copy(console=mock_console)
 
 
-def test_ExecutableTest_random_folder_name_should_be_unique():
-    folder_names = set()
-    count = 50
-    for i in range(count):
-        folder_names.add(ExecutableTest.random_folder_name())
-
-    assert len(folder_names) == count
-
-
 def test_ExecutableTest_deploy_executable_returns_path_and_folder(executable_test,
                                                                   mock_console):
     test_file = '/folder/abc'
@@ -77,7 +68,7 @@ def test_ExecutableTest_deploy_executable_returns_path_and_folder(executable_tes
         assert executable_test.executable_file
 
         assert dest.startswith(tmp_folder)
-        assert dest.endswith(os.path.basename(test_file))
+        assert dest.endswith(Path(test_file).name)
 
 
 def test_ExecutableTest_deploy_executable_calls_mkdir(executable_test,
@@ -121,7 +112,7 @@ def test_ExecutableTest_test_body_deploy_on_target(executable_test,
     executable_test.run_on_host = False
     executable_test.host_file = True
     target_tmp_dir = '/home/abc'
-    target_executable = os.path.join(target_tmp_dir, 'myapp')
+    target_executable = Path(target_tmp_dir)/'myapp'
 
     with patch('pluma.test.CommandRunner.run') as run:
         executable_test.deploy_file_in_tmp_folder = MagicMock()

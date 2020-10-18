@@ -1,9 +1,8 @@
 import os
-import string
-import random
 
 from pluma.test import TestBase, CommandRunner
 from pluma.core.baseclasses import ConsoleBase
+from pluma.utils import random_dir_name
 from pluma import HostConsole
 
 
@@ -78,7 +77,7 @@ class ExecutableTest(TestBase):
 
     def deploy_file_in_tmp_folder(self, file: str, console: ConsoleBase) -> (str, str):
         '''Deploy the file, and returns its full path and containing temporary folder'''
-        temp_folder = ExecutableTest.random_folder_name()
+        temp_folder = random_dir_name()
         CommandRunner.run(test_name=self._test_name,
                           command=f'mkdir {temp_folder}',
                           console=console, timeout=self.timeout)
@@ -88,9 +87,3 @@ class ExecutableTest(TestBase):
                                destination=destination)
 
         return destination, temp_folder
-
-    @staticmethod
-    def random_folder_name():
-        '''Return a random folder name'''
-        characters = string.ascii_letters + string.digits
-        return 'pluma-' + ''.join(random.choice(characters) for i in range(10))
