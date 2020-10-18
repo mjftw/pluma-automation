@@ -3,9 +3,10 @@ import traceback
 import os
 from typing import Any, Callable, Optional
 
-from .core.baseclasses import Logger, LogMode, LogLevel
-from .cli import Pluma, TestsConfigError, TestsBuildError, TargetConfigError
-from .cli.plugins import load_plugin_modules
+from pluma.core.baseclasses import Logger, LogMode, LogLevel
+from pluma.core.build import TestsBuildError
+from pluma.cli import Pluma, TestsConfigError, TargetConfigError
+from pluma.cli.plugins import load_plugin_modules
 
 log = Logger()
 

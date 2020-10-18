@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from pluma.cli import CommandFileBuilder, TestsBuildError
+from pluma.core.build import CommandFileBuilder, TestsBuildError
 
 
 def test_CommandFileBuilder_output_filepath_use_target_and_install_dir():
