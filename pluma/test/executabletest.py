@@ -41,9 +41,9 @@ class ExecutableTest(TestBase):
     def check_console_supports_copy(self, console: ConsoleBase):
         if not console:
             raise ValueError(
-                f'Cannot run executable test "{self}" on target: no console'
-                ' was defined or set. Define a console in "pluma-target.yml", or use '
-                ' "run_on_host" test attribute to run on the host instead.')
+                f'Cannot run executable test "{self}" on target: no console '
+                'was defined or set. Define a console in your target config file, '
+                'or use "run_on_host" test attribute to run on the host instead.')
 
         if not console.support_file_copy:
             raise ValueError(
