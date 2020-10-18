@@ -1,9 +1,9 @@
-import subprocess
-import os.path
-import sys
 import shutil
+import subprocess
+import sys
 
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import List
 
 from pluma.core.baseclasses import Logger
@@ -17,29 +17,53 @@ class TestsBuildError(Exception):
 
 class FileBuilder(ABC):
     '''Generic builder class to generate an output file from inputs.'''
+    DEFAULT_BUILD_ROOT = Path.cwd()/'.pluma-build'
 
     def __init__(self, target_name: str, install_dir: str = None):
         self.target_name = target_name
-        self.install_dir = os.path.abspath(install_dir)
+        self.install_dir = Path(install_dir or FileBuilder.DEFAULT_BUILD_ROOT).resolve()
 
     @abstractmethod
     def build(self) -> str:
         '''Generate the output file, and return its path.'''
 
-    @abstractmethod
-    def clean(self, force: bool = False):
+    @classmethod
+    def clean(cls, force: bool = False):
         '''Clean build and output files.'''
+        try:
+            build_folder = cls.DEFAULT_BUILD_ROOT
+
+            if not force:
+                answer = input(
+                    f'Do you confirm removing build folder "{build_folder}"? [yN]: ')
+                if (answer != 'y'):
+                    log.log('Aborting clean operation.')
+                    return
+
+            if build_folder == '' or build_folder == '/':
+                raise TestsBuildError(
+                    f'Refusing to clean build folder "{build_folder}"')
+
+            shutil.rmtree(build_folder)
+            log.log('Removed toolchain and test build folder')
+
+        except Exception as e:
+            raise TestsBuildError(
+                f'Failed to clean build output: {e}')
 
     @property
-    def output_filepath(self):
+    def output_filepath(self) -> Path:
         '''Return output file path'''
-        return os.path.join(self.install_dir, self.target_name)
+        return self.install_dir.joinpath(self.target_name)
 
     @staticmethod
-    def create_directory(directory: str):
+    def create_directory(directory: Path):
         '''Create the directory or raise an error'''
+        if not isinstance(directory, Path):
+            raise ValueError('Expected a Path object')
+
         try:
-            os.makedirs(directory, exist_ok=True)
+            Path(directory).mkdir(exist_ok=True)
         except Exception as e:
             raise TestsBuildError(
                 f'Failed to create build directory {directory}: {e}')
@@ -67,7 +91,7 @@ class CommandFileBuilder(FileBuilder):
 
         log.debug(f'Build output = {out.decode()}')
 
-        if not os.path.isfile(self.output_filepath):
+        if not self.output_filepath.is_file():
             raise TestsBuildError(f'The build generated no output for target "{self.target_name}": '
                                   f'Expected file "{self.output_filepath}" does not exist.')
 
@@ -81,11 +105,8 @@ class YoctoCCrossCompiler(FileBuilder):
     source a Yocto SDK environment, and to cross compile a C
     application locally.
     '''
-    DEFAULT_BUILD_ROOT = os.path.join(os.path.dirname(
-        os.path.abspath(sys.modules['__main__'].__file__)), 'build')
-    DEFAULT_TOOLCHAIN_INSTALL_DIR = os.path.join(
-        DEFAULT_BUILD_ROOT, 'toolchain')
-    DEFAULT_EXEC_INSTALL_DIR = os.path.join(DEFAULT_BUILD_ROOT, 'ctests')
+    DEFAULT_TOOLCHAIN_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto_toolchain'
+    DEFAULT_EXEC_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto_c'
 
     def __init__(self, target_name: str, env_file: str, sources: List[str],
                  flags: List[str] = None, install_dir: str = None):
@@ -96,34 +117,10 @@ class YoctoCCrossCompiler(FileBuilder):
         self.install_dir = install_dir
 
     def build(self) -> str:
-        return YoctoCCrossCompiler.cross_compile(
-            target_name=self.target_name, env_file=self.env_file,
-            sources=self.sources, flags=self.flags, install_dir=self.install_dir)
-
-    @staticmethod
-    def clean(force: bool = False):
-        try:
-            # TODO: Would need to use actual build folder and list of built/installed
-            # files
-            build_folder = YoctoCCrossCompiler.DEFAULT_BUILD_ROOT
-
-            if not force:
-                answer = input(
-                    f'Do you confirm removing build folder "{build_folder}"? [yN]: ')
-                if (answer != 'y'):
-                    log.log('Aborting clean operation.')
-                    return
-
-            if build_folder == '' or build_folder == '/':
-                raise TestsBuildError(
-                    f'Refusing to clean build folder "{build_folder}"')
-
-            shutil.rmtree(build_folder)
-            log.log('Removed toolchain and test build folder')
-
-        except Exception as e:
-            raise TestsBuildError(
-                f'Failed to clean build output: {e}')
+        return YoctoCCrossCompiler.create_builder(target_name=self.target_name,
+                                                  env_file=self.env_file,
+                                                  sources=self.sources, flags=self.flags,
+                                                  install_dir=self.install_dir).build()
 
     @staticmethod
     def install_yocto_sdk(yocto_sdk: str, install_dir: str = None) -> str:
@@ -131,15 +128,15 @@ class YoctoCCrossCompiler(FileBuilder):
         if not yocto_sdk or not isinstance(yocto_sdk, str):
             raise ValueError('Null Yocto SDK file path provided')
 
-        yocto_sdk = os.path.abspath(yocto_sdk)
-        if not os.path.isfile(yocto_sdk):
+        yocto_sdk = Path(yocto_sdk).resolve()
+        if not yocto_sdk.is_file():
             raise TestsBuildError(
                 f'Failed to locate Yocto SDK "{yocto_sdk}" for C tests')
 
         if not install_dir:
             install_dir = YoctoCCrossCompiler.DEFAULT_TOOLCHAIN_INSTALL_DIR
 
-        install_dir = os.path.abspath(install_dir)
+        install_dir = Path(install_dir).resolve()
         YoctoCCrossCompiler.create_directory(install_dir)
 
         log.info('Installing Yocto SDK...')
@@ -159,9 +156,9 @@ class YoctoCCrossCompiler(FileBuilder):
     def get_yocto_sdk_env_file(install_dir: str) -> str:
         '''Return the path to the Yocto SDK environment file in a folder or raise an error.'''
         env_file_pattern = 'environment-'
-        for file in os.listdir(install_dir):
-            if file.startswith(env_file_pattern):
-                return os.path.abspath(os.path.join(install_dir, file))
+        for file in install_dir.iterdir():
+            if str(file).startswith(env_file_pattern):
+                return install_dir.pathjoin(file).resolve()
 
         raise TestsBuildError(
             f'No environment file ({env_file_pattern}) found in the toolchain '
@@ -193,7 +190,7 @@ class YoctoCCrossCompiler(FileBuilder):
         elif isinstance(flags, list):
             flags = ' '.join(flags)
 
-        output_filepath = os.path.join(install_dir, target_name)
+        output_filepath = Path(install_dir).joinpath(target_name)
         command = f'. {env_file} && $CC {sources} {flags} -o {output_filepath}'
         return CommandFileBuilder(target_name=target_name, build_command=command,
                                   install_dir=install_dir)
