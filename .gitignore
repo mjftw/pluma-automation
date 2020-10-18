@@ -107,3 +107,4 @@ venv.bak/
 
 # Pluma specific
 pluma*.yml
+.pluma-build/
