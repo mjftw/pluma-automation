@@ -3,7 +3,7 @@ from .configpreprocessor import PlumaConfigPreprocessor
 from .config import PlumaConfig, Configuration, ConfigurationError, TestsConfigError, \
     TargetConfigError, TestsProvider, TestDefinition, ConfigPreprocessor
 from .testsconfig import TestsConfig
-from .testsbuilder import FileBuilder, YoctoCCrossCompiler, TestsBuildError
+from .testsbuilder import FileBuilder, CommandFileBuilder, YoctoCCrossCompiler, TestsBuildError
 from .targetconfig import TargetConfig, TargetFactory, Credentials
 from .pythontestsprovider import PythonTestsProvider
 from .shelltestsprovider import ShellTestsProvider

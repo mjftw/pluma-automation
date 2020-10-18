@@ -39,7 +39,7 @@ class CTestsProvider(TestsProvider):
         for test_name in tests_config:
             try:
                 test_parameters = tests_config[test_name]
-                test_executable = YoctoCCrossCompiler.build_c_test(
+                test_executable = YoctoCCrossCompiler.cross_compile(
                     target_name=test_name, env_file=env_file,
                     sources=test_parameters.pop('sources'),
                     flags=test_parameters.pop('flags', None))
