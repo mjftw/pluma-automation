@@ -224,9 +224,9 @@ Supported attributes:
   * `- wait_for_pattern:` Wait for a specific pattern on the console
     * `pattern: <pattern>`
     * `timeout: <timeout_in_seconds>`
-  * `- deploy:` Copies a single file to the target device
-    * `file: <file_path>`
-    * `destination: <device_target_path>`
+  * `- deploy:` Deploy one or more files to the target device, to a specific destination
+    * `files: [<file_path>, <file_path>]`
+    * `destination: <device_target_path>` Destination folder
     * `timeout: <timeout_in_seconds>`
   * `- login:` Attempt to login on the active console. Typically used for Serial
   * `- set:`

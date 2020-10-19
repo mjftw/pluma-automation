@@ -6,7 +6,7 @@ from pluma import Board
 from pluma.core.baseclasses import ConsoleBase
 from pluma.test import TaskFailed
 from pluma.cli import DeviceActionRegistry, DeviceActionBase, LoginAction, WaitAction, \
-    WaitForPatternAction, SetAction
+    WaitForPatternAction, SetAction, DeployAction
 from utils import nonblocking
 
 
@@ -66,7 +66,7 @@ def test_WaitForPatternAction_should_succeed_when_matched(mock_board):
     action.execute()
 
 
-def test_WaitForPatternAction_should_succeed_when_matched_proxy_console(mock_board, serial_console_proxy):
+def test_WaitForPatternAction_should_succeed_when_matched_proxy_console(serial_console_proxy):
     mock_board = Board("board", console=serial_console_proxy.console)
     expected_pattern = 'abc'
     action = WaitForPatternAction(
@@ -82,7 +82,7 @@ def test_WaitForPatternAction_should_succeed_when_matched_proxy_console(mock_boa
     async_action.get()
 
 
-def test_WaitForPatternAction_should_fail_when_no_matched_proxy_console(mock_board, serial_console_proxy):
+def test_WaitForPatternAction_should_fail_when_no_matched_proxy_console(serial_console_proxy):
     mock_board = Board("board", console=serial_console_proxy.console)
     expected_pattern = 'abc'
     action = WaitForPatternAction(
@@ -120,3 +120,41 @@ def test_SetAction_should_error_if_no_console(mock_board, console_type):
     mock_board.get_console.return_value = None
     with pytest.raises(ValueError):
         SetAction(mock_board, device_console=console_type)
+
+
+def test_DeployAction_constructor_should_work(mock_board):
+    DeployAction(board=mock_board, files=['myfile'], destination='there')
+
+
+def test_DeployAction_should_error_if_files_is_not_a_list(mock_board):
+    with pytest.raises(ValueError):
+        DeployAction(board=mock_board, files='myfile', destination='there')
+
+
+def test_DeployAction_should_error_if_console_does_not_support_copy(mock_board):
+    mock_board.console.support_file_copy = False
+    mock_board.console.copy_to_target = MagicMock()
+
+    action = DeployAction(board=mock_board, files=['myfile'], destination='there')
+    with pytest.raises(TaskFailed):
+        action.execute()
+
+
+def test_DeployAction_should_deploy_files(mock_board):
+    mock_board.console.support_file_copy = True
+    mock_board.console.copy_to_target = MagicMock()
+    files = ['/a/abc.so', 'other']
+    destination = '/some/where'
+    timeout = 666
+
+    action = DeployAction(board=mock_board, files=files, destination=destination,
+                          timeout=timeout)
+    action.execute()
+
+    assert mock_board.console.copy_to_target.call_count == len(files)
+    index = 0
+    for call in mock_board.console.copy_to_target.call_args_list:
+        assert call[1]['source'] == files[index]
+        assert call[1]['destination'] == destination
+        assert call[1]['timeout'] == timeout
+        index += 1

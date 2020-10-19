@@ -2,6 +2,8 @@ import os
 import sys
 import time
 
+from typing import List
+
 from pluma.core.baseclasses import Logger, LogLevel
 from pluma import Board
 from pluma.test import TaskFailed
@@ -93,15 +95,24 @@ class SetAction(DeviceActionBase):
 
 @DeviceActionRegistry.register('deploy')
 class DeployAction(DeviceActionBase):
-    def __init__(self, board: Board, file: str, destination: str, timeout: int = 15):
+    def __init__(self, board: Board, files: List[str], destination: str, timeout: int = 15):
         super().__init__(board)
-        self.file = file
+        if not isinstance(files, list):
+            raise ValueError(f'"files" must be a list, but instead got: {files}')
+
+        self.files = files
         self.destination = destination
         self.timeout = timeout
 
     def execute(self):
-        log.log(f'Copying {self.file} to target device destination {self.destination}')
-        self.board.console.copy_to_target(self.file, self.destination, self.timeout)
+        if not self.board.console.support_file_copy:
+            raise TaskFailed('Cannot deploy files, current console does not support file copy. '
+                             'Use or set a different console to be able to deploy files (e.g. SSH)')
+
+        for f in self.files:
+            log.log(f'Copying {f} to target device destination {self.destination}')
+            self.board.console.copy_to_target(source=f, destination=self.destination,
+                                              timeout=self.timeout)
 
 
 class ManualDeviceActionBase(DeviceActionBase):
