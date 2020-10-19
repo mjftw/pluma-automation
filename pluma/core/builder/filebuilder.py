@@ -75,7 +75,7 @@ class CommandFileBuilder(FileBuilder):
         self.build_command = build_command
 
     def build(self) -> str:
-        log.info(f'Build "{self.target_name}"...')
+        log.info(f'Building "{self.target_name}"...')
         FileBuilder.create_directory(self.install_dir)
 
         log.debug(f'Build command = "{self.build_command}"')
