@@ -5,7 +5,7 @@ import os
 import json
 
 from pluma.core.baseclasses import Logger, LogLevel
-from pluma.core.builder import TestsBuildError,  YoctoCCrossCompiler
+from pluma.core.builder import TestsBuildError,  YoctoCBuilder
 from pluma.test import TestController
 from pluma.cli import PlumaContext, PlumaConfig, TestsConfig, TargetConfig
 from pluma.cli import PythonTestsProvider, ShellTestsProvider, CTestsProvider, \
@@ -78,7 +78,7 @@ class Pluma:
             raise TestsBuildError(
                 f'Failed to remove log files: {e}')
 
-        YoctoCCrossCompiler.clean(force)
+        YoctoCBuilder.clean(force)
 
     @staticmethod
     def create_target_context(target_config_path: str) -> PlumaContext:

@@ -8,7 +8,7 @@ from pluma.core.baseclasses import Logger
 log = Logger()
 
 
-class YoctoCCrossCompiler(FileBuilder):
+class YoctoCBuilder(FileBuilder):
     '''Setup and cross-compile C tests with a Yocto SDK.
 
     Provide a set of methods to install a Yocto SDK, to find and
@@ -27,10 +27,10 @@ class YoctoCCrossCompiler(FileBuilder):
         self.install_dir = install_dir
 
     def build(self) -> str:
-        return YoctoCCrossCompiler.create_builder(target_name=self.target_name,
-                                                  env_file=self.env_file,
-                                                  sources=self.sources, flags=self.flags,
-                                                  install_dir=self.install_dir).build()
+        return YoctoCBuilder.create_builder(target_name=self.target_name,
+                                            env_file=self.env_file,
+                                            sources=self.sources, flags=self.flags,
+                                            install_dir=self.install_dir).build()
 
     @staticmethod
     def install_yocto_sdk(yocto_sdk: str, install_dir: str = None) -> str:
@@ -44,10 +44,10 @@ class YoctoCCrossCompiler(FileBuilder):
                 f'Yocto SDK "{yocto_sdk}" does not exist.')
 
         if not install_dir:
-            install_dir = YoctoCCrossCompiler.DEFAULT_TOOLCHAIN_INSTALL_DIR
+            install_dir = YoctoCBuilder.DEFAULT_TOOLCHAIN_INSTALL_DIR
 
         install_dir = Path(install_dir).resolve()
-        YoctoCCrossCompiler.create_directory(install_dir)
+        YoctoCBuilder.create_directory(install_dir)
 
         log.info('Installing Yocto SDK...')
         log.log([f'SDK: "{yocto_sdk}"',
@@ -92,7 +92,7 @@ class YoctoCCrossCompiler(FileBuilder):
             raise ValueError('Null target, environment or sources passed')
 
         if not install_dir:
-            install_dir = YoctoCCrossCompiler.DEFAULT_EXEC_INSTALL_DIR
+            install_dir = YoctoCBuilder.DEFAULT_EXEC_INSTALL_DIR
 
         if isinstance(sources, list):
             sources = ' '.join(sources)

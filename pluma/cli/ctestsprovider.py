@@ -1,5 +1,5 @@
 from pluma.core.baseclasses import Logger
-from pluma.core.builder import YoctoCCrossCompiler
+from pluma.core.builder import YoctoCBuilder
 from pluma.test import ExecutableTest
 from pluma.cli import TestsConfigError
 from .config import TestDefinition, TestsProvider
@@ -29,17 +29,17 @@ class CTestsProvider(TestsProvider):
 
         install_dir = None
         if toolchain_file:
-            install_dir = YoctoCCrossCompiler.install_yocto_sdk(toolchain_file)
+            install_dir = YoctoCBuilder.install_yocto_sdk(toolchain_file)
 
         if not env_file:
-            env_file = YoctoCCrossCompiler.get_yocto_sdk_env_file(install_dir)
+            env_file = YoctoCBuilder.get_yocto_sdk_env_file(install_dir)
 
         all_tests = []
         tests_config = config.pop('tests', default={}).content()
         for test_name in tests_config:
             try:
                 test_parameters = tests_config[test_name]
-                test_executable = YoctoCCrossCompiler.cross_compile(
+                test_executable = YoctoCBuilder.cross_compile(
                     target_name=test_name, env_file=env_file,
                     sources=test_parameters.pop('sources'),
                     flags=test_parameters.pop('flags', None))
