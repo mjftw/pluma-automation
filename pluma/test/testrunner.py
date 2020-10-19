@@ -231,7 +231,7 @@ class TestRunnerBase(ABC):
                     str(test), task_name, str(e)))
                 raise e
 
-            self._failed_task_side_effects(test, task_name, e)
+            self._handle_failed_task(test, task_name, e)
 
             if not self.continue_on_fail:
                 raise e
@@ -239,9 +239,9 @@ class TestRunnerBase(ABC):
         else:
             self.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
         finally:
-            self.board.release_log()
+            self.release_log()
 
-    def _failed_task_side_effects(self, test: TestBase, task_name: str, exception: Exception):
+    def _handle_failed_task(self, test: TestBase, task_name: str, exception: Exception):
         '''Run any side effects for a task failure, such as writing logs or sending emails'''
         failed = {
             'time': time.time(),
