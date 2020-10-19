@@ -148,8 +148,8 @@ settings:
 
 sequence:
 # Power on, wait for prompt and login
-- poweron:
-- waitforpattern:
+- power_on:
+- wait_for_pattern:
     pattern: 'login:'
     timeout: 20
 - login:
@@ -221,19 +221,19 @@ Supported attributes:
         * `flags: <list_of_flags>` - Compilation flags
   * `- wait:` Wait for a specific duration
     * `duration: <wait_in_seconds>`
-  * `- waitforpattern:` Wait for a specific pattern on the console
+  * `- wait_for_pattern:` Wait for a specific pattern on the console
     * `pattern: <pattern>`
     * `timeout: <timeout_in_seconds>`
-  * `- copytodevice:` Copies a single file to the target device
+  * `- deploy:` Copies a single file to the target device
     * `file: <file_path>`
     * `destination: <device_target_path>`
     * `timeout: <timeout_in_seconds>`
   * `- login:` Attempt to login on the active console. Typically used for Serial
   * `- set:`
     * `device_console: <ssh/serial>` Set the default console to be used for communication with the device
-  * `- poweron:` Use the power controller defined to power on the board
-  * `- poweroff:` Use the power controller defined to power off the board
-  * `- powercycle:` Use the power controller defined to power cycle the board (off and on)
+  * `- power_on:` Use the power controller defined to power on the board
+  * `- power_off:` Use the power controller defined to power off the board
+  * `- power_cycle:` Use the power controller defined to power cycle the board (off and on)
     * `off_duration_ms:` Duration for which the device is powered off. Actual duration may be longer
   * `- manual_action:` Prints a message and wait for the user to press ENTER
     * `name: <test_name>` Optional test name

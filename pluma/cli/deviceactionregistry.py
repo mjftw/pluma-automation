@@ -1,5 +1,3 @@
-import re
-
 from pluma import Board
 from pluma.cli import DeviceActionBase
 
@@ -8,7 +6,7 @@ class DeviceActionRegistry():
     action_classes_dict = {}
 
     @classmethod
-    def register(cls, action_key: str = None):
+    def register(cls, action_key: str):
         def decorator(action_class: DeviceActionBase):
             cls.register_class(action_class=action_class,
                                action_key=action_key)
@@ -16,13 +14,8 @@ class DeviceActionRegistry():
         return decorator
 
     @classmethod
-    def register_class(cls, action_class: DeviceActionBase, action_key: str = None):
-        '''Register a class as DeviceAction, usable from the tests configuration file.
-
-        The "action_key" defaults to the name of the class stripped from "Action", lower case.'''
-        if not action_key:
-            action_key = re.sub(r'Action$', '', action_class.__name__).lower()
-
+    def register_class(cls, action_class: DeviceActionBase, action_key: str):
+        '''Register a class as DeviceAction, usable from the tests configuration file.'''
         if not issubclass(action_class, DeviceActionBase):
             raise Exception(
                 f'Error trying to register Action class "{action_class.__name__}" '

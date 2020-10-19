@@ -10,19 +10,19 @@ from pluma.cli import DeviceActionBase, DeviceActionRegistry
 log = Logger()
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('power_on')
 class PowerOnAction(DeviceActionBase):
     def execute(self):
         self.board.power.on()
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('power_off')
 class PowerOffAction(DeviceActionBase):
     def execute(self):
         self.board.power.off()
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('power_cycle')
 class PowerCycleAction(DeviceActionBase):
     def __init__(self, board: Board, off_duration_ms: float = None):
         super().__init__(board)
@@ -34,13 +34,13 @@ class PowerCycleAction(DeviceActionBase):
         self.board.power.on()
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('login')
 class LoginAction(DeviceActionBase):
     def execute(self):
         self.board.login()
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('wait')
 class WaitAction(DeviceActionBase):
     def __init__(self, board: Board, duration: int):
         super().__init__(board)
@@ -58,7 +58,7 @@ class WaitAction(DeviceActionBase):
         time.sleep(self.duration)
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('wait_for_pattern')
 class WaitForPatternAction(DeviceActionBase):
     def __init__(self, board: Board, pattern: str, timeout: int = None):
         super().__init__(board)
@@ -74,7 +74,7 @@ class WaitForPatternAction(DeviceActionBase):
                 f'{str(self)}: Timeout reached while waiting for pattern "{self.pattern}"')
 
 
-@DeviceActionRegistry.register()
+@DeviceActionRegistry.register('set')
 class SetAction(DeviceActionBase):
     def __init__(self, board: Board, device_console: str = None):
         super().__init__(board)
@@ -91,8 +91,8 @@ class SetAction(DeviceActionBase):
             self.board.console = self.board.get_console(self.device_console)
 
 
-@DeviceActionRegistry.register()
-class CopyToDeviceAction(DeviceActionBase):
+@DeviceActionRegistry.register('deploy')
+class DeployAction(DeviceActionBase):
     def __init__(self, board: Board, file: str, destination: str, timeout: int = 15):
         super().__init__(board)
         self.file = file
