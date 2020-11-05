@@ -87,7 +87,7 @@ Another helper provided by the `Board` is the `login()` method. This method uses
 The login is actually performed using the `console`'s `login()` method.
 
 ```python
-from pluma import Board, ConsoleLoginFailedError
+from pluma import Board, ConsoleLoginFailedError, SystemContext, Credentials
 
 # Control classes defined elsewhere for this example
 from my_hardware import console, power
@@ -122,7 +122,7 @@ It also expects the password prompt to be "Password:", and will not enter the pa
 If these defaults do not work for your system, they can be changed with the board parameters `login_user_match` and `login_pass_match`.
 
 ```python
-from pluma import Board
+from pluma import Board, SystemContext, Credentials
 
 # Control classes defined elsewhere for this example
 from my_hardware import console
@@ -146,7 +146,7 @@ In other words, if we see the `prompt` after we entered the password then the lo
 This method can be more robust, but requires additional knowledge of the board's console behaviour in advance.
 
 ```python
-from pluma import Board
+from pluma import Board, SystemContext, Credentials
 
 # Control classes defined elsewhere for this example
 from my_hardware import console
@@ -168,7 +168,7 @@ To get around this issue, if `login()` is called after `reboot_and_validate()` r
 To know whether this is not the case you can read the board's `booted_to_prompt` property
 
 ```python
-from pluma import Board, ConsoleLoginFailedError
+from pluma import Board, ConsoleLoginFailedError, SystemContext, Credentials
 
 # Control classes defined elsewhere for this example
 from my_hardware import console, power

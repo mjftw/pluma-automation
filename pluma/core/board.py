@@ -127,11 +127,11 @@ class Board(HardwareBase):
         start_time = time.time()
         try:
             (__, matched) = self.console.send_and_expect(
+                '',
                 match=bootstr,
                 excepts=exception_bootstr,
                 send_newline=False,
-                timeout=timeout,
-                sleep_time=5)
+                timeout=timeout)
         except ConsoleExceptionKeywordReceivedError as e:
             raise BoardBootValidationError('Matched exception keyword: {}'.format(
                 str(e)))
