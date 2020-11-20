@@ -19,6 +19,12 @@ def test_TargetConfig_create_context_should_error_on_unconsumed(target_config):
         TargetConfig.create_context(Configuration(invalid_config))
 
 
+def test_TargetConfig_create_context_passes_serial_console_to_create_power_control(serial_config):
+    config = Configuration({'console': {'serial': serial_config}})
+    context = TargetConfig.create_context(config)
+    assert context.board.power is not None
+
+
 def test_TargetFactory_parse_credentials():
     login = 'abc'
     password = 'def'
@@ -153,3 +159,20 @@ def test_TargetFactory_parse_variables_should_allow_variables_access():
                                                                               var2: var2_value}))
     assert variables.get(var1) == var1_value
     assert variables.get(var2) == var2_value
+
+
+def test_TargetFactory_SoftPower_parameters_can_be_specified(mock_console):
+    on_cmd = 'foo'
+    off_cmd = 'bar'
+
+    config = Configuration({
+        'soft': {
+            'on_cmd': on_cmd,
+            'off_cmd': off_cmd
+        }
+    })
+    power = TargetFactory.create_power_control(config, mock_console)
+
+    assert isinstance(power, SoftPower)
+    assert power.on_cmd == on_cmd
+    assert power.off_cmd == off_cmd

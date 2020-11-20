@@ -38,7 +38,7 @@ class TargetConfig:
             log.warning("No console defined in the device configuration file")
 
         power = TargetFactory.create_power_control(
-            config.pop('power'), ssh)
+            config.pop('power'), ssh or serial)
 
         config.ensure_consumed()
 
@@ -196,7 +196,9 @@ class TargetFactory:
                 raise TargetConfigError(
                     'No console available for soft power control')
 
-            power = SoftPower(console)
+            on_cmd = power_config.pop('on_cmd')
+            off_cmd = power_config.pop('off_cmd')
+            power = SoftPower(console, on_cmd=on_cmd, off_cmd=off_cmd)
 
         elif control_type == POWER_IPPOWER9258:
             host = power_config.pop('host')
