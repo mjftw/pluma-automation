@@ -178,3 +178,10 @@ def test_ConsoleBase_get_json_data_should_match_json(basic_console):
     basic_console.engine.wait_for_match = MagicMock(return_value=result)
     json_result = basic_console.get_json_data(cmd='command')
     assert json_result == json.loads(json_data)
+
+
+def test_ConsoleBase_send_control_calls_engines_send_control(basic_console):
+    basic_console.engine.send_control = MagicMock()
+
+    basic_console.send_control('C')
+    basic_console.engine.send_control.assert_called_with('C')

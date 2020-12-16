@@ -46,6 +46,16 @@ class PexpectEngine(ConsoleEngine):
         assert self.is_open
         self._pex.send(data)
 
+    def send_control(self, char: str):
+        assert self.is_open
+
+        code_ascii_value = ord(char.upper()) - ord('A') + 1
+        if code_ascii_value not in range(1, 27):
+            raise AttributeError('Control character must be A-Z')
+
+        code = bytes([code_ascii_value])
+        self._pex.send(code)
+
     def _read_from_console(self) -> str:
         received = ''
         try:

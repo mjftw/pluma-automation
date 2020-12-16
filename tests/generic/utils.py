@@ -11,19 +11,26 @@ def fd_has_data(fd, timeout=0):
 class OsFile:
     def __init__(self, fd, encoding=None):
         self.fd = fd
-        self.encoding = encoding or 'ascii'
+        self.encoding = encoding
 
     def read(self, n=None, timeout=None):
         if timeout is not None and not fd_has_data(self.fd, timeout):
-            return ""
+            raw = b''
+        else:
+            raw = os.read(self.fd, n or 10000)
 
-        raw = os.read(self.fd, n or 10000)
-        decoded = raw.decode(self.encoding)
-        return decoded
+        if self.encoding:
+            msg = raw.decode(self.encoding)
+        else:
+            msg = raw
+
+        return msg
 
     def write(self, msg):
-        encoded = msg.encode(self.encoding)
-        return os.write(self.fd, encoded)
+        if self.encoding:
+            msg = msg.encode(self.encoding)
+        print('msg', msg)
+        return os.write(self.fd, msg)
 
 
 def nonblocking(f, *args, **kwargs):

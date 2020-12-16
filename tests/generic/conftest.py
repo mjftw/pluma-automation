@@ -53,6 +53,9 @@ class MockConsoleEngine(ConsoleEngine):
     def send(self, data: str):
         self.sent += data
 
+    def send_control(self, char: bytes):
+        pass
+
     def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
         return MatchResult(None, None, '')
 
@@ -129,6 +132,11 @@ PtyPair = namedtuple('PtyPair', ['main', 'secondary'])
 
 @fixture
 def pty_pair() -> PtyPair:
+    main, secondary = pty.openpty()
+    return PtyPair(OsFile(main, 'ascii'), OsFile(secondary, 'ascii'))
+
+@fixture
+def pty_pair_raw() -> PtyPair:
     main, secondary = pty.openpty()
     return PtyPair(OsFile(main), OsFile(secondary))
 

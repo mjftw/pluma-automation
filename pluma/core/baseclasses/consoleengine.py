@@ -106,6 +106,10 @@ class ConsoleEngine(ABC):
     def send(self, data: str):
         '''Send data on the console.'''
 
+    @abstractmethod
+    def send_control(self, char: bytes):
+        '''Send control character on the console.'''
+
     def send_line(self, data: str):
         '''Send data and a line break on the console.'''
         self.send(data+self.linesep)

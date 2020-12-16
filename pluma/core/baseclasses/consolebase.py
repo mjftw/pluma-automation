@@ -198,6 +198,9 @@ class ConsoleBase(HardwareBase, ABC):
         '''Send a command/data. Identical to ConsoleBase.send_nonblocking()'''
         self.send_nonblocking(cmd=cmd, send_newline=send_newline, flush_before=flush_before)
 
+    def send_control(self, char: str):
+        self.engine.send_control(char)
+
     def check_alive(self, timeout=10.0):
         '''Return True if the console responds to <Enter>'''
 

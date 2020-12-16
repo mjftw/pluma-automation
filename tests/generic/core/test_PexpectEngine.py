@@ -141,3 +141,19 @@ def test_PexpectEngine_wait_for_match_should_return_immediately_on_match(pty_pai
     engine.wait_for_match(match=[received], timeout=2)
 
     assert time.time() - start_time < 0.2
+
+
+def test_PexpectEngine_send_control_sends_correct_bytes(pty_pair_raw):
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair_raw.main.fd)
+
+    engine.send_control('C')
+
+    assert pty_pair_raw.main.read(timeout=0.5) == b'^C'
+
+def test_PexpectEngine_error_on_invalid_code(pty_pair_raw):
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair_raw.main.fd)
+
+    with pytest.raises(Exception):
+        engine.send_control('!')
