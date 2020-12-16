@@ -23,6 +23,16 @@ def test_PexpectEngine_open_fd_should_succeed(pty_pair):
     assert engine.is_open
 
 
+def test_PexpectEngine_send_write_content(pty_pair):
+    sent = 'Hello'
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair.main.fd)
+
+    engine.send(sent)
+
+    assert pty_pair.secondary.read(timeout=0.5) == sent
+
+
 def test_PexpectEngine_send_line_write_content_and_line_break(pty_pair):
     sent = 'abcdef'
     engine = PexpectEngine()
