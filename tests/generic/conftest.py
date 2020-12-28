@@ -184,7 +184,8 @@ def target_config():
 def ssh_config():
     return {
         'target': '123',
-        'login': 'abc'
+        'login': 'abc',
+        'log_file': 'abc/def.log'
     }
 
 
@@ -193,6 +194,7 @@ def serial_config():
     return {
         'port': 'abc',
         'baudrate': 123,
+        'log_file': 'abc/def.log'
     }
 
 

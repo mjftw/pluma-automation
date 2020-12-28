@@ -3,9 +3,9 @@ from .dataclasses import SystemContext
 
 
 class HostConsole(ConsoleBase):
-    def __init__(self, command, system: SystemContext = None):
+    def __init__(self, command, system: SystemContext = None, raw_logfile: str = None):
         self.command = command
-        super().__init__(system=system)
+        super().__init__(system=system, raw_logfile=raw_logfile)
 
         self._requires_login = False
 

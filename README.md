@@ -124,10 +124,12 @@ Supported attributes:
   * `serial:`
     * `port: <port>` - Serial port to the device, e.g. `/dev/ttyUSB0`
     * `baudrate: <baudrate>` - Baudrate of the serial port, defaults to 115200
+    * `log_file: <file_path>` - File used to store the communication log
   * `ssh:`
     * `target: <ip/host>` - IP or hostname of the target device
     * `login: <login>` - SSH specific login
     * `password: <password>` - SSH specific password
+    * `log_file: <file_path>` - File used to store the communication log
 
 * `variables:` User defined variables, substituted in the **tests configuration** (pluma.yml) file only.
   * `my_var: my_value` - A sample variable, usable as `${my_var}`

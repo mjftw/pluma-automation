@@ -136,7 +136,7 @@ class TargetFactory:
                 'Missing "port" attributes for serial console in the configuration file')
 
         serial = SerialConsole(port=port, baud=int(serial_config.pop('baudrate') or 115200),
-                               system=system)
+                               system=system, raw_logfile=serial_config.pop('log_file'))
         serial_config.ensure_consumed()
         return serial
 
@@ -154,6 +154,7 @@ class TargetFactory:
                 'Missing "target" or "login" attributes for SSH console in the configuration file')
 
         password = ssh_config.pop('password', system.credentials.password)
+        log_file = ssh_config.pop('log_file')
         ssh_config.ensure_consumed()
 
         # Create a new system config to override default credentials
@@ -161,7 +162,7 @@ class TargetFactory:
         ssh_system.credentials.login = login
         ssh_system.credentials.password = password
 
-        return SSHConsole(target, system=ssh_system)
+        return SSHConsole(target, system=ssh_system, raw_logfile=log_file)
 
     @staticmethod
     def create_power_control(power_config: Configuration, console: ConsoleBase) -> PowerBase:

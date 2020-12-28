@@ -7,8 +7,10 @@ system:
 console:
   serial:
     port: /dev/ttyUSB0
+    log_file: serial.log
   ssh:
     target: 192.168.0.25
+    log_file: ssh.log
 
 power:
   uhubctl:

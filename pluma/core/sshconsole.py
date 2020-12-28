@@ -6,7 +6,7 @@ from .dataclasses import SystemContext
 
 
 class SSHConsole(HostConsole):
-    def __init__(self, target: str, system: SystemContext):
+    def __init__(self, target: str, system: SystemContext, raw_logfile: str = None):
         self.target = target
 
         if not target:
@@ -26,7 +26,7 @@ class SSHConsole(HostConsole):
                 ' -o PreferredAuthentications=password' \
                 ' -o PubkeyAuthentication=no -o StrictHostKeyChecking=no'
 
-        super().__init__(command, system=system)
+        super().__init__(command, system=system, raw_logfile=raw_logfile)
 
     def open(self):
         try:

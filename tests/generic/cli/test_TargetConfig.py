@@ -47,40 +47,44 @@ def test_TargetFactory_parse_credentials_should_work_with_empty_config():
 def test_TargetFactory_create_serial(serial_config):
     port = serial_config['port']
     baudrate = serial_config['baudrate']
+    log_file = serial_config['log_file']
     config = Configuration(copy.deepcopy(serial_config))
 
     console = TargetFactory.create_serial(config, SystemContext())
     assert console.port == port
     assert console.baud == baudrate
+    assert console.engine.raw_logfile == log_file
 
 
 def test_TargetFactory_create_serial_should_return_none_with_no_config():
     assert TargetFactory.create_serial(None, None) is None
 
 
-def test_TargetFactory_create_serial_should_error_with_no_port(serial_config):
-    serial_config['other'] = 'abc'
+def test_TargetFactory_create_serial_should_error_if_unconsumed(serial_config):
+    serial_config['unused'] = 'abc'
 
     with pytest.raises(ConfigurationError):
         TargetFactory.create_serial(Configuration(serial_config), SystemContext())
 
 
-def test_TargetFactory_create_serial_should_error_if_uncomsuned():
-    config = Configuration({'baudrate': 123})
+def test_TargetFactory_create_serial_should_error_with_no_port(serial_config):
+    serial_config.pop('port')
 
     with pytest.raises(TargetConfigError):
-        TargetFactory.create_serial(config, SystemContext())
+        TargetFactory.create_serial(Configuration(serial_config), SystemContext())
 
 
 def test_TargetFactory_create_ssh(ssh_config):
     target = ssh_config['target']
     login = ssh_config['login']
+    log_file = ssh_config['log_file']
     config = Configuration(copy.deepcopy(ssh_config))
 
     console = TargetFactory.create_ssh(config, SystemContext())
     assert console.target == target
     assert console.system.credentials.login == login
     assert console.system.credentials.password is None
+    assert console.engine.raw_logfile == log_file
 
 
 def test_TargetFactory_create_ssh_should_use_password(ssh_config):
