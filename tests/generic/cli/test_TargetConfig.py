@@ -46,7 +46,7 @@ def test_TargetFactory_parse_credentials_should_work_with_empty_config():
 
 def test_TargetFactory_create_serial(serial_config):
     port = serial_config['port']
-    baudrate = serial_config['baud']
+    baudrate = serial_config['baudrate']
     config = Configuration(copy.deepcopy(serial_config))
 
     console = TargetFactory.create_serial(config, SystemContext())
@@ -66,7 +66,7 @@ def test_TargetFactory_create_serial_should_error_with_no_port(serial_config):
 
 
 def test_TargetFactory_create_serial_should_error_if_uncomsuned():
-    config = Configuration({'baud': 123})
+    config = Configuration({'baudrate': 123})
 
     with pytest.raises(TargetConfigError):
         TargetFactory.create_serial(config, SystemContext())

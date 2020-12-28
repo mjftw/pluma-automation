@@ -123,6 +123,7 @@ Supported attributes:
 * `console:`
   * `serial:`
     * `port: <port>` - Serial port to the device, e.g. `/dev/ttyUSB0`
+    * `baudrate: <baudrate>` - Baudrate of the serial port, defaults to 115200
   * `ssh:`
     * `target: <ip/host>` - IP or hostname of the target device
     * `login: <login>` - SSH specific login

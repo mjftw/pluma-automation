@@ -135,7 +135,7 @@ class TargetFactory:
             raise TargetConfigError(
                 'Missing "port" attributes for serial console in the configuration file')
 
-        serial = SerialConsole(port=port, baud=int(serial_config.pop('baud') or 115200),
+        serial = SerialConsole(port=port, baud=int(serial_config.pop('baudrate') or 115200),
                                system=system)
         serial_config.ensure_consumed()
         return serial

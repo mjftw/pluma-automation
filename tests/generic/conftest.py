@@ -192,7 +192,7 @@ def ssh_config():
 def serial_config():
     return {
         'port': 'abc',
-        'baud': 123,
+        'baudrate': 123,
     }
 
 
