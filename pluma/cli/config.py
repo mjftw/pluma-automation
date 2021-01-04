@@ -104,6 +104,10 @@ class TestsProvider(ABC):
     def display_name(self) -> str:
         '''Return a human-friendly name for the provider'''
 
+    def consume_config(self, config: Configuration):
+        '''Consumes provider-specific settings from the configuration file'''
+        pass
+
     @abstractmethod
     def configuration_key(self) -> str:
         '''Return a unique key (string) representing the provider.
