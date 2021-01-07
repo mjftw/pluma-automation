@@ -9,6 +9,7 @@ from pluma.test.stock.deffuncs import sc_run_n_iterations
 from pluma.cli import Configuration, ConfigurationError, TestsConfigError, TestDefinition,\
     TestsProvider
 from pluma import Board
+from pluma.utils.helpers import get_file_and_line
 
 log = Logger()
 
@@ -172,7 +173,7 @@ class TestsConfig:
 
     @staticmethod
     def print_tests_definition(tests: List[TestDefinition], log_level: LogLevel = None):
-        if not log_level:
+        if log_level is None:
             log_level = LogLevel.INFO
 
         tests = sorted(
@@ -194,13 +195,13 @@ class TestsConfig:
                     printed_data = json.dumps(test_parameters)
                     log.log(f'          {printed_data}', level=log_level)
 
-            if log_level == LogLevel.IMPORTANT:
-                description = test.description()
-                
-                if description:
-                    log.log(f'          {description}\n', level=log_level)
-                else:
-                    log.log(f'          No description\n', color='yellow', level=log_level)
+            description = test.description
+            if description is not None:
+                log.log(f'          {description}\n', level=log_level)
+            else:
+                file, line = get_file_and_line(test.testclass)
+                file_loc_string = f'{file}:{line or "unknown"}' if file is not None else 'unknown location'
+                log.log(f'          No description - missing docstring at {file_loc_string} in {test.testclass.__name__}\n', color='yellow', level=log_level)
 
         log.log('', level=log_level)
 

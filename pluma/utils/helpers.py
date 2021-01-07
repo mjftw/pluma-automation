@@ -1,8 +1,12 @@
 import subprocess
 import json
 import re
+import inspect
+from pathlib import PurePath
 from datetime import datetime
+from typing import Tuple, Optional, Type, Any
 
+ROOT_PROJECT_DIRECTORY = PurePath(__file__).parents[2]
 
 def run_host_cmd(command, stdin=None, *args, **kwargs):
     ''' Wrapper for subprocess.Popen
@@ -66,3 +70,22 @@ def regex_filter_list(patterns, items, unique=None):
     if unique:
         gen = set(gen)
     return sorted(gen)
+
+def get_file_and_line(obj: Type[Any], relative_to: PurePath = ROOT_PROJECT_DIRECTORY) -> Tuple[Optional[PurePath], Optional[int]]:
+    '''
+    Get the filename and line number of a given
+    python object type (@obj). Useful for creating a stack trace.
+    The filename will be relative to @relative_to for easy printing.
+    The default value of @relative_to is the project root of this library.
+    '''
+    src_file = inspect.getsourcefile(obj)
+    if src_file is None:
+        return (None, None)
+    src_path = PurePath(src_file)
+    src_line = inspect.getsourcelines(obj)[1]
+    try:
+        rel_path = src_path.relative_to(relative_to)
+    except:
+        return (src_path, src_line)
+    else:
+        return (rel_path, src_line)

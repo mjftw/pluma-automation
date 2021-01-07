@@ -36,6 +36,6 @@ class TestBase():
         """Return a human-readable name for the test"""
         return self._test_name
 
-    def description(self):
-        return self.__doc__
-        
+    @classmethod
+    def description(cls):
+        return cls.__doc__

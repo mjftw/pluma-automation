@@ -1,9 +1,10 @@
 import yaml
 import json
 import os
-
+from pluma.test.testbase import TestBase
 from pluma.core.baseclasses import Logger
 from abc import ABC, abstractmethod
+from typing import Type
 
 log = Logger()
 
@@ -69,7 +70,7 @@ class Configuration:
 class TestDefinition():
     '''Data class representing a test, its class, and parameters.'''
 
-    def __init__(self, name: str, testclass: type, test_provider: object,
+    def __init__(self, name: str, testclass: Type[TestBase], test_provider: object,
                  parameter_sets: list = None, selected: bool = False):
         if not name or name == '':
             raise ValueError('Test name cannot be empty')
@@ -92,10 +93,9 @@ class TestDefinition():
     def __repr__(self):
         return f'{self.__module__}.{self.__class__.__name__}{self.parameter_sets or ""}'
 
+    @property
     def description(self):
-        desc = self.testclass.description(self.testclass)
-
-        return desc
+        return self.testclass.description()
 
 
 class TestsProvider(ABC):
