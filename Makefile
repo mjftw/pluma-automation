@@ -24,11 +24,17 @@ DOCKER_RUN_PRIVILEGED_ARGS := $(DOCKER_RUN_ARGS) --privileged -v /dev:/dev
 install:: ## Install Pluma
 		@./install.sh
 
+install-devtools::  ## Install Pluma additional development tools
+		@./install_devtools.sh
+
 test:: ## Run the Pluma Automation tests. Tests in tests/rpi are ignored if not on Raspberry Pi
 		@./tests/scripts/run_tests.sh
 
 test-coverage:: ## Check the code test coverage. Tests in tests/rpi are ignored if not on Raspberry Pi
 		@./tests/scripts/run_tests.sh --coverage
+
+typecheck:: ## Run static type checking against the Pluma source code
+		pyright pluma
 
 docker-build:: ## Build the docker image
 		@echo Building $(IMAGE_TAG)
