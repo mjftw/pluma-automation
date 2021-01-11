@@ -60,6 +60,7 @@ class ConsoleBase(HardwareBase, ABC):
 
     def wait_for_match(self, match: List[str], timeout=None) -> str:
         '''Wait a maximum duration of 'timeout' for a matching regex, and returns matched text'''
+        self.require_open()
         match_result = self.engine.wait_for_match(match=match, timeout=timeout)
         return match_result.text_matched
 

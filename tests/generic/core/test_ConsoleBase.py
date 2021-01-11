@@ -185,3 +185,13 @@ def test_ConsoleBase_send_control_calls_engines_send_control(basic_console):
 
     basic_console.send_control('C')
     basic_console.engine.send_control.assert_called_with('C')
+
+
+def test_ConsoleBase_should_call_open_for_wait_for_match(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.wait_for_match(['foo'])
+    basic_console.open.assert_called()
