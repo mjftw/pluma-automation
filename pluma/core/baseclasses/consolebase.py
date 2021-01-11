@@ -200,6 +200,7 @@ class ConsoleBase(HardwareBase, ABC):
         self.send_nonblocking(cmd=cmd, send_newline=send_newline, flush_before=flush_before)
 
     def send_control(self, char: str):
+        self.require_open()
         self.engine.send_control(char)
 
     def check_alive(self, timeout=10.0):
