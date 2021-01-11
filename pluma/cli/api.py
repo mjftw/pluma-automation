@@ -102,19 +102,16 @@ class Pluma:
         tests_config = PlumaConfig.load_configuration('Tests config', tests_config_path,
                                                       PlumaConfigPreprocessor(context.variables))
         default_log = f'pluma-{START_TIMESTAMP}.log'
-        context.board.log_file = tests_config.pop('log', default_log)
+        context.board.log_file = tests_config.pop_optional(str, 'log', default_log)
 
         return TestsConfig(tests_config, Pluma.tests_providers())
 
     @staticmethod
     def create_results_config(tests_config: TestsConfig) -> ResultsConfig:
-        defaults = {
-            'file': f'pluma-results-{START_TIMESTAMP}.json'
-        }
-        return tests_config.create_results_config(defaults)
+        return tests_config.create_results_config(default_file=f'pluma-results-{START_TIMESTAMP}.json')
 
     @staticmethod
-    def build_test_controller(tests_config: TestsConfig, target_context: TargetConfig,
+    def build_test_controller(tests_config: TestsConfig, target_context: PlumaContext,
                               show_tests_list: bool) -> TestController:
 
         tests_list_log_level = LogLevel.INFO if show_tests_list else LogLevel.NOTICE

@@ -33,7 +33,7 @@ class YoctoCBuilder(FileBuilder):
                                             install_dir=self.install_dir).build()
 
     @staticmethod
-    def install_yocto_sdk(yocto_sdk: str, install_dir: str = None) -> str:
+    def install_yocto_sdk(yocto_sdk: str, install_dir: Path = None) -> Path:
         '''Install the Yocto SDK in a directory and return the directory used'''
         if not yocto_sdk or not isinstance(yocto_sdk, str):
             raise ValueError('Null Yocto SDK file path provided')
@@ -63,9 +63,10 @@ class YoctoCBuilder(FileBuilder):
         return install_dir
 
     @staticmethod
-    def get_yocto_sdk_env_file(install_dir: str) -> Path:
+    def get_yocto_sdk_env_file(install_dir: Path) -> Path:
         '''Return the path to the Yocto SDK environment file in a folder or raise an error.'''
-        install_dir = Path(install_dir)
+        if not isinstance(install_dir, Path):
+            raise TypeError('install_dir must be a Path')
 
         env_file_pattern = 'environment-'
         for file in install_dir.iterdir():
@@ -77,7 +78,7 @@ class YoctoCBuilder(FileBuilder):
             f'installation folder ({install_dir})')
 
     @classmethod
-    def cross_compile(cls, target_name: str, env_file: str, sources: List[str],
+    def cross_compile(cls, target_name: str, env_file: Path, sources: List[str],
                       flags: List[str] = None, install_dir: str = None) -> str:
         '''Cross-compile a C application with a Yocto SDK environment file and return its path'''
         return cls.create_builder(target_name=target_name, env_file=env_file,
@@ -85,7 +86,7 @@ class YoctoCBuilder(FileBuilder):
                                   install_dir=install_dir).build()
 
     @staticmethod
-    def create_builder(target_name: str, env_file: str, sources: List[str],
+    def create_builder(target_name: str, env_file: Path, sources: List[str],
                        flags: List[str] = None, install_dir: str = None) -> FileBuilder:
         '''Return a builder to cross-compile a C application with a Yocto SDK'''
         if not target_name or not env_file or not sources:

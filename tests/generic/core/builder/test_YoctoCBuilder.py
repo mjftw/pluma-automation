@@ -10,7 +10,7 @@ def test_YoctoCBuilder_get_yocto_sdk_env_file_error_if_no_env_file():
         Path(tmpdir).joinpath('somefile').touch()
 
         with pytest.raises(TestsBuildError):
-            YoctoCBuilder.get_yocto_sdk_env_file(install_dir=tmpdir)
+            YoctoCBuilder.get_yocto_sdk_env_file(install_dir=Path(tmpdir))
 
 
 def test_YoctoCBuilder_get_yocto_sdk_env_file_finds_env_file():
@@ -18,7 +18,7 @@ def test_YoctoCBuilder_get_yocto_sdk_env_file_finds_env_file():
         env_file = Path(tmpdir).joinpath('environment-toolchainname')
         env_file.touch()
         env_returned = YoctoCBuilder.get_yocto_sdk_env_file(
-            install_dir=tmpdir)
+            install_dir=Path(tmpdir))
 
         assert env_file == env_returned
 

@@ -1,3 +1,5 @@
+from typing import List
+
 from pluma.core.baseclasses import Logger
 from pluma.cli import Configuration, DeviceActionRegistry
 from .config import TestDefinition, TestsProvider
@@ -9,13 +11,13 @@ class DeviceActionProvider(TestsProvider):
     def __init__(self):
         pass
 
-    def display_name(self):
+    def display_name(self) -> str:
         return 'Device actions'
 
-    def configuration_key(self):
+    def configuration_key(self) -> List[str]:
         return DeviceActionRegistry.all_actions()
 
-    def all_tests(self, key: str, config):
+    def all_tests(self, key: str, config: Configuration) -> List[TestDefinition]:
         parameter_set = None
         if config:
             if not isinstance(config, Configuration):

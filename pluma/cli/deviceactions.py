@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from typing import List
+from typing import List, Union
 
 from pluma.core.baseclasses import Logger, LogLevel
 from pluma import Board
@@ -50,8 +50,7 @@ class WaitAction(DeviceActionBase):
         self.duration = duration
 
         if self.duration < 0:
-            DeviceActionBase.parsing_error(self.__class__,
-                                           'Wait duration must be a positive number, '
+            DeviceActionBase.parsing_error('Wait duration must be a positive number, '
                                            'but got "{self.duration}" instead.')
 
     def validate(self):
@@ -63,9 +62,9 @@ class WaitAction(DeviceActionBase):
 
 @DeviceActionRegistry.register('wait_for_pattern')
 class WaitForPatternAction(DeviceActionBase):
-    def __init__(self, board: Board, pattern: str, timeout: int = None):
+    def __init__(self, board: Board, pattern: Union[str, List[str]], timeout: int = None):
         super().__init__(board)
-        self.pattern = pattern
+        self.pattern = pattern if isinstance(pattern, List) else [pattern]
         self.timeout = timeout if timeout else 15
 
     def execute(self):

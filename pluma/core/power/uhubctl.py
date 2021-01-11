@@ -1,6 +1,6 @@
 import os
 import subprocess
-from typing import List
+from typing import List, Optional
 
 from pluma.core.baseclasses import PowerBase
 from pluma.core import PDUError
@@ -9,7 +9,7 @@ from pluma.core import PDUError
 class Uhubctl(PowerBase):
     ''' USB hub power control using uhubctl utility '''
 
-    def __init__(self, location: str, port: int, reboot_delay: int = None):
+    def __init__(self, location: str, port: int, reboot_delay: Optional[int] = None):
         PowerBase.__init__(self, reboot_delay)
         self.location = location
         self.port = port

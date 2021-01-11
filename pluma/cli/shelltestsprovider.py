@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from pluma.core.baseclasses import Logger
 from pluma.test import ShellTest
@@ -12,23 +13,21 @@ class ShellTestsProvider(TestsProvider):
     def __init__(self):
         pass
 
-    def display_name(self):
+    def display_name(self) -> str:
         return 'Inline tests (pluma.yml, Shell)'
 
-    def configuration_key(self):
+    def configuration_key(self) -> str:
         return 'shell_tests'
 
-    def all_tests(self, key: str, config):
+    def all_tests(self, key: str, config: Configuration) -> List[TestDefinition]:
         if not config:
             return []
 
-        if isinstance(config, Configuration):
-            config = config.content()
-
+        config_dict = config.content()
         selected_tests = []
-        for test_name in config:
+        for test_name in config_dict:
             try:
-                test_parameters = config[test_name]
+                test_parameters = config_dict[test_name]
                 test_parameters['name'] = test_name
                 test = TestDefinition(test_name, testclass=ShellTest, test_provider=self,
                                       parameter_sets=[test_parameters], selected=True)

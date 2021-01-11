@@ -15,19 +15,19 @@ class PythonTestsProvider(TestsProvider):
     def __init__(self):
         pass
 
-    def display_name(self):
+    def display_name(self) -> str:
         return 'Core tests (testsuite, Python)'
 
-    def configuration_key(self):
+    def configuration_key(self) -> str:
         return 'core_tests'
 
-    def all_tests(self, key: str, config):
+    def all_tests(self, key: str, config: Configuration) -> List[TestDefinition]:
         if not config:
             return []
 
-        includes = config.pop('include') or []
-        excludes = config.pop('exclude') or []
-        parameters = config.pop('parameters') or Configuration()
+        includes = config.pop_optional(list, 'include') or []
+        excludes = config.pop_optional(list, 'exclude') or []
+        parameters = config.pop_optional(Configuration, 'parameters') or Configuration()
         all_tests = self.find_python_tests()
 
         PythonTestsProvider.validate_match_strings(all_tests,
@@ -53,7 +53,7 @@ class PythonTestsProvider(TestsProvider):
         config.ensure_consumed()
         return all_tests
 
-    def find_python_tests(self):
+    def find_python_tests(self) -> List[TestDefinition]:
         '''Search plugins module for classes inheriting TestBase and create TestDefinitions'''
 
         modules = {module_name: module
@@ -88,7 +88,7 @@ class PythonTestsProvider(TestsProvider):
         return False
 
     @staticmethod
-    def test_match(test_name: str, match_string: str):
+    def test_match(test_name: str, match_string: str) -> bool:
         test_name_list = test_name.split('.')
         match_string_list = match_string.split('.')
 

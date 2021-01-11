@@ -19,7 +19,7 @@ class DeviceActionBase(TestBase):
     def execute(self):
         pass
 
-    @staticmethod
+    @classmethod
     def parsing_error(cls, error: str):
         error_prefix = f'Invalid action for "{str(cls)}": '
         raise ValueError(error_prefix + error)

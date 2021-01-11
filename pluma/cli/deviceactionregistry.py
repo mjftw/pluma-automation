@@ -1,24 +1,26 @@
+from typing import Dict, Optional, List, Type, cast
+
 from pluma import Board
 from pluma.cli import DeviceActionBase
 
 
 class DeviceActionRegistry():
-    action_classes_dict = {}
+    action_classes_dict: Dict[str, Type[DeviceActionBase]] = {}
 
     @classmethod
     def register(cls, action_key: str):
-        def decorator(action_class: DeviceActionBase):
+        def decorator(action_class: Type[DeviceActionBase]):
             cls.register_class(action_class=action_class,
                                action_key=action_key)
             return action_class
         return decorator
 
     @classmethod
-    def register_class(cls, action_class: DeviceActionBase, action_key: str):
+    def register_class(cls, action_class: Type[DeviceActionBase], action_key: str):
         '''Register a class as DeviceAction, usable from the tests configuration file.'''
         if not issubclass(action_class, DeviceActionBase):
             raise Exception(
-                f'Error trying to register Action class "{action_class.__name__}" '
+                f'Error trying to register Action class "{cast(Type, action_class).__name__}" '
                 'which does not inherit DeviceActionBase')
 
         if action_key in cls.action_classes_dict:
@@ -30,11 +32,11 @@ class DeviceActionRegistry():
         cls.action_classes_dict[action_key] = action_class
 
     @classmethod
-    def all_actions(cls):
-        return cls.action_classes_dict.keys()
+    def all_actions(cls) -> List[str]:
+        return list(cls.action_classes_dict.keys())
 
     @classmethod
-    def create(cls, board: Board, action: str, args: dict = None):
+    def create(cls, board: Board, action: str, args: Optional[dict] = None):
         if not action or not isinstance(action, str):
             raise ValueError(
                 f'Invalid device action "{action}": Actions must be a single string')
@@ -58,6 +60,10 @@ class DeviceActionRegistry():
         return aclass(board, **args)
 
     @classmethod
-    def action_class(cls, action_key: str) -> type:
+    def action_class(cls, action_key: str) -> Type[DeviceActionBase]:
         '''Return the class associated with an action string'''
-        return cls.action_classes_dict.get(action_key)
+        action_class = cls.action_classes_dict.get(action_key)
+        if not action_class:
+            raise Exception(f'No action class exists for key "{action_key}"')
+
+        return action_class

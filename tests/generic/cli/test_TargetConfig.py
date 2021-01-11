@@ -19,7 +19,8 @@ def test_TargetConfig_create_context_should_error_on_unconsumed(target_config):
         TargetConfig.create_context(Configuration(invalid_config))
 
 
-def test_TargetConfig_create_context_passes_serial_console_to_create_power_control(serial_config):
+def test_TargetConfig_create_context_passes_serial_console_to_create_power_control(
+        serial_config):
     config = Configuration({'console': {'serial': serial_config}})
     context = TargetConfig.create_context(config)
     assert context.board.power is not None
@@ -70,7 +71,7 @@ def test_TargetFactory_create_serial_should_error_if_unconsumed(serial_config):
 def test_TargetFactory_create_serial_should_error_with_no_port(serial_config):
     serial_config.pop('port')
 
-    with pytest.raises(TargetConfigError):
+    with pytest.raises(ConfigurationError):
         TargetFactory.create_serial(Configuration(serial_config), SystemContext())
 
 
@@ -159,8 +160,8 @@ def test_TargetFactory_parse_variables_should_allow_variables_access():
     var2 = 'def'
     var2_value = 3
 
-    variables = TargetFactory.parse_variables(variables_config=Configuration({var1: var1_value,
-                                                                              var2: var2_value}))
+    vars_config = Configuration({var1: var1_value, var2: var2_value})
+    variables = TargetFactory.parse_variables(variables_config=vars_config)
     assert variables.get(var1) == var1_value
     assert variables.get(var2) == var2_value
 

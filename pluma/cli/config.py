@@ -1,10 +1,11 @@
 import yaml
 import json
 import os
-from pluma.test.testbase import TestBase
-from pluma.core.baseclasses import Logger
+from typing import Optional, List, TypeVar, Type, Union, overload, cast
 from abc import ABC, abstractmethod
-from typing import Type
+
+from pluma.core.baseclasses import Logger
+from pluma.test.testbase import TestBase
 
 log = Logger()
 
@@ -21,6 +22,9 @@ class TestsConfigError(Exception):
     pass
 
 
+T = TypeVar('T')
+
+
 class Configuration:
     def __init__(self, config: dict = None):
         config = config or {}
@@ -29,25 +33,69 @@ class Configuration:
 
         self.config = config
 
-    def pop(self, attribute, default=None):
-        value = self.pop_raw(attribute, default)
-        if isinstance(value, dict):
-            return Configuration(value)
+    @staticmethod
+    def __raise_error(error: str, context: Optional[str]):
+        prefix = f'in "{context}", ' if context else ''
+        raise ConfigurationError(f'Configuration error: {prefix}{error}')
+
+    def pop(self, datatype: Type[T], attribute: str, context: Optional[str] = None) -> T:
+        value = self.pop_optional(datatype, attribute, context=context)
+        if value is None:
+            self.__raise_error(
+                f'attribute "{attribute}" required', context)
 
         return value
 
-    def pop_raw(self, attribute, default=None):
+    # Type if default is None
+    @overload
+    def pop_optional(self, datatype: Type[T], attribute: str, default: None = None,
+                     context: Optional[str] = None) -> Optional[T]: ...
+
+    # Type if default is a non-None value
+    @overload
+    def pop_optional(self, datatype: Type[T], attribute: str,
+                     default: T, context: Optional[str] = None) -> T: ...
+
+    # Implementation
+    def pop_optional(self, datatype: Type[T], attribute: str, default: Optional[T] = None,
+                     context: Optional[str] = None) -> Union[T, Optional[T]]:
+        value = self.pop_raw(attribute, default)
+        if value is not None and not isinstance(value, datatype):
+            converted = False
+            try:
+                if datatype is int and isinstance(value, str):
+                    value = int(value)
+                    converted = True
+                elif datatype is Configuration and isinstance(value, dict):
+                    value = Configuration(value)
+                    converted = True
+            except ValueError:
+                pass
+
+            if not converted:
+                expected_type = datatype.__name__
+                if datatype is Configuration:
+                    expected_type = dict.__name__
+
+                self.__raise_error(f'attribute "{attribute}" should be a {expected_type} '
+                                   f'but got "{value}"', context)
+
+        return cast(Union[T, Optional[T]], value)
+
+    def pop_raw(self, attribute: str, default=None):
         return self.config.pop(attribute, default)
 
-    def read_and_keep(self, attribute):
+    def read_and_keep(self, attribute: str):
         return self.config.get(attribute)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.config)
 
-    def first(self):
+    def first(self) -> str:
         for key in self.config:
             return key
+
+        raise ConfigurationError('Configuration empty, cannot call "first"')
 
     def ensure_consumed(self):
         if len(self) > 0:
@@ -119,7 +167,7 @@ class TestsProvider(ABC):
         '''
 
     @abstractmethod
-    def all_tests(self, key: str, config: Configuration) -> list:
+    def all_tests(self, key: str, config: Configuration) -> List[TestDefinition]:
         '''Return all TestDefinition from the "config" provided by the sequence key "key"'''
 
 
