@@ -195,3 +195,83 @@ def test_ConsoleBase_should_call_open_for_wait_for_match(basic_console):
 
     basic_console.wait_for_match(['foo'])
     basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_read_all(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.read_all()
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_wait_for_bytes(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.wait_for_bytes()
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_wait_for_quiet(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.wait_for_quiet()
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_send_and_read(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.send_and_read('foo')
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_send_and_expect(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.send_and_expect('foo', ['bar'])
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_send_nonblocking(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.send_nonblocking('foo')
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_send(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.send('foo')
+    basic_console.open.assert_called()
+
+
+def test_ConsoleBase_should_call_open_for_send_control(basic_console):
+    basic_console.close()
+    assert not basic_console.is_open
+
+    basic_console.open = MagicMock(side_effect=basic_console.open)
+
+    basic_console.send_control('C')
+    basic_console.open.assert_called()
