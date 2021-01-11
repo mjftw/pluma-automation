@@ -213,7 +213,7 @@ def test_ConsoleBase_should_call_open_for_wait_for_bytes(basic_console):
 
     basic_console.open = MagicMock(side_effect=basic_console.open)
 
-    basic_console.wait_for_bytes()
+    basic_console.wait_for_bytes(0.1)
     basic_console.open.assert_called()
 
 
@@ -223,7 +223,7 @@ def test_ConsoleBase_should_call_open_for_wait_for_quiet(basic_console):
 
     basic_console.open = MagicMock(side_effect=basic_console.open)
 
-    basic_console.wait_for_quiet()
+    basic_console.wait_for_quiet(0.1)
     basic_console.open.assert_called()
 
 
