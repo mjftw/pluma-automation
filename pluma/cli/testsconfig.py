@@ -1,8 +1,8 @@
 import json
 import os
+import yaml
+import textwrap
 from pluma.cli.resultsconfig import ResultsConfig
-from typing import List, Union
-
 from pluma.core.baseclasses import Logger, LogLevel
 from pluma.test import TestController, TestRunner, TestBase
 from pluma.test.stock.deffuncs import sc_run_n_iterations
@@ -10,6 +10,7 @@ from pluma.cli import Configuration, ConfigurationError, TestsConfigError, TestD
     TestsProvider
 from pluma import Board
 from pluma.utils.helpers import get_file_and_line
+from typing import List, Union
 
 log = Logger()
 
@@ -168,11 +169,11 @@ class TestsConfig:
         '''Return only selected tests among all tests available'''
         return list(filter(lambda test: (test.selected), self.tests))
 
-    def print_tests(self, log_level: LogLevel = None):
-        TestsConfig.print_tests_definition(self.tests, log_level=log_level)
+    def print_tests(self, log_level: LogLevel = None, show_description: bool = False):
+        TestsConfig.print_tests_definition(self.tests, log_level=log_level, show_description=show_description)
 
     @staticmethod
-    def print_tests_definition(tests: List[TestDefinition], log_level: LogLevel = None):
+    def print_tests_definition(tests: List[TestDefinition], log_level: LogLevel = None, show_description: bool = False):
         if log_level is None:
             log_level = LogLevel.INFO
 
@@ -182,7 +183,9 @@ class TestsConfig:
         last_provider = None
         for test in tests:
             if test.provider != last_provider:
-                log.log(f'{os.linesep}{test.provider.display_name()}:',
+                if last_provider is not None:
+                    log.log('', level=log_level)
+                log.log(f'{test.provider.display_name()}:',
                         bold=True, level=log_level)
                 last_provider = test.provider
 
@@ -190,18 +193,24 @@ class TestsConfig:
             log.log(f'    [{check}] {test.name}',
                     color='green' if test.selected else 'normal', level=log_level)
 
-            for test_parameters in test.parameter_sets:
-                if test.selected and test_parameters:
-                    printed_data = json.dumps(test_parameters)
-                    log.log(f'          {printed_data}', level=log_level)
+            if show_description:
+                description = test.description
+                if description is not None:
+                    log.log(f'          {description}', level=log_level)
+                else:
+                    file, line = get_file_and_line(test.testclass)
+                    file_loc_string = f'{file}:{line or "unknown"}' if file is not None else 'unknown location'
+                    log.log(f'          No description - missing docstring at {file_loc_string} in {test.testclass.__name__}', color='yellow', level=log_level)
 
-            description = test.description
-            if description is not None:
-                log.log(f'          {description}\n', level=log_level)
-            else:
-                file, line = get_file_and_line(test.testclass)
-                file_loc_string = f'{file}:{line or "unknown"}' if file is not None else 'unknown location'
-                log.log(f'          No description - missing docstring at {file_loc_string} in {test.testclass.__name__}\n', color='yellow', level=log_level)
+                if len(test.parameter_sets) and test.parameter_sets[0] is not None:
+                    log.log('          Parameters:', level=log_level)
+                    if len(test.parameter_sets) > 1:
+                        serailized_parameters = yaml.safe_dump(test.parameter_sets)
+                    else:
+                        serailized_parameters = yaml.safe_dump(test.parameter_sets[0], indent=12)
+                    log.log(f'{textwrap.indent(serailized_parameters, "            ")}', level=log_level)
+                else:
+                    log.log('', level=log_level)
 
         log.log('', level=log_level)
 

@@ -61,7 +61,7 @@ class Pluma:
 
         log.log(
             'List of core and script tests available, based on the current configuration.')
-        tests_config.print_tests(log_level=LogLevel.IMPORTANT)
+        tests_config.print_tests(log_level=LogLevel.IMPORTANT, show_description=True)
 
     @staticmethod
     def execute_clean(force: bool = False):
@@ -118,7 +118,7 @@ class Pluma:
                               show_tests_list: bool) -> TestController:
 
         tests_list_log_level = LogLevel.INFO if show_tests_list else LogLevel.NOTICE
-        tests_config.print_tests(tests_list_log_level)
+        tests_config.print_tests(log_level=tests_list_log_level)
 
         return tests_config.create_test_controller(target_context.board)
 
