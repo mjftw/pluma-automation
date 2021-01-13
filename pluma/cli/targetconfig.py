@@ -190,6 +190,9 @@ class TargetFactory:
                 f'Unsupported power control type "{control_type}". Supported types: {POWER_LIST}')
 
         power_config = power_config.pop(control_type) or Configuration()
+
+        reboot_delay = power_config.pop('reboot_delay')
+
         power = None
         if control_type == POWER_SOFT:
             if not console:
@@ -198,7 +201,7 @@ class TargetFactory:
 
             on_cmd = power_config.pop('on_cmd')
             off_cmd = power_config.pop('off_cmd')
-            power = SoftPower(console, on_cmd=on_cmd, off_cmd=off_cmd)
+            power = SoftPower(console, on_cmd=on_cmd, off_cmd=off_cmd, reboot_delay=reboot_delay)
 
         elif control_type == POWER_IPPOWER9258:
             host = power_config.pop('host')
@@ -211,10 +214,10 @@ class TargetFactory:
             login = power_config.pop('login')
             password = power_config.pop('password')
             power = IPPowerPDU(outlet, host, netport=port,
-                               username=login, password=password)
+                               username=login, password=password, reboot_delay=reboot_delay)
         elif control_type == POWER_UHUBCTL:
             power = Uhubctl(location=power_config.pop('location'),
-                            port=power_config.pop('port'))
+                            port=power_config.pop('port'), reboot_delay=reboot_delay)
         else:
             raise Exception('Unreachable, unknown power controller')
 
