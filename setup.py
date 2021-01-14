@@ -66,11 +66,14 @@ if sys.version_info[:2] == (3, 6):
     requires.append('dataclasses')
 
 setuptools.setup(
-    name='pluma-automation',
+    name='pluma',
     version=get_version(),
     author='Witekio',
     author_email='mwebster@witekio.com',
-    description='Pluma Automation',
+    description=('Pluma Automation is a test and automation framework for embedded devices. '
+                 'Main contributors: '
+                 'Merlin Webster <mwebster@witekio.com> and '
+                 'Adrien Leravat <aleravat@witekio.com>.'),
     long_description=long_description,
     long_description_content_type=long_description_content_type,
     url='https://github.com/Witekio/pluma-automation/',
@@ -83,7 +86,6 @@ setuptools.setup(
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Operating System :: POSIX :: Linux',
-        'Development Status :: 3 - Alpha'
+        'Operating System :: POSIX :: Linux'
     ],
 )
