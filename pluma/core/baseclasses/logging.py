@@ -1,5 +1,6 @@
 import datetime
 import os
+import textwrap
 
 from enum import Enum, IntEnum
 from typing import Iterable
@@ -40,6 +41,8 @@ COLOR_STYLES = {
     'normal': STYLE_NORMAL,
 }
 
+""" Four space indenting """
+INDENT = '    '
 
 class LogLevel(IntEnum):
     _MAX = 6
@@ -87,34 +90,34 @@ class Logger(Singleton):
         self.held = False
         self.log_buffer = ''
 
-    def log(self, message, color=None, bold=False, newline=True, bypass_hold=False, level=None):
+    def log(self, message, color=None, bold=False, newline=True, indent=0, bypass_hold=False, level=None):
         if level is None:
             level = LogLevel.NOTICE
 
         if level < self.mode.min_level():
             return
 
-        self._log(message, color, bold, newline, bypass_hold)
+        self._log(message, color, bold, newline, indent, bypass_hold)
 
-    def debug(self, message):
-        self.log(message, level=LogLevel.DEBUG)
+    def debug(self, message, **kwargs):
+        self.log(message, level=LogLevel.DEBUG, **kwargs)
 
-    def notice(self, message):
-        self.log(message, level=LogLevel.NOTICE)
+    def notice(self, message, **kwargs):
+        self.log(message, level=LogLevel.NOTICE, **kwargs)
 
-    def info(self, message):
-        self.log(message, level=LogLevel.INFO)
+    def info(self, message, **kwargs):
+        self.log(message, level=LogLevel.INFO, **kwargs)
 
-    def warning(self, message):
-        self.log(message, color='yellow', level=LogLevel.WARNING)
+    def warning(self, message, **kwargs):
+        self.log(message, color='yellow', level=LogLevel.WARNING, **kwargs)
 
-    def important(self, message):
-        self.log(message, level=LogLevel.IMPORTANT)
+    def important(self, message, **kwargs):
+        self.log(message, level=LogLevel.IMPORTANT, **kwargs)
 
-    def error(self, message):
-        self.log(message, color='red', level=LogLevel.ERROR)
+    def error(self, message, **kwargs):
+        self.log(message, color='red', level=LogLevel.ERROR, **kwargs)
 
-    def _log(self, message, color=None, bold=False, newline=True, bypass_hold=False):
+    def _log(self, message, color=None, bold=False, newline=True, indent=0, bypass_hold=False, **kwargs):
         # Use message in list form for consistent multiline messages
         if not isinstance(message, str) and isinstance(message, Iterable):
             message = f'{os.linesep}    '.join(message)
@@ -130,6 +133,11 @@ class Logger(Singleton):
 
         if bold:
             message = f'{STYLE_BOLD}{message}{style_reset}'
+
+        if isinstance(indent, int):
+            message = textwrap.indent(message, INDENT * indent)
+        elif isinstance(indent, str):
+            message = textwrap.indent(message, indent)
 
         if newline:
             message += os.linesep

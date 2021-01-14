@@ -85,7 +85,7 @@ def get_file_and_line(obj: Type[Any], relative_to: PurePath = ROOT_PROJECT_DIREC
     src_line = inspect.getsourcelines(obj)[1]
     try:
         rel_path = src_path.relative_to(relative_to)
-    except:
+    except ValueError:
         return (src_path, src_line)
     else:
         return (rel_path, src_line)

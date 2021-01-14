@@ -1,7 +1,6 @@
 import json
 import os
 import yaml
-import textwrap
 from pluma.cli.resultsconfig import ResultsConfig
 from pluma.core.baseclasses import Logger, LogLevel
 from pluma.test import TestController, TestRunner, TestBase
@@ -190,25 +189,26 @@ class TestsConfig:
                 last_provider = test.provider
 
             check = 'x' if test.selected else ' '
-            log.log(f'    [{check}] {test.name}',
-                    color='green' if test.selected else 'normal', level=log_level)
+            log.log(f'[{check}] {test.name}',
+                    indent=1, color='green' if test.selected else 'normal', level=log_level)
 
             if show_description:
                 description = test.description
                 if description is not None:
-                    log.log(f'          {description}', level=log_level)
+                    log.log(description, level=log_level, indent=2)
                 else:
                     file, line = get_file_and_line(test.testclass)
                     file_loc_string = f'{file}:{line or "unknown"}' if file is not None else 'unknown location'
-                    log.log(f'          No description - missing docstring at {file_loc_string} in {test.testclass.__name__}', color='yellow', level=log_level)
+                    log.log(f'No description - missing docstring at {file_loc_string} in {test.testclass.__name__}',
+                        color='yellow', level=log_level, indent=2)
 
                 if len(test.parameter_sets) and test.parameter_sets[0] is not None:
-                    log.log('          Parameters:', level=log_level)
+                    log.log('Parameters:', level=log_level, indent=2)
                     if len(test.parameter_sets) > 1:
                         serailized_parameters = yaml.safe_dump(test.parameter_sets)
                     else:
                         serailized_parameters = yaml.safe_dump(test.parameter_sets[0], indent=12)
-                    log.log(f'{textwrap.indent(serailized_parameters, "            ")}', level=log_level)
+                    log.log(serailized_parameters, level=log_level, indent=3)
                 else:
                     log.log('', level=log_level)
 
