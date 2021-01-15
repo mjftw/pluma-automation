@@ -1,7 +1,7 @@
 import pexpect
 import pexpect.fdpexpect
 
-from typing import List
+from typing import List, IO
 
 from pluma.core.baseclasses import ConsoleEngine, MatchResult
 from .logging import Logger
@@ -15,31 +15,24 @@ class PexpectEngine(ConsoleEngine):
                          raw_logfile=raw_logfile)
         self._pex = None
 
-    def _open_process(self, command: str):
-        self._pex = pexpect.spawn(command, timeout=0.01)
-        self._on_opened()
+    def _open_process(self, command: str, log_file: IO = None):
+        self._pex = pexpect.spawn(command, timeout=0.01, logfile=log_file)
 
-    def _open_fd(self, fd):
+    def _open_fd(self, fd: int, log_file: IO = None):
         self._pex = pexpect.fdpexpect.fdspawn(fd=fd, timeout=0.5)
-        self._on_opened()
-
-    def _on_opened(self):
-        self._pex.timeout = 0.5
-
-        if self.raw_logfile:
-            assert self._raw_logfile_fd
-            self._pex.logfile = self._raw_logfile_fd
+        # Use the logfile_read to avoid seeing commands sent twice for TTYs.
+        self._pex.logfile_read = log_file
 
     @property
     def is_open(self):
         return bool(self._pex and self._pex.isalive())
 
     def _close_fd(self):
-        # Nothing to do, FD closed at a higher level
+        self._pex.close()
         self._pex = None
 
     def _close_process(self):
-        self._pex.sendintr()
+        self._pex.close()
         self._pex = None
 
     def send(self, data: str):

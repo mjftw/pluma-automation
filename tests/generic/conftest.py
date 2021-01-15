@@ -29,10 +29,10 @@ class MockConsoleEngine(ConsoleEngine):
         self.sent = ''
         self.received = ''
 
-    def _open_process(self, command: str):
+    def _open_process(self, command: str, log_file=None):
         self._is_open = True
 
-    def _open_fd(self, fd):
+    def _open_fd(self, fd, log_file=None):
         self._is_open = True
 
     @property
@@ -134,6 +134,7 @@ PtyPair = namedtuple('PtyPair', ['main', 'secondary'])
 def pty_pair() -> PtyPair:
     main, secondary = pty.openpty()
     return PtyPair(OsFile(main, 'ascii'), OsFile(secondary, 'ascii'))
+
 
 @fixture
 def pty_pair_raw() -> PtyPair:

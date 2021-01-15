@@ -29,7 +29,7 @@ class OsFile:
     def write(self, msg):
         if self.encoding:
             msg = msg.encode(self.encoding)
-        print('msg', msg)
+
         return os.write(self.fd, msg)
 
 

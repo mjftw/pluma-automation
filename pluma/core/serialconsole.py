@@ -43,8 +43,10 @@ class SerialConsole(ConsoleBase):
             return
 
         self._ser.flush()
+
+        # Closes the serial too
         super().close()
-        self._ser.close()
+
         self._ser = None
         self.log("Closed serial", level=LogLevel.DEBUG)
 

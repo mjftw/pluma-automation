@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import List, IO
 
 from pluma.utils import datetime_to_timestamp
 from .consoleexceptions import ConsoleCannotOpenError
@@ -36,7 +36,7 @@ class ConsoleEngine(ABC):
         self.linesep = linesep or '\n'
         self.encoding = encoding or 'ascii'
         self.raw_logfile = raw_logfile or default_raw_logfile
-        self._raw_logfile_fd = None
+        self._raw_logfile_io = None
         self._console_type = None
         self._reception_buffer = ''
 
@@ -44,21 +44,24 @@ class ConsoleEngine(ABC):
     def console_type(self):
         return self._console_type
 
-    def open(self, console_cmd: str = None, console_fd=None):
+    def open(self, console_cmd: str = None, console_fd: int = None):
         if (console_cmd is None and console_fd is None) or (
                 console_cmd and console_fd):
             raise ValueError('Either "console_cmd" or "console_fd" must be provided.')
 
         if self.raw_logfile:
-            os.makedirs(os.path.dirname(self.raw_logfile), exist_ok=True)
-            self._raw_logfile_fd = open(self.raw_logfile, 'wb')
+            dirpath = os.path.dirname(self.raw_logfile)
+            if dirpath:
+                os.makedirs(dirpath, exist_ok=True)
+
+            self._raw_logfile_io = open(self.raw_logfile, 'wb')
 
         try:
             if console_cmd:
-                self._open_process(command=console_cmd)
+                self._open_process(command=console_cmd, log_file=self._raw_logfile_io)
                 self._console_type = ConsoleType.Process
             else:
-                self._open_fd(fd=console_fd)
+                self._open_fd(fd=console_fd, log_file=self._raw_logfile_io)
                 self._console_type = ConsoleType.FileDescriptor
 
             assert self.is_open
@@ -66,11 +69,11 @@ class ConsoleEngine(ABC):
             raise ConsoleCannotOpenError
 
     @abstractmethod
-    def _open_process(self, command: str):
+    def _open_process(self, command: str, log_file: IO = None):
         '''Open a console by spawning a process'''
 
     @abstractmethod
-    def _open_fd(self, fd):
+    def _open_fd(self, fd: int, log_file: IO = None):
         '''Open a specific file descriptor as the console'''
 
     @property
@@ -90,9 +93,9 @@ class ConsoleEngine(ABC):
         else:
             raise Exception(f'Unknown console_type {self.console_type}')
 
-        if self._raw_logfile_fd:
-            self._raw_logfile_fd.close()
-            self._raw_logfile_fd = None
+        if self._raw_logfile_io:
+            self._raw_logfile_io.close()
+            self._raw_logfile_io = None
 
     @abstractmethod
     def _close_fd(self):

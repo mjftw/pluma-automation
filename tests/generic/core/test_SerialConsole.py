@@ -1,6 +1,9 @@
-import time
+import os
 import pytest
+import tempfile
+import time
 from pluma.core.exceptions import ConsoleLoginFailedError
+from pluma.core import SerialConsole
 
 from utils import nonblocking
 from loremipsum import loremipsum
@@ -314,3 +317,18 @@ def test_SerialConsole_login_except_on_wrong_username_match(serial_console_proxy
 
 def test_SerialConsole_does_not_require_login(serial_console_proxy):
     assert serial_console_proxy.console.requires_login is True
+
+
+def test_SerialConsole_raw_log_file(pty_pair):
+    received = 'abcd\nefgh'
+
+    with tempfile.NamedTemporaryFile() as tmpfile:
+        console = SerialConsole(port=os.ttyname(pty_pair.secondary.fd), baud=115200,
+                                encoding='utf-8', raw_logfile=tmpfile.name)
+
+        console.open()
+        pty_pair.main.write(received)
+        console.read_all()
+        console.close()
+
+        assert tmpfile.read() == received.encode(console.engine.encoding)
