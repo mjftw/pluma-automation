@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, IO
+from typing import List, IO, Optional
 
 from pluma.utils import datetime_to_timestamp
 from .consoleexceptions import ConsoleCannotOpenError
@@ -26,8 +26,8 @@ class MatchResult:
 
 
 class ConsoleEngine(ABC):
-    def __init__(self, linesep: str = None, encoding: str = None,
-                 raw_logfile: str = None):
+    def __init__(self, linesep: Optional[str] = None, encoding: Optional[str] = None,
+                 raw_logfile: Optional[str] = None):
         timestamp = datetime_to_timestamp(datetime.now())
         default_raw_logfile = os.path.join(
             '/tmp', 'pluma',
@@ -44,7 +44,7 @@ class ConsoleEngine(ABC):
     def console_type(self):
         return self._console_type
 
-    def open(self, console_cmd: str = None, console_fd: int = None):
+    def open(self, console_cmd: Optional[str] = None, console_fd: Optional[int] = None):
         if (console_cmd is None and console_fd is None) or (
                 console_cmd and console_fd):
             raise ValueError('Either "console_cmd" or "console_fd" must be provided.')
@@ -69,11 +69,11 @@ class ConsoleEngine(ABC):
             raise ConsoleCannotOpenError
 
     @abstractmethod
-    def _open_process(self, command: str, log_file: IO = None):
+    def _open_process(self, command: str, log_file: Optional[IO] = None):
         '''Open a console by spawning a process'''
 
     @abstractmethod
-    def _open_fd(self, fd: int, log_file: IO = None):
+    def _open_fd(self, fd: int, log_file: Optional[IO] = None):
         '''Open a specific file descriptor as the console'''
 
     @property
@@ -136,7 +136,8 @@ class ConsoleEngine(ABC):
         '''Read and return all data available on the console'''
 
     @abstractmethod
-    def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
+    def wait_for_match(self, match: List[str],
+                       timeout: Optional[int] = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
 
     @property

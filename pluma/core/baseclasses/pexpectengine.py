@@ -1,7 +1,7 @@
 import pexpect
 import pexpect.fdpexpect
 
-from typing import List, IO
+from typing import List, IO, Optional
 
 from pluma.core.baseclasses import ConsoleEngine, MatchResult
 from .logging import Logger
@@ -10,15 +10,16 @@ log = Logger()
 
 
 class PexpectEngine(ConsoleEngine):
-    def __init__(self, linesep: str = None, encoding: str = None, raw_logfile: str = None):
+    def __init__(self, linesep: Optional[str] = None, encoding: Optional[str] = None,
+                 raw_logfile: Optional[str] = None):
         super().__init__(linesep=linesep, encoding=encoding,
                          raw_logfile=raw_logfile)
         self._pex = None
 
-    def _open_process(self, command: str, log_file: IO = None):
+    def _open_process(self, command: str, log_file: Optional[IO] = None):
         self._pex = pexpect.spawn(command, timeout=0.01, logfile=log_file)
 
-    def _open_fd(self, fd: int, log_file: IO = None):
+    def _open_fd(self, fd: int, log_file: Optional[IO] = None):
         self._pex = pexpect.fdpexpect.fdspawn(fd=fd, timeout=0.5)
         # Use the logfile_read to avoid seeing commands sent twice for TTYs.
         self._pex.logfile_read = log_file
@@ -62,7 +63,8 @@ class PexpectEngine(ConsoleEngine):
 
         return received
 
-    def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
+    def wait_for_match(self, match: List[str],
+                       timeout: Optional[int] = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
         assert self.is_open
 
