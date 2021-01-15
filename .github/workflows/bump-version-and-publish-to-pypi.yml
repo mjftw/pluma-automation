@@ -24,6 +24,9 @@ jobs:
     needs: bump-version
     steps:
     - uses: actions/checkout@master
+      with:
+        fetch-depth: 0
+
     - name: Set up Python 3.8
       uses: actions/setup-python@v1
       with:
