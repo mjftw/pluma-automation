@@ -1,7 +1,7 @@
 import time
 import json
 import os
-from typing import List
+from typing import Optional, List, Tuple, Union
 from abc import ABC, abstractmethod
 
 from pluma.core.dataclasses import SystemContext
@@ -58,17 +58,18 @@ class ConsoleBase(HardwareBase, ABC):
         self.require_open()
         return self.engine.read_all(preserve_read_buffer=preserve_read_buffer)
 
-    def wait_for_match(self, match: List[str], timeout=None) -> str:
+    def wait_for_match(self, match: List[str], timeout=None) -> Optional[str]:
         '''Wait a maximum duration of 'timeout' for a matching regex, and returns matched text'''
         self.require_open()
         match_result = self.engine.wait_for_match(match=match, timeout=timeout)
         return match_result.text_matched
 
-    def wait_for_bytes(self, timeout: int = None, sleep_time: int = None,
+    def wait_for_bytes(self, timeout: Optional[float] = None,
+                       sleep_time: Optional[float] = None,
                        start_bytes: int = None) -> bool:
         '''Wait for data to be received on the console.'''
-        timeout = timeout or 10.0
-        sleep_time = sleep_time or 0.1
+        timeout = timeout if timeout is not None else 10.0
+        sleep_time = sleep_time if sleep_time is not None else 0.1
 
         self.require_open()
 
@@ -126,8 +127,9 @@ class ConsoleBase(HardwareBase, ABC):
         # Timeout
         return False
 
-    def send_and_read(self, cmd: str, timeout: int = None,
-                      sleep_time: int = None, quiet_time: int = None,
+    def send_and_read(self, cmd: str, timeout: Optional[float] = None,
+                      sleep_time: Optional[float] = None,
+                      quiet_time: Optional[float] = None,
                       send_newline: bool = True, flush_before: bool = True) -> str:
         '''Send a command/data on the console, wait for quiet and return the data received'''
         timeout = timeout if timeout is not None else 3
@@ -140,17 +142,18 @@ class ConsoleBase(HardwareBase, ABC):
                             timeout=timeout)
         return self.read_all()
 
-    def send_and_expect(self, cmd: str, match: list,
-                        excepts: list = None, timeout: int = None,
-                        send_newline: bool = True, flush_before: bool = True) -> (str, str):
+    def send_and_expect(self, cmd: str, match: Union[str, List[str]],
+                        excepts: Union[str, List[str]] = None,
+                        timeout: int = None, send_newline: bool = True,
+                        flush_before: bool = True) -> Tuple[Optional[str], Optional[str]]:
         '''Send a command/data on the console, and wait for one of "expects" patterns.'''
         match = match or []
         excepts = excepts or []
         timeout = timeout if timeout is not None else 5
 
-        if not isinstance(match, list):
+        if isinstance(match, str):
             match = [match]
-        if not isinstance(excepts, list):
+        if isinstance(excepts, str):
             excepts = [excepts]
 
         watches = []
@@ -160,21 +163,21 @@ class ConsoleBase(HardwareBase, ABC):
         self.send_nonblocking(cmd, send_newline=send_newline,
                               flush_before=flush_before)
 
-        match = self.engine.wait_for_match(timeout=timeout, match=watches)
+        result = self.engine.wait_for_match(timeout=timeout, match=watches)
 
-        if match.regex_matched:
-            debug_match_str = f'<<matched expects={watches}>>{match.regex_matched}<</matched>>'
+        if result.regex_matched:
+            debug_match_str = f'<<matched expects={watches}>>{result.regex_matched}<</matched>>'
         else:
             debug_match_str = f'<<not_matched expects={watches}>>'
 
-        self.log(f'<<received>>{match.text_received}{debug_match_str}<</received>>',
+        self.log(f'<<received>>{result.text_received}{debug_match_str}<</received>>',
                  force_echo=False, level=LogLevel.DEBUG)
 
-        if match.regex_matched in excepts:
-            self.error(f'Matched [{match.regex_matched}] is in exceptions list {excepts}',
+        if result.regex_matched in excepts:
+            self.error(f'Matched [{result.regex_matched}] is in exceptions list {excepts}',
                        exception=ConsoleExceptionKeywordReceivedError)
 
-        return (match.text_received, match.text_matched)
+        return (result.text_received, result.text_matched)
 
     def send_nonblocking(self, cmd: str,
                          send_newline: bool = True,

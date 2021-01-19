@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import List, IO, Optional
+from typing import List, IO, Optional, Union
 
 from pluma.utils import datetime_to_timestamp
 from .consoleexceptions import ConsoleCannotOpenError
@@ -20,9 +20,9 @@ class ConsoleType(Enum):
 
 @dataclass(frozen=True)
 class MatchResult:
-    regex_matched: str
-    text_matched: str
-    text_received: str
+    regex_matched: Optional[str]
+    text_matched: Optional[str]
+    text_received: Optional[str]
 
 
 class ConsoleEngine(ABC):
@@ -46,7 +46,7 @@ class ConsoleEngine(ABC):
 
     def open(self, console_cmd: Optional[str] = None, console_fd: Optional[int] = None):
         if (console_cmd is None and console_fd is None) or (
-                console_cmd and console_fd):
+                console_cmd is not None and console_fd is not None):
             raise ValueError('Either "console_cmd" or "console_fd" must be provided.')
 
         if self.raw_logfile:
@@ -57,12 +57,14 @@ class ConsoleEngine(ABC):
             self._raw_logfile_io = open(self.raw_logfile, 'wb')
 
         try:
-            if console_cmd:
+            if console_cmd is not None:
                 self._open_process(command=console_cmd, log_file=self._raw_logfile_io)
                 self._console_type = ConsoleType.Process
-            else:
+            elif console_fd is not None:
                 self._open_fd(fd=console_fd, log_file=self._raw_logfile_io)
                 self._console_type = ConsoleType.FileDescriptor
+            else:
+                raise Exception('Unreachable branch')
 
             assert self.is_open
         except Exception:
@@ -110,7 +112,7 @@ class ConsoleEngine(ABC):
         '''Send data on the console.'''
 
     @abstractmethod
-    def send_control(self, char: bytes):
+    def send_control(self, char: str):
         '''Send control character on the console.'''
 
     def send_line(self, data: str):
@@ -136,7 +138,7 @@ class ConsoleEngine(ABC):
         '''Read and return all data available on the console'''
 
     @abstractmethod
-    def wait_for_match(self, match: List[str],
+    def wait_for_match(self, match: Union[str, List[str]],
                        timeout: Optional[int] = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
 
@@ -156,20 +158,14 @@ class ConsoleEngine(ABC):
 
     def decode(self, text: bytes) -> str:
         '''Decode text using the engine's encoding'''
-        if not text:
-            return text
-
         if not isinstance(text, bytes):
-            raise ValueError('"text" should be of type "bytes"')
+            raise TypeError('"text" should be of type "bytes"')
 
         return text.decode(self.encoding, 'replace')
 
     def encode(self, text: str) -> bytes:
         '''Encode text using the engine's encoding'''
-        if not text:
-            return text
-
         if not isinstance(text, str):
-            raise ValueError('"text" should be of type "str"')
+            raise TypeError('"text" should be of type "str"')
 
         return text.encode(self.encoding)

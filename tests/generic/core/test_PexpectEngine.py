@@ -89,7 +89,7 @@ def test_PexpectEngine_wait_for_match_return_match_and_if_matched(pty_pair):
 
 def test_PexpectEngine_wait_for_match_return_received_if_not_matched(pty_pair):
     pattern = r'not going to match'
-    received = f'abcd abcdyz'
+    received = 'abcd abcdyz'
 
     engine = PexpectEngine()
     engine.open(console_fd=pty_pair.main.fd)
@@ -150,6 +150,15 @@ def test_PexpectEngine_send_control_sends_correct_bytes(pty_pair_raw):
     engine.send_control('C')
 
     assert pty_pair_raw.main.read(timeout=0.5) == b'^C'
+
+
+def test_PexpectEngine_error_on_control_longer_than_one_char(pty_pair_raw):
+    engine = PexpectEngine()
+    engine.open(console_fd=pty_pair_raw.main.fd)
+
+    with pytest.raises(ValueError):
+        engine.send_control('CC')
+
 
 def test_PexpectEngine_error_on_invalid_code(pty_pair_raw):
     engine = PexpectEngine()

@@ -1,7 +1,7 @@
 import pexpect
 import pexpect.fdpexpect
 
-from typing import List, IO, Optional
+from typing import List, IO, Optional, Union
 
 from pluma.core.baseclasses import ConsoleEngine, MatchResult
 from .logging import Logger
@@ -42,6 +42,9 @@ class PexpectEngine(ConsoleEngine):
 
     def send_control(self, char: str):
         assert self.is_open
+        if len(char) > 1:
+            raise ValueError('Only a single character can be sent as control code, '
+                             f'but got {char}')
 
         code_ascii_value = ord(char.upper()) - ord('A') + 1
         if code_ascii_value not in range(1, 27):
@@ -63,14 +66,14 @@ class PexpectEngine(ConsoleEngine):
 
         return received
 
-    def wait_for_match(self, match: List[str],
+    def wait_for_match(self, match: Union[str, List[str]],
                        timeout: Optional[int] = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
         assert self.is_open
 
         timeout = timeout or self._pex.timeout
 
-        if not isinstance(match, list):
+        if isinstance(match, str):
             match = [match]
 
         log.debug(f'Waiting up to {timeout}s for patterns: {match}...')
@@ -98,9 +101,11 @@ class PexpectEngine(ConsoleEngine):
             matched_regex = None
             matched_text = None
 
-        return MatchResult(regex_matched=matched_regex,
-                           text_matched=self.decode(matched_text),
-                           text_received=self.decode(received))
+        text_matched = self.decode(matched_text) if matched_text else None
+        text_received = self.decode(received) if received else None
+
+        return MatchResult(regex_matched=matched_regex, text_matched=text_matched,
+                           text_received=text_received)
 
     def interact(self):
         assert self.is_open
