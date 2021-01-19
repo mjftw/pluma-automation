@@ -3,6 +3,7 @@ import json
 import os
 from typing import Optional, List, TypeVar, Type, Union, overload, cast
 from abc import ABC, abstractmethod
+from yaml.parser import ParserError
 
 from pluma.core.baseclasses import Logger
 from pluma.test.testbase import TestBase
@@ -197,7 +198,7 @@ class PlumaConfig:
         except FileNotFoundError as e:
             raise ConfigurationError(
                 f'{name} "{yaml_file_path}" does not exist') from e
-        except yaml.parser.ParserError as e:
+        except ParserError as e:
             raise ConfigurationError(
                 f'Error while parsing {name} "{yaml_file_path}":'
                 f'{os.linesep}{e}') from e
