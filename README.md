@@ -424,6 +424,11 @@ If you plan on using the tests to check your changes, it is recommended that you
 
 ## Contributing
 
+Main contributors:
+
+* Merlin Webster <mwebster@witekio.com>
+* Adrien Leravat <aleravat@witekio.com>
+
 If you would like to contribute to developing Pluma then check out our [Contributing Guide](./docs/how-to-contribute.md) to find out how.
 
 We also have a code style guide for you to read before you begin development: [Style Guide](./docs/style-guide.md)

@@ -70,10 +70,8 @@ setuptools.setup(
     version=get_version(),
     author='Witekio',
     author_email='mwebster@witekio.com',
-    description=('Pluma Automation is a test and automation framework for embedded devices. '
-                 'Main contributors: '
-                 'Merlin Webster <mwebster@witekio.com> and '
-                 'Adrien Leravat <aleravat@witekio.com>.'),
+    description=('Pluma Automation is a test and automation framework for embedded devices, '
+        'with a focus on ease of use.'),
     long_description=long_description,
     long_description_content_type=long_description_content_type,
     url='https://github.com/Witekio/pluma-automation/',
