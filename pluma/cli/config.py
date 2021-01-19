@@ -29,6 +29,9 @@ class Configuration:
 
         self.config = config
 
+    def popitem(self):
+        return self.config.popitem()
+
     def pop(self, attribute, default=None):
         value = self.pop_raw(attribute, default)
         if isinstance(value, dict):

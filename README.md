@@ -130,6 +130,8 @@ Supported attributes:
     * `login: <login>` - SSH specific login
     * `password: <password>` - SSH specific password
     * `log_file: <file_path>` - File used to store the communication log
+  * `<other_console_name>:`
+    * `type: <ssh or serial>` - SSH and serial consoles are supported. You need to add the SSH or serial properties defined above, depending on the type of console used.
 
 * `variables:` User defined variables, substituted in the **tests configuration** (pluma.yml) file only.
   * `my_var: my_value` - A sample variable, usable as `${my_var}`

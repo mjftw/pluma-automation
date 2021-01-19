@@ -92,13 +92,13 @@ def test_Board_console_setter_should_reset_consoles_if_not_in_the_list():
 
 
 @pytest.mark.parametrize('consoles', [[], 'abc', {'abc': None}, {'abc': 'def'}])
-def test_Board_should_error_on_invalid_console_type(consoles):
-    with pytest.raises(ValueError):
+def test_Board_constructor_should_error_on_invalid_console_type(consoles):
+    with pytest.raises(TypeError):
         Board(name='board', console=consoles)
 
 
 @pytest.mark.parametrize('consoles', [[], 'abc', {'abc': None}, {'abc': 'def'}])
 def test_Board_consoles_setter_should_error_on_invalid_type(consoles):
     board = Board(name='board')
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         board.consoles = consoles
