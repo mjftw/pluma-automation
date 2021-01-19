@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional, Union
 
 from pluma.core.baseclasses import Logger
 from pluma import HostConsole, Board
@@ -12,7 +12,7 @@ class ShellTest(TestBase):
     '''Execute script within the target (or host) shell'''
     shell_test_index = 0
 
-    def __init__(self, board: Board, script: str, name: str = None,
+    def __init__(self, board: Board, script: Union[str, List[str]], name: str = None,
                  should_match_regex: List[str] = None,  should_not_match_regex: List[str] = None,
                  run_on_host: bool = False, timeout: int = None,  runs_in_shell: bool = True,
                  login_automatically: bool = False):
@@ -24,9 +24,10 @@ class ShellTest(TestBase):
         self.runs_in_shell = runs_in_shell
         self.login_automatically = login_automatically
 
-        self.scripts = script
-        if not isinstance(self.scripts, list):
-            self.scripts = [self.scripts]
+        if isinstance(script, str):
+            self.scripts = [script]
+        else:
+            self.scripts = script
 
         if name:
             self._test_name += f'[{name}]'
@@ -43,8 +44,9 @@ class ShellTest(TestBase):
     def test_body(self):
         self.run_commands()
 
-    def run_commands(self, console: ConsoleBase = None,
-                     scripts: str = None, timeout: int = None) -> str:
+    def run_commands(self, console: Optional[ConsoleBase] = None,
+                     scripts: List[str] = None,
+                     timeout: Optional[int] = None) -> str:
         scripts = scripts or self.scripts
 
         if console is None:
@@ -65,7 +67,8 @@ class ShellTest(TestBase):
 
         return output
 
-    def run_command(self, console: ConsoleBase, script: str, timeout: int = None) -> str:
+    def run_command(self, console: ConsoleBase, script: str,
+                    timeout: Optional[int] = None) -> str:
         timeout = timeout or self.timeout
 
         if self.runs_in_shell:

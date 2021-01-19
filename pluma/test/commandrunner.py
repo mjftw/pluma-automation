@@ -1,6 +1,6 @@
 import os
 import re
-from typing import List
+from typing import List, Optional
 
 from pluma.core.baseclasses import ConsoleBase, Logger
 from pluma.test import TestingException, TaskFailed
@@ -94,7 +94,8 @@ class CommandRunner():
 
     @staticmethod
     def check_output(test_name: str, command: str, output: str,
-                     match_regex: List[str], error_regex: List[str]):
+                     match_regex: Optional[List[str]] = None,
+                     error_regex: Optional[List[str]] = None):
         '''Check that command output includes expected content, and no error content'''
         if CommandRunner.output_matches_any_pattern(error_regex, output):
             CommandRunner.log_error(test_name=test_name, sent=command, output=output,
