@@ -39,6 +39,9 @@ class Configuration:
         prefix = f'in "{context}", ' if context else ''
         raise ConfigurationError(f'Configuration error: {prefix}{error}')
 
+    def popitem(self):
+        return self.config.popitem()
+
     def pop(self, datatype: Type[T], attribute: str, context: Optional[str] = None) -> T:
         value = self.pop_optional(datatype, attribute, context=context)
         if value is None:

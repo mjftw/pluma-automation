@@ -166,7 +166,22 @@ def test_Configuration_pop_config_fails_if_not_config():
         config.pop(Configuration, attribute)
 
 
-def test_Configuration_ensure_consume_should_error_on_uncomsumed(minimal_config):
+def test_TestsConfig_popitem_returns_last_keyvalue_pair(minimal_config):
+    assert minimal_config.popitem() == (ATTRIBUTE2, ATTRIBUTE2_DICT)
+
+
+def test_TestsConfig_popitem_removes_item(minimal_config):
+    minimal_config.popitem()
+    assert len(minimal_config) == len(MINIMAL_CONFIG_DICT)-1
+
+
+def test_TestsConfig_popitem_raise_error_if_empty():
+    config = Configuration()
+    with pytest.raises(KeyError):
+        config.popitem()
+
+
+def test_Configuration_ensure_consume_should_error_on_unconsumed(minimal_config):
     with pytest.raises(ConfigurationError):
         minimal_config.ensure_consumed()
 

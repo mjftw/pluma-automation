@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Optional, Tuple
+from typing import Dict, Optional
 from copy import deepcopy
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU
@@ -30,11 +30,15 @@ class TargetConfig:
 
     @staticmethod
     def _create_context(config: Configuration) -> PlumaContext:
-        variables = TargetFactory.parse_variables(config.pop_optional(Configuration, 'variables'))
-        system = TargetFactory.parse_system_context(config.pop_optional(Configuration, 'system'))
-        serial, ssh = TargetFactory.create_consoles(
+        variables = TargetFactory.parse_variables(
+            config.pop_optional(Configuration, 'variables'))
+        system = TargetFactory.parse_system_context(
+            config.pop_optional(Configuration, 'system'))
+        consoles = TargetFactory.create_consoles(
             config.pop_optional(Configuration, 'console'), system)
 
+        serial = consoles.get('serial')
+        ssh = consoles.get('ssh')
         if not serial and not ssh:
             log.warning("No console defined in the device configuration file")
 
@@ -42,12 +46,6 @@ class TargetConfig:
             config.pop_optional(Configuration, 'power'), ssh or serial)
 
         config.ensure_consumed()
-
-        consoles = {}
-        if serial:
-            consoles['serial'] = serial
-        if ssh:
-            consoles['ssh'] = ssh
 
         board = Board('Test board', console=consoles, power=power,
                       system=system)
@@ -117,15 +115,36 @@ class TargetFactory:
 
     @staticmethod
     def create_consoles(config: Optional[Configuration],
-                        system: SystemContext) -> Tuple[Optional[ConsoleBase],
-                                                        Optional[ConsoleBase]]:
+                        system: SystemContext) -> Dict[str, ConsoleBase]:
         if not config:
-            return None, None
+            return {}
 
-        serial = TargetFactory.create_serial(config.pop_optional(Configuration, 'serial'), system)
-        ssh = TargetFactory.create_ssh(config.pop_optional(Configuration, 'ssh'), system)
+        consoles = {}
+        serial = TargetFactory.create_serial(
+            config.pop_optional(Configuration, 'serial'), system)
+        if serial:
+            consoles['serial'] = serial
+
+        ssh = TargetFactory.create_ssh(
+            config.pop_optional(Configuration, 'ssh'), system)
+        if ssh:
+            consoles['ssh'] = ssh
+
+        while(config):
+            console_name, console_dict = config.popitem()
+            console_config = Configuration(console_dict)
+            console_type = console_config.pop(str, 'type')
+            if console_type == 'ssh':
+                console = TargetFactory.create_ssh(console_config, system)
+            elif console_type == 'serial':
+                console = TargetFactory.create_serial(console_config, system)
+            else:
+                raise TargetConfigError(f'Unknown console type {console_type}. '
+                                        'Console type must be "ssh" or "serial"')
+            consoles[console_name] = console
+
         config.ensure_consumed()
-        return serial, ssh
+        return consoles
 
     @staticmethod
     def create_serial(serial_config: Optional[Configuration],
