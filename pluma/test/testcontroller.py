@@ -137,7 +137,7 @@ class TestController():
             'TestController': {
                 'settings': {},
                 'stats': {},
-                'results': {},
+                'results': [],
                 'results_summary': {},
                 'test_settings': {}
             }
@@ -161,8 +161,6 @@ class TestController():
         self.stats['num_tests_pass'] = 0
         self.stats['num_tests_total'] = 0
 
-        self.results = []
-
     @property
     def settings(self):
         ''' The Testcontroller settings control control its behaviour. '''
@@ -182,7 +180,7 @@ class TestController():
         self.data['TestController']['stats'] = stats
 
     @property
-    def results(self):
+    def results(self) -> list:
         ''' Saved test runtime results.
 
         ll the data values saved to the "data" dicts of
@@ -191,7 +189,7 @@ class TestController():
         return self.data['TestController']['results']
 
     @results.setter
-    def results(self, results):
+    def results(self, results: list):
         self.data['TestController']['results'] = results
 
     @property

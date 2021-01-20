@@ -3,9 +3,8 @@ import traceback
 import time
 import re
 from abc import ABC, abstractmethod
-import inspect
 from copy import copy
-from typing import Iterable, List, Union
+from typing import Iterable, Optional, List, Union
 
 from pluma import utils
 from pluma.core.baseclasses import LogLevel, Logger
@@ -17,7 +16,7 @@ global_logger = Logger()
 class TestRunnerBase(ABC):
     '''Run a set of tests a single time and collect their settings and saved data'''
 
-    def __init__(self, board: Board = None, tests: Iterable[TestBase] = None,
+    def __init__(self, board: Board = None, tests: Union[TestBase, Iterable[TestBase]] = None,
                  email_on_fail: bool = None, continue_on_fail: bool = None):
         self.board = board
         self.email_on_fail = email_on_fail if email_on_fail is not None else False
@@ -35,7 +34,7 @@ class TestRunnerBase(ABC):
             self.release_log = global_logger.release
 
         self._tests = []
-        if not isinstance(tests, Iterable):
+        if isinstance(tests, TestBase):
             tests = [tests]
         self.tests = tests
 
@@ -104,7 +103,7 @@ class TestRunnerBase(ABC):
         }
 
     @property
-    def tests(self):
+    def tests(self) -> List[TestBase]:
         return self._tests
 
     @tests.setter
@@ -115,15 +114,6 @@ class TestRunnerBase(ABC):
 
     def add_test(self, test: TestBase):
         '''Add a test to the test list. Handles tests with same name by appending a number'''
-        # Check if user accidentally passed in a class inheriting
-        # TestBase, instead of an instance of that class.
-        if inspect.isclass(test) and (test is TestBase or issubclass(test, TestBase)):
-            raise AttributeError(
-                'test passed in is TestBase class or a subclass of it.  '
-                'It should be an object instance of either TestBase or '
-                'a subclass.  Possible cause: tests list passed to TestRunner'
-                ' contains <testClassName> instead of <testClassName>().'
-            )
         # Verify that test is an instance of class TestBase.
         if not isinstance(test, TestBase):
             raise AttributeError(
@@ -167,7 +157,7 @@ class TestRunnerBase(ABC):
             self.log("Removed test: {}".format(str(test)))
             self.tests.remove(test)
 
-    def _get_test_by_name(self, test_name: str) -> TestBase:
+    def _get_test_by_name(self, test_name: str) -> Optional[TestBase]:
         tests = [t for t in self.tests if str(t) == test_name]
         if len(tests) > 1:
             raise TestingException('Found multiple tests with name {}'.format(
@@ -175,7 +165,8 @@ class TestRunnerBase(ABC):
 
         return None if not tests else tests[0]
 
-    def _run_tasks(self, tests: Union[TestBase, List[TestBase]], task_names: Union[str, List[str]]):
+    def _run_tasks(self, tests: Union[TestBase, Iterable[TestBase]],
+                   task_names: Union[str, List[str]]):
         '''Run all tasks in task_names on test in tests if the test has a task with that name'''
         if isinstance(task_names, str):
             task_names = [task_names]
