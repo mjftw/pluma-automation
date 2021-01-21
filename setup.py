@@ -58,6 +58,8 @@ requires = [
     'pytest-xdist',
     'coverage',
     'pyyaml>=5.1',
+    'atlassian-python-api',
+    'python-magic',
     'deprecated'
 ]
 
