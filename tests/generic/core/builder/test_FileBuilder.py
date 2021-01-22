@@ -8,9 +8,10 @@ from pluma.core.builder import CommandFileBuilder, TestsBuildError
 
 def test_CommandFileBuilder_output_filepath_use_target_and_install_dir():
     output = 'myfile'
-    install_dir = 'mydir'
-    builder = CommandFileBuilder(target_name=output, install_dir=install_dir, build_command='')
-    assert builder.output_filepath == Path(install_dir).resolve() / output
+    install_dir = Path('mydir')
+    builder = CommandFileBuilder(target_name=output, install_dir=install_dir,
+                                 build_command='')
+    assert builder.output_filepath.resolve() == install_dir.resolve() / output
 
 
 def test_CommandFileBuilder_build_should_error_if_file_not_built():
@@ -60,9 +61,10 @@ def test_CommandFileBuilder_build_should_error_on_command_error():
 
 
 def test_CommandFileBuilder_install_folder_should_be_local():
-    install = 'mybuild'
-    builder = CommandFileBuilder(target_name='abc', build_command='xyz', install_dir=install)
-    assert str(builder.install_dir).startswith(str(Path.cwd()))
+    install = Path('mybuild')
+    builder = CommandFileBuilder(target_name='abc', build_command='xyz',
+                                 install_dir=install)
+    assert str(builder.install_dir.resolve()).startswith(str(Path.cwd()))
 
 
 def test_CommandFileBuilder_install_folder_should_defaults_to_local_build_folder():

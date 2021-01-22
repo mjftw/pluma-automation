@@ -1,4 +1,6 @@
 import os
+from pluma.core.board import Board
+from typing import Tuple
 
 from pluma.test import TestBase, CommandRunner
 from pluma.core.baseclasses import ConsoleBase
@@ -14,11 +16,11 @@ class ExecutableTest(TestBase):
     the target directly, skipping the deployment.
     '''
 
-    def __init__(self, board, executable_file, host_file=True, run_on_host=False, timeout=None):
+    def __init__(self, board: Board, executable_file: str, host_file: bool = True,
+                 run_on_host: bool = False, timeout: float = None):
         abs_path = os.path.abspath(executable_file)
-        super().__init__(test_name=str(abs_path))
-        self.board = board
-        self.executable_file = abs_path
+        super().__init__(board, test_name=executable_file)
+        self.executable_file = os.path.abspath(executable_file)
         self.host_file = host_file
         self.run_on_host = run_on_host
         self.timeout = timeout if timeout is not None else 5
@@ -65,14 +67,15 @@ class ExecutableTest(TestBase):
                 filepath = self.executable_file
 
         try:
-            CommandRunner.run(test_name=self, command=filepath,
+            CommandRunner.run(test_name=self._test_name, command=filepath,
                               console=console, timeout=self.timeout)
         finally:
             if temp_folder:
-                CommandRunner.run(test_name=self, command=f'rm -r {temp_folder}',
+                CommandRunner.run(test_name=self._test_name, command=f'rm -r {temp_folder}',
                                   console=console, timeout=self.timeout)
 
-    def deploy_file_in_tmp_folder(self, file: str, console: ConsoleBase) -> (str, str):
+    def deploy_file_in_tmp_folder(self, file: str,
+                                  console: ConsoleBase) -> Tuple[str, str]:
         '''Deploy the file, and returns its full path and containing temporary folder'''
         temp_folder = random_dir_name()
         CommandRunner.run(test_name=self._test_name,

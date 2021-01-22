@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+from typing import Optional
 
 from abc import ABC, abstractmethod
 from pathlib import Path
@@ -17,9 +18,9 @@ class FileBuilder(ABC):
     '''Generic builder class to generate an output file from inputs.'''
     DEFAULT_BUILD_ROOT = Path.cwd()/'.pluma-build'
 
-    def __init__(self, target_name: str, install_dir: str = None):
+    def __init__(self, target_name: str, install_dir: Optional[Path] = None):
         self.target_name = target_name
-        self.install_dir = Path(install_dir or FileBuilder.DEFAULT_BUILD_ROOT).resolve()
+        self.install_dir = install_dir or FileBuilder.DEFAULT_BUILD_ROOT.resolve()
 
     @abstractmethod
     def build(self) -> str:
@@ -70,7 +71,8 @@ class FileBuilder(ABC):
 class CommandFileBuilder(FileBuilder):
     '''Generic builder class to generate an output file from inputs.'''
 
-    def __init__(self, target_name: str, build_command: str, install_dir: str = None):
+    def __init__(self, target_name: str, build_command: str,
+                 install_dir: Optional[Path] = None):
         super().__init__(target_name, install_dir)
         self.build_command = build_command
 

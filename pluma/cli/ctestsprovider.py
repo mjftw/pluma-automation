@@ -26,15 +26,15 @@ class CTestsProvider(TestsProvider):
 
         toolchain_file = config.pop_optional(str, 'yocto_sdk')
         env_file = config.pop_optional(str, 'source_environment')
-        if not toolchain_file and not env_file:
-            raise TestsConfigError(
-                'Missing \'yocto_sdk\' or \'source_environment\' attributes for C tests')
 
         if env_file:
             env_file = Path(env_file)
-        else:
-            install_dir = YoctoCBuilder.install_yocto_sdk(cast(str, toolchain_file))
+        elif toolchain_file:
+            install_dir = YoctoCBuilder.install_yocto_sdk(Path(toolchain_file))
             env_file = YoctoCBuilder.get_yocto_sdk_env_file(install_dir)
+        else:
+            raise TestsConfigError(
+                'Missing "yocto_sdk" or "source_environment" attributes for C tests')
 
         all_tests = []
         tests_config = config.pop_optional(

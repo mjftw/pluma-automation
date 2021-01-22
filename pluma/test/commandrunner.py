@@ -10,7 +10,7 @@ log = Logger()
 
 class CommandRunner():
     @staticmethod
-    def run(test_name: str, console: ConsoleBase, command: str, timeout: int = None) -> str:
+    def run(test_name: str, console: ConsoleBase, command: str, timeout: float = None) -> str:
         '''Run a command in a Shell context'''
         retcode_token = 'pluma-retcode='
         base_command = command
@@ -141,7 +141,7 @@ class CommandRunner():
         return int(retcode_match.group(1))
 
     @staticmethod
-    def output_matches_all_patterns(patterns: List[str], output: str) -> bool:
+    def output_matches_all_patterns(patterns: Optional[List[str]], output: str) -> bool:
         '''Return whether the output matches all patterns or not.'''
         if not patterns:
             return True
@@ -156,7 +156,7 @@ class CommandRunner():
         return True
 
     @staticmethod
-    def output_matches_any_pattern(patterns: List[str], output: str) -> bool:
+    def output_matches_any_pattern(patterns: Optional[List[str]], output: str) -> bool:
         '''Return whether the output matches any of the pattern or not.'''
         if not patterns:
             return False

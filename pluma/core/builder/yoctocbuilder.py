@@ -1,6 +1,6 @@
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 from pluma.core.builder import FileBuilder, CommandFileBuilder, TestsBuildError
 from pluma.core.baseclasses import Logger
@@ -18,13 +18,13 @@ class YoctoCBuilder(FileBuilder):
     DEFAULT_TOOLCHAIN_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto-toolchain'
     DEFAULT_EXEC_INSTALL_DIR = FileBuilder.DEFAULT_BUILD_ROOT/'yocto-c'
 
-    def __init__(self, target_name: str, env_file: str, sources: List[str],
-                 flags: List[str] = None, install_dir: str = None):
+    def __init__(self, target_name: str, sources: List[str],
+                 flags: List[str] = None, env_file: str = None, install_dir: str = None):
         super().__init__(target_name)
-        self.env_file = env_file
+        self.env_file = Path(env_file) if env_file else None
+        self.install_dir = Path(install_dir) if install_dir else None
         self.sources = sources
         self.flags = flags
-        self.install_dir = install_dir
 
     def build(self) -> str:
         return YoctoCBuilder.create_builder(target_name=self.target_name,
@@ -33,12 +33,11 @@ class YoctoCBuilder(FileBuilder):
                                             install_dir=self.install_dir).build()
 
     @staticmethod
-    def install_yocto_sdk(yocto_sdk: str, install_dir: Path = None) -> Path:
+    def install_yocto_sdk(yocto_sdk: Path, install_dir: Path = None) -> Path:
         '''Install the Yocto SDK in a directory and return the directory used'''
-        if not yocto_sdk or not isinstance(yocto_sdk, str):
+        if not yocto_sdk or not isinstance(yocto_sdk, Path):
             raise ValueError('Null Yocto SDK file path provided')
 
-        yocto_sdk = Path(yocto_sdk).resolve()
         if not yocto_sdk.is_file():
             raise TestsBuildError(
                 f'Yocto SDK "{yocto_sdk}" does not exist.')
@@ -79,15 +78,16 @@ class YoctoCBuilder(FileBuilder):
 
     @classmethod
     def cross_compile(cls, target_name: str, env_file: Path, sources: List[str],
-                      flags: List[str] = None, install_dir: str = None) -> str:
+                      flags: List[str] = None, install_dir: Path = None) -> str:
         '''Cross-compile a C application with a Yocto SDK environment file and return its path'''
         return cls.create_builder(target_name=target_name, env_file=env_file,
                                   sources=sources, flags=flags,
                                   install_dir=install_dir).build()
 
     @staticmethod
-    def create_builder(target_name: str, env_file: Path, sources: List[str],
-                       flags: List[str] = None, install_dir: str = None) -> FileBuilder:
+    def create_builder(target_name: str, sources: List[str],
+                       flags: List[str] = None, env_file: Optional[Path] = None,
+                       install_dir: Optional[Path] = None) -> FileBuilder:
         '''Return a builder to cross-compile a C application with a Yocto SDK'''
         if not target_name or not env_file or not sources:
             raise ValueError('Null target, environment or sources passed')
@@ -95,15 +95,13 @@ class YoctoCBuilder(FileBuilder):
         if not install_dir:
             install_dir = YoctoCBuilder.DEFAULT_EXEC_INSTALL_DIR
 
-        if isinstance(sources, list):
-            sources = ' '.join(sources)
-
         if not flags:
-            flags = ''
-        elif isinstance(flags, list):
-            flags = ' '.join(flags)
+            flags_str = ''
+        else:
+            flags_str = ' '.join(flags)
 
+        sources_str = ' '.join(sources)
         output_filepath = Path(install_dir).joinpath(target_name)
-        command = f'. {env_file} && $CC {sources} {flags} -o {output_filepath}'
+        command = f'. {env_file} && $CC {sources_str} {flags_str} -o {output_filepath}'
         return CommandFileBuilder(target_name=target_name, build_command=command,
                                   install_dir=install_dir)

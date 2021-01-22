@@ -30,7 +30,7 @@ def test_YoctoCBuilder_create_builder_should_error_on_missing_sources():
     flags = ['-d', '-a']
 
     with pytest.raises(ValueError):
-        YoctoCBuilder.create_builder(target_name=target, env_file=env_file,
+        YoctoCBuilder.create_builder(target_name=target, env_file=Path(env_file),
                                      flags=flags, sources=sources)
 
 
@@ -39,7 +39,7 @@ def test_YoctoCBuilder_create_builder_should_error_on_missing_env_file():
     sources = ['main.c', 'other.c']
     flags = ['-d', '-a']
 
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         YoctoCBuilder.create_builder(target_name=target,
                                      flags=flags, sources=sources)
 
@@ -50,7 +50,7 @@ def test_YoctoCBuilder_create_builder_should_return_builder():
     sources = ['main.c', 'other.c']
     flags = ['-d', '-a']
 
-    builder = YoctoCBuilder.create_builder(target_name=target, env_file=env_file,
+    builder = YoctoCBuilder.create_builder(target_name=target, env_file=Path(env_file),
                                            flags=flags, sources=sources)
     assert isinstance(builder, FileBuilder)
 
@@ -63,9 +63,9 @@ def test_YoctoCBuilder_create_builder_should_generate_correct_build_command():
     src_string = ' '.join(sources)
     flags_string = ' '.join(flags)
 
-    builder = YoctoCBuilder.create_builder(target_name=target, env_file=env_file,
+    builder = YoctoCBuilder.create_builder(target_name=target, env_file=Path(env_file),
                                            flags=flags, sources=sources)
 
-    target_fullpath = Path(builder.install_dir)/target
+    target_fullpath = builder.install_dir/target
     expected_cmd = f'. {env_file} && $CC {src_string} {flags_string} -o {target_fullpath}'
     assert builder.build_command == expected_cmd
