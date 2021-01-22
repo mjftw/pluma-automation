@@ -1,5 +1,4 @@
 import subprocess
-import json
 import re
 import inspect
 from pathlib import PurePath
@@ -8,7 +7,9 @@ from typing import Tuple, Optional, Type, Any
 
 ROOT_PROJECT_DIRECTORY = PurePath(__file__).parents[2]
 
-def run_host_cmd(command, stdin=None, *args, **kwargs):
+
+def run_host_cmd(command: str, stdin: Optional[str] = None, *args,
+                 **kwargs) -> Tuple[str, int]:
     ''' Wrapper for subprocess.Popen
     Runs the command @command in a subproccess
     returns a tuple of (<command output>, <returncode>)
@@ -22,32 +23,10 @@ def run_host_cmd(command, stdin=None, *args, **kwargs):
     if kwargs:
         kwargs_final.update(kwargs)
 
-    child_proc = subprocess.Popen(
-        command.split(), *args, **kwargs_final)
-    return (child_proc.communicate(
-        input=None if not stdin else bytes(stdin, 'utf-8')
-    )[0].decode('utf-8'), child_proc.returncode)
+    child_proc = subprocess.Popen(command.split(), *args, **kwargs_final)
+    output, _ = child_proc.communicate(input=None if not stdin else stdin)
 
-
-def format_json_tinydb(db_file, db_output_file):
-    '''
-    Formats a TinyDB json database with line separators and key ordering
-    so that it can be committed to version control.
-    '''
-    with open(db_file) as f:
-        db_str = f.read()
-
-    db_dict = json.loads(db_str)
-
-    # Convert ids from str to int so that they order properly
-    for t in db_dict:
-        db_dict[t] = {int(x): db_dict[t][x] for x in db_dict[t].keys()}
-
-    db_json = json.dumps(db_dict,
-                         sort_keys=True, indent=4, separators=(',', ': '))
-
-    with open(db_output_file, 'w') as f:
-        f.writelines(db_json)
+    return output, child_proc.returncode
 
 
 def timestamp_to_datetime(timestamp):
@@ -71,7 +50,12 @@ def regex_filter_list(patterns, items, unique=None):
         gen = set(gen)
     return sorted(gen)
 
-def get_file_and_line(obj: Type[Any], relative_to: PurePath = ROOT_PROJECT_DIRECTORY) -> Tuple[Optional[PurePath], Optional[int]]:
+
+FileAndLine = Tuple[Optional[PurePath], Optional[int]]
+
+
+def get_file_and_line(obj: Type[Any],
+                      relative_to: PurePath = ROOT_PROJECT_DIRECTORY) -> FileAndLine:
     '''
     Get the filename and line number of a given
     python object type (@obj). Useful for creating a stack trace.

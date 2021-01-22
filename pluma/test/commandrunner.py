@@ -75,11 +75,13 @@ class CommandRunner():
         '''Return a formatted log output regarding a command and its output'''
         formatted_output = ''
         first_line = True
-        for line in output.splitlines():
-            if not first_line:
-                formatted_output += '            '
-            formatted_output += f'{line}{os.linesep}'
-            first_line = False
+
+        if output:
+            for line in output.splitlines():
+                if not first_line:
+                    formatted_output += '            '
+                formatted_output += f'{line}{os.linesep}'
+                first_line = False
 
         sent_line = f'  Sent:     $ {sent}{os.linesep}'
         match_regex_line = f'  Expected: {match_regex}{os.linesep}' if match_regex else ''

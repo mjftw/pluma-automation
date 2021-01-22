@@ -1,3 +1,6 @@
+# type: ignore
+# TODO: Drop file, or fix type check
+
 import time
 import re
 import sys

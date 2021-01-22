@@ -27,5 +27,4 @@ jobs:
     - name: Install development tools
       run: ./install_devtools.sh
     - name: Run static type checking
-    # Ignore failure for now, until it passes
-      run: make typecheck | true
+      run: make typecheck

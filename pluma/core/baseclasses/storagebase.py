@@ -31,25 +31,29 @@ class StorageBase(HardwareBase, metaclass=ABCMeta):
         ''' Switch storage to the board '''
 
     def mount_host(self, devnode, mountpoint=None, max_tries=5):
+        if max_tries <= 0:
+            raise ValueError(f'Invalid tries number "{max_tries}"')
+
         mountpoint = mountpoint or self.host_mountpoint
         if not mountpoint:
             self.host_mountpoint = tempfile.mkdtemp(suffix='_lab')
             mountpoint = self.host_mountpoint
 
         success = False
-        for _ in range(0, max_tries):
+        output = ''
+        ret = None
+        for _ in range(max_tries):
             # Check if already mounted
             (output, ret) = run_host_cmd('mount')
 
             # Unmount if mounted
-            if re.search('{}.*'.format(devnode), output):
+            if re.search(fr'{devnode}.*', output):
                 self.unmount_host(devnode)
 
             if not os.path.isdir(mountpoint):
                 os.mkdir(mountpoint)
 
-            (output, ret) = run_host_cmd(
-                'mount {} {}'.format(devnode, mountpoint))
+            (output, ret) = run_host_cmd(f'mount {devnode} {mountpoint}')
             if ret == 0:
                 success = True
                 break
@@ -57,8 +61,8 @@ class StorageBase(HardwareBase, metaclass=ABCMeta):
             time.sleep(1)
 
         if not success:
-            raise StorageError('Failed to mount {} at {} after {} attemps: [ERR-{}] {}'.format(
-                devnode, mountpoint, max_tries, ret, output))
+            raise StorageError(f'Failed to mount {devnode} at {mountpoint} after '
+                               f'{max_tries} attemps: [ERR-{ret}] {output}')
 
     def unmount_host(self, devnode, max_tries=5):
         # Check if actually mounted, and unmount until not mounted

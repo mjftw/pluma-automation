@@ -44,6 +44,7 @@ COLOR_STYLES = {
 """ Four space indenting """
 INDENT = '    '
 
+
 class LogLevel(IntEnum):
     _MAX = 6
     ERROR = 5
@@ -63,15 +64,17 @@ class LogMode(Enum):
 
     def min_level(self) -> LogLevel:
         if self == LogMode.SILENT:
-            return int(LogLevel._MAX)
-        if self == LogMode.QUIET:
-            return int(LogLevel.IMPORTANT)
-        if self == LogMode.NORMAL:
-            return int(LogLevel.INFO)
-        if self == LogMode.VERBOSE:
-            return int(LogLevel.NOTICE)
-        if self == LogMode.DEBUG:
-            return int(LogLevel.DEBUG)
+            return LogLevel._MAX
+        elif self == LogMode.QUIET:
+            return LogLevel.IMPORTANT
+        elif self == LogMode.NORMAL:
+            return LogLevel.INFO
+        elif self == LogMode.VERBOSE:
+            return LogLevel.NOTICE
+        elif self == LogMode.DEBUG:
+            return LogLevel.DEBUG
+        else:
+            raise Exception(f'Unreachable: unhandled log level {self}')
 
 
 class Logger(Singleton):
@@ -90,7 +93,8 @@ class Logger(Singleton):
         self.held = False
         self.log_buffer = ''
 
-    def log(self, message, color=None, bold=False, newline=True, indent=0, bypass_hold=False, level=None):
+    def log(self, message, color=None, bold=False, newline=True,
+            indent=0, bypass_hold=False, level=None):
         if level is None:
             level = LogLevel.NOTICE
 
@@ -117,7 +121,8 @@ class Logger(Singleton):
     def error(self, message, **kwargs):
         self.log(message, color='red', level=LogLevel.ERROR, **kwargs)
 
-    def _log(self, message, color=None, bold=False, newline=True, indent=0, bypass_hold=False, **kwargs):
+    def _log(self, message, color=None, bold=False, newline=True, indent=0,
+             bypass_hold=False, **kwargs):
         # Use message in list form for consistent multiline messages
         if not isinstance(message, str) and isinstance(message, Iterable):
             message = f'{os.linesep}    '.join(message)

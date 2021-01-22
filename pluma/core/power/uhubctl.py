@@ -26,8 +26,7 @@ class Uhubctl(PowerBase):
                 '--location', self.location,
                 '--port', str(self.port)]
 
-    @PowerBase.on
-    def on(self):
+    def _handle_power_on(self):
         try:
             subprocess.check_output(self.uhubctl_command(action='on'),
                                     stderr=subprocess.STDOUT)
@@ -40,8 +39,7 @@ class Uhubctl(PowerBase):
                 'or running pluma as root/sudo, if required.'
                 f'{os.linesep}{os.linesep}{e.output.decode()}')
 
-    @PowerBase.off
-    def off(self):
+    def _handle_power_off(self):
         try:
             subprocess.check_output(self.uhubctl_command(action='off'),
                                     stderr=subprocess.STDOUT)

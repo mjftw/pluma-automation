@@ -1,15 +1,15 @@
+from abc import ABC, abstractmethod
+
 from .hardwarebase import HardwareBase
-from abc import ABCMeta, abstractmethod
-from functools import wraps
 
 
-class RelayBase(HardwareBase, metaclass=ABCMeta):
+class RelayBase(HardwareBase, ABC):
+
+    def toggle(self, port: int, throw: str):
+        '''Toggle relay'''
+        self.log(f'{str(self)}: Switching port {port} to {throw}')
+        self._handle_toggle(port, throw)
 
     @abstractmethod
-    def toggle(f):
-        @wraps(f)
-        def wrap(self, port, throw, *args, **kwargs):
-            self.log('{}: Switching port {} to {}'.format(
-                str(self), port, throw))
-            f(self, port, throw, *args, **kwargs)
-        return wrap
+    def _handle_toggle(self, port: int, throw: str):
+        '''Implement toggle logic'''

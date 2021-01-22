@@ -93,7 +93,8 @@ class PexpectEngine(ConsoleEngine):
             log.debug('No match found before timeout or EOF')
 
         # Pexpect exposes received via '.before'
-        received = self._pex.before
+        matched_text: Optional[bytes]
+        received: bytes = self._pex.before if self._pex.before is not None else bytes()
         if matched_regex:
             matched_text = self._pex.after
             received += matched_text
@@ -102,7 +103,7 @@ class PexpectEngine(ConsoleEngine):
             matched_text = None
 
         text_matched = self.decode(matched_text) if matched_text else None
-        text_received = self.decode(received) if received else None
+        text_received = self.decode(received)
 
         return MatchResult(regex_matched=matched_regex, text_matched=text_matched,
                            text_received=text_received)

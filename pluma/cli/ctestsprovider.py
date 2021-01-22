@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, cast
+from typing import List
 
 from pluma.core.baseclasses import Logger
 from pluma.core.builder import YoctoCBuilder

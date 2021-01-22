@@ -35,14 +35,19 @@ class ExecutableTest(TestBase):
                     f'Cannot run an executable for test "{self}" on host that '
                     'is not present on the host machine')
         else:
-            self.check_console_supports_copy(self.board.console)
+            console = self.board.console
+            if not console:
+                raise ValueError(
+                    f'Cannot run executable test "{self}" on target: no console '
+                    'was defined or set. Define a console in your target config file, '
+                    'or use "run_on_host" test attribute to run on the host instead.')
 
-    def check_console_supports_copy(self, console: ConsoleBase):
+            self.check_console_supports_copy(console)
+
+    @staticmethod
+    def check_console_supports_copy(console: ConsoleBase):
         if not console:
-            raise ValueError(
-                f'Cannot run executable test "{self}" on target: no console '
-                'was defined or set. Define a console in your target config file, '
-                'or use "run_on_host" test attribute to run on the host instead.')
+            raise ValueError('No console provided')
 
         if not console.support_file_copy:
             raise ValueError(
@@ -58,6 +63,8 @@ class ExecutableTest(TestBase):
             filepath = self.executable_file
         else:
             console = self.board.console
+            if not console:
+                raise ValueError('Current console is null, cannot copy executable')
 
             if self.host_file:
                 self.check_console_supports_copy(console)

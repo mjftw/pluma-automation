@@ -45,6 +45,7 @@ class LoginAction(DeviceActionBase):
 @DeviceActionRegistry.register('wait')
 class WaitAction(DeviceActionBase):
     '''Delays the execution of the next test/action for a set amount of time'''
+
     def __init__(self, board: Board, duration: int):
         super().__init__(board)
         self.duration = duration
@@ -79,6 +80,7 @@ class WaitForPatternAction(DeviceActionBase):
 @DeviceActionRegistry.register('set')
 class SetAction(DeviceActionBase):
     '''Sets the type of console to use'''
+
     def __init__(self, board: Board, device_console: str = None):
         super().__init__(board)
 
@@ -91,7 +93,11 @@ class SetAction(DeviceActionBase):
     def execute(self):
         if self.device_console:
             log.log(f'Setting device console to {self.device_console}')
-            self.board.console = self.board.get_console(self.device_console)
+            console = self.board.get_console(self.device_console)
+            if not console:
+                raise TaskFailed('Failed to find console "{self.device_console}"')
+
+            self.board.console = console
 
 
 @DeviceActionRegistry.register('deploy')

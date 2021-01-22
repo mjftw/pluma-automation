@@ -22,7 +22,7 @@ class ConsoleType(Enum):
 class MatchResult:
     regex_matched: Optional[str]
     text_matched: Optional[str]
-    text_received: Optional[str]
+    text_received: str
 
 
 class ConsoleEngine(ABC):

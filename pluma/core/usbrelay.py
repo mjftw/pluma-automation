@@ -1,4 +1,3 @@
-
 from .usb import USB, USBNoDevice
 from .serialconsole import SerialConsole
 from .baseclasses import RelayBase
@@ -44,18 +43,17 @@ class USBRelay(RelayBase, USB):
         USB.bind(self)
         self.console.open()
 
-    @RelayBase.toggle
-    def toggle(self, port, throw):
+    def _handle_toggle(self, port: int, throw: str):
         if port not in [1, 2, 3, 4]:
             self.error(f"Port must be 1, 2, 3, or 4, not [{port}]")
         if throw not in ['A', 'a', 'B', 'b']:
             self.error(f"Throw direction must be A or B, not [{throw}]")
 
         if throw in ['A', 'a']:
-            self.console.send(self.port_map[port-1]['a'])
+            self.console.send(str(self.port_map[port-1]['a']))
 
         if throw in ['B', 'b']:
-            self.console.send(self.port_map[port-1]['b'])
+            self.console.send(str(self.port_map[port-1]['b']))
 
     def __getitem__(self, key):
         return (self, key)

@@ -1,4 +1,5 @@
 import time
+from typing import Dict, Optional
 
 from .baseclasses import HardwareBase, ConsoleBase
 from .dataclasses import SystemContext
@@ -28,7 +29,7 @@ class Board(HardwareBase):
         self.hub = hub
 
         self._current_console_name = None
-        self._consoles = None
+        self._consoles: Dict[str, ConsoleBase] = {}
         self.consoles = console
         self.system = system or SystemContext()
 
@@ -46,7 +47,7 @@ class Board(HardwareBase):
         return 'Board[{}]'.format(self.name)
 
     @property
-    def console(self) -> ConsoleBase:
+    def console(self) -> Optional[ConsoleBase]:
         if self._current_console_name:
             return self.consoles[self._current_console_name]
         else:
@@ -60,14 +61,16 @@ class Board(HardwareBase):
             for name, console in self.consoles.items():
                 if console is new_console:
                     self._current_console_name = name
-                    break
+                    return
+
+            raise Exception('Unreachable: Failed to find expected console')
 
     @property
-    def consoles(self) -> dict:
+    def consoles(self) -> Dict[str, ConsoleBase]:
         return self._consoles
 
     @consoles.setter
-    def consoles(self, new_consoles) -> dict:
+    def consoles(self, new_consoles):
         if isinstance(new_consoles, ConsoleBase):
             new_consoles = {'main': new_consoles}
         elif not isinstance(new_consoles, dict) and new_consoles is not None:
@@ -88,7 +91,7 @@ class Board(HardwareBase):
 
         self._consoles = new_consoles
 
-    def get_console(self, console_name: str = None) -> ConsoleBase:
+    def get_console(self, console_name: str = None) -> Optional[ConsoleBase]:
         '''Get a specific console from the Board.'''
         if console_name:
             return self.consoles.get(console_name)
@@ -143,7 +146,6 @@ class Board(HardwareBase):
         self.last_boot_len = round(time.time() - start_time, 2)
         self.log(f'Boot success. Matched [{matched}]')
 
-        prompt = self.system.prompt_regex
         if prompt and matched == prompt:
             self.booted_to_prompt = True
 

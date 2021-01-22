@@ -145,7 +145,7 @@ class ConsoleBase(HardwareBase, ABC):
     def send_and_expect(self, cmd: str, match: Union[str, List[str]],
                         excepts: Union[str, List[str]] = None,
                         timeout: int = None, send_newline: bool = True,
-                        flush_before: bool = True) -> Tuple[Optional[str], Optional[str]]:
+                        flush_before: bool = True) -> Tuple[str, Optional[str]]:
         '''Send a command/data on the console, and wait for one of "expects" patterns.'''
         match = match or []
         excepts = excepts or []
@@ -179,12 +179,11 @@ class ConsoleBase(HardwareBase, ABC):
 
         return (result.text_received, result.text_matched)
 
-    def send_nonblocking(self, cmd: str,
-                         send_newline: bool = True,
+    def send_nonblocking(self, cmd: str, send_newline: bool = True,
                          flush_before: bool = True):
         '''Send a command/data and return immediately. Identical to ConsoleBase.send()'''
         self.require_open()
-        self.log(f'Sending command: \'{cmd}\'', force_log_file=None,
+        self.log(f'Sending command: "{cmd}"', force_log_file=None,
                  level=LogLevel.DEBUG)
 
         if flush_before:
@@ -296,6 +295,10 @@ class ConsoleBase(HardwareBase, ABC):
         '''Wait for a prompt, throws if no prompt before timeout'''
 
         prompt_regex = self.system.prompt_regex
+        if not prompt_regex:
+            raise ConsoleError('Trying to wait for prompt, but no prompt regex set. '
+                               'Set a valid prompt regex for the console')
+
         self.log(f'Waiting for prompt "{prompt_regex}" for {timeout}s')
         match_result = self.engine.wait_for_match(match=prompt_regex, timeout=timeout)
         if not match_result.regex_matched:

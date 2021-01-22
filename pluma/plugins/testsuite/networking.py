@@ -4,6 +4,7 @@ import time
 import concurrent.futures
 
 from pluma.core.baseclasses import Logger
+from pluma.core.sshconsole import SSHConsole
 from pluma.test import ShellTest, TaskFailed
 from pluma import Board, HostConsole
 
@@ -20,6 +21,11 @@ class NetworkingTestBase(ShellTest):
             if not ssh_console:
                 raise ValueError(f'{self}: You need to provide a "target" parameter, '
                                  'or an SSH console to get the target host from.')
+
+            if not isinstance(ssh_console, SSHConsole):
+                raise ValueError(f'{self}: The "target" argument must be specified '
+                                 'for networking tests, if an SSH console is not used')
+
             target = ssh_console.target
 
         self.target = target
@@ -27,6 +33,7 @@ class NetworkingTestBase(ShellTest):
 
 class RespondsToPing(NetworkingTestBase):
     '''Verifies that there's a response to ping on the target'''
+
     def __init__(self, board: Board, target: str = None):
         super().__init__(board, target)
         self.run_on_host = True
@@ -35,6 +42,7 @@ class RespondsToPing(NetworkingTestBase):
 
 class IperfBandwidth(NetworkingTestBase):
     '''Verifies the minimum bandwidth (in MBps)'''
+
     def __init__(self, board: Board, minimum_mbps: float, target: str = None, duration: int = None):
         super().__init__(board, target)
         self.duration = int(duration) if duration else 10

@@ -1,28 +1,30 @@
-from .hardwarebase import HardwareBase
 import time
-from abc import ABCMeta, abstractmethod
-from functools import wraps
+from abc import ABC, abstractmethod
+
+from .hardwarebase import HardwareBase
 
 
-class PowerBase(HardwareBase, metaclass=ABCMeta):
-    def __init__(self, reboot_delay=None):
+class PowerBase(HardwareBase, ABC):
+    def __init__(self, reboot_delay: float = None):
         self.reboot_delay = reboot_delay or 0.5
 
-    @abstractmethod
-    def on(f):
-        @wraps(f)
-        def wrap(self, *args, **kwargs):
-            self.log(f'{str(self)}: Power on')
-            f(self, *args, **kwargs)
-        return wrap
+    def on(self):
+        '''Turn on the power control'''
+        self.log(f'{str(self)}: Power on')
+        self._handle_power_on()
 
     @abstractmethod
-    def off(f):
-        @wraps(f)
-        def wrap(self, *args, **kwargs):
-            self.log(f'{str(self)}: Power off')
-            f(self, *args, **kwargs)
-        return wrap
+    def _handle_power_on(self):
+        '''Implement power on logic'''
+
+    def off(self):
+        '''Turn off the power control'''
+        self.log(f'{str(self)}: Power off')
+        self._handle_power_off()
+
+    @abstractmethod
+    def _handle_power_off(self):
+        '''Implement power off logic'''
 
     def reboot(self):
         self.off()

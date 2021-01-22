@@ -11,13 +11,11 @@ class MockPower(PowerBase):
         self.on_called = 0
         self.off_called = 0
 
-    @PowerBase.on
-    def on(self):
+    def _handle_power_on(self):
         self.on_called += 1
         self.mocks_on_list.append(self)
 
-    @PowerBase.off
-    def off(self):
+    def _handle_power_off(self):
         self.off_called += 1
         self.mocks_off_list.append(self)
 

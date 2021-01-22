@@ -141,16 +141,15 @@ class MultimeterTTI1604():
 
     def _sample_and_decode(self):
         max_attempts = 3
-        for num_bad_rx in range(1, max_attempts):
+        for num_bad_rx in range(max_attempts):
             try:
                 data = self._get_sample()
-                decoded_data, decoded_unit = self._decode_data(data)
-                break
+                return self._decode_data(data)
             except MultimeterDecodeError as e:
                 if num_bad_rx >= max_attempts:
                     raise e
 
-        return decoded_data, decoded_unit
+        raise Exception('Unreachable, should raise error.')
 
     def _get_sample(self):
         packet = []

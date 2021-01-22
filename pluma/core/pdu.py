@@ -1,3 +1,6 @@
+# type: ignore
+# TODO: Drop file, or fix type check
+
 import time
 import requests
 import re
@@ -41,9 +44,9 @@ class PDUReqestsBase():
         elif method == 'POST':
             request_method = requests.post
         else:
+            supported = ['GET', 'POST']
             raise PDURequestError(
-                'Unsupported request method [{}]. Supported: {}'.format(
-                    method, ['GET', 'POST']))
+                f'Unsupported request method [{method}]. Supported: {supported}')
 
         url = 'http://{}{}{}{}'.format(
             self.host,
@@ -107,8 +110,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
             endpoint=self.endpoint, timeout=30)
         return json.loads(json_info)
 
-    @PowerBase.on
-    def on(self):
+    def _handle_power_on(self):
         on = None
         for i in range(0, self._retries):
             self._make_request(endpoint=f'{self.endpoint}/on')
@@ -121,8 +123,7 @@ class EnergeniePDU(PowerBase, PDUReqestsBase):
         if not on:
             self.error('Failed to turn on', PDUError)
 
-    @PowerBase.off
-    def off(self):
+    def _handle_power_off(self):
         on = None
         for i in range(0, self._retries):
             self._make_request(endpoint=f'{self.endpoint}/off')
@@ -172,12 +173,10 @@ class IPPowerPDU(PowerBase, PDUReqestsBase):
         ])
         return self._make_request(endpoint='set.cmd', params=params_str, max_tries=2)
 
-    @PowerBase.on
-    def on(self):
+    def _handle_power_on(self):
         self.make_request('cmd=setpower+p6{}=1'.format(self.port))
 
-    @PowerBase.off
-    def off(self):
+    def _handle_power_off(self):
         self.make_request('cmd=setpower+p6{}=0'.format(self.port))
 
     def is_on(self):
@@ -271,10 +270,8 @@ class APCPDU(PowerBase):
         self._disconnect()
         self.console.close()
 
-    @PowerBase.on
-    def on(self):
+    def _handle_power_on(self):
         self._switch('on')
 
-    @PowerBase.off
-    def off(self):
+    def _handle_power_off(self):
         self._switch('off')

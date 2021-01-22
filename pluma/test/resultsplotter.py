@@ -93,7 +93,6 @@ class DefaultResultsPlotter(ResultsPlotter):
             chart.config = config
 
         points = {}
-
         if vs_type in ['iteration', 'cumulative']:
             vs_str = '{}{} vs iteration'.format(
                 'cumulative ' if vs_type == 'cumulative' else '',
@@ -113,8 +112,8 @@ class DefaultResultsPlotter(ResultsPlotter):
                             last_v = v
 
                         points[tf][f'{tf}: {k}'].append((i, v))
-
-        elif vs_type == 'fields':
+        else:
+            assert vs_type == 'fields'
             tests_with_fields = [
                 tf for tf in tests_found for r in results
                 if fields[0] in r[tf] and fields[1] in r[tf]

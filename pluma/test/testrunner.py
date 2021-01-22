@@ -36,7 +36,8 @@ class TestRunnerBase(ABC):
         self._tests = []
         if isinstance(tests, TestBase):
             tests = [tests]
-        self.tests = tests
+
+        self.tests = tests  # type: ignore
 
         self.known_tasks = TestBase.task_hooks
 
