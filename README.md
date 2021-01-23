@@ -385,20 +385,41 @@ my_board.power.off()
 For more examples check out the [Tutorials](docs/tutorials/1-tutorial-introduction.md).
 To get up and running quickly, check out the [Quick Start Guide](./docs/quick-start-guide/1-introduction.md).
 
-## Running the Tests
+## Running Pluma's unit tests
 
-The project's unit tests are split into two groups.
-Those that do not require a specific hardware setup and those that do.
+The project's unit tests are split into two groups: generic and hardware specific unit tests.
+
+We recommend to run the following command to install all requirements:
+
+```shell
+make install-devtools
+```
+
+To run all tests available, you can run:
+
+```shell
+make validate
+```
 
 ### Generic tests
 
-You can run the project's hardware independent tests with:
+You can run all hardware independent tests with the command below. These do not require any hardware to be connected and should run on any Linux system that supports Python3.
 
 ```shell
 make test
 ```
 
-These do not require any hardware to be connected and should run on any Linux system that supports Python3.
+or a subset of those:
+
+```shell
+make test scope=generic/cli
+```
+
+You can also run the type checker with
+
+```shell
+make typecheck
+```
 
 ### Hardware specific tests
 
