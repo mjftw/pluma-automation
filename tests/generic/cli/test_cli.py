@@ -158,7 +158,8 @@ def test_cli_should_create_results_file_with_correct_data(pluma_cli, pluma_confi
             os.remove(results_file)
 
 
-def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, pluma_config_file, temp_file):
+def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli,
+                                                                     pluma_config_file, temp_file):
     load_plugin_modules(PLUGIN_DIR)
 
     results_file = 'results-test.json'
@@ -177,7 +178,9 @@ def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, 
         {
             "tasks": {
                 "ran": [
-                    "test_body"
+                    "setup",
+                    "test_body",
+                    "teardown"
                 ],
                 "failed": {}
             },
@@ -205,7 +208,9 @@ def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, 
             os.remove(results_file)
 
 
-def test_cli_should_create_results_file_with_correct_settings(pluma_cli, pluma_config_file, temp_file):
+def test_cli_should_create_results_file_with_correct_settings(pluma_cli,
+                                                              pluma_config_file,
+                                                              temp_file):
     load_plugin_modules(PLUGIN_DIR)
 
     results_file = 'results-test.json'

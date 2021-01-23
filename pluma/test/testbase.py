@@ -1,7 +1,9 @@
+from abc import ABC, abstractmethod
+
 from pluma.core import Board
 
 
-class TestBase():
+class TestBase(ABC):
     """Base class for tests"""
 
     test_count = 0
@@ -26,6 +28,16 @@ class TestBase():
 
         # Output data to be saved during the test
         self.data = {}
+
+    def setup(self):
+        '''Setup before the actual test runs'''
+
+    @abstractmethod
+    def test_body(self):
+        '''Executed during the test'''
+
+    def teardown(self):
+        '''Cleanup after the test'''
 
     def save_data(self, data: dict = None, **data_kwargs: dict):
         '''Save some test data'''

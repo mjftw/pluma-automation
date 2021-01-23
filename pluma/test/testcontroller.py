@@ -522,7 +522,7 @@ class TestController():
 
         self.stats['num_tests_run'] += num_tests_run
         self.stats['num_tests_pass'] += num_tests_pass
-        self.stats['num_tests_total'] += self.testrunner.num_tests
+        self.stats['num_tests_total'] += len(self.testrunner.tests)
 
         self.stats['num_iterations_run'] += 1
 

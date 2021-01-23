@@ -1,4 +1,3 @@
-from subprocess import run
 from pluma.test.testrunner import TestRunnerParallel
 from unittest.mock import Mock, patch
 from pluma.test import TestRunner, TestBase
@@ -8,6 +7,9 @@ from utils import PlumaOutputMatcher
 def test_TestRunner_should_run_setup_task_if_present(mock_board):
     class MyTest(TestBase):
         def setup(self):
+            pass
+
+        def test_body(self):
             pass
 
     test = MyTest(mock_board)
@@ -39,6 +41,9 @@ def test_TestRunner_should_run_test_body_task_if_present(mock_board):
 
 def test_TestRunner_should_run_teardown_task_if_present(mock_board):
     class MyTest(TestBase):
+        def test_body(self):
+            pass
+
         def teardown(self):
             pass
 
@@ -55,6 +60,9 @@ def test_TestRunner_should_run_teardown_task_if_present(mock_board):
 
 def test_TestRunner_should_not_non_hook_functions(mock_board):
     class MyTest(TestBase):
+        def test_body(self):
+            pass
+
         def foobar(self):
             pass
 
@@ -74,11 +82,17 @@ def test_TestRunner_should_run_hook_tasks_from_all_tests(mock_board):
         def setup(self):
             pass
 
+        def test_body(self):
+            pass
+
     class MyTest2(TestBase):
         def test_body(self):
             pass
 
     class MyTest3(TestBase):
+        def test_body(self):
+            pass
+
         def teardown(self):
             pass
 
@@ -106,11 +120,17 @@ def test_TestRunnerParallel_should_run_hook_tasks_from_all_tests(mock_board):
         def setup(self):
             pass
 
+        def test_body(self):
+            pass
+
     class MyTest2(TestBase):
         def test_body(self):
             pass
 
     class MyTest3(TestBase):
+        def test_body(self):
+            pass
+
         def teardown(self):
             pass
 
@@ -171,6 +191,9 @@ def test_TestRunner_should_not_run_teardown_if_setup_raises_exception(mock_board
     class MyTest(TestBase):
         def setup(self):
             raise RuntimeError
+
+        def test_body(self):
+            pass
 
         def teardown(self):
             pass
@@ -299,7 +322,7 @@ def test_TestRunner_should_have_expected_data_single_test(mock_board):
             },
             'tasks': {
                 'failed': {},
-                'ran': ['test_body', 'teardown']}
+                'ran': ['setup', 'test_body', 'teardown']}
         }
     ]
 
@@ -340,7 +363,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
             },
             'tasks': {
                 'failed': {},
-                'ran': ['test_body', 'teardown']}
+                'ran': ['setup', 'test_body', 'teardown']}
         },
         {
             'data': {
@@ -352,7 +375,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
             },
             'tasks': {
                 'failed': {},
-                'ran': ['test_body', 'teardown']}
+                'ran': ['setup', 'test_body', 'teardown']}
         }
     ]
 
@@ -404,7 +427,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
             },
             'tasks': {
                 'failed': {},
-                'ran': ['test_body', 'teardown']}
+                'ran': ['setup', 'test_body', 'teardown']}
         },
         {
             'data': {
@@ -417,7 +440,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
             },
             'tasks': {
                 'failed': {},
-                'ran': ['setup', 'test_body']}
+                'ran': ['setup', 'test_body', 'teardown']}
         }
     ]
 
@@ -548,22 +571,3 @@ def test_TestRunner_board_should_be_optional():
     )
 
     runner.run()
-
-
-def test_TestRunner_rm_test_should_remove_test(mock_board):
-    class MyTest1(TestBase):
-        def test_body(self):
-            pass
-
-    class MyTest2(TestBase):
-        def test_body(self):
-            pass
-
-    runner = TestRunner(
-        tests=[MyTest1(mock_board), MyTest2(mock_board)]
-    )
-
-    test = runner.tests[0]
-    runner.rm_test(test)
-
-    assert test not in runner.tests

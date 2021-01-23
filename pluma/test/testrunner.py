@@ -1,14 +1,12 @@
 from pluma.core.board import Board
 import traceback
 import time
-import re
 from abc import ABC, abstractmethod
-from copy import copy
-from typing import Iterable, Optional, List, Union
+from typing import Iterable, List, Union
 
 from pluma import utils
 from pluma.core.baseclasses import LogLevel, Logger
-from pluma.test import TestBase, TestingException, AbortTesting
+from pluma.test import TestBase, TestGroup, AbortTesting
 
 global_logger = Logger()
 
@@ -33,12 +31,12 @@ class TestRunnerBase(ABC):
             self.hold_log = global_logger.hold
             self.release_log = global_logger.release
 
-        self._tests = []
         if isinstance(tests, TestBase):
             tests = [tests]
+        elif tests is not None and isinstance(tests, Iterable):
+            tests = list(tests)
 
-        self.tests = tests  # type: ignore
-
+        self._test_group = TestGroup(tests=tests)
         self.known_tasks = TestBase.task_hooks
 
         # General purpose data for use globally between tests
@@ -86,10 +84,6 @@ class TestRunnerBase(ABC):
     def __repr__(self):
         return f'[{self.__class__.__name__}]'
 
-    @property
-    def num_tests(self):
-        return len(self.tests)
-
     def _init_test_data(self, test: TestBase):
         '''Initialise the test data. Required for integration with TestController'''
         test.data = {}
@@ -105,45 +99,11 @@ class TestRunnerBase(ABC):
 
     @property
     def tests(self) -> List[TestBase]:
-        return self._tests
+        return self._test_group.tests
 
     @tests.setter
     def tests(self, tests: List[TestBase]):
-        self._tests = []
-        for test in tests:
-            self.add_test(test)
-
-    def add_test(self, test: TestBase):
-        '''Add a test to the test list. Handles tests with same name by appending a number'''
-        # Verify that test is an instance of class TestBase.
-        if not isinstance(test, TestBase):
-            raise AttributeError(
-                'test should be an object instance of class TestBase'
-                ' or one of its subclasses.'
-            )
-
-        if self._get_test_by_name(str(test)) is not None:
-            raise RuntimeError(f'Found duplicate test name {str(test)}!'
-                               'This is a bug, please report it to the pluma development team.')
-
-        test = copy(test)
-
-        self.log("Appending test: {}".format(str(test)))
-        self._tests.append(test)
-
-    def rm_test(self, test: TestBase):
-        '''Remove a test from the test list'''
-        if test in self.tests:
-            self.log("Removed test: {}".format(str(test)))
-            self.tests.remove(test)
-
-    def _get_test_by_name(self, test_name: str) -> Optional[TestBase]:
-        tests = [t for t in self.tests if str(t) == test_name]
-        if len(tests) > 1:
-            raise TestingException('Found multiple tests with name {}'.format(
-                test_name))
-
-        return None if not tests else tests[0]
+        self._test_group.tests = tests
 
     def _run_tasks(self, tests: Union[TestBase, Iterable[TestBase]],
                    task_names: Union[str, List[str]]):
