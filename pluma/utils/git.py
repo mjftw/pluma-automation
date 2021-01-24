@@ -1,3 +1,5 @@
+# type: ignore
+
 import subprocess
 from os import chdir
 import re
@@ -232,20 +234,17 @@ def compile_version_list(srcdir, version_filters):
         return None
 
     if filtered_versions_lists:
-        # TODO: Are we sure [0] is never None?
-        filtered_versions = set(filtered_versions_lists[0])  # type: ignore
+        filtered_versions = set(filtered_versions_lists[0])
         for v in filtered_versions_lists[1:]:
-            # TODO: Are we sure "v" is never None?
-            filtered_versions.intersection_update(v)  # type: ignore
+            filtered_versions.intersection_update(v)
 
         filtered_versions = list(filtered_versions)
     else:
         filtered_versions = None
 
     # Sort the final versions
-    # TODO: Make typecheck happy
     filtered_versions = list(map(lambda v: tuple(v.split('.')),
-                                 filtered_versions))  # type: ignore
+                                 filtered_versions))
     filtered_versions.sort()
     filtered_versions = list(map(lambda v: '{}.{}.{}'.format(v[0], v[1], v[2]), filtered_versions))
 

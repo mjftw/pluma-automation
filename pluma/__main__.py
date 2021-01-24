@@ -122,12 +122,12 @@ def main():
         exit(-3)
     except TestsBuildError as e:
         log.error(
-            [f'Error while building tests:', str(e)])
+            ['Error while building tests:', str(e)])
         exit(-4)
     except Exception as e:
         if log.mode in [LogMode.VERBOSE, LogMode.DEBUG]:
             traceback.print_exc()
-        log.error(e)
+        log.error(repr(e))
         exit(-1)
 
 

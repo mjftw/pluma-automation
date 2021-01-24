@@ -3,7 +3,7 @@ import os
 import textwrap
 
 from enum import Enum, IntEnum
-from typing import Iterable
+from typing import Iterable, Union, Optional, Type
 from pluma.utils import datetime_to_timestamp
 
 from .hierarchy import hier_setter
@@ -93,8 +93,9 @@ class Logger(Singleton):
         self.held = False
         self.log_buffer = ''
 
-    def log(self, message, color=None, bold=False, newline=True,
-            indent=0, bypass_hold=False, level=None):
+    def log(self, message: Union[str, Iterable[str]], color: str = None,
+            bold: bool = False, newline: bool = True, indent: int = 0,
+            bypass_hold: bool = False, level: LogLevel = None):
         if level is None:
             level = LogLevel.NOTICE
 
@@ -103,26 +104,27 @@ class Logger(Singleton):
 
         self._log(message, color, bold, newline, indent, bypass_hold)
 
-    def debug(self, message, **kwargs):
+    def debug(self, message: Union[str, Iterable[str]], **kwargs):
         self.log(message, level=LogLevel.DEBUG, **kwargs)
 
-    def notice(self, message, **kwargs):
+    def notice(self, message: Union[str, Iterable[str]], **kwargs):
         self.log(message, level=LogLevel.NOTICE, **kwargs)
 
-    def info(self, message, **kwargs):
+    def info(self, message: Union[str, Iterable[str]], **kwargs):
         self.log(message, level=LogLevel.INFO, **kwargs)
 
-    def warning(self, message, **kwargs):
+    def warning(self, message: Union[str, Iterable[str]], **kwargs):
         self.log(message, color='yellow', level=LogLevel.WARNING, **kwargs)
 
-    def important(self, message, **kwargs):
+    def important(self, message: Union[str, Iterable[str]], **kwargs):
         self.log(message, level=LogLevel.IMPORTANT, **kwargs)
 
-    def error(self, message, **kwargs):
+    def error(self, message: Union[str, Iterable[str]], **kwargs):
         self.log(message, color='red', level=LogLevel.ERROR, **kwargs)
 
-    def _log(self, message, color=None, bold=False, newline=True, indent=0,
-             bypass_hold=False, **kwargs):
+    def _log(self, message: Union[str, Iterable[str]], color: str = None,
+             bold: bool = False, newline: bool = True, indent: int = 0,
+             bypass_hold: bool = False, **kwargs):
         # Use message in list form for consistent multiline messages
         if not isinstance(message, str) and isinstance(message, Iterable):
             message = f'{os.linesep}    '.join(message)
@@ -183,7 +185,7 @@ class Logging():
             log.mode = LogMode.SILENT
 
     @property
-    def log_name(self):
+    def log_name(self) -> Optional[str]:
         if hasattr(self, "_log_name"):
             return self._log_name
         else:
@@ -191,11 +193,11 @@ class Logging():
 
     @log_name.setter
     @hier_setter
-    def log_name(self, log_name):
+    def log_name(self, log_name: str):
         self._log_name = log_name
 
     @property
-    def log_time(self):
+    def log_time(self) -> bool:
         if hasattr(self, "_log_time"):
             return self._log_time
         else:
@@ -203,7 +205,7 @@ class Logging():
 
     @log_time.setter
     @hier_setter
-    def log_time(self, log_time):
+    def log_time(self, log_time: bool):
         self._log_time = log_time
 
     @property
@@ -219,7 +221,7 @@ class Logging():
         self._log_time_format = log_time_format
 
     @property
-    def log_file(self):
+    def log_file(self) -> str:
         if not hasattr(self, "_log_file"):
             # Default logfile for all hardwarebasees lives in /tmp
             self._log_file = os.path.join('/tmp', 'pluma', '{}_{}.log'.format(
@@ -228,11 +230,11 @@ class Logging():
 
     @log_file.setter
     @hier_setter
-    def log_file(self, log_file):
+    def log_file(self, log_file: str):
         self._log_file = log_file
 
     @property
-    def log_echo(self):
+    def log_echo(self) -> bool:
         if hasattr(self, "_log_echo"):
             return self._log_echo
         else:
@@ -240,7 +242,7 @@ class Logging():
 
     @log_echo.setter
     @hier_setter
-    def log_echo(self, log_echo):
+    def log_echo(self, log_echo: bool):
         self._log_echo = log_echo
 
     @property
@@ -266,30 +268,23 @@ class Logging():
         if self.log_file:
             open(self.log_file, 'w').close()
 
-    def log(self, message, color=None, bold=False, force_echo=None,
-            force_log_file=False, newline=True, bypass_hold=False, level=None):
+    def log(self, message: str, color: str = None, bold: bool = False, force_echo: bool = None,
+            force_log_file: str = None, newline: bool = True, bypass_hold: bool = False,
+            level: LogLevel = None):
         prefix = ''
-
-        if force_echo is not None:
-            echo = force_echo
-        else:
-            echo = self.log_echo
-
-        if force_log_file is not False:
-            log_file = force_log_file
-        else:
-            log_file = self.log_file
+        echo = force_echo if force_echo is not None else self.log_echo
+        log_file = force_log_file if force_log_file else self.log_file
 
         if self.log_on:
             if self.log_hier_path:
-                prefix = '[{}]{}'.format(self.log_hier_path, prefix)
+                prefix = f'[{self.log_hier_path}]{prefix}'
             if self.log_name:
-                prefix = '{}{}'.format(self.log_name, prefix)
+                prefix = f'{self.log_name}{prefix}'
             if self.log_time and self.log_time_format:
                 timestr = datetime.datetime.now().strftime(self.log_time_format)
-                prefix = '{} {}'.format(timestr, prefix)
+                prefix = f'{timestr} {prefix}'
             if prefix:
-                message = '{}: {}'.format(prefix, message)
+                message = f'{prefix}: {message}'
             if log_file:
                 logdir = os.path.dirname(log_file)
                 if logdir and not os.path.exists(logdir):
@@ -310,7 +305,7 @@ class Logging():
         global_log = Logger()
         global_log.release()
 
-    def error(self, message, exception=None):
+    def error(self, message: str, exception: Type[Exception] = None):
         message = f'ERROR: {message}'
         self.log(message, color='red', bold=True)
         if exception:
