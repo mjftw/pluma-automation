@@ -58,18 +58,18 @@ class TestRunnerBase(ABC):
         for test in self.tests:
             self._init_test_data(test)
 
-        self.log("Running tests: {}".format(
-            list(map(str, self.tests))), level=LogLevel.DEBUG)
+        self.log(f'Running tests: {list(map(str, self.tests))}', level=LogLevel.DEBUG)
 
         try:
             # Defer the actual test running to classes that inherit this base
             self._run(self.tests)
-
-        # Prevent exceptions from leaving test runner
-        except Exception:
-            self.log("\n== TESTING ABORTED EARLY ==", color='red', bold=True)
+        except Exception as e:
+            # Prevent exceptions from leaving test runner
+            self.log('\n== TESTING ABORTED EARLY ==', color='red', bold=True,
+                     level=LogLevel.DEBUG)
+            self.log(f'  due to exception {e}', color='red', level=LogLevel.DEBUG)
         else:
-            self.log("\n== ALL TESTS COMPLETED ==", color='blue', bold=True,
+            self.log('\n== ALL TESTS COMPLETED ==', color='blue', bold=True,
                      level=LogLevel.DEBUG)
 
         # Check if any tasks failed
@@ -116,15 +116,15 @@ class TestRunnerBase(ABC):
 
         for test, task in ((test, task)
                            for task in task_names
-                           for test in tests
-                           if hasattr(test, task)):
-            self._run_task(task, test)
+                           for test in tests):
+            self._run_task(test, task)
 
-    def _run_task(self, task_name, test: TestBase):
+    def _run_task(self, test: TestBase, task_name: str):
         '''Run a single task from a test'''
         task_func = getattr(test, task_name, None)
         if not task_func:
-            # If test does not have this task, then skip
+            self.log(f'Skipping {str(test)} - {task_name}: Not present',
+                     level=LogLevel.DEBUG)
             return
 
         self.data[str(test)]['tasks']['ran'].append(task_name)
@@ -153,13 +153,16 @@ class TestRunnerBase(ABC):
             self.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
 
             # Run teardown for test if test_body raises an exception
-            if hasattr(test, 'teardown') and task_name == 'test_body':
-                self._run_task('teardown', test)
+            try:
+                if task_name == test.test_body.__name__:
+                    self._run_task(test, test.teardown.__name__)
+            except Exception as tear_down_exception:
+                self.log(f'Teardown failed for task {str(test)} - {task_name}:'
+                         f' {str(tear_down_exception)}')
 
             # If request to abort testing, do so but don't run side effects and always reraise
             if isinstance(e, AbortTesting):
-                self.log('Testing aborted by task {} - {}: {}'.format(
-                    str(test), task_name, str(e)))
+                self.log(f'Testing aborted by task {str(test)} - {task_name}: {str(e)}')
                 raise e
 
             self._handle_failed_task(test, task_name, e)

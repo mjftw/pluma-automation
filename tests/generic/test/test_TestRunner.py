@@ -171,11 +171,9 @@ def test_TestRunner_should_run_teardown_if_test_body_raises_exception(mock_board
         def test_body(self):
             raise RuntimeError
 
-        def teardown(self):
-            pass
-
     test = MyTest(mock_board)
-    test.teardown = Mock()
+    test.teardown = Mock(test.teardown)
+    test.teardown.__name__ = 'teardown'
 
     runner = TestRunner(
         board=mock_board,
