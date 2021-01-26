@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 from copy import deepcopy
 
 from pluma import Board, SerialConsole, SSHConsole, SoftPower, IPPowerPDU

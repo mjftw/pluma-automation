@@ -2,7 +2,8 @@ from .baseclasses.consolebase import ConsoleError,\
     ConsoleCannotOpenError, ConsoleLoginFailedError, ConsoleExceptionKeywordReceivedError,\
     ConsoleInvalidJSONReceivedError
 from .baseclasses.storagebase import StorageError
-from .board import BoardError, BoardBootValidationError
+from .boardexceptions import BoardError, BoardBootValidationError, \
+    BoardFieldInstanceIsNoneError
 from .modem import ModemError
 from .multimeter import MultimeterError, MultimeterInvalidKeyPress,\
     MultimeterMeasurementError, MultimeterDecodeError

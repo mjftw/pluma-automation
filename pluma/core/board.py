@@ -1,34 +1,25 @@
 import time
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
-from .baseclasses import HardwareBase, ConsoleBase
-from .dataclasses import SystemContext
-from .exceptions import ConsoleExceptionKeywordReceivedError
-
-
-class BoardError(Exception):
-    pass
-
-
-class BoardBootValidationError(BoardError):
-    pass
-
-
-class BoardFieldInstanceIsNoneError(BoardError):
-    pass
+from pluma.core.dataclasses import SystemContext
+from pluma.core.baseclasses import ConsoleBase, HardwareBase, PowerBase, StorageBase
+from pluma.core import ConsoleExceptionKeywordReceivedError, \
+    BoardFieldInstanceIsNoneError, BoardBootValidationError
 
 
 class Board(HardwareBase):
-    def __init__(self, name, power=None, hub=None, storage=None, console=None,
-                 bootstr=None, boot_max_s=None, logfile=None,
-                 login_user_match=None, login_pass_match=None,
+    def __init__(self, name: str, power: PowerBase = None, hub=None,
+                 storage: StorageBase = None,
+                 console: Union[ConsoleBase, Dict[str, ConsoleBase]] = None,
+                 bootstr: str = None, boot_max_s: int = None,
+                 login_user_match: str = None, login_pass_match: str = None,
                  system: SystemContext = None):
         self.name = name
         self.power = power
         self.storage = storage
         self.hub = hub
 
-        self._current_console_name = None
+        self._current_console_name: Optional[str] = None
         self._consoles: Dict[str, ConsoleBase] = {}
         self.consoles = console
         self.system = system or SystemContext()
@@ -38,7 +29,7 @@ class Board(HardwareBase):
         self.bootstr = bootstr or self.login_user_match
         self.boot_max_s = boot_max_s or 60
 
-        self.last_boot_len = None
+        self.last_boot_len: Optional[float] = None
         self.booted_to_prompt = False
 
         self.log_recurse = True

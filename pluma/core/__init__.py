@@ -1,4 +1,5 @@
 from .exceptions import *
+from .boardexceptions import *
 from .board import Board, get_board_by_name
 from .usbrelay import USBRelay
 from .usbenet import USBEnet
@@ -16,4 +17,3 @@ from .sdwire import SDWire
 from .multimeter import MultimeterTTI1604
 from .modem import ModemSim868
 from .dataclasses import *
-name = "core"
