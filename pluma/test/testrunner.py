@@ -121,30 +121,9 @@ class TestRunnerBase(ABC):
                 ' or one of its subclasses.'
             )
 
-        # Rename test if a test with the same name already added
-        # Default name is the class name, new names are <classname>_1,2,3 etc.
-        if not hasattr(test, '_test_name'):
-            setattr(test, '_test_name', test.__class__.__name__)
-
-        max_duplicate_tests = 500
-        original_name = test._test_name
-        stripped_name = re.sub(r'[0-9]+_', '', original_name[::-1], count=1)[::-1]
-
-        for i in range(1, max_duplicate_tests+1):
-            if not self._get_test_by_name(str(test._test_name)):
-                break
-
-            old_name = test._test_name
-            test._test_name = f'{stripped_name}_{i}'
-
-            self.log(
-                'Test [{}] already added. Renaming to [{}]'.format(
-                    old_name, test._test_name))
-
-            if i >= max_duplicate_tests:
-                raise TestingException(
-                    'Maximum number [{}] of tests with name [{}] reached!'.format(
-                        max_duplicate_tests, original_name))
+        if self._get_test_by_name(str(test)) is not None:
+            raise RuntimeError(f'Found duplicate test name {str(test)}!'
+                               'This is a bug, please report it to the pluma development team.')
 
         test = copy(test)
 

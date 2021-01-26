@@ -15,20 +15,17 @@ class ExecutableTest(TestBase):
     '''
 
     def __init__(self, board, executable_file, host_file=True, run_on_host=False, timeout=None):
-        super().__init__(self)
+        abs_path = os.path.abspath(executable_file)
+        super().__init__(test_name=str(abs_path))
         self.board = board
-        self.executable_file = executable_file
+        self.executable_file = abs_path
         self.host_file = host_file
         self.run_on_host = run_on_host
         self.timeout = timeout if timeout is not None else 5
 
-        if self.host_file and not os.path.isfile(executable_file):
+        if self.host_file and not os.path.isfile(abs_path):
             raise ValueError(
                 f'File {executable_file} does not exist on host')
-
-        self.executable_file = os.path.abspath(self.executable_file)
-
-        self._test_name += f'[{self.executable_file}]'
 
         if self.run_on_host:
             if not self.host_file:

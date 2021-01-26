@@ -10,13 +10,12 @@ log = Logger()
 
 class ShellTest(TestBase):
     '''Execute script within the target (or host) shell'''
-    shell_test_index = 0
 
     def __init__(self, board: Board, script: Union[str, List[str]], name: str = None,
                  should_match_regex: List[str] = None,  should_not_match_regex: List[str] = None,
                  run_on_host: bool = False, timeout: int = None,  runs_in_shell: bool = True,
                  login_automatically: bool = False):
-        super().__init__(board)
+        super().__init__(board, test_name=name)
         self.should_match_regex = should_match_regex
         self.should_not_match_regex = should_not_match_regex
         self.run_on_host = run_on_host
@@ -28,12 +27,6 @@ class ShellTest(TestBase):
             self.scripts = [script]
         else:
             self.scripts = script
-
-        if name:
-            self._test_name += f'[{name}]'
-        else:
-            ShellTest.shell_test_index += 1
-            self._test_name += f'[{ShellTest.shell_test_index}]'
 
         if not self.run_on_host and not self.board.console:
             raise ValueError(

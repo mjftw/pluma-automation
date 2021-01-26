@@ -120,9 +120,7 @@ class ManualDeviceActionBase(DeviceActionBase):
     '''Base class for manual tests'''
 
     def __init__(self, board: Board, message: str, name: str = None):
-        super().__init__(board)
-        if name:
-            self._test_name += f'[{name}]'
+        super().__init__(board, test_name=name)
         self.manual_test_name = name
         self.message = message
 

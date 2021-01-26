@@ -4,9 +4,10 @@ from pluma.core import Board
 class TestBase():
     """Base class for tests"""
 
+    test_count = 0
     task_hooks = ['setup', 'test_body', 'teardown']
 
-    def __init__(self, board: Board = None, test_name_suffix: str = None):
+    def __init__(self, board: Board = None, test_name: str = None):
         """Construct a TestBase with a board, and test suffix"""
         self.board = board
 
@@ -15,9 +16,10 @@ class TestBase():
         else:
             self._test_name = self.__class__.__name__
 
-        if test_name_suffix:
-            assert isinstance(test_name_suffix, str)
-            self._test_name += f'_{test_name_suffix}'
+        TestBase.test_count += 1
+        if test_name:
+            self._test_name += f'[{test_name}]'
+        self._test_name += f'#{TestBase.test_count}'
 
         # Settings to control this test instance
         self.settings = {}
