@@ -4,6 +4,7 @@ import json
 
 from pluma.cli.plugins import load_plugin_modules
 from pluma import plugins
+from utils import PlumaOutputMatcher
 
 
 PLUGIN_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'plugins-src')
@@ -57,7 +58,6 @@ def test_cli_should_create_results_file(pluma_cli, pluma_config_file, temp_file)
 def test_cli_should_create_results_file_with_correct_data(pluma_cli, pluma_config_file, temp_file):
     load_plugin_modules(PLUGIN_DIR)
 
-
     results_file = 'results-test.json'
     config = pluma_config_file(
         core_tests_params=[(
@@ -67,13 +67,12 @@ def test_cli_should_create_results_file_with_correct_data(pluma_cli, pluma_confi
             'iterations': 3,
             'results': {
                 'file': results_file
-        }})
+            }})
 
     pluma_cli(['--config', config, '--target', temp_file()])
 
-    expected_data = json.loads('''\
-    {
-        "example_plugin.maths.Maths": {
+    expected_data = [
+        {
             "x_square": {
                 "count": {
                     "1.0": 3
@@ -148,19 +147,19 @@ def test_cli_should_create_results_file_with_correct_data(pluma_cli, pluma_confi
                 }
             }
         }
-    }''')
+    ]
 
     try:
         with open(results_file, 'r') as f:
             data = json.load(f)
-            assert data['data'] == expected_data
+            assert PlumaOutputMatcher('example_plugin.maths.Maths', expected_data) == data['data']
     finally:
         if os.path.isfile(results_file):
             os.remove(results_file)
 
+
 def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, pluma_config_file, temp_file):
     load_plugin_modules(PLUGIN_DIR)
-
 
     results_file = 'results-test.json'
     config = pluma_config_file(
@@ -170,13 +169,12 @@ def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, 
         settings={
             'results': {
                 'file': results_file
-        }})
+            }})
 
     pluma_cli(['--config', config, '--target', temp_file()])
 
-    expected_testrunner_data = json.loads('''\
-    {
-        "example_plugin.maths.Maths": {
+    expected_testrunner_data = [
+        {
             "tasks": {
                 "ran": [
                     "test_body"
@@ -195,19 +193,20 @@ def test_cli_should_create_results_file_with_correct_testrunner_data(pluma_cli, 
             },
             "order": 0
         }
-    }''')
+    ]
 
     try:
         with open(results_file, 'r') as f:
             data = json.load(f)
-            assert data['results'][0]['TestRunner'] == expected_testrunner_data
+            assert PlumaOutputMatcher('example_plugin.maths.Maths',
+                                      expected_testrunner_data) == data['results'][0]['TestRunner']
     finally:
         if os.path.isfile(results_file):
             os.remove(results_file)
 
+
 def test_cli_should_create_results_file_with_correct_settings(pluma_cli, pluma_config_file, temp_file):
     load_plugin_modules(PLUGIN_DIR)
-
 
     results_file = 'results-test.json'
     config = pluma_config_file(
@@ -218,21 +217,17 @@ def test_cli_should_create_results_file_with_correct_settings(pluma_cli, pluma_c
             'iterations': 3,
             'results': {
                 'file': results_file
-        }})
+            }})
 
     pluma_cli(['--config', config, '--target', temp_file()])
 
-    expected_settings = json.loads('''\
-    {
-        "example_plugin.maths.Maths": {
-            "x": 1
-        }
-    }''')
+    expected_settings = [{"x": 1}]
 
     try:
         with open(results_file, 'r') as f:
             data = json.load(f)
-            assert data['settings'] == expected_settings
+            assert PlumaOutputMatcher('example_plugin.maths.Maths',
+                                      expected_settings) == data['settings']
     finally:
         if os.path.isfile(results_file):
             os.remove(results_file)

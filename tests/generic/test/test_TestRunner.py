@@ -2,6 +2,7 @@ from subprocess import run
 from pluma.test.testrunner import TestRunnerParallel
 from unittest.mock import Mock, patch
 from pluma.test import TestRunner, TestBase
+from utils import PlumaOutputMatcher
 
 
 def test_TestRunner_should_run_setup_task_if_present(mock_board):
@@ -287,8 +288,8 @@ def test_TestRunner_should_have_expected_data_single_test(mock_board):
         def random_func_not_hook(self):
             pass
 
-    expected_data = {
-        'test_TestRunner.MyTest': {
+    expected_data = [
+        {
             'data': {
                 'foo': 'bar'
             },
@@ -300,7 +301,7 @@ def test_TestRunner_should_have_expected_data_single_test(mock_board):
                 'failed': {},
                 'ran': ['test_body', 'teardown']}
         }
-    }
+    ]
 
     runner = TestRunner(
         board=mock_board,
@@ -309,7 +310,7 @@ def test_TestRunner_should_have_expected_data_single_test(mock_board):
 
     runner.run()
 
-    assert runner.data == expected_data
+    assert PlumaOutputMatcher('test_TestRunner.MyTest', expected_data) == runner.data
 
 
 def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_board):
@@ -328,8 +329,8 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
         def random_func_not_hook(self):
             pass
 
-    expected_data = {
-        'test_TestRunner.MyTest': {
+    expected_data = [
+        {
             'data': {
                 'foo': 'bar'
             },
@@ -341,7 +342,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
                 'failed': {},
                 'ran': ['test_body', 'teardown']}
         },
-        'test_TestRunner.MyTest_1': {
+        {
             'data': {
                 'foo': 'bar'
             },
@@ -353,7 +354,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
                 'failed': {},
                 'ran': ['test_body', 'teardown']}
         }
-    }
+    ]
 
     test1 = MyTest(mock_board)
     test2 = MyTest(mock_board)
@@ -365,7 +366,8 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
 
     runner.run()
 
-    assert runner.data == expected_data
+    assert PlumaOutputMatcher(
+        ['test_TestRunner.MyTest', 'test_TestRunner.MyTest'], expected_data) == runner.data
 
 
 def test_TestRunner_should_have_expected_data_multiple_tests_different_class(mock_board):
@@ -391,8 +393,8 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
         def test_body(self):
             self.save_data(the_answer=42, the_question='Ask again in ten million years')
 
-    expected_data = {
-        'test_TestRunner.MyFirstTest': {
+    expected_data = [
+        {
             'data': {
                 'foo': 'bar'
             },
@@ -404,7 +406,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
                 'failed': {},
                 'ran': ['test_body', 'teardown']}
         },
-        'test_TestRunner.MySecondTest': {
+        {
             'data': {
                 'the_answer': 42,
                 'the_question': 'Ask again in ten million years'
@@ -417,7 +419,7 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
                 'failed': {},
                 'ran': ['setup', 'test_body']}
         }
-    }
+    ]
 
     test1 = MyFirstTest(mock_board)
     test2 = MySecondTest(mock_board)
@@ -429,7 +431,8 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
 
     runner.run()
 
-    assert runner.data == expected_data
+    assert PlumaOutputMatcher(['test_TestRunner.MyFirstTest',
+                               'test_TestRunner.MySecondTest'], expected_data) == runner.data
 
 
 def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(mock_board):
@@ -443,8 +446,8 @@ def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(
         def teardown(self):
             raise Exception('Baz')
 
-    expected_data = {
-        'test_TestRunner.MyTest': {
+    expected_data = [
+        {
             'data': {},
             'order': 0,
             'settings': {},
@@ -455,7 +458,7 @@ def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(
                 },
                 'ran': ['setup', 'test_body', 'teardown']}
         }
-    }
+    ]
 
     runner = TestRunner(
         board=mock_board,
@@ -464,7 +467,7 @@ def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(
 
     runner.run()
 
-    assert runner.data == expected_data
+    assert PlumaOutputMatcher('test_TestRunner.MyTest', expected_data) == runner.data
 
 
 def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
@@ -478,8 +481,8 @@ def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
         def teardown(self):
             pass
 
-    expected_data = {
-        'test_TestRunner.MyTest': {
+    expected_data = [
+        {
             'data': {},
             'order': 0,
             'settings': {},
@@ -489,7 +492,7 @@ def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
                 },
                 'ran': ['setup']}
         }
-    }
+    ]
 
     runner = TestRunner(
         board=mock_board,
@@ -498,7 +501,7 @@ def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
 
     runner.run()
 
-    assert runner.data == expected_data
+    assert PlumaOutputMatcher('test_TestRunner.MyTest', expected_data) == runner.data
 
 
 def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
@@ -512,8 +515,8 @@ def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
         def teardown(self):
             pass
 
-    expected_data = {
-        'test_TestRunner.MyTest': {
+    expected_data = [
+        {
             'data': {},
             'order': 0,
             'settings': {},
@@ -523,7 +526,7 @@ def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
                 },
                 'ran': ['setup', 'test_body', 'teardown']}
         }
-    }
+    ]
 
     runner = TestRunner(
         board=mock_board,
@@ -532,7 +535,7 @@ def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
 
     runner.run()
 
-    assert runner.data == expected_data
+    assert PlumaOutputMatcher('test_TestRunner.MyTest', expected_data) == runner.data
 
 
 def test_TestRunner_board_should_be_optional():
