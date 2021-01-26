@@ -1,5 +1,4 @@
-from pluma.test import TestGroup
-from pluma.test import TestBase
+from pluma.test import TestGroup, TestBase
 
 
 def test_TestGroup_default_constructor():
