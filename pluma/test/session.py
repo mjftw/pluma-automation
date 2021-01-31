@@ -10,14 +10,15 @@ class Session(GroupedTest):
         super().__init__(board=board, test_name=test_name, tests=tests)
 
     def setup(self):
-        self.board.power.reboot()
+        if self.board.power:
+            self.board.power.reboot()
 
         for test in self.tests:
-            print("setup ", repr(test))
             test.session_setup()
 
     def teardown(self):
-        self.board.power.off()
+        if self.board.power:
+            self.board.power.off()
 
         for test in self.tests:
             test.session_teardown()
