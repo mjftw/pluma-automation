@@ -51,9 +51,11 @@ class TestGroup:
                                'This is a bug, please report it to the pluma '
                                'development team.')
 
+        print(repr(test))
         test = copy(test)
+        print("2: ", repr(test))
 
-        log.debug(f'Appending test: {test}')
+        log.debug(f'Added test "{test}" to group "{self}"')
         self._tests.append(test)
 
     def get_test_by_name(self, test_name: str) -> Optional[TestBase]:
@@ -74,8 +76,12 @@ class GroupedTest(TestBase):
 
         self.test_group = TestGroup(tests=tests)
 
+    @property
+    def tests(self) -> TestList:
+        return self.test_group.tests
+
     def test_body(self):
-        for test in self.test_group.tests:
+        for test in self.tests:
             test.setup()
             test.test_body()
             test.teardown()

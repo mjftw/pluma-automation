@@ -1,5 +1,5 @@
 from .exceptions import TestingException, TaskFailed, AbortTesting
-from .testbase import TestBase
+from .testbase import TestBase, NoopTest
 from .testgroup import TestList, TestGroup, GroupedTest
 from .session import Session
 from .plan import Plan

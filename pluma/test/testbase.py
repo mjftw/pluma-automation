@@ -29,6 +29,9 @@ class TestBase(ABC):
         # Output data to be saved during the test
         self.data = {}
 
+    def session_setup(self):
+        '''Setup at the beginning of the test session'''
+
     def setup(self):
         '''Setup before the actual test runs'''
 
@@ -38,6 +41,9 @@ class TestBase(ABC):
 
     def teardown(self):
         '''Cleanup after the test'''
+
+    def session_teardown(self):
+        '''Teardown at the end of the test session'''
 
     def save_data(self, data: dict = None, **data_kwargs: dict):
         '''Save some test data'''
@@ -53,3 +59,10 @@ class TestBase(ABC):
     @classmethod
     def description(cls):
         return cls.__doc__
+
+
+class NoopTest(TestBase):
+    """An empty test which does nothing."""
+
+    def test_body(self):
+        pass

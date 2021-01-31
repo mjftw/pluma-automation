@@ -12,5 +12,12 @@ class Session(GroupedTest):
     def setup(self):
         self.board.power.reboot()
 
+        for test in self.tests:
+            print("setup ", repr(test))
+            test.session_setup()
+
     def teardown(self):
         self.board.power.off()
+
+        for test in self.tests:
+            test.session_teardown()
