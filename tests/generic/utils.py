@@ -51,7 +51,7 @@ def nonblocking(f, *args, **kwargs):
 
 
 class PlumaOutputMatcher:
-    ''' 
+    '''
     Match a Pluma output object with an expected output, ignoring any
     extra information that may be appended to the name of the test in the output.
 
@@ -76,7 +76,8 @@ class PlumaOutputMatcher:
     values are respectively equal to valueObject and valueObject2.
     '''
 
-    def __init__(self, expected_names: Union[List[str], str], expected_output: List[Dict[str, Any]]) -> None:
+    def __init__(self, expected_names: Union[List[str], str],
+                 expected_output: List[Dict[str, Any]]) -> None:
         self.expected_output = expected_output
         self.expected_names = expected_names if isinstance(
             expected_names, list) else [expected_names]
@@ -91,21 +92,27 @@ class PlumaOutputMatcher:
         return self == o
 
     @staticmethod
-    def _test_output_names_match(expected_keys: List[str], actual_output: Dict[str, Dict[str, Any]]):
+    def _test_output_names_match(expected_keys: List[str],
+                                 actual_output: Dict[str, Dict[str, Any]]):
         expected_keys_not_found = list(expected_keys)
+
         for actual_key in actual_output.keys():
             # verify that the actual name matches at least one of the names in the expected list
-            name_matches = [exp_key for exp_key in expected_keys_not_found if exp_key in actual_key]
+            name_matches = [exp_key for exp_key in expected_keys_not_found
+                            if exp_key in actual_key]
             if len(name_matches) == 0:
                 raise AssertionError(
-                    f'Did not find an match for actual key {actual_key} in expected keys [{", ".join(expected_keys)}]')
+                    f'Did not find an match for actual key "{actual_key}" '
+                    f'in expected keys [{", ".join(expected_keys)}]')
             expected_keys_not_found.remove(name_matches[0])
         if len(expected_keys_not_found) > 0:
             raise AssertionError(
-                f'Found no match for expected key(s) [{", ".join(expected_keys_not_found)}]')
+                'Found no match for expected key(s) '
+                f'[{", ".join(expected_keys_not_found)}]')
 
     @staticmethod
-    def _test_output_values_match(expected_output: List[Dict[str, Any]], actual_output: Dict[str, Dict[str, Any]]):
+    def _test_output_values_match(expected_output: List[Dict[str, Any]],
+                                  actual_output: Dict[str, Dict[str, Any]]):
         expected_output_not_found = list(expected_output)
         for key, actual_val in actual_output.items():
             # verify that the actual value matches at least one of values in the expected list
@@ -117,4 +124,5 @@ class PlumaOutputMatcher:
                 expected_output_not_found.pop(found_index)
         if len(expected_output_not_found) > 0:
             raise AssertionError(
-                f'Found too few entries in the actual (expected {len(expected_output)}, got {len(actual_output)}')
+                f'Found too few entries in the actual (expected {len(expected_output)}, '
+                f'got {len(actual_output)}')

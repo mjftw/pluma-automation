@@ -1,14 +1,15 @@
+from pluma.test.testgroup import GroupedTest
 from pluma.core.board import Board
 import traceback
 import time
 from abc import ABC, abstractmethod
-from typing import Iterable, List, Union
+from typing import Iterable, List, Union, cast
 
 from pluma import utils
 from pluma.core.baseclasses import LogLevel, Logger
 from pluma.test import TestBase, TestGroup, AbortTesting
 
-global_logger = Logger()
+log = Logger()
 
 
 class TestRunnerBase(ABC):
@@ -21,23 +22,12 @@ class TestRunnerBase(ABC):
         self.continue_on_fail = continue_on_fail if continue_on_fail is not None else False
         self.test_fails = []
 
-        # Use global logger if no board available
-        if board:
-            self.log = self.board.log
-            self.hold_log = self.board.hold_log
-            self.release_log = self.board.release_log
-        else:
-            self.log = global_logger.log
-            self.hold_log = global_logger.hold
-            self.release_log = global_logger.release
-
         if isinstance(tests, TestBase):
             tests = [tests]
         elif tests is not None and isinstance(tests, Iterable):
             tests = list(tests)
 
         self._test_group = TestGroup(tests=tests)
-        self.known_tasks = TestBase.task_hooks
 
         # General purpose data for use globally between tests
         self.data = {}
@@ -48,35 +38,21 @@ class TestRunnerBase(ABC):
 
     def run(self) -> bool:
         '''Run all tasks for all tests. Returns True if all succes and False otherwise'''
-        self.log('Running tests', bold=True)
+        log.log('Running tests')
         self.test_fails = []
-
-        # Init data
         self.data = {}
 
-        # Init test data
         for test in self.tests:
-            self._init_test_data(test)
-
-        self.log(f'Running tests: {list(map(str, self.tests))}', level=LogLevel.DEBUG)
+            self._init_test_data(test_parent=self, test=test)
 
         try:
             # Defer the actual test running to classes that inherit this base
-            self._run(self.tests)
+            return self._run(self.tests)
         except Exception as e:
             # Prevent exceptions from leaving test runner
-            self.log('\n== TESTING ABORTED EARLY ==', color='red', bold=True,
-                     level=LogLevel.DEBUG)
-            self.log(f'  due to exception {e}', color='red', level=LogLevel.DEBUG)
-        else:
-            self.log('\n== ALL TESTS COMPLETED ==', color='blue', bold=True,
-                     level=LogLevel.DEBUG)
-
-        # Check if any tasks failed
-        if self.test_fails:
+            log.log('Testing aborted', color='red', bold=True, level=LogLevel.IMPORTANT)
+            log.notice(f'  due to exception {e}', color='red')
             return False
-        else:
-            return True
 
     def __call__(self):
         return self.run()
@@ -84,7 +60,7 @@ class TestRunnerBase(ABC):
     def __repr__(self):
         return f'[{self.__class__.__name__}]'
 
-    def _init_test_data(self, test: TestBase):
+    def _init_test_data(self, test_parent, test: TestBase):
         '''Initialise the test data. Required for integration with TestController'''
         test.data = {}
         self.data[str(test)] = {
@@ -94,8 +70,12 @@ class TestRunnerBase(ABC):
             },
             'data': test.data,
             'settings': test.settings,
-            'order': self.tests.index(test)
+            'order': test_parent.tests.index(test)
         }
+
+        if isinstance(test, GroupedTest):
+            for child_test in test.tests:
+                self._init_test_data(test_parent=test, test=child_test)
 
     @property
     def tests(self) -> List[TestBase]:
@@ -105,40 +85,14 @@ class TestRunnerBase(ABC):
     def tests(self, tests: List[TestBase]):
         self._test_group.tests = tests
 
-    def _run_tasks(self, tests: Union[TestBase, Iterable[TestBase]],
-                   task_names: Union[str, List[str]]):
-        '''Run all tasks in task_names on test in tests if the test has a task with that name'''
-        if isinstance(task_names, str):
-            task_names = [task_names]
-
-        if not isinstance(tests, Iterable):
-            tests = [tests]
-
-        for test, task in ((test, task)
-                           for task in task_names
-                           for test in tests):
-            self._run_task(test, task)
-
-    def _run_task(self, test: TestBase, task_name: str):
+    def _run_task(self, test: TestBase, task_name: str) -> bool:
         '''Run a single task from a test'''
         task_func = getattr(test, task_name, None)
         if not task_func:
-            self.log(f'Skipping {str(test)} - {task_name}: Not present',
-                     level=LogLevel.DEBUG)
-            return
+            log.error(f'Function {task_name} does not exist for test {test}')
+            return False
 
         self.data[str(test)]['tasks']['ran'].append(task_name)
-
-        # Print test message
-        test_message = f'{str(test)} - {task_name}'
-
-        column_limit = 75
-        if len(test_message) > column_limit:
-            test_message = f'{test_message[:column_limit-3]}...'
-
-        self.log(test_message.ljust(column_limit) + ' ',
-                 level=LogLevel.IMPORTANT, newline=False)
-        self.hold_log()
 
         try:
             task_func()
@@ -150,30 +104,17 @@ class TestRunnerBase(ABC):
         except Exception as e:
             self.data[str(test)]['tasks']['failed'][task_name] = str(e)
 
-            self.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
-
-            # Run teardown for test if test_body raises an exception
-            try:
-                if task_name == test.test_body.__name__:
-                    self._run_task(test, test.teardown.__name__)
-            except Exception as tear_down_exception:
-                self.log(f'Teardown failed for task {str(test)} - {task_name}:'
-                         f' {str(tear_down_exception)}')
-
             # If request to abort testing, do so but don't run side effects and always reraise
             if isinstance(e, AbortTesting):
-                self.log(f'Testing aborted by task {str(test)} - {task_name}: {str(e)}')
+                log.error(f'Testing aborted in "{task_name}": {str(e)}')
                 raise e
+
+            log.debug(f'An exception occurred in "{task_name}": {str(e)}')
 
             self._handle_failed_task(test, task_name, e)
+            return False
 
-            if not self.continue_on_fail:
-                raise e
-
-        else:
-            self.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
-        finally:
-            self.release_log()
+        return True
 
     def _handle_failed_task(self, test: TestBase, task_name: str, exception: Exception):
         '''Run any side effects for a task failure, such as writing logs or sending emails'''
@@ -193,22 +134,19 @@ class TestRunnerBase(ABC):
         if not error:
             error = exception.__class__.__name__
 
-        self.log(f'Task failed: {error}', level=LogLevel.ERROR,
-                 bold=True, color='red')
-        self.log(f'Details: {failed}', color='yellow')
+        log.error(f'Task failed: {error}', bold=True)
+        log.debug(f'  details: {failed}')
 
     def send_fail_email(self, exception: Exception, test_failed: TestBase, task_failed: str):
         '''Send an email to the default email address explaining the test failure'''
-        subject = 'TestRunner Exception Occurred: [{}: {}] [{}]'.format(
-            str(test_failed), task_failed, self.board.name if self.board else 'No Board')
-        body = '''
-        <b>Tests:</b> {}<br>
-        <b>Test Failed:</b> {}<br>
-        <b>Task Failed:</b> {}
-        '''.format(
-            [str(t) for t in self.tests],
-            str(test_failed),
-            task_failed)
+        board_name = self.board.name if self.board else 'No Board'
+        subject = (f'TestRunner Exception Occurred: [{str(test_failed)}: {task_failed}] '
+                   f'[{board_name}]')
+        body = f'''
+        <b>Tests:</b> {[str(t) for t in self.tests]}<br>
+        <b>Test Failed:</b> {str(test_failed)}<br>
+        <b>Task Failed:</b> {task_failed}
+        '''
 
         utils.send_exception_email(
             exception=exception,
@@ -221,19 +159,48 @@ class TestRunnerBase(ABC):
 class TestRunner(TestRunnerBase):
     '''Run a set of tests sequentially'''
 
-    def _run(self, tests: Iterable[TestBase]):
-        self.log('== TESTING MODE: SEQUENTIAL ==', color='blue', bold=True,
-                 level=LogLevel.DEBUG)
+    def _run(self, tests: Iterable[TestBase]) -> bool:
+        success = True
+
+        log.debug(f'Running tests: {list(map(str, self.tests))}')
 
         for test in tests:
-            for task_name in self.known_tasks:
-                self._run_tasks(test, task_name)
+            # Print test message
+            test_message = str(test)
+            column_limit = 70
 
+            if len(test_message) > column_limit:
+                test_message = f'{test_message[:column_limit-3]}...'
 
-class TestRunnerParallel(TestRunnerBase):
-    '''Run a set of tests in parallel'''
+            is_group_test = isinstance(test, GroupedTest)
+            log.log(test_message.ljust(column_limit) + '  ', level=LogLevel.IMPORTANT,
+                    newline=is_group_test)
 
-    def _run(self, tests: Iterable[TestBase]):
-        self.log('== TESTING MODE: PARALLEL ==', color='blue', bold=True,
-                 level=LogLevel.DEBUG)
-        self._run_tasks(tests, self.known_tasks)
+            log.hold()
+            test_success = self._run_task(test, "setup")
+            if test_success:
+                test_success = self._run_task(test, "test_body")
+                if test_success and is_group_test:
+                    log.release()
+                    test_success = self._run(cast(GroupedTest, test).tests)
+                    log.hold()
+
+                # Run teardown even if 'test_body' failed
+                test_success &= self._run_task(test, "teardown")
+
+            if is_group_test:
+                log.log(test_message.ljust(column_limit) + '  ', level=LogLevel.IMPORTANT,
+                        newline=False, bypass_hold=True)
+
+            if test_success:
+                log.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
+            else:
+                log.log('FAIL', color='red', level=LogLevel.IMPORTANT, bypass_hold=True)
+
+            log.release()
+            success &= test_success
+
+            if not success and not self.continue_on_fail:
+                raise AbortTesting('Aborting the execution (stop on failure)')
+
+        return success

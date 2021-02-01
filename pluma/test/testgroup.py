@@ -51,9 +51,7 @@ class TestGroup:
                                'This is a bug, please report it to the pluma '
                                'development team.')
 
-        print(repr(test))
         test = copy(test)
-        print("2: ", repr(test))
 
         log.debug(f'Added test "{test}" to group "{self}"')
         self._tests.append(test)
@@ -81,7 +79,5 @@ class GroupedTest(TestBase):
         return self.test_group.tests
 
     def test_body(self):
-        for test in self.tests:
-            test.setup()
-            test.test_body()
-            test.teardown()
+        # Grouped test have to intrisinc test body
+        pass

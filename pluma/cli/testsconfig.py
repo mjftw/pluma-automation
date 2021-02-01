@@ -57,10 +57,11 @@ class TestsConfig:
             return controller
 
     def _create_test_controller(self, board: Board, settings: Configuration) -> TestController:
+        tests = TestsConfig.create_tests(self.selected_tests(), board)
+
         testrunner = TestRunner(
             board=board,
-            tests=TestsConfig.create_tests(
-                self.selected_tests(), board),
+            tests=tests,
             email_on_fail=settings.pop_optional(bool, 'email_on_fail', default=False),
             continue_on_fail=settings.pop_optional(bool,
                                                    'continue_on_fail', default=True)
@@ -204,7 +205,8 @@ class TestsConfig:
                 else:
                     file, line = get_file_and_line(test.testclass)
                     file_loc_string = f'{file}:{line or "unknown"}' if file is not None else 'unknown location'
-                    log.log(f'No description - missing docstring at {file_loc_string} in {test.testclass.__name__}',
+                    log.log(f'No description - missing docstring at '
+                            f'{file_loc_string} in {test.testclass.__name__}',
                             color='yellow', level=log_level, indent=2)
 
                 if len(test.parameter_sets) and test.parameter_sets[0] is not None:

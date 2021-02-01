@@ -7,7 +7,6 @@ class TestBase(ABC):
     """Base class for tests"""
 
     test_count = 0
-    task_hooks = ['setup', 'test_body', 'teardown']
 
     def __init__(self, board: Board = None, test_name: str = None):
         """Construct a TestBase with a board, and test suffix"""

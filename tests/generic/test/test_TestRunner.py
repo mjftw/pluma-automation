@@ -1,18 +1,12 @@
-from pluma.test.testrunner import TestRunnerParallel
+from pluma.test.testgroup import GroupedTest
+from pluma.test.testbase import NoopTest
 from unittest.mock import Mock, patch
 from pluma.test import TestRunner, TestBase
 from utils import PlumaOutputMatcher
 
 
 def test_TestRunner_should_run_setup_task_if_present(mock_board):
-    class MyTest(TestBase):
-        def setup(self):
-            pass
-
-        def test_body(self):
-            pass
-
-    test = MyTest(mock_board)
+    test = NoopTest(mock_board)
     test.setup = Mock(test.setup)
 
     TestRunner(
@@ -24,11 +18,7 @@ def test_TestRunner_should_run_setup_task_if_present(mock_board):
 
 
 def test_TestRunner_should_run_test_body_task_if_present(mock_board):
-    class MyTest(TestBase):
-        def test_body(self):
-            pass
-
-    test = MyTest(mock_board)
+    test = NoopTest(mock_board)
     test.test_body = Mock(test.test_body)
 
     TestRunner(
@@ -40,14 +30,7 @@ def test_TestRunner_should_run_test_body_task_if_present(mock_board):
 
 
 def test_TestRunner_should_run_teardown_task_if_present(mock_board):
-    class MyTest(TestBase):
-        def test_body(self):
-            pass
-
-        def teardown(self):
-            pass
-
-    test = MyTest(mock_board)
+    test = NoopTest(mock_board)
     test.teardown = Mock(test.teardown)
 
     TestRunner(
@@ -59,10 +42,7 @@ def test_TestRunner_should_run_teardown_task_if_present(mock_board):
 
 
 def test_TestRunner_should_not_non_hook_functions(mock_board):
-    class MyTest(TestBase):
-        def test_body(self):
-            pass
-
+    class MyTest(NoopTest):
         def foobar(self):
             pass
 
@@ -78,31 +58,13 @@ def test_TestRunner_should_not_non_hook_functions(mock_board):
 
 
 def test_TestRunner_should_run_hook_tasks_from_all_tests(mock_board):
-    class MyTest1(TestBase):
-        def setup(self):
-            pass
-
-        def test_body(self):
-            pass
-
-    class MyTest2(TestBase):
-        def test_body(self):
-            pass
-
-    class MyTest3(TestBase):
-        def test_body(self):
-            pass
-
-        def teardown(self):
-            pass
-
-    test1 = MyTest1(mock_board)
+    test1 = NoopTest(mock_board)
     test1.setup = Mock(test1.setup)
 
-    test2 = MyTest2(mock_board)
+    test2 = NoopTest(mock_board)
     test2.test_body = Mock(test2.test_body)
 
-    test3 = MyTest3(mock_board)
+    test3 = NoopTest(mock_board)
     test3.teardown = Mock(test3.teardown)
 
     TestRunner(
@@ -115,42 +77,51 @@ def test_TestRunner_should_run_hook_tasks_from_all_tests(mock_board):
     test3.teardown.assert_called_once()
 
 
-def test_TestRunnerParallel_should_run_hook_tasks_from_all_tests(mock_board):
-    class MyTest1(TestBase):
+def test_TestRunner_should_run_tests_recursively(mock_board):
+    calls = []
+    expected_calls = ['t1_setup', 't1_body',
+                      't2_setup', 't2_body',
+                      't3_setup', 't3_body', 't3_teardown',
+                      't2_teardown',
+                      't1_teardown']
+
+    class GroupedTest1(GroupedTest):
         def setup(self):
-            pass
+            calls.append('t1_setup')
 
         def test_body(self):
-            pass
-
-    class MyTest2(TestBase):
-        def test_body(self):
-            pass
-
-    class MyTest3(TestBase):
-        def test_body(self):
-            pass
+            calls.append('t1_body')
 
         def teardown(self):
-            pass
+            calls.append('t1_teardown')
 
-    test1 = MyTest1(mock_board)
-    test1.setup = Mock(test1.setup)
+    class GroupedTest2(GroupedTest):
+        def setup(self):
+            calls.append('t2_setup')
 
-    test2 = MyTest2(mock_board)
-    test2.test_body = Mock(test2.test_body)
+        def test_body(self):
+            calls.append('t2_body')
 
-    test3 = MyTest3(mock_board)
-    test3.teardown = Mock(test3.teardown)
+        def teardown(self):
+            calls.append('t2_teardown')
 
-    TestRunnerParallel(
-        board=mock_board,
-        tests=[test1, test2, test3]
-    ).run()
+    class Test3(TestBase):
+        def setup(self):
+            calls.append('t3_setup')
 
-    test1.setup.assert_called_once()
-    test2.test_body.assert_called_once()
-    test3.teardown.assert_called_once()
+        def test_body(self):
+            calls.append('t3_body')
+
+        def teardown(self):
+            calls.append('t3_teardown')
+
+    test1 = Test3(mock_board)
+    test2 = GroupedTest2(mock_board, tests=[test1])
+    test3 = GroupedTest1(mock_board, tests=[test2])
+
+    TestRunner(board=mock_board, tests=[test3]
+               ).run()
+    assert calls == expected_calls
 
 
 def test_TestRunner_should_swallow_test_exceptions(mock_board):
@@ -186,15 +157,9 @@ def test_TestRunner_should_run_teardown_if_test_body_raises_exception(mock_board
 
 
 def test_TestRunner_should_not_run_teardown_if_setup_raises_exception(mock_board):
-    class MyTest(TestBase):
+    class MyTest(NoopTest):
         def setup(self):
             raise RuntimeError
-
-        def test_body(self):
-            pass
-
-        def teardown(self):
-            pass
 
     test = MyTest(mock_board)
     test.teardown = Mock()
@@ -218,12 +183,8 @@ def test_TestRunner_should_not_run_more_tests_if_failure_and_no_continue_on_fail
         def test_body(self):
             raise RuntimeError
 
-    class MyTest2(TestBase):
-        def test_body(self):
-            pass
-
     test1 = MyTest1(mock_board)
-    test2 = MyTest2(mock_board)
+    test2 = NoopTest(mock_board)
     test2.test_body = Mock(test2.test_body)
 
     TestRunner(
@@ -240,12 +201,8 @@ def test_TestRunner_should_run_more_tests_if_failure_but_continue_on_fail(mock_b
         def test_body(self):
             raise RuntimeError
 
-    class MyTest2(TestBase):
-        def test_body(self):
-            pass
-
     test1 = MyTest1(mock_board)
-    test2 = MyTest2(mock_board)
+    test2 = NoopTest(mock_board)
     test2.test_body = Mock(test2.test_body)
 
     TestRunner(
@@ -303,9 +260,6 @@ def test_TestRunner_should_have_expected_data_single_test(mock_board):
         def test_body(self):
             self.save_data({'foo': 'bar'})
 
-        def teardown(self):
-            pass
-
         def random_func_not_hook(self):
             pass
 
@@ -343,9 +297,6 @@ def test_TestRunner_should_have_expected_data_multiple_tests_same_class(mock_boa
 
         def test_body(self):
             self.save_data({'foo': 'bar'})
-
-        def teardown(self):
-            pass
 
         def random_func_not_hook(self):
             pass
@@ -399,9 +350,6 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
 
         def test_body(self):
             self.save_data({'foo': 'bar'})
-
-        def teardown(self):
-            pass
 
     class MySecondTest(TestBase):
         def __init__(self, *args, **kwargs):
@@ -458,9 +406,6 @@ def test_TestRunner_should_have_expected_data_multiple_tests_different_class(moc
 
 def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(mock_board):
     class MyTest(TestBase):
-        def setup(self):
-            pass
-
         def test_body(self):
             raise Exception('Foobar')
 
@@ -492,15 +437,9 @@ def test_TestRunner_should_have_expected_data_on_test_body_and_teardown_failure(
 
 
 def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
-    class MyTest(TestBase):
+    class MyTest(NoopTest):
         def setup(self):
             raise Exception('Hello')
-
-        def test_body(self):
-            pass
-
-        def teardown(self):
-            pass
 
     expected_data = [
         {
@@ -527,14 +466,8 @@ def test_TestRunner_should_have_expected_data_on_setup_failure(mock_board):
 
 def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
     class MyTest(TestBase):
-        def setup(self):
-            pass
-
         def test_body(self):
             raise Exception('Foobar')
-
-        def teardown(self):
-            pass
 
     expected_data = [
         {
@@ -560,12 +493,8 @@ def test_TestRunner_should_have_expected_data_on_test_body_failure(mock_board):
 
 
 def test_TestRunner_board_should_be_optional():
-    class MyTest(TestBase):
-        def test_body(self):
-            pass
-
     runner = TestRunner(
-        tests=MyTest()
+        tests=NoopTest()
     )
 
     runner.run()

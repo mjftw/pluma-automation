@@ -46,7 +46,7 @@ def test_GroupedTest_set_tests_manually(group_test_class, mock_board):
     assert isinstance(grouped_test.test_group.tests[1], test2.__class__)
 
 
-def test_GroupedTest_run(mock_board):
+def test_GroupedTest_should_not_call_test_methods(mock_board):
     class MyTest1(TestBase):
         def test_body(self):
             pass
@@ -55,21 +55,16 @@ def test_GroupedTest_run(mock_board):
         def test_body(self):
             pass
 
-    test1, test2 = MyTest1(mock_board), MyTest2(mock_board)
+    test1 = MyTest1(mock_board)
     test1.setup = Mock()
     test1.test_body = Mock()
     test1.teardown = Mock()
-    test2.setup = Mock()
-    test2.test_body = Mock()
-    test2.teardown = Mock()
 
-    grouped_test = GroupedTest(tests=[test1, test2])
-
+    grouped_test = GroupedTest(tests=[test1])
+    grouped_test.setup()
     grouped_test.test_body()
-    test1.setup.assert_called_once()
-    test1.test_body.assert_called_once()
-    test1.teardown.assert_called_once()
+    grouped_test.teardown()
 
-    test2.setup.assert_called_once()
-    test2.test_body.assert_called_once()
-    test2.teardown.assert_called_once()
+    test1.setup.assert_not_called()
+    test1.test_body.assert_not_called()
+    test1.teardown.assert_not_called()
