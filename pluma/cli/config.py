@@ -184,7 +184,7 @@ class ConfigPreprocessor(ABC):
 
 class PlumaConfig:
     @staticmethod
-    def load_configuration(name: str, config_path: str,
+    def load_configuration_file(name: str, config_path: str,
                            preprocessor: ConfigPreprocessor = None) -> Configuration:
         return Configuration(PlumaConfig.load_yaml(name, config_path, preprocessor))
 

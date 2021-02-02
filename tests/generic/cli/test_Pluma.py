@@ -15,9 +15,10 @@ def config_file_path(config: str):
 def run_all(test_file: str, target_file: str):
     test_file_path = path.join(config_file_path(test_file))
     target_file_path = path.join(config_file_path(target_file))
+    context, config = Pluma.create_context_from_files(test_file_path, target_file_path)
 
-    Pluma.execute_tests(test_file_path, target_file_path)
-    Pluma.execute_run(test_file_path, target_file_path, check_only=True)
+    Pluma.execute_tests(config)
+    Pluma.execute_run(context, config, check_only=True)
 
 
 def test_Pluma_minimal():
@@ -33,16 +34,14 @@ def test_Pluma_target_variables_substitution():
 
 
 def test_Pluma_create_target_context_should_parse_target_variables():
-    config, env = Pluma.load_target_config_file(config_file_path('variable-sub-target'))
-    context = Pluma.create_target_context(config, env)
+    context = Pluma.create_target_context(config_file_path('variable-sub-target'))
     assert context.variables['mymessage'] == 'echo hello script!'
 
 
 def test_Pluma_create_target_context_variables_should_reflect_env_vars(monkeypatch):
     monkeypatch.setenv('abc', 'def')
 
-    config, env = Pluma.load_target_config_file(config_file_path('minimal-target'))
-    context = Pluma.create_target_context(config, env)
+    context = Pluma.create_target_context(config_file_path('minimal-target'))
 
     assert context.variables['abc'] == 'def'
 
@@ -50,8 +49,7 @@ def test_Pluma_create_target_context_variables_should_reflect_env_vars(monkeypat
 def test_Pluma_create_target_context_env_vars_should_override_target_variables(monkeypatch):
     monkeypatch.setenv('mymessage', 'env message')
 
-    config, env = Pluma.load_target_config_file(config_file_path('variable-sub-target'))
-    context = Pluma.create_target_context(config, env)
+    context = Pluma.create_target_context(config_file_path('variable-sub-target'))
 
     assert context.variables['mymessage'] == 'env message'
 
@@ -59,9 +57,7 @@ def test_Pluma_create_target_context_env_vars_should_override_target_variables(m
 def test_Pluma_create_target_context_should_warn_if_variable_overwritten_by_env(capsys, monkeypatch):
     monkeypatch.setenv('mymessage', 'env message')
 
-    config, env = Pluma.load_target_config_file(config_file_path('variable-sub-target'))
-    Pluma.create_target_context(config, env)
-
+    Pluma.create_target_context(config_file_path('variable-sub-target'))
     stdout = capsys.readouterr().out
 
     assert f'"mymessage" defined in both environment variables and target config.{os.linesep}    Using environment: env message' in stdout

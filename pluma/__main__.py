@@ -100,14 +100,20 @@ def main():
 
     try:
         command = args.command
-        if command == RUN_COMMAND:
-            success = Pluma.execute_run(tests_config_path, target_config_path)
-            exit(0 if success else 1)
-        elif command == CHECK_COMMAND:
-            Pluma.execute_run(tests_config_path, target_config_path,
-                              check_only=True)
-        elif command == TESTS_COMMAND:
-            Pluma.execute_tests(tests_config_path, target_config_path)
+
+        if command in [RUN_COMMAND, CHECK_COMMAND, TESTS_COMMAND]:
+            pluma_context, tests_config = Pluma.create_context_from_files(tests_config_path,
+                                                                          target_config_path)
+
+            if command == RUN_COMMAND:
+                success = Pluma.execute_run(pluma_context, tests_config)
+                exit(0 if success else 1)
+            elif command == CHECK_COMMAND:
+                Pluma.execute_run(pluma_context, tests_config,
+                                check_only=True)
+            elif command == TESTS_COMMAND:
+                Pluma.execute_tests(tests_config_path)
+
         elif command == CLEAN_COMMAND:
             Pluma.execute_clean(args.force)
         elif command == VERSION_COMMAND:

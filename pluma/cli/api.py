@@ -29,14 +29,10 @@ class Pluma:
                 CTestsProvider(), DeviceActionProvider()]
 
     @staticmethod
-    def execute_run(tests_config_path: str, target_config_path: str,
+    def execute_run(context: PlumaContext, tests_config: TestsConfig,
                     check_only: bool = False) -> bool:
         '''Execute the "run" command, and allow checking only ("check" command).'''
 
-        target_config_opts, env_vars = Pluma.load_target_config_file(target_config_path)
-        context = Pluma.create_target_context(target_config_opts, env_vars)
-        tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
-        tests_config = Pluma.create_tests_config(tests_config_opts, context)
         results_config = Pluma.create_results_config(tests_config)
 
         controller = Pluma.build_test_controller(tests_config, context, show_tests_list=check_only)
@@ -58,12 +54,8 @@ class Pluma:
         return success
 
     @staticmethod
-    def execute_tests(tests_config_path: str, target_config_path: str):
+    def execute_tests(tests_config: TestsConfig):
         '''Execute the "tests" command, listing all tests.'''
-        target_config_opts, env_vars = Pluma.load_target_config_file(target_config_path)
-        context = Pluma.create_target_context(target_config_opts, env_vars)
-        tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
-        tests_config = Pluma.create_tests_config(tests_config_opts, context)
 
         log.log(
             'List of core and script tests available, based on the current configuration.')
@@ -87,20 +79,25 @@ class Pluma:
         YoctoCBuilder.clean(force)
 
     @staticmethod
+    def create_context_from_files(tests_config_path: str, target_config_path: str) -> Tuple[PlumaContext, TestsConfig]:
+        context = Pluma.create_target_context(target_config_path)
+        tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
+        tests_config = Pluma.create_tests_config(tests_config_opts, context)
+
+        return context, tests_config
+
+    @staticmethod
     def load_config_file(config_path: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
                         )-> Configuration:
         log.debug(f'Parsing {name} "{config_path}"...')
-        config = PlumaConfig.load_configuration(name, config_path,
+        config = PlumaConfig.load_configuration_file(name, config_path,
                                                 PlumaConfigPreprocessor(extra_vars))
         return config
 
     @staticmethod
-    def load_target_config_file(config_path: str) -> Tuple[Configuration, Dict[str, str]]:
+    def create_target_context(target_config_path: str) -> PlumaContext:
         env_vars = dict(os.environ)
-        return Pluma.load_config_file(config_path, 'Target config', dict(os.environ)), env_vars
-
-    @staticmethod
-    def create_target_context(target_config: Configuration, env_vars: Dict[str, str]) -> PlumaContext:
+        target_config = Pluma.load_config_file(target_config_path, 'Target config', env_vars)
         context = TargetConfig.create_context(target_config)
 
         for variable, env_value in ((var, val) for var, val in env_vars.items()
