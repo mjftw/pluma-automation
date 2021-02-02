@@ -1,7 +1,7 @@
 import yaml
 import json
 import os
-from typing import Optional, List, TypeVar, Type, Union, overload, cast
+from typing import Any, Dict, Optional, List, TypeVar, Type, Union, overload, cast
 from abc import ABC, abstractmethod
 from yaml.parser import ParserError
 
@@ -185,27 +185,39 @@ class ConfigPreprocessor(ABC):
 class PlumaConfig:
     @staticmethod
     def load_configuration_file(name: str, config_path: str,
-                           preprocessor: ConfigPreprocessor = None) -> Configuration:
-        return Configuration(PlumaConfig.load_yaml(name, config_path, preprocessor))
+                           preprocessor: Optional[ConfigPreprocessor] = None) -> Configuration:
+        return Configuration(PlumaConfig.load_yaml_file(name, config_path, preprocessor))
 
     @staticmethod
-    def load_yaml(name: str, yaml_file_path: str,
-                  preprocessor: ConfigPreprocessor = None) -> dict:
+    def load_configuration_yaml(name: str, config_yaml: str,
+                           preprocessor: Optional[ConfigPreprocessor] = None) -> Configuration:
+        return Configuration(PlumaConfig.load_yaml_str(name, config_yaml, preprocessor))
+
+    @staticmethod
+    def load_yaml_file(name: str, yaml_file_path: str,
+                       preprocessor: Optional[ConfigPreprocessor] = None) -> Dict[str, Any]:
         try:
             with open(yaml_file_path, 'r') as config:
                 content = config.read()
-                if preprocessor:
-                    content = preprocessor.preprocess(content)
-
-                return yaml.load(content, Loader=yaml.FullLoader)
+                return PlumaConfig.load_yaml_str(name, content, preprocessor)
         except FileNotFoundError as e:
             raise ConfigurationError(
                 f'{name} "{yaml_file_path}" does not exist') from e
-        except ParserError as e:
-            raise ConfigurationError(
-                f'Error while parsing {name} "{yaml_file_path}":'
-                f'{os.linesep}{e}') from e
         except Exception as e:
             raise ConfigurationError(
-                f'An error occurred while opening/parsing {name} "{yaml_file_path}":'
+                f'An error occurred while opening {name} "{yaml_file_path}":'
+                f'{os.linesep}{e}') from e
+
+    @staticmethod
+    def load_yaml_str(name: str, yaml_str: str,
+                      preprocessor: Optional[ConfigPreprocessor] = None) -> Dict[str, Any]:
+        try:
+            content = yaml_str
+            if preprocessor:
+                content = preprocessor.preprocess(content)
+
+            return yaml.load(content, Loader=yaml.FullLoader)
+        except (ParserError, Exception) as e:
+            raise ConfigurationError(
+                f'An error occurred while parsing {name} yaml:'
                 f'{os.linesep}{e}') from e
