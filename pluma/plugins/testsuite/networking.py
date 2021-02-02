@@ -16,6 +16,10 @@ class NetworkingTestBase(ShellTest):
     def __init__(self, board: Board, target: str = None):
         super().__init__(board, script='')
 
+        if self.__class__ == NetworkingTestBase:
+            raise NotImplementedError(f'{self.__class__.__name__} is a base class and '
+                                      'should not be instantiated by itself')
+
         if not target:
             ssh_console = board.get_console('ssh')
             if not ssh_console:

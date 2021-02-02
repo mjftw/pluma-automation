@@ -66,7 +66,11 @@ class PythonTestsProvider(TestsProvider):
         for module_name, module in {**modules, **submodules}.items():
             for class_name, cls in inspect.getmembers(module, inspect.isclass):
                 # Exclude TestBase classes imported in but not defined in module
-                if issubclass(cls, TestBase) and cls.__module__.startswith(module.__name__):
+                # Exclude classes ending with 'Base', as quick fix until a better
+                # mecanism is implemented
+                if (issubclass(cls, TestBase)
+                        and cls.__module__.startswith(module.__name__)
+                        and not class_name.endswith('Base')):
                     full_name = f'{cls.__module__[cls.__module__.index(module_name):]}.{class_name}'
                     test_classes[full_name] = cls
 
