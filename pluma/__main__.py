@@ -102,8 +102,9 @@ def main():
         command = args.command
 
         if command in [RUN_COMMAND, CHECK_COMMAND, TESTS_COMMAND]:
-            pluma_context, tests_config = Pluma.create_context_from_files(tests_config_path,
-                                                                          target_config_path)
+            env_vars = dict(os.environ)
+            pluma_context, tests_config = Pluma.create_context_from_files(
+                tests_config_path, target_config_path, env_vars)
 
             if command == RUN_COMMAND:
                 success = Pluma.execute_run(pluma_context, tests_config)

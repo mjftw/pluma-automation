@@ -79,8 +79,12 @@ class Pluma:
         YoctoCBuilder.clean(force)
 
     @staticmethod
-    def create_context_from_files(tests_config_path: str, target_config_path: str) -> Tuple[PlumaContext, TestsConfig]:
-        context = Pluma.create_target_context(target_config_path)
+    def create_context_from_files(tests_config_path: str, target_config_path: str,
+                                  substitute_vars: Optional[Dict[str, Any]] = None
+                                  ) -> Tuple[PlumaContext, TestsConfig]:
+        substitute_vars = substitute_vars or {}
+        target_config_opts = Pluma.load_config_file(target_config_path, 'Target config', substitute_vars)
+        context = Pluma.create_target_context(target_config_opts, substitute_vars)
         tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
         tests_config = Pluma.create_tests_config(tests_config_opts, context)
 
@@ -91,21 +95,20 @@ class Pluma:
                         )-> Configuration:
         log.debug(f'Parsing {name} "{config_path}"...')
         config = PlumaConfig.load_configuration_file(name, config_path,
-                                                PlumaConfigPreprocessor(extra_vars))
+                                                     PlumaConfigPreprocessor(extra_vars))
         return config
 
     @staticmethod
-    def create_target_context(target_config_path: str) -> PlumaContext:
-        env_vars = dict(os.environ)
-        target_config = Pluma.load_config_file(target_config_path, 'Target config', env_vars)
+    def create_target_context(target_config: Configuration, substitute_values: Dict[str, Any]
+                             ) -> PlumaContext:
         context = TargetConfig.create_context(target_config)
 
-        for variable, env_value in ((var, val) for var, val in env_vars.items()
+        for variable, env_value in ((var, val) for var, val in substitute_values.items()
                                     if var in context.variables):
             log.warning([f'"{variable}" defined in both environment variables and target config.',
                          f'Using environment: {env_value}'])
 
-        context.variables.update(env_vars)
+        context.variables.update(substitute_values)
         return context
 
     @staticmethod

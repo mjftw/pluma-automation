@@ -17,7 +17,8 @@ def config_file_path(config: str):
 def run_all(test_file: str, target_file: str):
     test_file_path = path.join(config_file_path(test_file))
     target_file_path = path.join(config_file_path(target_file))
-    context, config = Pluma.create_context_from_files(test_file_path, target_file_path)
+    env_vars = dict(os.environ)
+    context, config = Pluma.create_context_from_files(test_file_path, target_file_path, env_vars)
 
     Pluma.execute_tests(config)
     Pluma.execute_run(context, config, check_only=True)
@@ -26,7 +27,8 @@ def run_all(test_file: str, target_file: str):
 def test_Pluma_create_context_from_files():
     test_file_path = config_file_path('minimal-tests')
     target_file_path = config_file_path('minimal-target')
-    context, config = Pluma.create_context_from_files(test_file_path, target_file_path)
+    env_vars = dict(os.environ)
+    context, config = Pluma.create_context_from_files(test_file_path, target_file_path, env_vars)
 
     assert isinstance(context, PlumaContext)
     assert isinstance(config, TestsConfig)
