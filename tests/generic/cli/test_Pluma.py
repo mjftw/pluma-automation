@@ -27,8 +27,19 @@ def run_all(test_file: str, target_file: str):
 def test_Pluma_create_context_from_files():
     test_file_path = config_file_path('minimal-tests')
     target_file_path = config_file_path('minimal-target')
-    env_vars = dict(os.environ)
-    context, config = Pluma.create_context_from_files(test_file_path, target_file_path, env_vars)
+    context, config = Pluma.create_context_from_files(test_file_path, target_file_path)
+
+    assert isinstance(context, PlumaContext)
+    assert isinstance(config, TestsConfig)
+
+
+def test_Pluma_create_context_from_yaml_strs():
+    with open(config_file_path('minimal-tests'), 'r') as f:
+        tests_yaml = f.read()
+    with open(config_file_path('minimal-target'), 'r') as f:
+        target_yaml = f.read()
+
+    context, config = Pluma.create_context_from_yaml_strs(tests_yaml, target_yaml)
 
     assert isinstance(context, PlumaContext)
     assert isinstance(config, TestsConfig)

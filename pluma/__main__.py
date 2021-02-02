@@ -113,7 +113,7 @@ def main():
                 Pluma.execute_run(pluma_context, tests_config,
                                 check_only=True)
             elif command == TESTS_COMMAND:
-                Pluma.execute_tests(tests_config_path)
+                Pluma.execute_tests(tests_config)
 
         elif command == CLEAN_COMMAND:
             Pluma.execute_clean(args.force)

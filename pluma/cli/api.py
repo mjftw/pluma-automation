@@ -99,6 +99,26 @@ class Pluma:
         return config
 
     @staticmethod
+    def create_context_from_yaml_strs(tests_config_yaml: str, target_config_yaml: str,
+                                      substitute_vars: Optional[Dict[str, Any]] = None
+                                      ) -> Tuple[PlumaContext, TestsConfig]:
+        substitute_vars = substitute_vars or {}
+        target_config_opts = Pluma.load_config_yaml(target_config_yaml, 'Target config', substitute_vars)
+        context = Pluma.create_target_context(target_config_opts, substitute_vars)
+        tests_config_opts = Pluma.load_config_yaml(tests_config_yaml, 'Tests config', context.variables)
+        tests_config = Pluma.create_tests_config(tests_config_opts, context)
+
+        return context, tests_config
+
+    @staticmethod
+    def load_config_yaml(yaml_str: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
+                        )-> Configuration:
+        log.debug(f'Parsing {name} yaml string...')
+        config = PlumaConfig.load_configuration_yaml(name, yaml_str,
+                                                     PlumaConfigPreprocessor(extra_vars))
+        return config
+
+    @staticmethod
     def create_target_context(target_config: Configuration, substitute_values: Dict[str, Any]
                              ) -> PlumaContext:
         context = TargetConfig.create_context(target_config)
