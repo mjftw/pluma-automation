@@ -1,5 +1,7 @@
 from os import path
 import os
+from pluma.cli.testsconfig import TestsConfig
+from pluma.cli.plumacontext import PlumaContext
 import pytest
 
 from pluma.cli import Pluma, ConfigurationError, TestsConfigError, TargetConfigError
@@ -19,6 +21,15 @@ def run_all(test_file: str, target_file: str):
 
     Pluma.execute_tests(config)
     Pluma.execute_run(context, config, check_only=True)
+
+
+def test_Pluma_create_context_from_files():
+    test_file_path = config_file_path('minimal-tests')
+    target_file_path = config_file_path('minimal-target')
+    context, config = Pluma.create_context_from_files(test_file_path, target_file_path)
+
+    assert isinstance(context, PlumaContext)
+    assert isinstance(config, TestsConfig)
 
 
 def test_Pluma_minimal():
