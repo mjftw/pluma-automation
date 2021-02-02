@@ -1,3 +1,5 @@
+from typing import Any, Dict, Optional
+from pluma.cli.config import Configuration
 from pluma.cli.resultsconfig import ResultsConfig
 import sys
 import time
@@ -81,12 +83,18 @@ class Pluma:
         YoctoCBuilder.clean(force)
 
     @staticmethod
+    def load_config_file(config_path: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
+                        )-> Configuration:
+        log.debug(f'Parsing {name} "{config_path}"...')
+        config = PlumaConfig.load_configuration(name, config_path,
+                                                PlumaConfigPreprocessor(extra_vars))
+        return config
+
+    @staticmethod
     def create_target_context(target_config_path: str) -> PlumaContext:
         env_vars = dict(os.environ)
-        log.debug(f'Parsing target configuration "{target_config_path}"...')
-        target_config = PlumaConfig.load_configuration('Target config', target_config_path,
-                                                       PlumaConfigPreprocessor(env_vars))
-        context = TargetConfig.create_context(target_config)
+        config = Pluma.load_config_file(target_config_path, 'Target config', env_vars)
+        context = TargetConfig.create_context(config)
 
         for variable, env_value in ((var, val) for var, val in env_vars.items()
                                     if var in context.variables):
@@ -98,13 +106,11 @@ class Pluma:
 
     @staticmethod
     def create_tests_config(tests_config_path: str, context: PlumaContext) -> TestsConfig:
-        log.debug(f'Parsing tests configuration "{tests_config_path}"...')
-        tests_config = PlumaConfig.load_configuration('Tests config', tests_config_path,
-                                                      PlumaConfigPreprocessor(context.variables))
+        config = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
         default_log = f'pluma-{START_TIMESTAMP}.log'
-        context.board.log_file = tests_config.pop_optional(str, 'log', default_log)
+        context.board.log_file = config.pop_optional(str, 'log', default_log)
 
-        return TestsConfig(tests_config, Pluma.tests_providers())
+        return TestsConfig(config, Pluma.tests_providers())
 
     @staticmethod
     def create_results_config(tests_config: TestsConfig) -> ResultsConfig:
