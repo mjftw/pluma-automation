@@ -10,7 +10,8 @@ log = Logger()
 
 class CommandRunner():
     @staticmethod
-    def run(test_name: str, console: ConsoleBase, command: str, timeout: float = None) -> str:
+    def run(test_name: str, console: ConsoleBase, command: str,
+            timeout: float = None) -> str:
         '''Run a command in a Shell context'''
         retcode_token = 'pluma-retcode='
         base_command = command
@@ -37,17 +38,18 @@ class CommandRunner():
         else:
             error = f'returned with exit code {retcode}'
 
+        output = CommandRunner.cleanup_command_output(command, output)
         if error:
             CommandRunner.log_error(test_name=test_name, sent=command, output=output,
                                     error=f'Command "{command}" {error}')
-
-        output = CommandRunner.cleanup_command_output(command, output)
-        log.log(CommandRunner.format_command_log(sent=base_command, output=output))
+        else:
+            log.debug(CommandRunner.format_command_log(sent=base_command, output=output))
 
         return output
 
     @staticmethod
-    def run_raw(test_name: str, console: ConsoleBase, command: str, timeout: int = None) -> str:
+    def run_raw(test_name: str, console: ConsoleBase, command: str,
+                timeout: int = None) -> str:
         '''Run a command with minimal assumptions regarding the context'''
         output = console.send_and_read(command, timeout=timeout, quiet_time=timeout)
         output = CommandRunner.cleanup_command_output(command, output)
@@ -56,8 +58,7 @@ class CommandRunner():
             CommandRunner.log_error(test_name=test_name, sent=command, output=output,
                                     error='No response received after sending command')
         else:
-            message = CommandRunner.format_command_log(sent=command, output=output)
-            log.log(message)
+            log.debug(CommandRunner.format_command_log(sent=command, output=output))
 
         return output
 
