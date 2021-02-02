@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 from pluma.cli.config import Configuration
 from pluma.cli.resultsconfig import ResultsConfig
 import sys
@@ -33,8 +33,10 @@ class Pluma:
                     check_only: bool = False) -> bool:
         '''Execute the "run" command, and allow checking only ("check" command).'''
 
-        context = Pluma.create_target_context(target_config_path)
-        tests_config = Pluma.create_tests_config(tests_config_path, context)
+        target_config_opts, env_vars = Pluma.load_target_config_file(target_config_path)
+        context = Pluma.create_target_context(target_config_opts, env_vars)
+        tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
+        tests_config = Pluma.create_tests_config(tests_config_opts, context)
         results_config = Pluma.create_results_config(tests_config)
 
         controller = Pluma.build_test_controller(tests_config, context, show_tests_list=check_only)
@@ -58,8 +60,10 @@ class Pluma:
     @staticmethod
     def execute_tests(tests_config_path: str, target_config_path: str):
         '''Execute the "tests" command, listing all tests.'''
-        context = Pluma.create_target_context(target_config_path)
-        tests_config = Pluma.create_tests_config(tests_config_path, context)
+        target_config_opts, env_vars = Pluma.load_target_config_file(target_config_path)
+        context = Pluma.create_target_context(target_config_opts, env_vars)
+        tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
+        tests_config = Pluma.create_tests_config(tests_config_opts, context)
 
         log.log(
             'List of core and script tests available, based on the current configuration.')
@@ -91,10 +95,13 @@ class Pluma:
         return config
 
     @staticmethod
-    def create_target_context(target_config_path: str) -> PlumaContext:
+    def load_target_config_file(config_path: str) -> Tuple[Configuration, Dict[str, str]]:
         env_vars = dict(os.environ)
-        config = Pluma.load_config_file(target_config_path, 'Target config', env_vars)
-        context = TargetConfig.create_context(config)
+        return Pluma.load_config_file(config_path, 'Target config', dict(os.environ)), env_vars
+
+    @staticmethod
+    def create_target_context(target_config: Configuration, env_vars: Dict[str, str]) -> PlumaContext:
+        context = TargetConfig.create_context(target_config)
 
         for variable, env_value in ((var, val) for var, val in env_vars.items()
                                     if var in context.variables):
@@ -105,8 +112,7 @@ class Pluma:
         return context
 
     @staticmethod
-    def create_tests_config(tests_config_path: str, context: PlumaContext) -> TestsConfig:
-        config = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
+    def create_tests_config(config: Configuration, context: PlumaContext) -> TestsConfig:
         default_log = f'pluma-{START_TIMESTAMP}.log'
         context.board.log_file = config.pop_optional(str, 'log', default_log)
 
