@@ -1,10 +1,12 @@
+from typing import Optional
 from .baseclasses import PowerBase, ConsoleBase
 from .exceptions import PDUError
 
 
 class SoftPower(PowerBase):
-    def __init__(self, console, on_cmd=None, off_cmd=None,
-                 reboot_cmd=None, reboot_delay=None):
+    def __init__(self, console: ConsoleBase, on_cmd: Optional[str] = None,
+                 off_cmd: Optional[str] = None, reboot_cmd: Optional[str] = None,
+                 reboot_delay: Optional[int] = None):
         assert isinstance(console, ConsoleBase)
 
         self.console = console
@@ -36,5 +38,5 @@ class SoftPower(PowerBase):
         elif self.off_cmd and self.on_cmd:
             PowerBase.reboot(self)
         else:
-            self.error('Need either "reboot_cmd" or "both off_cmd" and "on_cmd" '
-                       'to soft reboot', PDUError)
+            self.error('Either "reboot_cmd" or "both off_cmd" and "on_cmd" '
+                       'are needed to reboot', PDUError)

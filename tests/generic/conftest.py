@@ -16,7 +16,6 @@ import yaml
 
 from collections import namedtuple
 from pytest import fixture
-from serial import Serial
 from types import ModuleType
 from typing import Dict, Iterable, List, Tuple, Union
 from unittest.mock import MagicMock, patch
