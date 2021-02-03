@@ -10,12 +10,12 @@ DOCKERFILE_DIR := $(WORKING_DIR)
 
 DOCKER_RUN_CMD :=
 DOCKER_RUN_ARGS := -it --rm
-ifneq ($(PROJECT_DIR),)
-	DOCKER_RUN_ARGS += -v $(realpath $(PROJECT_DIR)):/root/project
 
-	ifneq ($(PROJECT_SCRIPT),)
-		DOCKER_RUN_CMD := python3 /root/project/$(PROJECT_SCRIPT)
-	endif
+ifneq ($(TESTS_CONFIG),)
+	DOCKER_RUN_ARGS += -v $(realpath $(TESTS_CONFIG)):/etc/pluma/pluma.yml
+endif
+ifneq ($(TARGET_CONFIG),)
+	DOCKER_RUN_ARGS += -v $(realpath $(TARGET_CONFIG)):/etc/pluma/pluma-target.yml
 endif
 DOCKER_RUN_PRIVILEGED_ARGS := $(DOCKER_RUN_ARGS) --privileged -v /dev:/dev
 
