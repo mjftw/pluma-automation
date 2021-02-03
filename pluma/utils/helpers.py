@@ -73,3 +73,14 @@ def get_file_and_line(obj: Type[Any],
         return (src_path, src_line)
     else:
         return (rel_path, src_line)
+
+
+def resize_string(text: str, length: int) -> str:
+    '''Pad or elide a string to be exactly "length" long'''
+    if length < 4:
+        raise ValueError('Length must be 4 or more, to fit the elide characters')
+
+    if len(text) > length:
+        return f'{text[:length-3]}...'
+    else:
+        return text.ljust(length)

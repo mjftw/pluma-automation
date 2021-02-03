@@ -1,5 +1,3 @@
-from pluma.test.testgroup import GroupedTest
-from pluma.core.board import Board
 import traceback
 import time
 from abc import ABC, abstractmethod
@@ -7,7 +5,9 @@ from typing import Iterable, List, Union, cast
 
 from pluma import utils
 from pluma.core.baseclasses import LogLevel, Logger
+from pluma.core.board import Board
 from pluma.test import TestBase, TestGroup, AbortTesting
+from pluma.test.testgroup import GroupedTest
 
 log = Logger()
 
@@ -166,15 +166,11 @@ class TestRunner(TestRunnerBase):
 
         for test in tests:
             # Print test message
-            test_message = str(test)
             column_limit = 70
-
-            if len(test_message) > column_limit:
-                test_message = f'{test_message[:column_limit-3]}...'
+            test_name = utils.resize_string(str(test), column_limit)
 
             is_group_test = isinstance(test, GroupedTest)
-            log.log(test_message.ljust(column_limit) + '  ', level=LogLevel.IMPORTANT,
-                    newline=is_group_test)
+            log.log(test_name + '  ', level=LogLevel.IMPORTANT, newline=is_group_test)
 
             log.hold()
             test_success = self._run_task(test, "setup")
@@ -189,8 +185,8 @@ class TestRunner(TestRunnerBase):
                 test_success &= self._run_task(test, "teardown")
 
             if is_group_test:
-                log.log(test_message.ljust(column_limit) + '  ', level=LogLevel.IMPORTANT,
-                        newline=False, bypass_hold=True)
+                log.log(test_name + '  ', level=LogLevel.IMPORTANT, newline=False,
+                        bypass_hold=True)
 
             if test_success:
                 log.log('PASS', color='green', level=LogLevel.IMPORTANT, bypass_hold=True)
