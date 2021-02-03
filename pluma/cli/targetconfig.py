@@ -226,7 +226,8 @@ class TargetFactory:
 
             on_cmd = power_config.pop_optional(str, 'on_cmd', context='Soft power')
             off_cmd = power_config.pop_optional(str, 'off_cmd', context='Soft power')
-            power = SoftPower(console, on_cmd=on_cmd, off_cmd=off_cmd,
+            reboot_cmd = power_config.pop_optional(str, 'reboot_cmd', context='Soft power')
+            power = SoftPower(console, on_cmd=on_cmd, off_cmd=off_cmd, reboot_cmd=reboot_cmd,
                               reboot_delay=reboot_delay)
 
         elif control_type == POWER_IPPOWER9258:
