@@ -9,6 +9,7 @@ Pluma Automation (formerly Automation Lab) is a tool created by [Witekio](https:
 
 * As a command line interface tool (`pluma run`), designed with ease of use, and extensibility in mind
   * Relies on a target configuration file (`pluma-target.yml`) and a test definition file (`pluma.yml`)
+  * Installed natively or run from a docker image
 * As python library, enabling programmatic hardware control of many supported devices to control a board's power, console, storage, and more
   * The main package for library use is named `pluma.core` (accessible as `pluma` top level package).
 
@@ -31,24 +32,25 @@ This will install all the required system packages, then install the `pluma` pyt
 
 ### Docker container
 
-To run with Docker you must first build the container.
+Build the Docker image locally
 
 ```shell
+# On a x86-64 machine
 make docker-build
+
+# On an ARM device
+docker-build-arm
 ```
 
-**Note:** _For ARM based systems you must use the `docker-build-arm` target instead_.
-
-Run the container with your project:
+Run as privileged or non-privileged container with `make docker-run-privileged` and `make docker-run` commands. Or use the `-arm` suffix if running it directly from an ARM device.
 
 ```shell
-make docker-run-privileged PROJECT_DIR=/path/to/my/project PROJECT_SCRIPT=myscript.py
+# On a x86-64 machine
+make docker-run-privileged TESTS_CONFIG=pluma.yml TARGET_CONFIG=pluma-target.yml
+
+# On an ARM device
+make docker-run-privileged-arm make docker-run TESTS_CONFIG=pluma.yml TARGET_CONFIG=pluma-target.yml
 ```
-
-**Note:** _For ARM based systems you must use the `docker-run-privileged-arm` target instead_.
-
-Where `PROJECT_DIR` is a directory containing all python scripts needed to run, and `PROJECT_SCRIPT` is the script to run from within that directory.
-For more detailed instructions, see the [Install and Run](./docs/quick-start-guide/2-install-and-run.md) section of Quick Start Guide. Here you'll find instructions on how to run Pluma Automation with Docker.
 
 ## Using the command line interface
 
