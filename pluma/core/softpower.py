@@ -12,7 +12,7 @@ class SoftPower(PowerBase):
         self.off_cmd = off_cmd
         self.reboot_cmd = reboot_cmd
 
-        if not self.reboot_cmd and not self.on_cmd and not self.off_cmd:
+        if not self.reboot_cmd and not (self.on_cmd and self.off_cmd):
             self.reboot_cmd = 'reboot || shutdown -r now || systemctl reboot'
 
         PowerBase.__init__(self, reboot_delay)
