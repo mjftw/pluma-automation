@@ -69,7 +69,7 @@ class IperfBandwidth(NetworkingTestBase):
 
             target_output = iperf_server.result()
 
-        bandwidth_regex = r'sec\s+(\d+\.\d+) MBytes'
+        bandwidth_regex = r'\s+(\d+(\.{0,1}\d+){0,1}) Mbits\/'
         match = re.search(bandwidth_regex, target_output, re.MULTILINE)
         if not match:
             raise TaskFailed('Failed to match iperf bandwidth regex for '
