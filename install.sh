@@ -30,11 +30,11 @@ function add_group {
 
 function support_serial {
     echo "Adding user to dialout group (Required for USB serial control)"
-    add_group dialout
+    add_group dialout || true
 }
 
 function support_sdwire {
-    $SUDO apt install -y --no-install-recommends libusb-1.0 libftdi-dev
+    $SUDO apt install -y --no-install-recommends libusb-1.0-0 libftdi-dev
 
     # LibUSB required for PyFTDI library used by SDWire
     echo
@@ -51,7 +51,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
     $SUDO udevadm trigger
 
     echo "Adding user to plugev group (Required for FTDI device control E.g. SD Wire)"
-    add_group plugdev
+    add_group plugdev || true
 }
 
 function support_uhubctl {
