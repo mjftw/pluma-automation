@@ -11,13 +11,13 @@ log = Logger()
 class CommandRunner():
     @staticmethod
     def run(test_name: str, console: ConsoleBase, command: str,
-            timeout: float = None) -> str:
+            timeout: Optional[int] = None) -> str:
         '''Run a command in a Shell context'''
         retcode_token = 'pluma-retcode='
         base_command = command
         command += f' ; echo {retcode_token}$?'
         output, matched = console.send_and_expect(
-            command, timeout=10, match=retcode_token+r'-?\d+')
+            command, timeout=timeout, match=retcode_token+r'-?\d+')
 
         if not matched:
             CommandRunner.log_error(test_name=test_name, sent=command, output=output,
