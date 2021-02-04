@@ -22,8 +22,8 @@ function display_help {
 
 function add_group {
     group="$1"
-    if [ -z "$(cat /etc/group | grep $group)" ]; then
-        $SUDO groupadd $group 
+    if [ -z "$(grep $group < /etc/group)" ]; then
+        $SUDO groupadd $group
         $SUDO usermod -aG $group $(whoami)
     fi
 }
