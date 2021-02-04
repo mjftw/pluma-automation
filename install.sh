@@ -22,15 +22,15 @@ function display_help {
 
 function add_group {
     group="$1"
-    if [ -z "$(groups | grep $group)" ]; then
-        $SUDO groupadd $group
+    if [ -z "$(cat /etc/group | grep $group)" ]; then
+        $SUDO groupadd $group 
         $SUDO usermod -aG $group $(whoami)
     fi
 }
 
 function support_serial {
     echo "Adding user to dialout group (Required for USB serial control)"
-    add_group dialout || true
+    add_group dialout
 }
 
 function support_sdwire {
@@ -51,7 +51,7 @@ SUBSYSTEM=="usb", ATTR{idVendor}=="0403", ATTR{idProduct}=="6015", GROUP="plugde
     $SUDO udevadm trigger
 
     echo "Adding user to plugev group (Required for FTDI device control E.g. SD Wire)"
-    add_group plugdev || true
+    add_group plugdev
 }
 
 function support_uhubctl {
