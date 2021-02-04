@@ -12,14 +12,15 @@ class ShellTest(TestBase):
     '''Execute script within the target (or host) shell'''
 
     def __init__(self, board: Board, script: Union[str, List[str]], name: str = None,
-                 should_match_regex: List[str] = None,  should_not_match_regex: List[str] = None,
-                 run_on_host: bool = False, timeout: int = None,  runs_in_shell: bool = True,
+                 should_match_regex: List[str] = None,
+                 should_not_match_regex: List[str] = None, run_on_host: bool = False,
+                 timeout: Optional[float] = None,  runs_in_shell: bool = True,
                  login_automatically: bool = False):
         super().__init__(board, test_name=name)
         self.should_match_regex = should_match_regex
         self.should_not_match_regex = should_not_match_regex
         self.run_on_host = run_on_host
-        self.timeout = timeout if timeout is not None else 5
+        self.timeout = timeout if timeout is not None else 5.0
         self.runs_in_shell = runs_in_shell
         self.login_automatically = login_automatically
 
@@ -61,7 +62,7 @@ class ShellTest(TestBase):
         return output
 
     def run_command(self, console: ConsoleBase, script: str,
-                    timeout: Optional[int] = None) -> str:
+                    timeout: Optional[float] = None) -> str:
         timeout = timeout or self.timeout
 
         if self.runs_in_shell:

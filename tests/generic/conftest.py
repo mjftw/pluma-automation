@@ -17,7 +17,7 @@ import yaml
 from collections import namedtuple
 from pytest import fixture
 from types import ModuleType
-from typing import Dict, Iterable, List, Tuple, Union
+from typing import Dict, Iterable, List, Tuple, Union, Optional
 from unittest.mock import MagicMock, patch
 
 
@@ -55,7 +55,8 @@ class MockConsoleEngine(ConsoleEngine):
     def send_control(self, char: bytes):
         pass
 
-    def wait_for_match(self, match: List[str], timeout: int = None) -> MatchResult:
+    def wait_for_match(self, match: List[str],
+                       timeout: Optional[float] = None) -> MatchResult:
         return MatchResult(None, None, '')
 
     def interact(self):

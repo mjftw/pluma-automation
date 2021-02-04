@@ -139,7 +139,7 @@ class ConsoleEngine(ABC):
 
     @abstractmethod
     def wait_for_match(self, match: Union[str, List[str]],
-                       timeout: Optional[int] = None) -> MatchResult:
+                       timeout: Optional[float] = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
 
     @property

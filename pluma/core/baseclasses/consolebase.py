@@ -58,7 +58,8 @@ class ConsoleBase(HardwareBase, ABC):
         self.require_open()
         return self.engine.read_all(preserve_read_buffer=preserve_read_buffer)
 
-    def wait_for_match(self, match: List[str], timeout=None) -> Optional[str]:
+    def wait_for_match(self, match: List[str],
+                       timeout: Optional[float] = None) -> Optional[str]:
         '''Wait a maximum duration of 'timeout' for a matching regex, and returns matched text'''
         self.require_open()
         match_result = self.engine.wait_for_match(match=match, timeout=timeout)
@@ -144,7 +145,7 @@ class ConsoleBase(HardwareBase, ABC):
 
     def send_and_expect(self, cmd: str, match: Union[str, List[str]],
                         excepts: Union[str, List[str]] = None,
-                        timeout: int = None, send_newline: bool = True,
+                        timeout: Optional[float] = None, send_newline: bool = True,
                         flush_before: bool = True) -> Tuple[str, Optional[str]]:
         '''Send a command/data on the console, and wait for one of "expects" patterns.'''
         match = match or []
@@ -291,7 +292,7 @@ class ConsoleBase(HardwareBase, ABC):
     def requires_login(self):
         return self._requires_login
 
-    def wait_for_prompt(self, timeout: int = None):
+    def wait_for_prompt(self, timeout: Optional[float] = None):
         '''Wait for a prompt, throws if no prompt before timeout'''
 
         prompt_regex = self.system.prompt_regex

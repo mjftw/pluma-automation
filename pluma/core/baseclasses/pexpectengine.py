@@ -67,7 +67,7 @@ class PexpectEngine(ConsoleEngine):
         return received
 
     def wait_for_match(self, match: Union[str, List[str]],
-                       timeout: Optional[int] = None) -> MatchResult:
+                       timeout: Optional[float] = None) -> MatchResult:
         '''Wait a maximum duration of 'timeout' for a matching regex'''
         assert self.is_open
 

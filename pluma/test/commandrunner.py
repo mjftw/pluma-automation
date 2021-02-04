@@ -11,7 +11,7 @@ log = Logger()
 class CommandRunner():
     @staticmethod
     def run(test_name: str, console: ConsoleBase, command: str,
-            timeout: Optional[int] = None) -> str:
+            timeout: Optional[float] = None) -> str:
         '''Run a command in a Shell context'''
         retcode_token = 'pluma-retcode='
         base_command = command
@@ -49,7 +49,7 @@ class CommandRunner():
 
     @staticmethod
     def run_raw(test_name: str, console: ConsoleBase, command: str,
-                timeout: int = None) -> str:
+                timeout: Optional[float] = None) -> str:
         '''Run a command with minimal assumptions regarding the context'''
         output = console.send_and_read(command, timeout=timeout, quiet_time=timeout)
         output = CommandRunner.cleanup_command_output(command, output)
