@@ -64,6 +64,7 @@ or running pluma as root/sudo, if required.'
 function install_python_packages {
     echo
     echo "Installing pluma package..."
+    python3 -m pip install setuptools
 
     if [ $install_as_dev -eq 1 ]; then
         # Install packages as a pluma package developer.
