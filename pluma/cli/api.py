@@ -82,6 +82,8 @@ class Pluma:
     def create_context_from_files(tests_config_path: str, target_config_path: str,
                                   substitute_vars: Optional[Dict[str, Any]] = None
                                   ) -> Tuple[PlumaContext, TestsConfig]:
+        '''Create the Pluma context and TestsConfig from yaml configuration files'''
+
         substitute_vars = substitute_vars or {}
         target_config_opts = Pluma.load_config_file(target_config_path, 'Target config', substitute_vars)
         context = Pluma.create_target_context(target_config_opts, substitute_vars)
@@ -93,6 +95,7 @@ class Pluma:
     @staticmethod
     def load_config_file(config_path: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
                         )-> Configuration:
+        '''Load a Configuration from a yaml file'''
         log.debug(f'Parsing {name} "{config_path}"...')
         config = PlumaConfig.load_configuration_file(name, config_path,
                                                      PlumaConfigPreprocessor(extra_vars))
@@ -102,6 +105,8 @@ class Pluma:
     def create_context_from_yaml_strs(tests_config_yaml: str, target_config_yaml: str,
                                       substitute_vars: Optional[Dict[str, Any]] = None
                                       ) -> Tuple[PlumaContext, TestsConfig]:
+        '''Create the Pluma context and TestsConfig from raw yaml strings'''
+
         substitute_vars = substitute_vars or {}
         target_config_opts = Pluma.load_config_yaml(target_config_yaml, 'Target config', substitute_vars)
         context = Pluma.create_target_context(target_config_opts, substitute_vars)
@@ -113,8 +118,10 @@ class Pluma:
     @staticmethod
     def load_config_yaml(yaml_str: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
                         )-> Configuration:
+        '''Load a Configuration from a raw yaml string'''
+
         log.debug(f'Parsing {name} yaml string...')
-        config = PlumaConfig.load_configuration_yaml(name, yaml_str,
+        config = PlumaConfig.load_configuration_yaml_str(name, yaml_str,
                                                      PlumaConfigPreprocessor(extra_vars))
         return config
 

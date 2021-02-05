@@ -186,16 +186,20 @@ class PlumaConfig:
     @staticmethod
     def load_configuration_file(name: str, config_path: str,
                            preprocessor: Optional[ConfigPreprocessor] = None) -> Configuration:
+        '''Load a configuration from a yaml file'''
+
         return Configuration(PlumaConfig.load_yaml_file(name, config_path, preprocessor))
 
     @staticmethod
-    def load_configuration_yaml(name: str, config_yaml: str,
+    def load_configuration_yaml_str(name: str, config_yaml: str,
                            preprocessor: Optional[ConfigPreprocessor] = None) -> Configuration:
+        '''Load a configuration from a raw yaml string'''
         return Configuration(PlumaConfig.load_yaml_str(name, config_yaml, preprocessor))
 
     @staticmethod
     def load_yaml_file(name: str, yaml_file_path: str,
                        preprocessor: Optional[ConfigPreprocessor] = None) -> Dict[str, Any]:
+        '''Load the contents of a yaml file into a dictionary'''
         try:
             with open(yaml_file_path, 'r') as config:
                 content = config.read()
@@ -211,6 +215,7 @@ class PlumaConfig:
     @staticmethod
     def load_yaml_str(name: str, yaml_str: str,
                       preprocessor: Optional[ConfigPreprocessor] = None) -> Dict[str, Any]:
+        '''Load the contents of a raw yaml string into a dictionary'''
         try:
             content = yaml_str
             if preprocessor:
