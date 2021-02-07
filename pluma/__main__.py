@@ -107,16 +107,16 @@ def main():
                 tests_config_path, target_config_path, env_vars)
 
             if command == RUN_COMMAND:
-                success = Pluma.execute_run(pluma_context, tests_config)
+                success = Pluma.run(pluma_context, tests_config)
                 exit(0 if success else 1)
             elif command == CHECK_COMMAND:
-                Pluma.execute_run(pluma_context, tests_config,
-                                check_only=True)
+                Pluma.run(pluma_context, tests_config,
+                          check_only=True)
             elif command == TESTS_COMMAND:
-                Pluma.execute_tests(tests_config)
+                Pluma.print_tests(tests_config)
 
         elif command == CLEAN_COMMAND:
-            Pluma.execute_clean(args.force)
+            Pluma.clean(args.force)
         elif command == VERSION_COMMAND:
             log.log(Pluma.version(), level=LogLevel.IMPORTANT)
     except TestsConfigError as e:

@@ -29,9 +29,9 @@ class Pluma:
                 CTestsProvider(), DeviceActionProvider()]
 
     @staticmethod
-    def execute_run(context: PlumaContext, tests_config: TestsConfig,
-                    check_only: bool = False) -> bool:
-        '''Execute the "run" command, and allow checking only ("check" command).'''
+    def run(context: PlumaContext, tests_config: TestsConfig,
+            check_only: bool = False) -> bool:
+        '''Run all tests, or perform a dry run, checking config files only'''
 
         results_config = Pluma.create_results_config(tests_config)
 
@@ -54,16 +54,16 @@ class Pluma:
         return success
 
     @staticmethod
-    def execute_tests(tests_config: TestsConfig):
-        '''Execute the "tests" command, listing all tests.'''
+    def print_tests(tests_config: TestsConfig):
+        '''Print the tests used and available.'''
 
         log.log(
             'List of core and script tests available, based on the current configuration.')
         tests_config.print_tests(log_level=LogLevel.IMPORTANT, show_description=True)
 
     @staticmethod
-    def execute_clean(force: bool = False):
-        '''Execute the "clean" command.'''
+    def clean(force: bool = False):
+        '''Clean temporary files'''
         log.log('Removing log files...')
         try:
             logs_folder = os.path.dirname(
