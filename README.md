@@ -1,3 +1,5 @@
+![Pluma logo](docs/pluma-logo.png)
+
 # Pluma Automation
 
 ![](https://github.com/Witekio/pluma-automation/workflows/Native%20installation%20and%20tests/badge.svg)
