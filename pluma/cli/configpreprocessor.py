@@ -1,4 +1,5 @@
 import re
+from typing import Dict, Optional
 
 from .config import ConfigPreprocessor
 from pluma.core.baseclasses import Logger
@@ -7,7 +8,7 @@ log = Logger()
 
 
 class PlumaConfigPreprocessor(ConfigPreprocessor):
-    def __init__(self, variables: dict):
+    def __init__(self, variables: Optional[Dict[str, str]]):
         self.variables = variables or {}
         if not isinstance(self.variables, dict):
             raise ValueError('Variables must be a dictionary')

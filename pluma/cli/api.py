@@ -85,16 +85,18 @@ class Pluma:
         '''Create the Pluma context and TestsConfig from yaml configuration files'''
 
         substitute_vars = substitute_vars or {}
-        target_config_opts = Pluma.load_config_file(target_config_path, 'Target config', substitute_vars)
+        target_config_opts = Pluma.load_config_file(
+            target_config_path, 'Target config', substitute_vars)
         context = Pluma.create_target_context(target_config_opts, substitute_vars)
-        tests_config_opts = Pluma.load_config_file(tests_config_path, 'Tests config', context.variables)
+        tests_config_opts = Pluma.load_config_file(
+            tests_config_path, 'Tests config', context.variables)
         tests_config = Pluma.create_tests_config(tests_config_opts, context)
 
         return context, tests_config
 
     @staticmethod
     def load_config_file(config_path: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
-                        )-> Configuration:
+                         ) -> Configuration:
         '''Load a Configuration from a yaml file'''
         log.debug(f'Parsing {name} "{config_path}"...')
         config = PlumaConfig.load_configuration_file(name, config_path,
@@ -108,26 +110,28 @@ class Pluma:
         '''Create the Pluma context and TestsConfig from raw yaml strings'''
 
         substitute_vars = substitute_vars or {}
-        target_config_opts = Pluma.load_config_yaml(target_config_yaml, 'Target config', substitute_vars)
+        target_config_opts = Pluma.load_config_yaml(target_config_yaml, 'Target config',
+                                                    substitute_vars)
         context = Pluma.create_target_context(target_config_opts, substitute_vars)
-        tests_config_opts = Pluma.load_config_yaml(tests_config_yaml, 'Tests config', context.variables)
+        tests_config_opts = Pluma.load_config_yaml(tests_config_yaml, 'Tests config',
+                                                   context.variables)
         tests_config = Pluma.create_tests_config(tests_config_opts, context)
 
         return context, tests_config
 
     @staticmethod
     def load_config_yaml(yaml_str: str, name: str, extra_vars: Optional[Dict[str, Any]] = {}
-                        )-> Configuration:
+                         ) -> Configuration:
         '''Load a Configuration from a raw yaml string'''
 
         log.debug(f'Parsing {name} yaml string...')
         config = PlumaConfig.load_configuration_yaml_str(name, yaml_str,
-                                                     PlumaConfigPreprocessor(extra_vars))
+                                                         PlumaConfigPreprocessor(extra_vars))
         return config
 
     @staticmethod
     def create_target_context(target_config: Configuration, substitute_values: Dict[str, Any]
-                             ) -> PlumaContext:
+                              ) -> PlumaContext:
         context = TargetConfig.create_context(target_config)
 
         for variable, env_value in ((var, val) for var, val in substitute_values.items()
@@ -147,7 +151,8 @@ class Pluma:
 
     @staticmethod
     def create_results_config(tests_config: TestsConfig) -> ResultsConfig:
-        return tests_config.create_results_config(default_file=f'pluma-results-{START_TIMESTAMP}.json')
+        default_file = f'pluma-results-{START_TIMESTAMP}.json'
+        return tests_config.create_results_config(default_file=default_file)
 
     @staticmethod
     def build_test_controller(tests_config: TestsConfig, target_context: PlumaContext,
